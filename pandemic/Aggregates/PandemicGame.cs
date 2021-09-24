@@ -10,6 +10,7 @@ namespace pandemic.Aggregates
     {
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
+        public int OutbreakCounter { get; set; }
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
@@ -24,12 +25,18 @@ namespace pandemic.Aggregates
             yield return new InfectionRateSet(rate);
         }
 
+        public static IEnumerable<IEvent> SetOutbreakCounter(List<IEvent> log, int value)
+        {
+            yield return new OutbreakCounterSet(value);
+        }
+
         public static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
         {
             return @event switch
             {
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
                 InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
+                OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
