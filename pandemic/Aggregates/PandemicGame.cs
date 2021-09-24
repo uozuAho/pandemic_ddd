@@ -13,8 +13,9 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public List<Player> Players { get; init; } = new();
+        public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
-        private static readonly Board Board = new Board();
+        private static readonly Board Board = new();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
@@ -50,15 +51,8 @@ namespace pandemic.Aggregates
                 throw new InvalidActionException(
                     $"Invalid drive/ferry to non-adjacent city: {playerLocation} to {city}");
             }
-            // var state = FromEvents(log);
-            //
-            // state.PlayerByRole(role)
-            yield return new PlayerMoved(role, city);
-        }
 
-        public Player PlayerByRole(Role role)
-        {
-            return Players.Single(p => p.Role == role);
+            yield return new PlayerMoved(role, city);
         }
 
         private static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)

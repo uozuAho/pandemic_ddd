@@ -39,7 +39,6 @@ namespace pandemic.test
                 PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Beijing").ToList());
         }
 
-        // todo: invalid move
         // todo: player dict is cloned
 
         private static List<IEvent> CreateNewGame()
