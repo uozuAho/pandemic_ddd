@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.Values;
 
 namespace pandemic.test
 {
@@ -12,9 +13,9 @@ namespace pandemic.test
         {
             var eventLog = new List<IEvent>();
 
-            eventLog.AddRange(Pandemic.SetDifficulty(eventLog, Difficulty.Normal));
+            eventLog.AddRange(PandemicGame.SetDifficulty(eventLog, Difficulty.Normal));
 
-            var state = Pandemic.FromEvents(eventLog);
+            var state = PandemicGame.FromEvents(eventLog);
             Assert.AreEqual(Difficulty.Normal, state.Difficulty);
         }
     }

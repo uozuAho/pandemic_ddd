@@ -1,4 +1,4 @@
-namespace pandemic
+namespace pandemic.Values
 {
     public enum Difficulty
     {
