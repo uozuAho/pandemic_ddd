@@ -13,6 +13,9 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public List<Player> Players { get; init; } = new();
+        public List<InfectionCard> InfectionDrawPile { get; set; } = new();
+        public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
+
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
         private static readonly Board Board = new();

@@ -39,7 +39,21 @@ namespace pandemic.test
                 PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Beijing").ToList());
         }
 
-        // todo: player dict is cloned
+        [Test]
+        public void Cities_are_infected_after_player_turn_ends()
+        {
+            var eventLog = CreateNewGame();
+            var startingState = PandemicGame.FromEvents(eventLog);
+
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+
+            var state = PandemicGame.FromEvents(eventLog);
+            Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, state.InfectionDrawPile.Count);
+            Assert.AreEqual(2, state.InfectionDiscardPile.Count);
+        }
 
         private static List<IEvent> CreateNewGame()
         {
