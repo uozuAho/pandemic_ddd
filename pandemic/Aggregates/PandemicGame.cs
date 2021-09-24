@@ -10,16 +10,17 @@ namespace pandemic.Aggregates
     {
         public Difficulty Difficulty { get; init; }
 
-        // create the aggregate from an event log
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events) => Fold(events);
+        // create a game state from an event log
+        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
+            events.Aggregate(new PandemicGame(), Apply);
 
-        // command
+        // commands yield events
         public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
         {
             yield return new DifficultySet(difficulty);
         }
 
-        // Modify state with events. Return a new object instead of mutating.
+        // Game state is modified by events. Return a new object instead of mutating.
         public static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
         {
             return @event switch
@@ -27,14 +28,6 @@ namespace pandemic.Aggregates
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
-        }
-
-        // convenience method that applies all events to get the current state
-        private static PandemicGame Fold(IEnumerable<IEvent> eventLog)
-        {
-            var initialState = new PandemicGame();
-
-            return eventLog.Aggregate(initialState, Apply);
         }
     }
 }
