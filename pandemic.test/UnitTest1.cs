@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace pandemic.test
@@ -54,33 +56,32 @@ namespace pandemic.test
     public class PandemicGame
     {
         public PandemicGameState CurrentState => Fold(_eventLog);
-
-        private PandemicGameState Fold(List<IEvent> eventLog)
-        {
-            var state = new PandemicGameState();
-
-            foreach (var @event in eventLog)
-            {
-                state.Apply(@event);
-            }
-
-            return state;
-        }
-
         private readonly List<IEvent> _eventLog = new();
 
         public void SetDifficulty(Difficulty difficulty)
         {
             _eventLog.AddRange(Pandemic.SetDifficulty(_eventLog, difficulty));
         }
+
+        private static PandemicGameState Fold(IEnumerable<IEvent> eventLog)
+        {
+            var initialState = new PandemicGameState();
+
+            return eventLog.Aggregate(initialState, (current, @event) => current.Apply(@event));
+        }
     }
 
     public record PandemicGameState
     {
-        public Difficulty Difficulty { get; }
+        public Difficulty Difficulty { get; init; }
 
-        public void Apply(IEvent @event)
+        public PandemicGameState Apply(IEvent @event)
         {
+            return @event switch
+            {
+                DifficultySet d => this with {Difficulty = d.Difficulty},
+                _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
         }
     }
 
