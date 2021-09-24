@@ -38,6 +38,14 @@ namespace pandemic.Aggregates
             yield return new OutbreakCounterSet(value);
         }
 
+        public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
+        {
+            // todo: shuffle
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard {City = c.Name});
+
+            yield return new InfectionDeckSetUp(unshuffledCities);
+        }
+
         public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
         {
             yield return new PlayerAdded(role);
@@ -63,6 +71,7 @@ namespace pandemic.Aggregates
             return @event switch
             {
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
+                InfectionDeckSetUp s => pandemicGame with {InfectionDrawPile = s.Deck},
                 InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(pandemicGame, p),

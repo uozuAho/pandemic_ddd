@@ -24,7 +24,9 @@ namespace pandemic.GameData
             return CityLookup[playerLocation].AdjacentCities.Contains(city);
         }
 
-        private static readonly City[] Cities = {
+        public IEnumerable<City> Cities => _cities.Select(c => c);
+
+        private static readonly City[] _cities = {
             new City
             {
                 Name = "San Francisco",
@@ -364,6 +366,6 @@ namespace pandemic.GameData
             ("Miami", "Bogota"),
         };
 
-        private static readonly Dictionary<string, City> CityLookup = Cities.ToDictionary(c => c.Name, c => c);
+        private static readonly Dictionary<string, City> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
     }
 }
