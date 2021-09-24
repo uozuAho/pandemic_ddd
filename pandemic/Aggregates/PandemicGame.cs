@@ -10,7 +10,8 @@ namespace pandemic.Aggregates
     {
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
-        public int OutbreakCounter { get; set; }
+        public int OutbreakCounter { get; init; }
+        public List<Player> Players { get; init; } = new();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
@@ -30,15 +31,38 @@ namespace pandemic.Aggregates
             yield return new OutbreakCounterSet(value);
         }
 
-        public static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
+        public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
+        {
+            // var state = FromEvents(log);
+            //
+            // state.PlayerByRole(role)
+            yield return new PlayerMoved(role, city);
+        }
+
+        public Player PlayerByRole(Role role)
+        {
+            return Players.Single(p => p.Role == role);
+        }
+
+        private static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
         {
             return @event switch
             {
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
                 InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
+                PlayerMoved p => ApplyPlayerMoved(pandemicGame, p),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
+        {
+            var newPlayers = pandemicGame.Players.Select(p => p).ToList();
+            var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerMoved.Role);
+            newPlayers[movedPlayerIdx] = newPlayers[movedPlayerIdx] with {Location = playerMoved.Location};
+
+            return pandemicGame with {Players = newPlayers};
         }
     }
 }
