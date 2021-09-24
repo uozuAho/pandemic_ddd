@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Events;
@@ -25,7 +26,7 @@ namespace pandemic.test
             var eventLog = CreateNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
-                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "fasdfasdf"));
+                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "fasdfasdf").ToList());
         }
 
         // todo: invalid move

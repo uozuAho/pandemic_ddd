@@ -1,8 +1,11 @@
 using System;
 
-namespace pandemic.test
+namespace pandemic.Values
 {
     public class InvalidActionException : Exception
     {
+        public InvalidActionException(string message): base(message)
+        {
+        }
     }
 }

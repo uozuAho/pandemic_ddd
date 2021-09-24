@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Events;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.Aggregates
@@ -13,7 +14,7 @@ namespace pandemic.Aggregates
         public int OutbreakCounter { get; init; }
         public List<Player> Players { get; init; } = new();
 
-        // private static readonly Board = // crap, need board
+        private static readonly Board Board = new Board();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
@@ -40,6 +41,8 @@ namespace pandemic.Aggregates
 
         public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
         {
+
+            if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
             // var state = FromEvents(log);
             //
             // state.PlayerByRole(role)
