@@ -9,7 +9,6 @@ namespace pandemic.test
     internal class GameTests
     {
         [Test]
-        [Ignore("need init player")]
         public void Move_player()
         {
             var eventLog = CreateNewGame();
@@ -30,6 +29,7 @@ namespace pandemic.test
             eventLog.AddRange(PandemicGame.SetDifficulty(eventLog, Difficulty.Normal));
             eventLog.AddRange(PandemicGame.SetInfectionRate(eventLog, 2));
             eventLog.AddRange(PandemicGame.SetOutbreakCounter(eventLog, 0));
+            eventLog.AddRange(PandemicGame.AddPlayer(eventLog, Role.Medic));
 
             return eventLog;
         }
