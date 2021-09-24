@@ -5,9 +5,12 @@ using pandemic.Events;
 
 namespace pandemic
 {
-    public class PandemicGame
+    /// <summary>
+    /// Keeps an up-to-date view of the game state by consuming events
+    /// </summary>
+    public class PandemicCurrentStateView
     {
-        public PandemicGameState CurrentState => Fold(_eventLog);
+        public Aggregates.Pandemic CurrentState => Fold(_eventLog);
         private readonly List<IEvent> _eventLog = new();
 
         public void SetDifficulty(Difficulty difficulty)
@@ -15,9 +18,9 @@ namespace pandemic
             _eventLog.AddRange(Pandemic.SetDifficulty(_eventLog, difficulty));
         }
 
-        private static PandemicGameState Fold(IEnumerable<IEvent> eventLog)
+        private static Aggregates.Pandemic Fold(IEnumerable<IEvent> eventLog)
         {
-            var initialState = new PandemicGameState();
+            var initialState = new Aggregates.Pandemic();
 
             return eventLog.Aggregate(initialState, (current, @event) => current.Apply(@event));
         }
