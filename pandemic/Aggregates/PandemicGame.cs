@@ -41,8 +41,15 @@ namespace pandemic.Aggregates
 
         public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
         {
-
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
+
+            var state = FromEvents(log);
+            var playerLocation = state.PlayerByRole(role).Location;
+            if (!Board.IsAdjacent(playerLocation, city))
+            {
+                throw new InvalidActionException(
+                    $"Invalid drive/ferry to non-adjacent city: {playerLocation} to {city}");
+            }
             // var state = FromEvents(log);
             //
             // state.PlayerByRole(role)

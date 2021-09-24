@@ -3,11 +3,25 @@ using System.Linq;
 
 namespace pandemic.GameData
 {
-    class Board
+    internal class Board
     {
+        public Board()
+        {
+            foreach (var (city1, city2) in Edges)
+            {
+                CityLookup[city1].AdjacentCities.Add(city2);
+                CityLookup[city2].AdjacentCities.Add(city1);
+            }
+        }
+
         public bool IsCity(string city)
         {
             return CityLookup.ContainsKey(city);
+        }
+
+        public bool IsAdjacent(string playerLocation, string city)
+        {
+            return CityLookup[playerLocation].AdjacentCities.Contains(city);
         }
 
         private static readonly City[] Cities = {
