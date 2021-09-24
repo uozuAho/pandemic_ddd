@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -42,7 +43,7 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var eventLog = CreateNewGame();
+            var eventLog = GameBuilder.InitialiseNewGame();
             var startingState = PandemicGame.FromEvents(eventLog);
 
             eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
