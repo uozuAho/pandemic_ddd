@@ -9,23 +9,27 @@ namespace pandemic.Aggregates
     public record PandemicGame
     {
         public Difficulty Difficulty { get; init; }
+        public int InfectionRate { get; init; }
 
-        // create a game state from an event log
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
 
-        // commands yield events
         public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
         {
             yield return new DifficultySet(difficulty);
         }
 
-        // Game state is modified by events. Return a new object instead of mutating.
+        public static IEnumerable<IEvent> SetInfectionRate(List<IEvent> log, int rate)
+        {
+            yield return new InfectionRateSet(rate);
+        }
+
         public static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
         {
             return @event switch
             {
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
+                InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }

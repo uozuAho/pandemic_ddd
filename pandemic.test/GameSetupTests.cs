@@ -9,11 +9,12 @@ namespace pandemic.test
     public class GameSetup
     {
         [Test]
-        public void Set_difficulty_works()
+        public void Do_all_the_stuff_to_start_a_game()
         {
             var eventLog = new List<IEvent>();
 
             eventLog.AddRange(PandemicGame.SetDifficulty(eventLog, Difficulty.Normal));
+            eventLog.AddRange(PandemicGame.SetInfectionRate(eventLog, 2));
 
             var state = PandemicGame.FromEvents(eventLog);
             Assert.AreEqual(Difficulty.Normal, state.Difficulty);
