@@ -31,6 +31,11 @@ namespace pandemic.Aggregates
             yield return new OutbreakCounterSet(value);
         }
 
+        public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
+        {
+            yield return new PlayerAdded(role);
+        }
+
         public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
         {
             // var state = FromEvents(log);
@@ -51,9 +56,18 @@ namespace pandemic.Aggregates
                 DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
                 InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
+                PlayerAdded p => ApplyPlayerAdded(pandemicGame, p),
                 PlayerMoved p => ApplyPlayerMoved(pandemicGame, p),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
+        {
+            var newPlayers = pandemicGame.Players.Select(p => p).ToList();
+            newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
+
+            return pandemicGame with { Players = newPlayers };
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)

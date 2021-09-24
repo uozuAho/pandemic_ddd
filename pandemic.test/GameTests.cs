@@ -9,6 +9,7 @@ namespace pandemic.test
     internal class GameTests
     {
         [Test]
+        [Ignore("need init player")]
         public void Move_player()
         {
             var eventLog = CreateNewGame();
