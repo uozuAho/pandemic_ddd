@@ -9,15 +9,16 @@ namespace pandemic.test
 {
     internal class GameTests
     {
-        [Test]
-        public void Move_player()
+        [TestCase("Chicago")]
+        [TestCase("Washington")]
+        public void Move_player(string toCity)
         {
             var eventLog = CreateNewGame();
 
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, toCity));
 
             var state = PandemicGame.FromEvents(eventLog);
-            Assert.AreEqual("Chicago", state.PlayerByRole(Role.Medic).Location);
+            Assert.AreEqual(toCity, state.PlayerByRole(Role.Medic).Location);
         }
 
         [Test]
@@ -27,6 +28,15 @@ namespace pandemic.test
 
             Assert.Throws<InvalidActionException>(() =>
                 PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "fasdfasdf").ToList());
+        }
+
+        [Test]
+        public void Drive_or_ferry_to_non_adjacent_city_throws()
+        {
+            var eventLog = CreateNewGame();
+
+            Assert.Throws<InvalidActionException>(() =>
+                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Beijing").ToList());
         }
 
         // todo: invalid move
