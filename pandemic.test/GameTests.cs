@@ -19,6 +19,15 @@ namespace pandemic.test
             Assert.AreEqual("Chicago", state.PlayerByRole(Role.Medic).Location);
         }
 
+        [Test]
+        public void Move_player_to_garbage_city_throws()
+        {
+            var eventLog = CreateNewGame();
+
+            Assert.Throws<InvalidActionException>(() =>
+                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "fasdfasdf"));
+        }
+
         // todo: invalid move
         // todo: player dict is cloned
 

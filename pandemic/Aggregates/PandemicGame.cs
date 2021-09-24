@@ -13,6 +13,8 @@ namespace pandemic.Aggregates
         public int OutbreakCounter { get; init; }
         public List<Player> Players { get; init; } = new();
 
+        // private static readonly Board = // crap, need board
+
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), Apply);
 
