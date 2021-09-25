@@ -36,7 +36,6 @@ namespace pandemic.test
             Assert.AreNotSame(game1.Players, game2.Players);
             Assert.AreNotEqual(game1.Players, game2.Players);
             Assert.AreNotSame(game1.Players[0], game2.Players[0]);
-            Assert.AreEqual(game1.Players[0], game2.Players[0]);
         }
     }
 }

@@ -15,6 +15,8 @@ namespace pandemic.Aggregates
         public List<Player> Players { get; init; } = new();
         public List<InfectionCard> InfectionDrawPile { get; set; } = new();
         public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
+        public Player CurrentPlayer => Players[CurrentPlayerIdx];
+        public int CurrentPlayerIdx { get; init; } = 0;
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
@@ -57,6 +59,10 @@ namespace pandemic.Aggregates
 
             var state = FromEvents(log);
             var player = state.PlayerByRole(role);
+
+            if (player.ActionsRemaining == 0)
+                throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
+
             if (!Board.IsAdjacent(player.Location, city))
             {
                 throw new InvalidActionException(
@@ -64,20 +70,42 @@ namespace pandemic.Aggregates
             }
 
             yield return new PlayerMoved(role, city);
+
+            if (player.ActionsRemaining == 1)
+            {
+                // todo: pick up cards from player draw pile here
+                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
+                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
+            }
         }
 
-        private static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
+        private static PandemicGame Apply(PandemicGame game, IEvent @event)
         {
             return @event switch
             {
-                DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
-                InfectionDeckSetUp s => pandemicGame with {InfectionDrawPile = s.Deck},
-                InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
-                OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
-                PlayerAdded p => ApplyPlayerAdded(pandemicGame, p),
-                PlayerMoved p => ApplyPlayerMoved(pandemicGame, p),
+                DifficultySet d => game with {Difficulty = d.Difficulty},
+                InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck},
+                InfectionRateSet i => game with {InfectionRate = i.Rate},
+                OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
+                PlayerAdded p => ApplyPlayerAdded(game, p),
+                PlayerMoved p => ApplyPlayerMoved(game, p),
+                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyPlayerCardPickedUp(
+            PandemicGame game,
+            PlayerCardPickedUp playerCardPickedUp)
+        {
+            var newPlayers = game.Players.Select(p => p).ToList();
+            var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
+            var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
+            currentPlayerHand.Add(playerCardPickedUp.Card);
+
+            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with {Hand = currentPlayerHand};
+
+            return game with {Players = newPlayers};
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
@@ -92,7 +120,13 @@ namespace pandemic.Aggregates
         {
             var newPlayers = pandemicGame.Players.Select(p => p).ToList();
             var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerMoved.Role);
-            newPlayers[movedPlayerIdx] = newPlayers[movedPlayerIdx] with {Location = playerMoved.Location};
+            var movedPlayer = newPlayers[movedPlayerIdx];
+
+            newPlayers[movedPlayerIdx] = movedPlayer with
+            {
+                Location = playerMoved.Location,
+                ActionsRemaining = movedPlayer.ActionsRemaining - 1
+            };
 
             return pandemicGame with {Players = newPlayers};
         }
