@@ -1,7 +1,4 @@
 namespace pandemic.Values
 {
-    public record InfectionCard
-    {
-        public string City { get; init; } = "";
-    }
+    public record InfectionCard(string City);
 }

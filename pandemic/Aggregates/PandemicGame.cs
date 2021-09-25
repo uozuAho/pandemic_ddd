@@ -44,7 +44,7 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
         {
             // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard {City = c.Name});
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c.Name));
 
             yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
         }
