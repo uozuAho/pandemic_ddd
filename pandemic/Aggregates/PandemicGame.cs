@@ -46,7 +46,7 @@ namespace pandemic.Aggregates
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard {City = c.Name});
 
-            yield return new InfectionDeckSetUp(unshuffledCities);
+            yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
         }
 
         public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
