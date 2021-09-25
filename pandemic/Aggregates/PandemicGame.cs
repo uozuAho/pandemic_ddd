@@ -59,6 +59,10 @@ namespace pandemic.Aggregates
 
             var state = FromEvents(log);
             var player = state.PlayerByRole(role);
+
+            if (player.ActionsRemaining == 0)
+                throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
+
             if (!Board.IsAdjacent(player.Location, city))
             {
                 throw new InvalidActionException(

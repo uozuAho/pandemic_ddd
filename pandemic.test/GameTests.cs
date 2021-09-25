@@ -55,7 +55,19 @@ namespace pandemic.test
             Assert.AreEqual(initialState.CurrentPlayer.Hand.Count + 2, state.CurrentPlayer.Hand.Count);
         }
 
-        // todo: player can't do 5 actions
+        [Test]
+        public void Player_attempts_fifth_action_throws()
+        {
+            var eventLog = GameBuilder.InitialiseNewGame();
+
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago").ToList());
+        }
 
         [Test]
         [Ignore("enable once end of turn is implemented")]
