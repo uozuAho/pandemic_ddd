@@ -15,6 +15,8 @@ namespace pandemic.Aggregates
         public List<Player> Players { get; init; } = new();
         public List<InfectionCard> InfectionDrawPile { get; set; } = new();
         public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
+        public Player CurrentPlayer => Players[CurrentPlayerIdx];
+        public int CurrentPlayerIdx { get; init; } = 0;
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
@@ -64,20 +66,28 @@ namespace pandemic.Aggregates
             }
 
             yield return new PlayerMoved(role, city);
+            yield return new PlayerCardPickedUp();
+            yield return new PlayerCardPickedUp();
         }
 
-        private static PandemicGame Apply(PandemicGame pandemicGame, IEvent @event)
+        private static PandemicGame Apply(PandemicGame game, IEvent @event)
         {
             return @event switch
             {
-                DifficultySet d => pandemicGame with {Difficulty = d.Difficulty},
-                InfectionDeckSetUp s => pandemicGame with {InfectionDrawPile = s.Deck},
-                InfectionRateSet i => pandemicGame with {InfectionRate = i.Rate},
-                OutbreakCounterSet o => pandemicGame with {OutbreakCounter = o.Value},
-                PlayerAdded p => ApplyPlayerAdded(pandemicGame, p),
-                PlayerMoved p => ApplyPlayerMoved(pandemicGame, p),
+                DifficultySet d => game with {Difficulty = d.Difficulty},
+                InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck},
+                InfectionRateSet i => game with {InfectionRate = i.Rate},
+                OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
+                PlayerAdded p => ApplyPlayerAdded(game, p),
+                PlayerMoved p => ApplyPlayerMoved(game, p),
+                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game, PlayerCardPickedUp playerCardPickedUp)
+        {
+            return game;
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
