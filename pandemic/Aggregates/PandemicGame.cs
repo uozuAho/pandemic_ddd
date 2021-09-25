@@ -56,11 +56,11 @@ namespace pandemic.Aggregates
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
             var state = FromEvents(log);
-            var playerLocation = state.PlayerByRole(role).Location;
-            if (!Board.IsAdjacent(playerLocation, city))
+            var player = state.PlayerByRole(role);
+            if (!Board.IsAdjacent(player.Location, city))
             {
                 throw new InvalidActionException(
-                    $"Invalid drive/ferry to non-adjacent city: {playerLocation} to {city}");
+                    $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
             yield return new PlayerMoved(role, city);

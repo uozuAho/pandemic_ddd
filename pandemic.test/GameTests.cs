@@ -41,6 +41,22 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Player_draws_two_cards_after_last_action()
+        {
+            var eventLog = GameBuilder.InitialiseNewGame();
+
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
+            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+
+            var lastTwoEvents = eventLog.TakeLast(2).ToList();
+
+            // Assert.AreEqual(typeof(PlayerCardPickedUp), lastTwoEvents[0].GetType());
+        }
+
+        [Test]
+        [Ignore("enable once end of turn is implemented")]
         public void Cities_are_infected_after_player_turn_ends()
         {
             var eventLog = GameBuilder.InitialiseNewGame();
