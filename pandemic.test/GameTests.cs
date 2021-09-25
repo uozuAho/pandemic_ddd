@@ -52,7 +52,7 @@ namespace pandemic.test
 
             var lastTwoEvents = eventLog.TakeLast(2).ToList();
 
-            // Assert.AreEqual(typeof(PlayerCardPickedUp), lastTwoEvents[0].GetType());
+            Assert.AreEqual(typeof(PlayerCardPickedUp), lastTwoEvents[0].GetType());
         }
 
         [Test]
