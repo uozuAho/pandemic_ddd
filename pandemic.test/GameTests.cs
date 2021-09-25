@@ -70,7 +70,7 @@ namespace pandemic.test
         }
 
         [Test]
-        [Ignore("enable once end of turn is implemented")]
+        [Ignore("get back to this after immutable collections")]
         public void Cities_are_infected_after_player_turn_ends()
         {
             var eventLog = GameBuilder.InitialiseNewGame();

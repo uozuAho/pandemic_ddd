@@ -23,7 +23,7 @@ namespace pandemic.Aggregates
         private static readonly Board Board = new();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
-            events.Aggregate(new PandemicGame(), Apply);
+            events.Aggregate(new PandemicGame(), ApplyEvent);
 
         public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
         {
@@ -76,10 +76,12 @@ namespace pandemic.Aggregates
                 // todo: pick up cards from player draw pile here
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
+                // todo: draw from infection deck here
+                yield return new CubesAddedToCity("Atlanta");
             }
         }
 
-        private static PandemicGame Apply(PandemicGame game, IEvent @event)
+        private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
         {
             return @event switch
             {
@@ -90,8 +92,14 @@ namespace pandemic.Aggregates
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
+                CubesAddedToCity c => ApplyCubesAddedToCity(game, c),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubesAddedToCity cubesAddedToCity)
+        {
+            return game;
         }
 
         private static PandemicGame ApplyPlayerCardPickedUp(
