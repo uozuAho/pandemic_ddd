@@ -55,6 +55,8 @@ namespace pandemic.test
             Assert.AreEqual(initialState.CurrentPlayer.Hand.Count + 2, state.CurrentPlayer.Hand.Count);
         }
 
+        // todo: player can't do 5 actions
+
         [Test]
         [Ignore("enable once end of turn is implemented")]
         public void Cities_are_infected_after_player_turn_ends()

@@ -66,8 +66,14 @@ namespace pandemic.Aggregates
             }
 
             yield return new PlayerMoved(role, city);
-            yield return new PlayerCardPickedUp();
-            yield return new PlayerCardPickedUp();
+
+            if (player.ActionsRemaining == 1)
+            {
+                // todo: only pick up on end of turn
+                // todo: pick up cards from player draw pile here
+                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
+                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
+            }
         }
 
         private static PandemicGame Apply(PandemicGame game, IEvent @event)
@@ -85,9 +91,18 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game, PlayerCardPickedUp playerCardPickedUp)
+        private static PandemicGame ApplyPlayerCardPickedUp(
+            PandemicGame game,
+            PlayerCardPickedUp playerCardPickedUp)
         {
-            return game;
+            var newPlayers = game.Players.Select(p => p).ToList();
+            var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
+            var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
+            currentPlayerHand.Add(playerCardPickedUp.Card);
+
+            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with {Hand = currentPlayerHand};
+
+            return game with {Players = newPlayers};
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
@@ -102,7 +117,15 @@ namespace pandemic.Aggregates
         {
             var newPlayers = pandemicGame.Players.Select(p => p).ToList();
             var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerMoved.Role);
-            newPlayers[movedPlayerIdx] = newPlayers[movedPlayerIdx] with {Location = playerMoved.Location};
+            var movedPlayer = newPlayers[movedPlayerIdx];
+
+            // todo: check has actions remaining here
+
+            newPlayers[movedPlayerIdx] = movedPlayer with
+            {
+                Location = playerMoved.Location,
+                ActionsRemaining = movedPlayer.ActionsRemaining - 1
+            };
 
             return pandemicGame with {Players = newPlayers};
         }
