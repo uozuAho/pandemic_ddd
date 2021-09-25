@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using pandemic.Events;
 using pandemic.GameData;
@@ -12,7 +13,7 @@ namespace pandemic.Aggregates
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
-        public List<Player> Players { get; init; } = new();
+        public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public List<InfectionCard> InfectionDrawPile { get; set; } = new();
         public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
@@ -113,7 +114,7 @@ namespace pandemic.Aggregates
 
             newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with {Hand = currentPlayerHand};
 
-            return game with {Players = newPlayers};
+            return game with {Players = newPlayers.ToImmutableList()};
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
@@ -121,7 +122,7 @@ namespace pandemic.Aggregates
             var newPlayers = pandemicGame.Players.Select(p => p).ToList();
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
-            return pandemicGame with { Players = newPlayers };
+            return pandemicGame with { Players = newPlayers.ToImmutableList() };
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
@@ -136,7 +137,7 @@ namespace pandemic.Aggregates
                 ActionsRemaining = movedPlayer.ActionsRemaining - 1
             };
 
-            return pandemicGame with {Players = newPlayers};
+            return pandemicGame with {Players = newPlayers.ToImmutableList()};
         }
     }
 }
