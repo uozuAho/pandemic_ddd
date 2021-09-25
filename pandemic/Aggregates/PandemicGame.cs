@@ -14,7 +14,7 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public List<InfectionCard> InfectionDrawPile { get; set; } = new();
+        public ImmutableList<InfectionCard> InfectionDrawPile { get; set; } = ImmutableList<InfectionCard>.Empty;
         public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
@@ -87,7 +87,7 @@ namespace pandemic.Aggregates
             return @event switch
             {
                 DifficultySet d => game with {Difficulty = d.Difficulty},
-                InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck},
+                InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
                 InfectionRateSet i => game with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
@@ -112,7 +112,7 @@ namespace pandemic.Aggregates
             var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
             currentPlayerHand.Add(playerCardPickedUp.Card);
 
-            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with {Hand = currentPlayerHand};
+            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with { Hand = currentPlayerHand.ToImmutableList() };
 
             return game with {Players = newPlayers.ToImmutableList()};
         }
