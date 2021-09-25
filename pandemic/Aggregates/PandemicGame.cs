@@ -73,7 +73,6 @@ namespace pandemic.Aggregates
 
             if (player.ActionsRemaining == 1)
             {
-                // todo: only pick up on end of turn
                 // todo: pick up cards from player draw pile here
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
@@ -122,8 +121,6 @@ namespace pandemic.Aggregates
             var newPlayers = pandemicGame.Players.Select(p => p).ToList();
             var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerMoved.Role);
             var movedPlayer = newPlayers[movedPlayerIdx];
-
-            // todo: check has actions remaining here
 
             newPlayers[movedPlayerIdx] = movedPlayer with
             {
