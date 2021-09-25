@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace pandemic.Values
 {
@@ -6,7 +6,7 @@ namespace pandemic.Values
     {
         public Role Role { get; init; }
         public string Location { get; init; } = "Atlanta";
-        public List<PlayerCard> Hand { get; init; } = new();
+        public ImmutableList<PlayerCard> Hand { get; init; } = ImmutableList<PlayerCard>.Empty;
         public int ActionsRemaining { get; init; } = 4;
     }
 }
