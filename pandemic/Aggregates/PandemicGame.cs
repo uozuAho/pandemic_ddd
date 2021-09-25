@@ -14,8 +14,8 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public ImmutableList<InfectionCard> InfectionDrawPile { get; set; } = ImmutableList<InfectionCard>.Empty;
-        public List<InfectionCard> InfectionDiscardPile { get; set; } = new();
+        public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
+        public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
 
