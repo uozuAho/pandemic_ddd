@@ -97,8 +97,7 @@ namespace pandemic.Aggregates
             var state = FromEvents(log);
             var (city, colour) = state.InfectionDrawPile.Last();
             yield return new InfectionCardDrawn(city, colour);
-            // todo: rename to CubeAddedToCity
-            yield return new CubesAddedToCity(city, colour);
+            yield return new CubeAddedToCity(city, colour);
         }
         #endregion
 
@@ -115,7 +114,7 @@ namespace pandemic.Aggregates
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
-                CubesAddedToCity c => ApplyCubesAddedToCity(game, c),
+                CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
@@ -129,14 +128,14 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubesAddedToCity cubesAddedToCity)
+        private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
         {
             // todo: make cities a dictionary?
             var cities = game.Cities.ToDictionary(c => c.Name, c => c);
-            var city = cities[cubesAddedToCity.City];
+            var city = cities[cubeAddedToCity.City];
             var cubes = city.Cubes.ToDictionary(c => c.Key, c => c.Value);
-            cubes[cubesAddedToCity.Colour] += 1;
-            cities[cubesAddedToCity.City] = city with {Cubes = cubes.ToImmutableDictionary()};
+            cubes[cubeAddedToCity.Colour] += 1;
+            cities[cubeAddedToCity.City] = city with {Cubes = cubes.ToImmutableDictionary()};
 
             return game with
             {
