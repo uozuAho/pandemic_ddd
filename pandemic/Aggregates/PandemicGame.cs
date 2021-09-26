@@ -53,9 +53,9 @@ namespace pandemic.Aggregates
             return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), eventLog);
         }
 
-        public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
+        public PandemicGame AddPlayer(List<IEvent> log, Role role)
         {
-            yield return new PlayerAdded(role);
+            return ApplyEvent(new PlayerAdded(role), log);
         }
 
         public static PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)
@@ -157,7 +157,7 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
         {
-            var newPlayers = pandemicGame.Players.Select(p => p).ToList();
+            var newPlayers = pandemicGame.Players.Select(p => p with { }).ToList();
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };
