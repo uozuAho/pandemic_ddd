@@ -77,9 +77,22 @@ namespace pandemic.Aggregates
                 // todo: pick up cards from player draw pile here
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                // todo: draw from infection deck here
-                yield return new CubesAddedToCity("Atlanta");
+                foreach (var @event in InfectCity(log))
+                {
+                    yield return @event;
+                }
+                foreach (var @event in InfectCity(log))
+                {
+                    yield return @event;
+                }
             }
+        }
+
+        public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
+        {
+            var state = FromEvents(log);
+            yield return new InfectionCardDrawn(state.InfectionDrawPile.Last().City);
+            yield return new CubesAddedToCity("Atlanta");
         }
 
         private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
@@ -87,6 +100,7 @@ namespace pandemic.Aggregates
             return @event switch
             {
                 DifficultySet d => game with {Difficulty = d.Difficulty},
+                InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
                 InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
                 InfectionRateSet i => game with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
@@ -95,6 +109,15 @@ namespace pandemic.Aggregates
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubesAddedToCity c => ApplyCubesAddedToCity(game, c),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn infectionCardDrawn)
+        {
+            return game with
+            {
+                InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
             };
         }
 
