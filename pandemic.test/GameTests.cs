@@ -15,10 +15,10 @@ namespace pandemic.test
         public void Drive_or_ferry_player(string toCity)
         {
             var eventLog = CreateNewGame();
-
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, toCity));
-
             var state = PandemicGame.FromEvents(eventLog);
+
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, toCity);
+
             Assert.AreEqual(toCity, state.PlayerByRole(Role.Medic).Location);
         }
 
@@ -26,47 +26,49 @@ namespace pandemic.test
         public void Drive_or_ferry_to_garbage_city_throws()
         {
             var eventLog = CreateNewGame();
+            var state = PandemicGame.FromEvents(eventLog);
 
             Assert.Throws<InvalidActionException>(() =>
-                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "fasdfasdf").ToList());
+                PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "fasdfasdf"));
         }
 
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
             var eventLog = CreateNewGame();
+            var state = PandemicGame.FromEvents(eventLog);
 
             Assert.Throws<InvalidActionException>(() =>
-                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Beijing").ToList());
+                PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Beijing"));
         }
 
         [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var eventLog = GameBuilder.InitialiseNewGame();
-            var initialState = PandemicGame.FromEvents(eventLog);
+            var startingState = PandemicGame.FromEvents(eventLog);
 
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            var state = PandemicGame.DriveOrFerryPlayer(startingState, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
 
-            var state = PandemicGame.FromEvents(eventLog);
-            Assert.AreEqual(initialState.CurrentPlayer.Hand.Count + 2, state.CurrentPlayer.Hand.Count);
+            Assert.AreEqual(startingState.CurrentPlayer.Hand.Count + 2, state.CurrentPlayer.Hand.Count);
         }
 
         [Test]
         public void Player_attempts_fifth_action_throws()
         {
             var eventLog = GameBuilder.InitialiseNewGame();
+            var state = PandemicGame.FromEvents(eventLog);
 
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago").ToList());
+                PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Chicago"));
         }
 
         [Test]
@@ -75,12 +77,11 @@ namespace pandemic.test
             var eventLog = GameBuilder.InitialiseNewGame();
             var startingState = PandemicGame.FromEvents(eventLog);
 
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Chicago"));
-            eventLog.AddRange(PandemicGame.DriveOrFerryPlayer(eventLog, Role.Medic, "Atlanta"));
+            var state = PandemicGame.DriveOrFerryPlayer(startingState, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Chicago");
+            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Atlanta");
 
-            var state = PandemicGame.FromEvents(eventLog);
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, state.InfectionDrawPile.Count);
             Assert.AreEqual(2, state.InfectionDiscardPile.Count);
 

@@ -58,11 +58,10 @@ namespace pandemic.Aggregates
             yield return new PlayerAdded(role);
         }
 
-        public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
+        public static PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)
         {
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
-            var state = FromEvents(log);
             var player = state.PlayerByRole(role);
 
             if (player.ActionsRemaining == 0)
@@ -74,34 +73,36 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            yield return new PlayerMoved(role, city);
+            state = state.ApplyEvent(new PlayerMoved(role, city), events);
 
             if (player.ActionsRemaining == 1)
             {
                 // todo: pick up cards from player draw pile here
-                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                foreach (var @event in InfectCity(log))
-                {
-                    yield return @event;
-                }
-                foreach (var @event in InfectCity(log))
-                {
-                    yield return @event;
-                }
+                state = state.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
+                state = state.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
+                state = InfectCity(state, events);
+                state = InfectCity(state, events);
             }
+
+            return state;
         }
 
-        public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
+        public static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
         {
-            var state = FromEvents(log);
             var infectionCard = state.InfectionDrawPile.Last();
-            yield return new InfectionCardDrawn(infectionCard.City);
-            yield return new CubeAddedToCity(infectionCard.City);
+            state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+            state = state.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+            return state;
         }
         #endregion
 
         #region Events
+        private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
+        {
+            events.Add(@event);
+            return ApplyEvent(this, @event);
+        }
+
         private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
         {
             return @event switch
