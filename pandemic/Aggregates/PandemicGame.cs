@@ -14,18 +14,22 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
+        public ImmutableList<City> Cities { get; init; } = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
+        public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
         private static readonly Board Board = new();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), ApplyEvent);
 
+        // oh god I'm using regions! what have I become...
+        #region Commands
         public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
         {
             yield return new DifficultySet(difficulty);
@@ -44,7 +48,7 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
         {
             // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c.Name));
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
             yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
         }
@@ -77,30 +81,63 @@ namespace pandemic.Aggregates
                 // todo: pick up cards from player draw pile here
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
                 yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                // todo: draw from infection deck here
-                yield return new CubesAddedToCity("Atlanta");
+                foreach (var @event in InfectCity(log))
+                {
+                    yield return @event;
+                }
+                foreach (var @event in InfectCity(log))
+                {
+                    yield return @event;
+                }
             }
         }
 
+        public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
+        {
+            var state = FromEvents(log);
+            var infectionCard = state.InfectionDrawPile.Last();
+            yield return new InfectionCardDrawn(infectionCard.City);
+            yield return new CubeAddedToCity(infectionCard.City);
+        }
+        #endregion
+
+        #region Events
         private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
         {
             return @event switch
             {
                 DifficultySet d => game with {Difficulty = d.Difficulty},
+                InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
                 InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
                 InfectionRateSet i => game with {InfectionRate = i.Rate},
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
-                CubesAddedToCity c => ApplyCubesAddedToCity(game, c),
+                CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
 
-        private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubesAddedToCity cubesAddedToCity)
+        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn infectionCardDrawn)
         {
-            return game;
+            return game with
+            {
+                InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
+            };
+        }
+
+        private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
+        {
+            var city = game.CityByName(cubeAddedToCity.City.Name);
+            var colour = cubeAddedToCity.City.Colour;
+            var newCity = city with { Cubes = city.Cubes.SetItem(colour, city.Cubes[colour] + 1) };
+
+            return game with
+            {
+                Cities = game.Cities.Replace(city, newCity)
+            };
         }
 
         private static PandemicGame ApplyPlayerCardPickedUp(
@@ -139,5 +176,6 @@ namespace pandemic.Aggregates
 
             return pandemicGame with {Players = newPlayers.ToImmutableList()};
         }
+        #endregion
     }
 }

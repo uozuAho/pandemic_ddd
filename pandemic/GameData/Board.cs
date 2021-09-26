@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using pandemic.Values;
 
 namespace pandemic.GameData
 {
@@ -24,245 +25,245 @@ namespace pandemic.GameData
             return CityLookup[playerLocation].AdjacentCities.Contains(city);
         }
 
-        public IEnumerable<City> Cities => _cities.Select(c => c);
+        public IEnumerable<CityData> Cities => _cities.Select(c => c);
 
-        private static readonly City[] _cities = {
-            new City
+        private static readonly CityData[] _cities = {
+            new CityData
             {
                 Name = "San Francisco",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Chicago",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Montreal",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "New York",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Washington",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Atlanta",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Madrid",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "London",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Paris",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Essen",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Milan",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "St. Petersburg",
                 Colour = Colour.Blue,
             },
-            new City
+            new CityData
             {
                 Name = "Algiers",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Istanbul",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Moscow",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Cairo",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Baghdad",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Tehran",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Delhi",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Karachi",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Riyadh",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Mumbai",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Chennai",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Kolkata",
                 Colour = Colour.Black,
             },
-            new City
+            new CityData
             {
                 Name = "Beijing",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Seoul",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Tokyo",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Shanghai",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Hong Kong",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Taipei",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Osaka",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Bangkok",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Ho Chi Minh City",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Manila",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Jakarta",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Sydney",
                 Colour = Colour.Red,
             },
-            new City
+            new CityData
             {
                 Name = "Khartoum",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Johannesburg",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Kinshasa",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Lagos",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Sao Paulo",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Buenos Aires",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Santiago",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Lima",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Bogota",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Mexico City",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Los Angeles",
                 Colour = Colour.Yellow,
             },
-            new City
+            new CityData
             {
                 Name = "Miami",
                 Colour = Colour.Yellow,
@@ -366,6 +367,6 @@ namespace pandemic.GameData
             ("Miami", "Bogota"),
         };
 
-        private static readonly Dictionary<string, City> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
+        private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
     }
 }

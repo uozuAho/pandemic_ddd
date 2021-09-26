@@ -1,6 +1,6 @@
-﻿namespace pandemic.GameData
+namespace pandemic.Values
 {
-    internal enum Colour
+    public enum Colour
     {
         Blue,
         Black,
