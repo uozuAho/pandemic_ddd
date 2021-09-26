@@ -15,7 +15,7 @@ namespace pandemic.test.Utils
             game.SetDifficulty(eventLog, Difficulty.Normal);
             game.SetInfectionRate(eventLog, 2);
             game.SetOutbreakCounter(eventLog, 0);
-            eventLog.AddRange(PandemicGame.SetupInfectionDeck(eventLog));
+            game.SetupInfectionDeck(eventLog);
             eventLog.AddRange(PandemicGame.AddPlayer(eventLog, Role.Medic));
 
             return eventLog;

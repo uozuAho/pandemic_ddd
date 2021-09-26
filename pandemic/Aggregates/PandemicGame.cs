@@ -45,12 +45,12 @@ namespace pandemic.Aggregates
             return ApplyEvent(new OutbreakCounterSet(value), log);
         }
 
-        public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
+        public PandemicGame SetupInfectionDeck(List<IEvent> eventLog)
         {
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
-            yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
+            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), eventLog);
         }
 
         public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
