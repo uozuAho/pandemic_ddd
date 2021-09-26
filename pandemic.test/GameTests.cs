@@ -12,7 +12,7 @@ namespace pandemic.test
     {
         [TestCase("Chicago")]
         [TestCase("Washington")]
-        public void Move_player(string toCity)
+        public void Drive_or_ferry_player(string toCity)
         {
             var eventLog = CreateNewGame();
 
@@ -23,7 +23,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Move_player_to_garbage_city_throws()
+        public void Drive_or_ferry_to_garbage_city_throws()
         {
             var eventLog = CreateNewGame();
 
