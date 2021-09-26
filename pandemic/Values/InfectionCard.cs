@@ -1,4 +1,6 @@
+using pandemic.GameData;
+
 namespace pandemic.Values
 {
-    public record InfectionCard(string City, Colour Colour);
+    public record InfectionCard(CityData City);
 }

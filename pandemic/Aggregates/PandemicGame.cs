@@ -48,7 +48,7 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
         {
             // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c.Name, c.Colour));
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
             yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
         }
@@ -95,9 +95,9 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
         {
             var state = FromEvents(log);
-            var (city, colour) = state.InfectionDrawPile.Last();
-            yield return new InfectionCardDrawn(city, colour);
-            yield return new CubeAddedToCity(city, colour);
+            var infectionCard = state.InfectionDrawPile.Last();
+            yield return new InfectionCardDrawn(infectionCard.City);
+            yield return new CubeAddedToCity(infectionCard.City);
         }
         #endregion
 
@@ -124,7 +124,7 @@ namespace pandemic.Aggregates
             return game with
             {
                 InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City, infectionCardDrawn.Colour)),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
             };
         }
 
@@ -132,10 +132,10 @@ namespace pandemic.Aggregates
         {
             // todo: make cities a dictionary?
             var cities = game.Cities.ToDictionary(c => c.Name, c => c);
-            var city = cities[cubeAddedToCity.City];
+            var city = cities[cubeAddedToCity.City.Name];
             var cubes = city.Cubes.ToDictionary(c => c.Key, c => c.Value);
-            cubes[cubeAddedToCity.Colour] += 1;
-            cities[cubeAddedToCity.City] = city with {Cubes = cubes.ToImmutableDictionary()};
+            cubes[cubeAddedToCity.City.Colour] += 1;
+            cities[cubeAddedToCity.City.Name] = city with {Cubes = cubes.ToImmutableDictionary()};
 
             return game with
             {
