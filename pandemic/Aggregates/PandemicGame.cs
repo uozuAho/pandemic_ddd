@@ -131,7 +131,8 @@ namespace pandemic.Aggregates
         private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
         {
             var city = game.CityByName(cubeAddedToCity.City.Name);
-            var newCity = city with { Cubes = city.Cubes.SetItem(cubeAddedToCity.City.Colour, city.Cubes[cubeAddedToCity.City.Colour] + 1) };
+            var colour = cubeAddedToCity.City.Colour;
+            var newCity = city with { Cubes = city.Cubes.SetItem(colour, city.Cubes[colour] + 1) };
 
             return game with
             {
