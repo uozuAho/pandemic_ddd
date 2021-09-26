@@ -35,9 +35,9 @@ namespace pandemic.Aggregates
             return ApplyEvent(new DifficultySet(difficulty), log);
         }
 
-        public static IEnumerable<IEvent> SetInfectionRate(List<IEvent> log, int rate)
+        public PandemicGame SetInfectionRate(ICollection<IEvent> log, int rate)
         {
-            yield return new InfectionRateSet(rate);
+            return ApplyEvent(new InfectionRateSet(rate), log);
         }
 
         public static IEnumerable<IEvent> SetOutbreakCounter(List<IEvent> log, int value)

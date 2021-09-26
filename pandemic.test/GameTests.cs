@@ -97,7 +97,7 @@ namespace pandemic.test
             var game = PandemicGame.FromEvents(eventLog);
 
             game = game.SetDifficulty(eventLog, Difficulty.Normal);
-            eventLog.AddRange(PandemicGame.SetInfectionRate(eventLog, 2));
+            game = game.SetInfectionRate(eventLog, 2);
             eventLog.AddRange(PandemicGame.SetOutbreakCounter(eventLog, 0));
             eventLog.AddRange(PandemicGame.AddPlayer(eventLog, Role.Medic));
 
