@@ -1,4 +1,7 @@
+using pandemic.Values;
+
 namespace pandemic.Events
 {
-    public record CubesAddedToCity(string City) : IEvent;
+    // todo: use CityData type instead?
+    public record CubesAddedToCity(string City, Colour Colour) : IEvent;
 }

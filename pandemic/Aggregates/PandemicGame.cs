@@ -97,7 +97,8 @@ namespace pandemic.Aggregates
             var state = FromEvents(log);
             var (city, colour) = state.InfectionDrawPile.Last();
             yield return new InfectionCardDrawn(city, colour);
-            yield return new CubesAddedToCity(city);
+            // todo: rename to CubeAddedToCity
+            yield return new CubesAddedToCity(city, colour);
         }
         #endregion
 
@@ -130,7 +131,17 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubesAddedToCity cubesAddedToCity)
         {
-            return game;
+            // todo: make cities a dictionary?
+            var cities = game.Cities.ToDictionary(c => c.Name, c => c);
+            var city = cities[cubesAddedToCity.City];
+            var cubes = city.Cubes.ToDictionary(c => c.Key, c => c.Value);
+            cubes[cubesAddedToCity.Colour] += 1;
+            cities[cubesAddedToCity.City] = city with {Cubes = cubes.ToImmutableDictionary()};
+
+            return game with
+            {
+                Cities = cities.Values.ToImmutableList()
+            };
         }
 
         private static PandemicGame ApplyPlayerCardPickedUp(
