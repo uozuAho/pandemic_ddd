@@ -162,5 +162,11 @@ namespace pandemic.Aggregates
 
             return pandemicGame with {Players = newPlayers.ToImmutableList()};
         }
+
+        // todo: this
+        // public CityData CityByName(string city)
+        // {
+        //     throw new NotImplementedException();
+        // }
     }
 }

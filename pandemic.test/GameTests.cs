@@ -83,7 +83,11 @@ namespace pandemic.test
             var state = PandemicGame.FromEvents(eventLog);
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, state.InfectionDrawPile.Count);
             Assert.AreEqual(2, state.InfectionDiscardPile.Count);
-            // todo: infected cities have cubes
+
+            foreach (var infectionCard in state.InfectionDiscardPile.TakeLast(2))
+            {
+                // Assert.AreEqual(1, state.CityByName(infectionCard.City).Cubes.Count);
+            }
         }
 
         private static List<IEvent> CreateNewGame()

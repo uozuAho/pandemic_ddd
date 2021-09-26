@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace pandemic.GameData
 {
-    internal record City
+    internal record CityData
     {
         public string Name { get; init; } = "";
         public Colour Colour { get; init; }
