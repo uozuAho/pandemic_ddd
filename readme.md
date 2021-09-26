@@ -1,5 +1,7 @@
 # Pandemic with DDD
 
+An attempt at implementing the pandemic board game, using DDD
+
 # todo
 - use immutable collections
 - check skipped tests
