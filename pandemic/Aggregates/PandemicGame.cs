@@ -130,16 +130,12 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
         {
-            // todo: make cities a dictionary?
-            var cities = game.Cities.ToDictionary(c => c.Name, c => c);
-            var city = cities[cubeAddedToCity.City.Name];
-            var cubes = city.Cubes.ToDictionary(c => c.Key, c => c.Value);
-            cubes[cubeAddedToCity.City.Colour] += 1;
-            cities[cubeAddedToCity.City.Name] = city with {Cubes = cubes.ToImmutableDictionary()};
+            var city = game.CityByName(cubeAddedToCity.City.Name);
+            var newCity = city with { Cubes = city.Cubes.SetItem(cubeAddedToCity.City.Colour, city.Cubes[cubeAddedToCity.City.Colour] + 1) };
 
             return game with
             {
-                Cities = cities.Values.ToImmutableList()
+                Cities = game.Cities.Replace(city, newCity)
             };
         }
 
