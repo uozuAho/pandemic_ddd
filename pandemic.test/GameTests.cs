@@ -86,7 +86,7 @@ namespace pandemic.test
 
             foreach (var infectionCard in state.InfectionDiscardPile.TakeLast(2))
             {
-                Assert.AreEqual(1, state.CityByName(infectionCard.City).Cubes.Count);
+                Assert.AreEqual(1, state.CityByName(infectionCard.City).Cubes[infectionCard.Colour]);
             }
         }
 

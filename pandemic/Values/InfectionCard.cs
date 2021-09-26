@@ -1,4 +1,4 @@
 namespace pandemic.Values
 {
-    public record InfectionCard(string City);
+    public record InfectionCard(string City, Colour Colour);
 }

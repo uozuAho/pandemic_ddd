@@ -14,7 +14,7 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public ImmutableList<City> Cities { get; init; } = ImmutableList<City>.Empty;
+        public ImmutableList<City> Cities { get; init; } = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
@@ -48,7 +48,7 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
         {
             // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c.Name));
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c.Name, c.Colour));
 
             yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
         }
@@ -95,8 +95,9 @@ namespace pandemic.Aggregates
         public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
         {
             var state = FromEvents(log);
-            yield return new InfectionCardDrawn(state.InfectionDrawPile.Last().City);
-            yield return new CubesAddedToCity("Atlanta");
+            var (city, colour) = state.InfectionDrawPile.Last();
+            yield return new InfectionCardDrawn(city, colour);
+            yield return new CubesAddedToCity(city);
         }
         #endregion
 
@@ -123,7 +124,7 @@ namespace pandemic.Aggregates
             return game with
             {
                 InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City, infectionCardDrawn.Colour)),
             };
         }
 
