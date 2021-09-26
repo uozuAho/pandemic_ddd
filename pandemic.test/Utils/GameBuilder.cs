@@ -10,8 +10,9 @@ namespace pandemic.test.Utils
         public static List<IEvent> InitialiseNewGame()
         {
             var eventLog = new List<IEvent>();
+            var game = PandemicGame.FromEvents(eventLog);
 
-            eventLog.AddRange(PandemicGame.SetDifficulty(eventLog, Difficulty.Normal));
+            game.SetDifficulty(eventLog, Difficulty.Normal);
             eventLog.AddRange(PandemicGame.SetInfectionRate(eventLog, 2));
             eventLog.AddRange(PandemicGame.SetOutbreakCounter(eventLog, 0));
             eventLog.AddRange(PandemicGame.SetupInfectionDeck(eventLog));

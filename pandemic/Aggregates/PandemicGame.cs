@@ -30,9 +30,9 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
+        public PandemicGame SetDifficulty(ICollection<IEvent> log, Difficulty difficulty)
         {
-            yield return new DifficultySet(difficulty);
+            return ApplyEvent(new DifficultySet(difficulty), log);
         }
 
         public static IEnumerable<IEvent> SetInfectionRate(List<IEvent> log, int rate)
