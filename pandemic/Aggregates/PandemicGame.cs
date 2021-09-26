@@ -14,18 +14,22 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
+        public ImmutableList<City> Cities { get; init; } = ImmutableList<City>.Empty;
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
+        public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
         private static readonly Board Board = new();
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
             events.Aggregate(new PandemicGame(), ApplyEvent);
 
+        // oh god I'm using regions! what have I become...
+        #region Commands
         public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
         {
             yield return new DifficultySet(difficulty);
@@ -94,7 +98,9 @@ namespace pandemic.Aggregates
             yield return new InfectionCardDrawn(state.InfectionDrawPile.Last().City);
             yield return new CubesAddedToCity("Atlanta");
         }
+        #endregion
 
+        #region Events
         private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
         {
             return @event switch
@@ -162,11 +168,6 @@ namespace pandemic.Aggregates
 
             return pandemicGame with {Players = newPlayers.ToImmutableList()};
         }
-
-        // todo: this
-        // public CityData CityByName(string city)
-        // {
-        //     throw new NotImplementedException();
-        // }
+        #endregion
     }
 }
