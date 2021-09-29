@@ -14,7 +14,7 @@ namespace pandemic.test
         [TestCase("Washington")]
         public void Drive_or_ferry_player(string toCity)
         {
-            var state = CreateNewGame();
+            var state = GameBuilder.InitialiseNewGame();
 
             state = PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, toCity);
 
@@ -24,7 +24,7 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_garbage_city_throws()
         {
-            var state = CreateNewGame();
+            var state = GameBuilder.InitialiseNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
                 PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, "fasdfasdf"));
@@ -33,7 +33,7 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
-            var state = CreateNewGame();
+            var state = GameBuilder.InitialiseNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
                 PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, "Beijing"));
@@ -86,19 +86,6 @@ namespace pandemic.test
             {
                 Assert.AreEqual(1, state.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour]);
             }
-        }
-
-        private static PandemicGame CreateNewGame()
-        {
-            var eventLog = new List<IEvent>();
-            var game = PandemicGame.CreateUninitialisedGame();
-
-            (game, _) = game.SetDifficulty(Difficulty.Normal);
-            (game, _) = game.SetInfectionRate(2);
-            (game, _) = game.SetOutbreakCounter(0);
-            game = game.AddPlayer(eventLog, Role.Medic);
-
-            return game;
         }
     }
 }
