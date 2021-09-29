@@ -44,17 +44,17 @@ namespace pandemic.Aggregates
             return ApplyEvents(new OutbreakCounterSet(value));
         }
 
-        public PandemicGame SetupInfectionDeck(List<IEvent> eventLog)
+        public (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
         {
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
-            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), eventLog);
+            return ApplyEvents(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()));
         }
 
-        public PandemicGame AddPlayer(List<IEvent> log, Role role)
+        public (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
         {
-            return ApplyEvent(new PlayerAdded(role), log);
+            return ApplyEvents(new PlayerAdded(role));
         }
 
         public static PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)

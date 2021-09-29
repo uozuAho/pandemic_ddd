@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using pandemic.Aggregates;
-using pandemic.Events;
 using pandemic.Values;
 
 namespace pandemic.test.Utils
@@ -9,14 +7,13 @@ namespace pandemic.test.Utils
     {
         public static PandemicGame InitialiseNewGame()
         {
-            var eventLog = new List<IEvent>();
             var game = PandemicGame.CreateUninitialisedGame();
 
             (game, _) = game.SetDifficulty(Difficulty.Normal);
             (game, _) = game.SetInfectionRate(2);
             (game, _) = game.SetOutbreakCounter(0);
-            game = game.SetupInfectionDeck(eventLog);
-            game = game.AddPlayer(eventLog, Role.Medic);
+            (game, _) = game.SetupInfectionDeck();
+            (game, _) = game.AddPlayer(Role.Medic);
 
             return game;
         }
