@@ -86,7 +86,7 @@ namespace pandemic.Aggregates
             return state;
         }
 
-        public static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        public PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
         {
             var infectionCard = state.InfectionDrawPile.Last();
             state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
