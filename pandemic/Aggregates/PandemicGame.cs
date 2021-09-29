@@ -31,9 +31,7 @@ namespace pandemic.Aggregates
         #region Commands
         public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
         {
-            var events = new List<IEvent> {new DifficultySet(difficulty)};
-            var state = events.Aggregate(this, ApplyEvent);
-            return (state, events);
+            return ApplyEvents(new DifficultySet(difficulty));
         }
 
         public PandemicGame SetInfectionRate(ICollection<IEvent> log, int rate)
@@ -98,6 +96,12 @@ namespace pandemic.Aggregates
         #endregion
 
         #region Events
+        private (PandemicGame, ICollection<IEvent>) ApplyEvents(params IEvent[] events)
+        {
+            var state = events.Aggregate(this, ApplyEvent);
+            return (state, events);
+        }
+
         private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
         {
             events.Add(@event);
