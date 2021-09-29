@@ -83,6 +83,7 @@ namespace pandemic.Aggregates
         private PandemicGame DoStuffAfterActions(Player player, PandemicGame currentState, ICollection<IEvent> events)
         {
             currentState = PickUpCard(player, currentState, events);
+            currentState = PickUpCard(player, currentState, events);
 
             currentState = InfectCity(currentState, events);
             currentState = InfectCity(currentState, events);
@@ -94,7 +95,6 @@ namespace pandemic.Aggregates
         {
             // todo: pick up cards from player draw pile here
             var (asdf, newEvents) = currentState.ApplyEvents(
-                new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")),
                 new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")));
 
             currentState = asdf;
