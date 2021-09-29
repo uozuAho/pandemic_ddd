@@ -29,9 +29,11 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public PandemicGame SetDifficulty(ICollection<IEvent> log, Difficulty difficulty)
+        public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
         {
-            return ApplyEvent(new DifficultySet(difficulty), log);
+            var events = new List<IEvent> {new DifficultySet(difficulty)};
+            var state = events.Aggregate(this, ApplyEvent);
+            return (state, events);
         }
 
         public PandemicGame SetInfectionRate(ICollection<IEvent> log, int rate)
