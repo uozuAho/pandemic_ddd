@@ -57,11 +57,11 @@ namespace pandemic.Aggregates
             return ApplyEvents(new PlayerAdded(role));
         }
 
-        public PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)
+        public PandemicGame DriveOrFerryPlayer(ICollection<IEvent> events, Role role, string city)
         {
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
-            var player = state.PlayerByRole(role);
+            var player = PlayerByRole(role);
 
             if (player.ActionsRemaining == 0)
                 throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
@@ -72,18 +72,18 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            state = state.ApplyEvent(new PlayerMoved(role, city), events);
+            var newState = ApplyEvent(new PlayerMoved(role, city), events);
 
             if (player.ActionsRemaining == 1)
             {
                 // todo: pick up cards from player draw pile here
-                state = state.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
-                state = state.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
-                state = InfectCity(state, events);
-                state = InfectCity(state, events);
+                newState = newState.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
+                newState = newState.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
+                newState = InfectCity(newState, events);
+                newState = InfectCity(newState, events);
             }
 
-            return state;
+            return newState;
         }
 
         public PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
