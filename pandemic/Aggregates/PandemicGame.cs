@@ -57,7 +57,7 @@ namespace pandemic.Aggregates
             return ApplyEvents(new PlayerAdded(role));
         }
 
-        public static PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)
+        public PandemicGame DriveOrFerryPlayer(PandemicGame state, ICollection<IEvent> events, Role role, string city)
         {
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
