@@ -39,9 +39,9 @@ namespace pandemic.Aggregates
             return ApplyEvents(new InfectionRateSet(rate));
         }
 
-        public PandemicGame SetOutbreakCounter(List<IEvent> log, int value)
+        public (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
         {
-            return ApplyEvent(new OutbreakCounterSet(value), log);
+            return ApplyEvents(new OutbreakCounterSet(value));
         }
 
         public PandemicGame SetupInfectionDeck(List<IEvent> eventLog)
