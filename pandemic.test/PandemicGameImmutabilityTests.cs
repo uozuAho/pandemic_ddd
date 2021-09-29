@@ -12,10 +12,8 @@ namespace pandemic.test
         public void Games_from_same_events_are_not_same()
         {
             var events = new List<IEvent>();
-            var game1 = PandemicGame.FromEvents(events);
-            game1.AddPlayer(events, Role.Medic);
-
-            var game2 = PandemicGame.FromEvents(events);
+            var game1 = PandemicGame.CreateUninitialisedGame();
+            var game2 = game1.AddPlayer(events, Role.Medic);
 
             Assert.AreNotSame(game1, game2);
             Assert.AreNotEqual(game1, game2);
@@ -25,9 +23,9 @@ namespace pandemic.test
         public void Player_list_is_not_shallow_copy()
         {
             var events = new List<IEvent>();
-            var game1 = PandemicGame.FromEvents(events);
-            game1 = game1.AddPlayer(events, Role.Medic);
-
+            var game1 = PandemicGame
+                .CreateUninitialisedGame()
+                .AddPlayer(events, Role.Medic);
             var game2 = game1.AddPlayer(events, Role.Medic);
 
             Assert.AreNotSame(game1.Players, game2.Players);

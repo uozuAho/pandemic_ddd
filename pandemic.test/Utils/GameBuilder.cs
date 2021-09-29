@@ -10,7 +10,7 @@ namespace pandemic.test.Utils
         public static PandemicGame InitialiseNewGame()
         {
             var eventLog = new List<IEvent>();
-            var game = PandemicGame.FromEvents(eventLog);
+            var game = PandemicGame.CreateUninitialisedGame();
 
             game = game.SetDifficulty(eventLog, Difficulty.Normal);
             game = game.SetInfectionRate(eventLog, 2);

@@ -25,8 +25,7 @@ namespace pandemic.Aggregates
 
         private static readonly Board Board = new();
 
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
-            events.Aggregate(new PandemicGame(), ApplyEvent);
+        public static PandemicGame CreateUninitialisedGame() => new ();
 
         // oh god I'm using regions! what have I become...
         #region Commands
