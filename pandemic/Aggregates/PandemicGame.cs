@@ -94,15 +94,9 @@ namespace pandemic.Aggregates
         private static PandemicGame PickUpCard(Player player, PandemicGame currentState, ICollection<IEvent> events)
         {
             // todo: pick up cards from player draw pile here
-            var (asdf, newEvents) = currentState.ApplyEvents(
-                new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")));
-
-            currentState = asdf;
-            foreach (var @event in newEvents)
-            {
-                events.Add(@event);
-            }
-
+            currentState = currentState.ApplyEvent(
+                new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")),
+                events);
             return currentState;
         }
 
