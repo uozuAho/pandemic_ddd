@@ -75,6 +75,13 @@ namespace pandemic.Aggregates
             var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
             // todo: extract to method
+            currentState = DoStuffAfterActions(role, player, currentState, events);
+
+            return (currentState, events);
+        }
+
+        private PandemicGame DoStuffAfterActions(Role role, Player player, PandemicGame currentState, ICollection<IEvent> events)
+        {
             if (player.ActionsRemaining == 1)
             {
                 // todo: pick up cards from player draw pile here
@@ -92,11 +99,10 @@ namespace pandemic.Aggregates
                 currentState = InfectCity(currentState, events);
             }
 
-            return (currentState, events);
+            return currentState;
         }
 
-        // todo: can this be private?
-        public PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        private PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
         {
             var infectionCard = state.InfectionDrawPile.Last();
             state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
