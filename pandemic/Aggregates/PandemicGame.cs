@@ -74,28 +74,33 @@ namespace pandemic.Aggregates
 
             var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
-            currentState = DoStuffAfterActions(player, currentState, events);
+            if (player.ActionsRemaining == 1)
+                currentState = DoStuffAfterActions(player, currentState, events);
 
             return (currentState, events);
         }
 
         private PandemicGame DoStuffAfterActions(Player player, PandemicGame currentState, ICollection<IEvent> events)
         {
-            if (player.ActionsRemaining == 1)
+            currentState = PickUpCard(player, currentState, events);
+
+            currentState = InfectCity(currentState, events);
+            currentState = InfectCity(currentState, events);
+
+            return currentState;
+        }
+
+        private static PandemicGame PickUpCard(Player player, PandemicGame currentState, ICollection<IEvent> events)
+        {
+            // todo: pick up cards from player draw pile here
+            var (asdf, newEvents) = currentState.ApplyEvents(
+                new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")),
+                new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")));
+
+            currentState = asdf;
+            foreach (var @event in newEvents)
             {
-                // todo: pick up cards from player draw pile here
-                var (asdf, newEvents) = currentState.ApplyEvents(
-                    new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")),
-                    new PlayerCardPickedUp(player.Role, new PlayerCard("Atlanta")));
-
-                currentState = asdf;
-                foreach (var @event in newEvents)
-                {
-                    events.Add(@event);
-                }
-
-                currentState = InfectCity(currentState, events);
-                currentState = InfectCity(currentState, events);
+                events.Add(@event);
             }
 
             return currentState;
