@@ -80,6 +80,7 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
+        // todo: I still reckon this can be refactored further
         private PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
         {
             currentState = PickUpCard(currentState, events);
