@@ -14,10 +14,9 @@ namespace pandemic.test
         [TestCase("Washington")]
         public void Drive_or_ferry_player(string toCity)
         {
-            var eventLog = CreateNewGame();
-            var state = PandemicGame.FromEvents(eventLog);
+            var state = CreateNewGame();
 
-            state = PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, toCity);
+            state = PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, toCity);
 
             Assert.AreEqual(toCity, state.PlayerByRole(Role.Medic).Location);
         }
@@ -25,21 +24,19 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_garbage_city_throws()
         {
-            var eventLog = CreateNewGame();
-            var state = PandemicGame.FromEvents(eventLog);
+            var state = CreateNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
-                PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "fasdfasdf"));
+                PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, "fasdfasdf"));
         }
 
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
-            var eventLog = CreateNewGame();
-            var state = PandemicGame.FromEvents(eventLog);
+            var state = CreateNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
-                PandemicGame.DriveOrFerryPlayer(state, eventLog, Role.Medic, "Beijing"));
+                PandemicGame.DriveOrFerryPlayer(state, new List<IEvent>(), Role.Medic, "Beijing"));
         }
 
         [Test]
@@ -91,7 +88,7 @@ namespace pandemic.test
             }
         }
 
-        private static List<IEvent> CreateNewGame()
+        private static PandemicGame CreateNewGame()
         {
             var eventLog = new List<IEvent>();
             var game = PandemicGame.FromEvents(eventLog);
@@ -101,7 +98,7 @@ namespace pandemic.test
             game = game.SetOutbreakCounter(eventLog, 0);
             game = game.AddPlayer(eventLog, Role.Medic);
 
-            return eventLog;
+            return game;
         }
     }
 }
