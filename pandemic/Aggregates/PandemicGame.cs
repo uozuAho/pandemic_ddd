@@ -57,7 +57,7 @@ namespace pandemic.Aggregates
             return ApplyEvents(new PlayerAdded(role));
         }
 
-        public PandemicGame DriveOrFerryPlayer(ICollection<IEvent> events, Role role, string city)
+        public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
@@ -72,20 +72,30 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            var newState = ApplyEvent(new PlayerMoved(role, city), events);
+            var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
+            // todo: extract to method
             if (player.ActionsRemaining == 1)
             {
                 // todo: pick up cards from player draw pile here
-                newState = newState.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
-                newState = newState.ApplyEvent(new PlayerCardPickedUp(role, new PlayerCard("Atlanta")), events);
-                newState = InfectCity(newState, events);
-                newState = InfectCity(newState, events);
+                var (asdf, newEvents) = currentState.ApplyEvents(
+                    new PlayerCardPickedUp(role, new PlayerCard("Atlanta")),
+                    new PlayerCardPickedUp(role, new PlayerCard("Atlanta")));
+
+                currentState = asdf;
+                foreach (var @event in newEvents)
+                {
+                    events.Add(@event);
+                }
+
+                currentState = InfectCity(currentState, events);
+                currentState = InfectCity(currentState, events);
             }
 
-            return newState;
+            return (currentState, events);
         }
 
+        // todo: can this be private?
         public PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
         {
             var infectionCard = state.InfectionDrawPile.Last();
@@ -99,7 +109,7 @@ namespace pandemic.Aggregates
         private (PandemicGame, ICollection<IEvent>) ApplyEvents(params IEvent[] events)
         {
             var state = events.Aggregate(this, ApplyEvent);
-            return (state, events);
+            return (state, events.ToList());
         }
 
         private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)

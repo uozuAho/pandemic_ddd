@@ -16,7 +16,7 @@ namespace pandemic.test
         {
             var game = GameBuilder.InitialiseNewGame();
 
-            game = game.DriveOrFerryPlayer(new List<IEvent>(), Role.Medic, toCity);
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, toCity);
 
             Assert.AreEqual(toCity, game.PlayerByRole(Role.Medic).Location);
         }
@@ -27,7 +27,7 @@ namespace pandemic.test
             var game = GameBuilder.InitialiseNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
-                game.DriveOrFerryPlayer(new List<IEvent>(), Role.Medic, "fasdfasdf"));
+                game.DriveOrFerryPlayer(Role.Medic, "fasdfasdf"));
         }
 
         [Test]
@@ -36,19 +36,18 @@ namespace pandemic.test
             var game = GameBuilder.InitialiseNewGame();
 
             Assert.Throws<InvalidActionException>(() =>
-                game.DriveOrFerryPlayer(new List<IEvent>(), Role.Medic, "Beijing"));
+                game.DriveOrFerryPlayer(Role.Medic, "Beijing"));
         }
 
         [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = GameBuilder.InitialiseNewGame();
-            var events = new List<IEvent>();
 
-            var game = startingState.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
+            var (game, _) = startingState.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.AreEqual(startingState.CurrentPlayer.Hand.Count + 2, game.CurrentPlayer.Hand.Count);
         }
@@ -57,27 +56,25 @@ namespace pandemic.test
         public void Player_attempts_fifth_action_throws()
         {
             var game = GameBuilder.InitialiseNewGame();
-            var events = new List<IEvent>();
 
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DriveOrFerryPlayer(events, Role.Medic, "Chicago"));
+                game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
         }
 
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
             var startingState = GameBuilder.InitialiseNewGame();
-            var events = new List<IEvent>();
 
-            var game = startingState.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Chicago");
-            game = game.DriveOrFerryPlayer(events, Role.Medic, "Atlanta");
+            var (game, _) = startingState.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(2, game.InfectionDiscardPile.Count);
