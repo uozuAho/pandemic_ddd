@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
@@ -81,8 +83,28 @@ namespace pandemic.test
 
             foreach (var infectionCard in game.InfectionDiscardPile.TakeLast(2))
             {
-                Assert.AreEqual(1, game.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour]);
+                Assert.AreEqual(1, game.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour],
+                    $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
+
+            Assert.AreEqual(24 * 4 - 2, game.Cubes.Values.Sum(), "2 cubes should have been removed from cube pile");
+        }
+
+        [Test]
+        public void Game_ends_when_cubes_run_out()
+        {
+            var game = GameBuilder.InitialiseNewGame() with
+            {
+                Cubes = Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0)
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            Assert.IsTrue(game.IsOver);
+            Assert.AreEqual(1, game.InfectionDiscardPile.Count);
         }
     }
 }

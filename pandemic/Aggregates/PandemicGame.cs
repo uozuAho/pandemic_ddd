@@ -19,6 +19,9 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
+        public bool IsOver { get; init; } = false;
+        public ImmutableDictionary<Colour, int> Cubes { get; init; } =
+            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
@@ -59,6 +62,8 @@ namespace pandemic.Aggregates
 
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
+            ThrowIfGameOver(this);
+
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
             var player = PlayerByRole(role);
@@ -80,33 +85,48 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        private static PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
+        private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
-            currentState = PickUpCard(currentState, events);
-            currentState = PickUpCard(currentState, events);
+            ThrowIfGameOver(game);
 
-            currentState = InfectCity(currentState, events);
-            currentState = InfectCity(currentState, events);
+            game = PickUpCard(game, events);
+            game = PickUpCard(game, events);
 
-            return currentState;
+            game = InfectCity(game, events);
+
+            if (!game.IsOver) game = InfectCity(game, events);
+
+            return game;
         }
 
-        private static PandemicGame PickUpCard(PandemicGame currentState, ICollection<IEvent> events)
+        private static PandemicGame PickUpCard(PandemicGame game, ICollection<IEvent> events)
         {
+            ThrowIfGameOver(game);
+
             // todo: pick up cards from player draw pile here
-            currentState = currentState.ApplyEvent(
-                new PlayerCardPickedUp(currentState.CurrentPlayer.Role, new PlayerCard("Atlanta")),
+            game = game.ApplyEvent(
+                new PlayerCardPickedUp(game.CurrentPlayer.Role, new PlayerCard("Atlanta")),
                 events);
-            return currentState;
+            return game;
         }
 
-        private static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
-            var infectionCard = state.InfectionDrawPile.Last();
-            state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
-            state = state.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-            return state;
+            ThrowIfGameOver(game);
+
+            var infectionCard = game.InfectionDrawPile.Last();
+            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+
+            return game.Cubes[infectionCard.City.Colour] == 0
+                ? game.ApplyEvent(new GameOverEvent(), events)
+                : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
         }
+
+        private static void ThrowIfGameOver(PandemicGame game)
+        {
+            if (game.IsOver) throw new GameRuleViolatedException("Game is over!");
+        }
+
         #endregion
 
         #region Events
@@ -135,6 +155,7 @@ namespace pandemic.Aggregates
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
+                GameOverEvent g => game with { IsOver = true },
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
@@ -156,7 +177,8 @@ namespace pandemic.Aggregates
 
             return game with
             {
-                Cities = game.Cities.Replace(city, newCity)
+                Cities = game.Cities.Replace(city, newCity),
+                Cubes = game.Cubes.SetItem(colour, game.Cubes[colour] - 1)
             };
         }
 

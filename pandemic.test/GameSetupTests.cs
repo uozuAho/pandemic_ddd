@@ -17,6 +17,7 @@ namespace pandemic.test
             Assert.AreEqual(1, state.Players.Count);
             Assert.AreEqual(48, state.InfectionDrawPile.Count);
             Assert.AreEqual(0, state.InfectionDiscardPile.Count);
+            Assert.IsFalse(state.IsOver);
         }
     }
 }
