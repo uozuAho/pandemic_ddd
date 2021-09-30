@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
@@ -91,7 +93,10 @@ namespace pandemic.test
         [Test]
         public void Game_ends_when_cubes_run_out()
         {
-            var game = GameBuilder.InitialiseNewGame();
+            var game = GameBuilder.InitialiseNewGame() with
+            {
+                Cubes = Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0)
+            };
 
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");

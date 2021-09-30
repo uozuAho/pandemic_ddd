@@ -19,7 +19,7 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
-        public bool IsOver { get; } = true;
+        public bool IsOver { get; } = false;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
