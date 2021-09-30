@@ -30,6 +30,9 @@ namespace pandemic.Aggregates
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
+        // todo: use the game builder here?
+        public static PandemicGame CreateNewGame() => new();
+
         // oh god I'm using regions! what have I become...
         #region Commands
         public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
