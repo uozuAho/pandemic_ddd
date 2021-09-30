@@ -19,7 +19,7 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
-        public bool IsOver { get; } = false;
+        public bool IsOver { get; init; } = false;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
@@ -103,12 +103,18 @@ namespace pandemic.Aggregates
             return currentState;
         }
 
-        private static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
-            var infectionCard = state.InfectionDrawPile.Last();
-            state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
-            state = state.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-            return state;
+            var infectionCard = game.InfectionDrawPile.Last();
+            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+
+            if (game.Cubes[infectionCard.City.Colour] == 0)
+            {
+                game = game.ApplyEvent(new GameOverEvent(), events);
+            }
+
+            game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+            return game;
         }
         #endregion
 
@@ -138,6 +144,7 @@ namespace pandemic.Aggregates
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
+                GameOverEvent g => game with { IsOver = true },
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }

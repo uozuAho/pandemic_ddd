@@ -104,6 +104,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.IsTrue(game.IsOver);
+            // Assert.AreEqual(1, game.InfectionDiscardPile.Count);
         }
     }
 }
