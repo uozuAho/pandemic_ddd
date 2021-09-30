@@ -7,7 +7,7 @@ namespace pandemic.test
     internal class PandemicGameImmutabilityTests
     {
         [Test]
-        public void Games_from_same_events_are_not_same()
+        public void Applying_command_returns_cloned_state()
         {
             var game1 = PandemicGame.CreateUninitialisedGame();
             var (game2, _) = game1.AddPlayer(Role.Medic);

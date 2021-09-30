@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using pandemic.Aggregates;
 using pandemic.test.Utils;
 using pandemic.Values;
 
