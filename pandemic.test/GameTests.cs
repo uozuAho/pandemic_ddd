@@ -84,5 +84,18 @@ namespace pandemic.test
                 Assert.AreEqual(1, game.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour]);
             }
         }
+
+        [Test]
+        public void Game_ends_when_cubes_run_out()
+        {
+            var game = GameBuilder.InitialiseNewGame();
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            Assert.IsTrue(game.IsOver);
+        }
     }
 }
