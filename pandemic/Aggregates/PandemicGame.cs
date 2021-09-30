@@ -62,6 +62,8 @@ namespace pandemic.Aggregates
 
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
+            ThrowIfGameOver(this);
+
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
             var player = PlayerByRole(role);
@@ -85,6 +87,8 @@ namespace pandemic.Aggregates
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
+            ThrowIfGameOver(game);
+
             game = PickUpCard(game, events);
             game = PickUpCard(game, events);
 
@@ -95,18 +99,19 @@ namespace pandemic.Aggregates
             return game;
         }
 
-        private static PandemicGame PickUpCard(PandemicGame currentState, ICollection<IEvent> events)
+        private static PandemicGame PickUpCard(PandemicGame game, ICollection<IEvent> events)
         {
+            ThrowIfGameOver(game);
+
             // todo: pick up cards from player draw pile here
-            currentState = currentState.ApplyEvent(
-                new PlayerCardPickedUp(currentState.CurrentPlayer.Role, new PlayerCard("Atlanta")),
+            game = game.ApplyEvent(
+                new PlayerCardPickedUp(game.CurrentPlayer.Role, new PlayerCard("Atlanta")),
                 events);
-            return currentState;
+            return game;
         }
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
-            // todo: add to all commands
             ThrowIfGameOver(game);
 
             var infectionCard = game.InfectionDrawPile.Last();
