@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using pandemic.Aggregates;
 using pandemic.test.Utils;
 using pandemic.Values;
 
@@ -10,7 +9,7 @@ namespace pandemic.test
         [Test]
         public void Do_all_the_stuff_to_start_a_game()
         {
-            var state = PandemicGame.FromEvents(GameBuilder.InitialiseNewGame());
+            var state = GameBuilder.InitialiseNewGame();
 
             Assert.AreEqual(Difficulty.Normal, state.Difficulty);
             Assert.AreEqual(2, state.InfectionRate);

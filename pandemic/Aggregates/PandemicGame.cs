@@ -25,45 +25,43 @@ namespace pandemic.Aggregates
 
         private static readonly Board Board = new();
 
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
-            events.Aggregate(new PandemicGame(), ApplyEvent);
+        public static PandemicGame CreateUninitialisedGame() => new ();
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public static IEnumerable<IEvent> SetDifficulty(List<IEvent> log, Difficulty difficulty)
+        public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
         {
-            yield return new DifficultySet(difficulty);
+            return ApplyEvents(new DifficultySet(difficulty));
         }
 
-        public static IEnumerable<IEvent> SetInfectionRate(List<IEvent> log, int rate)
+        public (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
         {
-            yield return new InfectionRateSet(rate);
+            return ApplyEvents(new InfectionRateSet(rate));
         }
 
-        public static IEnumerable<IEvent> SetOutbreakCounter(List<IEvent> log, int value)
+        public (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
         {
-            yield return new OutbreakCounterSet(value);
+            return ApplyEvents(new OutbreakCounterSet(value));
         }
 
-        public static IEnumerable<IEvent> SetupInfectionDeck(List<IEvent> eventLog)
+        public (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
         {
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
-            yield return new InfectionDeckSetUp(unshuffledCities.ToImmutableList());
+            return ApplyEvents(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()));
         }
 
-        public static IEnumerable<IEvent> AddPlayer(List<IEvent> log, Role role)
+        public (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
         {
-            yield return new PlayerAdded(role);
+            return ApplyEvents(new PlayerAdded(role));
         }
 
-        public static IEnumerable<IEvent> DriveOrFerryPlayer(List<IEvent> log, Role role, string city)
+        public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
-            var state = FromEvents(log);
-            var player = state.PlayerByRole(role);
+            var player = PlayerByRole(role);
 
             if (player.ActionsRemaining == 0)
                 throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
@@ -74,34 +72,56 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            yield return new PlayerMoved(role, city);
+            var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
             if (player.ActionsRemaining == 1)
-            {
-                // todo: pick up cards from player draw pile here
-                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                yield return new PlayerCardPickedUp(role, new PlayerCard("Atlanta"));
-                foreach (var @event in InfectCity(log))
-                {
-                    yield return @event;
-                }
-                foreach (var @event in InfectCity(log))
-                {
-                    yield return @event;
-                }
-            }
+                currentState = DoStuffAfterActions(currentState, events);
+
+            return (currentState, events);
         }
 
-        public static IEnumerable<IEvent> InfectCity(List<IEvent> log)
+        private static PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
         {
-            var state = FromEvents(log);
+            currentState = PickUpCard(currentState, events);
+            currentState = PickUpCard(currentState, events);
+
+            currentState = InfectCity(currentState, events);
+            currentState = InfectCity(currentState, events);
+
+            return currentState;
+        }
+
+        private static PandemicGame PickUpCard(PandemicGame currentState, ICollection<IEvent> events)
+        {
+            // todo: pick up cards from player draw pile here
+            currentState = currentState.ApplyEvent(
+                new PlayerCardPickedUp(currentState.CurrentPlayer.Role, new PlayerCard("Atlanta")),
+                events);
+            return currentState;
+        }
+
+        private static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        {
             var infectionCard = state.InfectionDrawPile.Last();
-            yield return new InfectionCardDrawn(infectionCard.City);
-            yield return new CubeAddedToCity(infectionCard.City);
+            state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+            state = state.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+            return state;
         }
         #endregion
 
         #region Events
+        private (PandemicGame, ICollection<IEvent>) ApplyEvents(params IEvent[] events)
+        {
+            var state = events.Aggregate(this, ApplyEvent);
+            return (state, events.ToList());
+        }
+
+        private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
+        {
+            events.Add(@event);
+            return ApplyEvent(this, @event);
+        }
+
         private static PandemicGame ApplyEvent(PandemicGame game, IEvent @event)
         {
             return @event switch
@@ -156,7 +176,7 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
         {
-            var newPlayers = pandemicGame.Players.Select(p => p).ToList();
+            var newPlayers = pandemicGame.Players.Select(p => p with { }).ToList();
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };

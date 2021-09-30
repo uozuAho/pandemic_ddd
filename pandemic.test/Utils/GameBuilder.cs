@@ -1,23 +1,21 @@
-using System.Collections.Generic;
 using pandemic.Aggregates;
-using pandemic.Events;
 using pandemic.Values;
 
 namespace pandemic.test.Utils
 {
     internal class GameBuilder
     {
-        public static List<IEvent> InitialiseNewGame()
+        public static PandemicGame InitialiseNewGame()
         {
-            var eventLog = new List<IEvent>();
+            var game = PandemicGame.CreateUninitialisedGame();
 
-            eventLog.AddRange(PandemicGame.SetDifficulty(eventLog, Difficulty.Normal));
-            eventLog.AddRange(PandemicGame.SetInfectionRate(eventLog, 2));
-            eventLog.AddRange(PandemicGame.SetOutbreakCounter(eventLog, 0));
-            eventLog.AddRange(PandemicGame.SetupInfectionDeck(eventLog));
-            eventLog.AddRange(PandemicGame.AddPlayer(eventLog, Role.Medic));
+            (game, _) = game.SetDifficulty(Difficulty.Normal);
+            (game, _) = game.SetInfectionRate(2);
+            (game, _) = game.SetOutbreakCounter(0);
+            (game, _) = game.SetupInfectionDeck();
+            (game, _) = game.AddPlayer(Role.Medic);
 
-            return eventLog;
+            return game;
         }
     }
 }
