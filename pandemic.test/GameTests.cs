@@ -81,8 +81,11 @@ namespace pandemic.test
 
             foreach (var infectionCard in game.InfectionDiscardPile.TakeLast(2))
             {
-                Assert.AreEqual(1, game.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour]);
+                Assert.AreEqual(1, game.CityByName(infectionCard.City.Name).Cubes[infectionCard.City.Colour],
+                    $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
+
+            Assert.AreEqual(24 * 4 - 2, game.Cubes.Values.Sum(), "2 cubes should have been removed from cube pile");
         }
 
         [Test]

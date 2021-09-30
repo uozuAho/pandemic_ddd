@@ -20,6 +20,8 @@ namespace pandemic.Aggregates
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
         public bool IsOver { get; } = true;
+        public ImmutableDictionary<Colour, int> Cubes { get; init; } =
+            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
@@ -157,7 +159,8 @@ namespace pandemic.Aggregates
 
             return game with
             {
-                Cities = game.Cities.Replace(city, newCity)
+                Cities = game.Cities.Replace(city, newCity),
+                Cubes = game.Cubes.SetItem(colour, game.Cubes[colour] - 1)
             };
         }
 
