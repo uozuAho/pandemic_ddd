@@ -80,8 +80,7 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        // todo: I still reckon this can be refactored further
-        private PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
+        private static PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
         {
             currentState = PickUpCard(currentState, events);
             currentState = PickUpCard(currentState, events);
@@ -101,7 +100,7 @@ namespace pandemic.Aggregates
             return currentState;
         }
 
-        private PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
+        private static PandemicGame InfectCity(PandemicGame state, ICollection<IEvent> events)
         {
             var infectionCard = state.InfectionDrawPile.Last();
             state = state.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
