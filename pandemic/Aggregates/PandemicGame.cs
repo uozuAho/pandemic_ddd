@@ -83,15 +83,16 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        private static PandemicGame DoStuffAfterActions(PandemicGame currentState, ICollection<IEvent> events)
+        private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
-            currentState = PickUpCard(currentState, events);
-            currentState = PickUpCard(currentState, events);
+            game = PickUpCard(game, events);
+            game = PickUpCard(game, events);
 
-            currentState = InfectCity(currentState, events);
-            currentState = InfectCity(currentState, events);
+            game = InfectCity(game, events);
 
-            return currentState;
+            if (!game.IsOver) game = InfectCity(game, events);
+
+            return game;
         }
 
         private static PandemicGame PickUpCard(PandemicGame currentState, ICollection<IEvent> events)
@@ -105,17 +106,22 @@ namespace pandemic.Aggregates
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
+            // todo: add to all commands
+            ThrowIfGameOver(game);
+
             var infectionCard = game.InfectionDrawPile.Last();
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
 
-            if (game.Cubes[infectionCard.City.Colour] == 0)
-            {
-                game = game.ApplyEvent(new GameOverEvent(), events);
-            }
-
-            game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-            return game;
+            return game.Cubes[infectionCard.City.Colour] == 0
+                ? game.ApplyEvent(new GameOverEvent(), events)
+                : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
         }
+
+        private static void ThrowIfGameOver(PandemicGame game)
+        {
+            if (game.IsOver) throw new GameRuleViolatedException("Game is over!");
+        }
+
         #endregion
 
         #region Events
