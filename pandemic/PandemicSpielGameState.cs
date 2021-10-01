@@ -9,7 +9,7 @@ namespace pandemic
     /// </summary>
     public class PandemicSpielGameState
     {
-        private readonly PandemicGame _game;
+        private PandemicGame _game;
         private readonly PlayerMoveGenerator _moveGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
@@ -18,6 +18,11 @@ namespace pandemic
         }
 
         public bool IsTerminal => _game.IsOver;
+
+        public override string ToString()
+        {
+            return _game.ToString();
+        }
 
         public IEnumerable<int> LegalActionsInt()
         {
@@ -44,6 +49,12 @@ namespace pandemic
 
         public void ApplyAction(PlayerMove action)
         {
+            switch (action.MoveType)
+            {
+                case MoveType.DriveOrFerry:
+                    (_game, _) = _game.DriveOrFerryPlayer(action.Role, action.City);
+                    break;
+            }
         }
     }
 }

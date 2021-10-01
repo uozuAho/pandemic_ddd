@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Newtonsoft.Json;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -30,8 +31,33 @@ namespace pandemic.Aggregates
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
-        // todo: use the game builder here?
-        public static PandemicGame CreateNewGame() => new();
+        public static (PandemicGame, IList<IEvent>) CreateNewGame(NewGameOptions options)
+        {
+            var game = CreateUninitialisedGame();
+            var events = new List<IEvent>();
+            ICollection<IEvent> tempEvents;
+
+            (game, tempEvents) = game.SetDifficulty(options.Difficulty);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetInfectionRate(2);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetOutbreakCounter(0);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetupInfectionDeck();
+            events.AddRange(tempEvents);
+            foreach (var role in options.Roles)
+            {
+                (game, tempEvents) = game.AddPlayer(role);
+                events.AddRange(tempEvents);
+            }
+
+            return (game, events);
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
 
         // oh god I'm using regions! what have I become...
         #region Commands
