@@ -13,10 +13,7 @@ namespace pandemic.test
         public void PlaysGameToCompletion()
         {
             var random = new Random();
-            var options = new NewGameOptions(Difficulty.Introductory, new []
-            {
-                Role.Medic
-            });
+            var options = new NewGameOptions {Difficulty = Difficulty.Introductory, Roles = new[] {Role.Medic}};
             var (game, events) = PandemicGame.CreateNewGame(options);
             var state = new PandemicSpielGameState(game);
 

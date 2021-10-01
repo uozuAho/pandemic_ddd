@@ -125,6 +125,8 @@ namespace pandemic.Aggregates
 
             if (!game.IsOver) game = InfectCity(game, events);
 
+            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+
             return game;
         }
 
@@ -185,6 +187,7 @@ namespace pandemic.Aggregates
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameOverEvent g => game with { IsOver = true },
+                TurnEnded t => game with{CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count},
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }

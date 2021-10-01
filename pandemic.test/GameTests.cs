@@ -106,5 +106,23 @@ namespace pandemic.test
             Assert.IsTrue(game.IsOver);
             Assert.AreEqual(1, game.InfectionDiscardPile.Count);
         }
+
+        [Test]
+        public void Next_player_turn_after_infect_cities()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            Assert.AreEqual(Role.Scientist, game.CurrentPlayer.Role);
+            Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
+        }
     }
 }
