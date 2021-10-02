@@ -154,13 +154,13 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
             if (game.InfectionDrawPile.Count == 0)
-                return game.ApplyEvent(new GameOverEvent(), events);
+                return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
 
             var infectionCard = game.InfectionDrawPile.Last();
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
 
             return game.Cubes[infectionCard.City.Colour] == 0
-                ? game.ApplyEvent(new GameOverEvent(), events)
+                ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
                 : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
         }
 
@@ -197,7 +197,7 @@ namespace pandemic.Aggregates
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
-                GameOverEvent g => game with { IsOver = true },
+                GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
