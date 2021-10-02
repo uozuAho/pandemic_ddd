@@ -37,8 +37,7 @@ namespace pandemic.test
 
             var builtFromEvents = PandemicGame.FromEvents(events);
 
-            // todo: fails. are immutable lists compared by reference?
-            Assert.AreEqual(state.Game, builtFromEvents);
+            Assert.IsTrue(state.Game.IsSameStateAs(builtFromEvents));
         }
 
         private static T RandomChoice<T>(IEnumerable<T> items, Random random)

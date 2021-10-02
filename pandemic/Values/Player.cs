@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace pandemic.Values
 {
@@ -8,5 +10,32 @@ namespace pandemic.Values
         public string Location { get; init; } = "Atlanta";
         public ImmutableList<PlayerCard> Hand { get; init; } = ImmutableList<PlayerCard>.Empty;
         public int ActionsRemaining { get; init; } = 4;
+
+        public bool IsSameStateAs(Player other)
+        {
+            if (Role != other.Role) return false;
+            if (Location != other.Location) return false;
+            if (!Hand.SequenceEqual(other.Hand)) return false;
+            if (ActionsRemaining != other.ActionsRemaining) return false;
+
+            return true;
+        }
+
+        public static IEqualityComparer<Player> DefaultEqualityComparer = new PlayerComparer();
+    }
+
+    internal class PlayerComparer : IEqualityComparer<Player>
+    {
+        public bool Equals(Player? x, Player? y)
+        {
+            if (x == null || y == null) return false;
+
+            return x.IsSameStateAs(y);
+        }
+
+        public int GetHashCode(Player obj)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

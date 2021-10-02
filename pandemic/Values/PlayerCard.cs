@@ -1,4 +1,12 @@
 namespace pandemic.Values
 {
-    public record PlayerCard(string City);
+    public struct PlayerCard
+    {
+        public PlayerCard(string city)
+        {
+            City = city;
+        }
+
+        public string City;
+    }
 }
