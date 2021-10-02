@@ -1,15 +1,11 @@
 using System.Collections.Generic;
 using pandemic.Aggregates;
-using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic
 {
     class PlayerMoveGenerator
     {
-        // todo: should this be part of the game, and not static?
-        private static readonly StandardGameBoard Board = new();
-
         /// <summary>
         /// Determines available 'moves' from the given game state. 'Moves' are any
         /// game action that requires a player to do something, eg:
@@ -23,7 +19,7 @@ namespace pandemic
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
-                foreach (var city in Board.AdjacentCities[game.CurrentPlayer.Location])
+                foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
                     yield return new PlayerMove(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
                 }

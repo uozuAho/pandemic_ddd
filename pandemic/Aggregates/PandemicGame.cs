@@ -14,7 +14,7 @@ namespace pandemic.Aggregates
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public ImmutableList<City> Cities { get; init; } = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+        public ImmutableList<City> Cities { get; init; }
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
@@ -26,7 +26,12 @@ namespace pandemic.Aggregates
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
-        private static readonly StandardGameBoard Board = new();
+        public readonly StandardGameBoard Board = new();
+
+        private PandemicGame()
+        {
+            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+        }
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
