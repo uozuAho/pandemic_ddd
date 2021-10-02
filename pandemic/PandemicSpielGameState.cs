@@ -11,19 +11,19 @@ namespace pandemic
     /// </summary>
     public class PandemicSpielGameState
     {
-        private PandemicGame _game;
+        public PandemicGame Game;
         private readonly PlayerMoveGenerator _moveGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
         {
-            _game = game;
+            Game = game;
         }
 
-        public bool IsTerminal => _game.IsOver;
+        public bool IsTerminal => Game.IsOver;
 
         public override string ToString()
         {
-            return _game.ToString();
+            return Game.ToString();
         }
 
         public IEnumerable<int> LegalActionsInt()
@@ -36,7 +36,7 @@ namespace pandemic
 
         public IEnumerable<PlayerMove> LegalActions()
         {
-            return _moveGenerator.LegalMoves(_game);
+            return _moveGenerator.LegalMoves(Game);
         }
 
         public string ActionToString(int currentPlayer, int action)
@@ -55,7 +55,7 @@ namespace pandemic
             {
                 case MoveType.DriveOrFerry:
                     IEnumerable<IEvent> events;
-                    (_game, events) = _game.DriveOrFerryPlayer(action.Role, action.City);
+                    (Game, events) = Game.DriveOrFerryPlayer(action.Role, action.City);
                     return events;
                 default:
                     throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
