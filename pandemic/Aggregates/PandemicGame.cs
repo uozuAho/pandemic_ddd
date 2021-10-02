@@ -148,6 +148,8 @@ namespace pandemic.Aggregates
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
+            if (game.InfectionDrawPile.Count == 0)
+                return game.ApplyEvent(new GameOverEvent(), events);
 
             var infectionCard = game.InfectionDrawPile.Last();
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
