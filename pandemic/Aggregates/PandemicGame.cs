@@ -10,16 +10,16 @@ namespace pandemic.Aggregates
 {
     public record PandemicGame
     {
+        public bool IsOver { get; init; } = false;
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
+        public Player CurrentPlayer => Players[CurrentPlayerIdx];
+        public int CurrentPlayerIdx { get; init; } = 0;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
-        public Player CurrentPlayer => Players[CurrentPlayerIdx];
-        public int CurrentPlayerIdx { get; init; } = 0;
-        public bool IsOver { get; init; } = false;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
@@ -33,7 +33,28 @@ namespace pandemic.Aggregates
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
         }
 
+        public bool IsSameStateAs(PandemicGame other)
+        {
+            if (IsOver != other.IsOver) return false;
+            if (Difficulty != other.Difficulty) return false;
+            if (InfectionRate != other.InfectionRate) return false;
+            if (OutbreakCounter != other.OutbreakCounter) return false;
+            if (CurrentPlayerIdx != other.CurrentPlayerIdx) return false;
+
+            // order is expected to be the same and significant (different order means not equal)
+            if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer)) return false;
+            if (!Cities.SequenceEqual(other.Cities, City.DefaultEqualityComparer)) return false;
+            if (!InfectionDrawPile.SequenceEqual(other.InfectionDrawPile)) return false;
+            if (!InfectionDiscardPile.SequenceEqual(other.InfectionDiscardPile)) return false;
+            if (!Cubes.SequenceEqual(other.Cubes)) return false;
+
+            return true;
+        }
+
         public static PandemicGame CreateUninitialisedGame() => new ();
+
+        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
+            events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
 
         public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
         {
