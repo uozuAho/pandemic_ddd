@@ -95,6 +95,7 @@ namespace pandemic.Aggregates
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
+            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
 
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 

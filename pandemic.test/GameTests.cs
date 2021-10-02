@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
-using pandemic.Events;
-using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -16,7 +13,11 @@ namespace pandemic.test
         [TestCase("Washington")]
         public void Drive_or_ferry_player(string toCity)
         {
-            var game = GameBuilder.InitialiseNewGame();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, toCity);
 
@@ -26,7 +27,11 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_garbage_city_throws()
         {
-            var game = GameBuilder.InitialiseNewGame();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
             Assert.Throws<InvalidActionException>(() =>
                 game.DriveOrFerryPlayer(Role.Medic, "fasdfasdf"));
@@ -35,7 +40,11 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
-            var game = GameBuilder.InitialiseNewGame();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
             Assert.Throws<InvalidActionException>(() =>
                 game.DriveOrFerryPlayer(Role.Medic, "Beijing"));
@@ -44,7 +53,11 @@ namespace pandemic.test
         [Test]
         public void Player_draws_two_cards_after_last_action()
         {
-            var startingState = GameBuilder.InitialiseNewGame();
+            var (startingState, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
             var (game, _) = startingState.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
@@ -57,7 +70,11 @@ namespace pandemic.test
         [Test]
         public void Player_attempts_fifth_action_throws()
         {
-            var game = GameBuilder.InitialiseNewGame();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
 
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
@@ -71,7 +88,11 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var startingState = GameBuilder.InitialiseNewGame();
+            var (startingState, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
             var (game, _) = startingState.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
@@ -93,7 +114,12 @@ namespace pandemic.test
         [Test]
         public void Game_ends_when_cubes_run_out()
         {
-            var game = GameBuilder.InitialiseNewGame() with
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
             {
                 Cubes = Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0)
             };
