@@ -11,14 +11,14 @@ namespace pandemic.test
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
+                Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
             Assert.AreEqual(Difficulty.Normal, game.Difficulty);
             Assert.AreEqual(2, game.InfectionRate);
             Assert.AreEqual(0, game.OutbreakCounter);
-            Assert.AreEqual(1, game.Players.Count);
+            Assert.AreEqual(2, game.Players.Count);
             Assert.AreEqual(48, game.InfectionDrawPile.Count);
             Assert.AreEqual(0, game.InfectionDiscardPile.Count);
             Assert.IsFalse(game.IsOver);

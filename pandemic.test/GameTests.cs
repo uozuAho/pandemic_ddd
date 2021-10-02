@@ -64,7 +64,9 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
-            Assert.AreEqual(startingState.CurrentPlayer.Hand.Count + 2, game.CurrentPlayer.Hand.Count);
+            Assert.AreEqual(
+                startingState.PlayerByRole(Role.Medic).Hand.Count + 2,
+                game.PlayerByRole(Role.Medic).Hand.Count);
         }
 
         [Test]
