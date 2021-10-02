@@ -8,7 +8,7 @@ namespace pandemic
     class PlayerMoveGenerator
     {
         // todo: should this be part of the game, and not static?
-        private static readonly Board Board = new();
+        private static readonly StandardGameBoard Board = new();
 
         /// <summary>
         /// Determines available 'moves' from the given game state. 'Moves' are any
@@ -23,7 +23,7 @@ namespace pandemic
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
-                foreach (var city in Board.City(game.CurrentPlayer.Location).AdjacentCities)
+                foreach (var city in Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
                     yield return new PlayerMove(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
                 }

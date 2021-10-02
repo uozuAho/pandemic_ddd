@@ -4,33 +4,21 @@ using pandemic.Values;
 
 namespace pandemic.GameData
 {
-    public class Board
+    public class StandardGameBoard
     {
-        public Board()
-        {
-            foreach (var (city1, city2) in Edges)
-            {
-                CityLookup[city1].AdjacentCities.Add(city2);
-                CityLookup[city2].AdjacentCities.Add(city1);
-            }
-        }
-
         public bool IsCity(string city)
         {
             return CityLookup.ContainsKey(city);
         }
 
-        public bool IsAdjacent(string playerLocation, string city)
+        public bool IsAdjacent(string city1, string city2)
         {
-            return CityLookup[playerLocation].AdjacentCities.Contains(city);
+            return AdjacentCities[city1].Contains(city2);
         }
 
         public IEnumerable<CityData> Cities => _cities.Select(c => c);
 
-        public CityData City(string name)
-        {
-            return CityLookup[name];
-        }
+        public readonly Dictionary<string, List<string>> AdjacentCities = CreateAdjacencyLookup();
 
         private static readonly CityData[] _cities = {
             new CityData
@@ -373,5 +361,18 @@ namespace pandemic.GameData
         };
 
         private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
+
+        private static Dictionary<string, List<string>> CreateAdjacencyLookup()
+        {
+            var lookup = _cities.ToDictionary(c => c.Name, _ => new List<string>());
+
+            foreach (var (city1, city2) in Edges)
+            {
+                lookup[city1].Add(city2);
+                lookup[city2].Add(city1);
+            }
+
+            return lookup;
+        }
     }
 }

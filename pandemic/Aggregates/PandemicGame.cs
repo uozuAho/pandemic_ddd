@@ -26,7 +26,7 @@ namespace pandemic.Aggregates
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
-        private static readonly Board Board = new();
+        private static readonly StandardGameBoard Board = new();
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
