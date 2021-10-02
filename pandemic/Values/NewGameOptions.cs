@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using pandemic.Values;
 
-namespace pandemic.Aggregates
+namespace pandemic.Values
 {
     public record NewGameOptions
     {
