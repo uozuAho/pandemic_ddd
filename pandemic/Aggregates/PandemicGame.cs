@@ -30,7 +30,7 @@ namespace pandemic.Aggregates
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
-        public static (PandemicGame, IList<IEvent>) CreateNewGame(NewGameOptions options)
+        public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
         {
             var game = CreateUninitialisedGame();
             var events = new List<IEvent>();
@@ -190,7 +190,7 @@ namespace pandemic.Aggregates
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameOverEvent g => game with { IsOver = true },
-                TurnEnded t => game with{CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count},
+                TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
@@ -252,6 +252,15 @@ namespace pandemic.Aggregates
             };
 
             return pandemicGame with {Players = newPlayers.ToImmutableList()};
+        }
+
+        private static PandemicGame ApplyTurnEnded(PandemicGame game)
+        {
+            return game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
+                CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count
+            };
         }
         #endregion
     }

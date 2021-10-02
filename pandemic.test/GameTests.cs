@@ -121,6 +121,8 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
+            Assert.AreEqual(4, game.PlayerByRole(Role.Medic).ActionsRemaining,
+                "player whose turn ended should get their 'remaining actions' counter reset");
             Assert.AreEqual(Role.Scientist, game.CurrentPlayer.Role);
             Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
         }

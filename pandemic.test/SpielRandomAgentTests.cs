@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.Events;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -18,7 +19,9 @@ namespace pandemic.test
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] {Role.Medic, Role.Scientist}
             };
-            var (game, events) = PandemicGame.CreateNewGame(options);
+            PandemicGame game;
+            List<IEvent> events;
+            (game, events) = PandemicGame.CreateNewGame(options);
             var state = new PandemicSpielGameState(game);
 
             for (var i = 0; i < 1000 && !state.IsTerminal; i++)
@@ -26,10 +29,10 @@ namespace pandemic.test
                 var legalActions = state.LegalActions();
                 if (!legalActions.Any())
                 {
-                    Assert.Fail($"No legal actions! State: \n\n{state}");
+                    Assert.Fail($"No legal actions! State: \n\n{state}\n\n Events:\n{string.Join('\n', events)}");
                 }
                 var action = RandomChoice(state.LegalActions(), random);
-                state.ApplyAction(action);
+                events.AddRange(state.ApplyAction(action));
             }
 
             Assert.IsTrue(state.IsTerminal, "Expected to reach terminal state in under 1000 actions");
