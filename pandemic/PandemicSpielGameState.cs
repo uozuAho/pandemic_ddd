@@ -6,7 +6,8 @@ using pandemic.Events;
 namespace pandemic
 {
     /// <summary>
-    /// Provides an OpenSpiel compatible interface for playing Pandemic
+    /// Provides an OpenSpiel compatible interface for playing Pandemic.
+    /// Work in progress. See todos.
     /// </summary>
     public class PandemicSpielGameState
     {
