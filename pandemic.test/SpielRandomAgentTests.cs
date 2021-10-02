@@ -13,7 +13,11 @@ namespace pandemic.test
         public void PlaysGameToCompletion()
         {
             var random = new Random();
-            var options = new NewGameOptions {Difficulty = Difficulty.Introductory, Roles = new[] {Role.Medic}};
+            var options = new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            };
             var (game, events) = PandemicGame.CreateNewGame(options);
             var state = new PandemicSpielGameState(game);
 
@@ -22,7 +26,7 @@ namespace pandemic.test
                 var legalActions = state.LegalActions();
                 if (!legalActions.Any())
                 {
-                    Assert.Fail($"No legal actions! State: {state}");
+                    Assert.Fail($"No legal actions! State: \n\n{state}");
                 }
                 var action = RandomChoice(state.LegalActions(), random);
                 state.ApplyAction(action);

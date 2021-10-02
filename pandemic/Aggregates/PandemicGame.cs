@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Newtonsoft.Json;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -37,6 +36,10 @@ namespace pandemic.Aggregates
             var events = new List<IEvent>();
             ICollection<IEvent> tempEvents;
 
+            if (options.Roles.Count < 2 || options.Roles.Count > 4)
+                throw new GameRuleViolatedException(
+                    $"number of players must be between 2-4. Was given {options.Roles.Count}");
+
             (game, tempEvents) = game.SetDifficulty(options.Difficulty);
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetInfectionRate(2);
@@ -56,7 +59,7 @@ namespace pandemic.Aggregates
 
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
+            return PandemicGameStringRenderer.ToString(this);
         }
 
         // oh god I'm using regions! what have I become...

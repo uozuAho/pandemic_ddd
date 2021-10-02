@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using pandemic.Aggregates;
+using pandemic.Events;
 
 namespace pandemic
 {
@@ -47,13 +48,16 @@ namespace pandemic
             throw new NotImplementedException();
         }
 
-        public void ApplyAction(PlayerMove action)
+        public IEnumerable<IEvent> ApplyAction(PlayerMove action)
         {
             switch (action.MoveType)
             {
                 case MoveType.DriveOrFerry:
-                    (_game, _) = _game.DriveOrFerryPlayer(action.Role, action.City);
-                    break;
+                    IEnumerable<IEvent> events;
+                    (_game, events) = _game.DriveOrFerryPlayer(action.Role, action.City);
+                    return events;
+                default:
+                    throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
             }
         }
     }

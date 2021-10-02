@@ -6,6 +6,6 @@ namespace pandemic.Aggregates
     public record NewGameOptions
     {
         public Difficulty Difficulty { get; init; }
-        public IEnumerable<Role> Roles { get; init; } = new List<Role>();
+        public ICollection<Role> Roles { get; init; } = new List<Role>();
     }
 }
