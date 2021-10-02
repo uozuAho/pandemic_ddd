@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using pandemic.test.Utils;
+using pandemic.Aggregates;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -9,15 +9,19 @@ namespace pandemic.test
         [Test]
         public void Do_all_the_stuff_to_start_a_game()
         {
-            var state = GameBuilder.InitialiseNewGame();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Normal,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
 
-            Assert.AreEqual(Difficulty.Normal, state.Difficulty);
-            Assert.AreEqual(2, state.InfectionRate);
-            Assert.AreEqual(0, state.OutbreakCounter);
-            Assert.AreEqual(1, state.Players.Count);
-            Assert.AreEqual(48, state.InfectionDrawPile.Count);
-            Assert.AreEqual(0, state.InfectionDiscardPile.Count);
-            Assert.IsFalse(state.IsOver);
+            Assert.AreEqual(Difficulty.Normal, game.Difficulty);
+            Assert.AreEqual(2, game.InfectionRate);
+            Assert.AreEqual(0, game.OutbreakCounter);
+            Assert.AreEqual(2, game.Players.Count);
+            Assert.AreEqual(48, game.InfectionDrawPile.Count);
+            Assert.AreEqual(0, game.InfectionDiscardPile.Count);
+            Assert.IsFalse(game.IsOver);
         }
     }
 }

@@ -4,7 +4,7 @@ using pandemic.Values;
 
 namespace pandemic.GameData
 {
-    internal class Board
+    public class Board
     {
         public Board()
         {
@@ -26,6 +26,11 @@ namespace pandemic.GameData
         }
 
         public IEnumerable<CityData> Cities => _cities.Select(c => c);
+
+        public CityData City(string name)
+        {
+            return CityLookup[name];
+        }
 
         private static readonly CityData[] _cities = {
             new CityData

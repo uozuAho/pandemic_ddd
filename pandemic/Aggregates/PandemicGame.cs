@@ -30,6 +30,38 @@ namespace pandemic.Aggregates
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
+        public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
+        {
+            var game = CreateUninitialisedGame();
+            var events = new List<IEvent>();
+            ICollection<IEvent> tempEvents;
+
+            if (options.Roles.Count < 2 || options.Roles.Count > 4)
+                throw new GameRuleViolatedException(
+                    $"number of players must be between 2-4. Was given {options.Roles.Count}");
+
+            (game, tempEvents) = game.SetDifficulty(options.Difficulty);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetInfectionRate(2);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetOutbreakCounter(0);
+            events.AddRange(tempEvents);
+            (game, tempEvents) = game.SetupInfectionDeck();
+            events.AddRange(tempEvents);
+            foreach (var role in options.Roles)
+            {
+                (game, tempEvents) = game.AddPlayer(role);
+                events.AddRange(tempEvents);
+            }
+
+            return (game, events);
+        }
+
+        public override string ToString()
+        {
+            return PandemicGameStringRenderer.ToString(this);
+        }
+
         // oh god I'm using regions! what have I become...
         #region Commands
         public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
@@ -63,6 +95,7 @@ namespace pandemic.Aggregates
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
+            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
 
             if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
@@ -96,6 +129,8 @@ namespace pandemic.Aggregates
 
             if (!game.IsOver) game = InfectCity(game, events);
 
+            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+
             return game;
         }
 
@@ -113,6 +148,8 @@ namespace pandemic.Aggregates
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
+            if (game.InfectionDrawPile.Count == 0)
+                return game.ApplyEvent(new GameOverEvent(), events);
 
             var infectionCard = game.InfectionDrawPile.Last();
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
@@ -156,6 +193,7 @@ namespace pandemic.Aggregates
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameOverEvent g => game with { IsOver = true },
+                TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
         }
@@ -217,6 +255,15 @@ namespace pandemic.Aggregates
             };
 
             return pandemicGame with {Players = newPlayers.ToImmutableList()};
+        }
+
+        private static PandemicGame ApplyTurnEnded(PandemicGame game)
+        {
+            return game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
+                CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count
+            };
         }
         #endregion
     }
