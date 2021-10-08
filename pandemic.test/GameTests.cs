@@ -181,5 +181,6 @@ namespace pandemic.test
         }
 
         // todo: cities infected after player discards
+        // todo: discarded card goes to pile
     }
 }

@@ -90,6 +90,7 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
+        // todo: these setup commands dont need to be public
         public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
         {
             return ApplyEvents(new DifficultySet(difficulty));
@@ -142,6 +143,11 @@ namespace pandemic.Aggregates
                 currentState = DoStuffAfterActions(currentState, events);
 
             return (currentState, events);
+        }
+
+        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(Role role, string city)
+        {
+            return ApplyEvents(new PlayerCardDiscarded(role, city));
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
@@ -220,6 +226,7 @@ namespace pandemic.Aggregates
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
+                PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
@@ -253,6 +260,7 @@ namespace pandemic.Aggregates
             PandemicGame game,
             PlayerCardPickedUp playerCardPickedUp)
         {
+            // todo: make this shorter?
             var newPlayers = game.Players.Select(p => p).ToList();
             var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
             var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
@@ -261,6 +269,19 @@ namespace pandemic.Aggregates
             newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with { Hand = currentPlayerHand.ToImmutableList() };
 
             return game with {Players = newPlayers.ToImmutableList()};
+        }
+
+        private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
+        {
+            var discardedCard = game.CurrentPlayer.Hand.Single(c => c.City == discarded.City);
+
+            return game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Remove(discardedCard)
+                })
+            };
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)

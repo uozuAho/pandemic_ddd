@@ -7,13 +7,14 @@ namespace pandemic
     class PlayerMoveGenerator
     {
         /// <summary>
-        /// Determines available 'moves' from the given game state. 'Moves' are any
-        /// game action that requires a player to do something, eg:
+        /// Determines available 'player commands' from the given game state.
+        /// Player commands are any game action that requires a player to do
+        /// something, eg:
         /// - performing an action by their role
         /// - playing an event card
         /// - drawing player cards
         /// </summary>
-        public IEnumerable<PlayerMove> LegalMoves(PandemicGame game)
+        public IEnumerable<PlayerCommand> LegalMoves(PandemicGame game)
         {
             if (game.IsOver) yield break;
 
@@ -21,7 +22,15 @@ namespace pandemic
             {
                 foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
-                    yield return new PlayerMove(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
+                    yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
+                }
+            }
+
+            if (game.CurrentPlayer.Hand.Count > 7)
+            {
+                foreach (var card in game.CurrentPlayer.Hand)
+                {
+                    yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.Discard, card.City);
                 }
             }
         }
@@ -29,8 +38,9 @@ namespace pandemic
 
     public enum MoveType
     {
-        DriveOrFerry
+        DriveOrFerry,
+        Discard
     }
 
-    public record PlayerMove(Role Role, MoveType MoveType, string City);
+    public record PlayerCommand(Role Role, MoveType MoveType, string City);
 }
