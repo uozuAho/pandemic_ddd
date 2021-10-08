@@ -138,7 +138,7 @@ namespace pandemic.Aggregates
 
             var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
-            if (player.ActionsRemaining == 1)
+            if (currentState.CurrentPlayer.ActionsRemaining == 0)
                 currentState = DoStuffAfterActions(currentState, events);
 
             return (currentState, events);

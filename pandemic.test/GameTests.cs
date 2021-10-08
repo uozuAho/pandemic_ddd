@@ -11,7 +11,7 @@ namespace pandemic.test
     {
         [TestCase("Chicago")]
         [TestCase("Washington")]
-        public void Drive_or_ferry_player(string toCity)
+        public void Drive_or_ferry_player_moves_them_to_city(string toCity)
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -136,7 +136,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Next_player_turn_after_infect_cities()
+        public void It_is_next_players_turn_after_infect_cities()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -153,6 +153,31 @@ namespace pandemic.test
                 "player whose turn ended should get their 'remaining actions' counter reset");
             Assert.AreEqual(Role.Scientist, game.CurrentPlayer.Role);
             Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
+        }
+
+        [Test]
+        public void Player_must_discard_when_hand_is_full()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = ImmutableList.Create(Enumerable.Repeat(new PlayerCard("asdf"), 7).ToArray())
+                })
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
+            Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
         }
     }
 }
