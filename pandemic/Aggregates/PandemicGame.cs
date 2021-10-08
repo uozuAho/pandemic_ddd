@@ -151,6 +151,9 @@ namespace pandemic.Aggregates
             game = PickUpCard(game, events);
             game = PickUpCard(game, events);
 
+            if (game.CurrentPlayer.Hand.Count > 7)
+                return game;
+
             game = InfectCity(game, events);
 
             if (!game.IsOver) game = InfectCity(game, events);

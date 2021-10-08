@@ -179,5 +179,7 @@ namespace pandemic.test
             Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
             Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
         }
+
+        // todo: cities infected after player discards
     }
 }
