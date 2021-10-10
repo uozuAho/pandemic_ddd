@@ -186,7 +186,7 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            return game.ApplyEvent(new PlayerCardPickedUp(game.CurrentPlayer.Role), events);
+            return game.ApplyEvent(new PlayerCardPickedUp(), events);
         }
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
@@ -234,7 +234,7 @@ namespace pandemic.Aggregates
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
-                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
+                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
@@ -282,9 +282,7 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyPlayerCardPickedUp(
-            PandemicGame game,
-            PlayerCardPickedUp playerCardPickedUp)
+        private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game)
         {
             var pickedCard = game.PlayerDrawPile.Last();
             return game with
