@@ -22,7 +22,7 @@ namespace pandemic
             {
                 foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
-                    yield return new DriveFerryPlayerCommand(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
+                    yield return new DriveFerryPlayerCommand(game.CurrentPlayer.Role, city);
                 }
             }
 
@@ -38,17 +38,11 @@ namespace pandemic
         }
     }
 
-    // todo: remove
-    public enum MoveType
-    {
-        DriveOrFerry,
-    }
-
     public abstract record PlayerCommand
     {
     }
 
-    public record DriveFerryPlayerCommand(Role Role, MoveType MoveType, string City) : PlayerCommand;
+    public record DriveFerryPlayerCommand(Role Role, string City) : PlayerCommand;
 
     public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
 }
