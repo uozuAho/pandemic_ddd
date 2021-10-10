@@ -18,6 +18,7 @@ namespace pandemic.Aggregates
         public int CurrentPlayerIdx { get; init; } = 0;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
+        public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
@@ -31,6 +32,7 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+            PlayerDrawPile = Board.Cities.Select(c => new PlayerCard(c.Name)).ToImmutableList();
         }
 
         public bool IsSameStateAs(PandemicGame other)
@@ -74,10 +76,15 @@ namespace pandemic.Aggregates
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetupInfectionDeck();
             events.AddRange(tempEvents);
+
+            // todo: setup draw pile correctly
+            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new PlayerCard(), 5))};
+
             foreach (var role in options.Roles)
             {
                 (game, tempEvents) = game.AddPlayer(role);
                 events.AddRange(tempEvents);
+                game = game.DealPlayerCards(role, 4, events);
             }
 
             return (game, events);
@@ -226,11 +233,28 @@ namespace pandemic.Aggregates
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
+                PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
+        {
+            var (role, numCards) = dealt;
+            var cards = game.PlayerDrawPile.TakeLast(numCards).ToList();
+            var player = game.PlayerByRole(role);
+
+            return game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
+                Players = game.Players.Replace(player, player with
+                {
+                    Hand = cards.ToImmutableList()
+                })
             };
         }
 
@@ -290,6 +314,11 @@ namespace pandemic.Aggregates
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };
+        }
+
+        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
