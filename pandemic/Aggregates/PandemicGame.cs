@@ -68,8 +68,9 @@ namespace pandemic.Aggregates
                 throw new GameRuleViolatedException(
                     $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
-            game = game.SetDifficulty(options.Difficulty, events);
-            game = game.SetInfectionRate(2, events);
+            game = game
+                .SetDifficulty(options.Difficulty, events)
+                .SetInfectionRate(2, events);
             (game, tempEvents) = game.SetOutbreakCounter(0);
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetupInfectionDeck();
