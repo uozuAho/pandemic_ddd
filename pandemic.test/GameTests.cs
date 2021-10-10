@@ -184,16 +184,16 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_discards()
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var (initialGame, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-            game = game with
+            var game = initialGame with
             {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                Players = initialGame.Players.Replace(initialGame.CurrentPlayer, initialGame.CurrentPlayer with
                 {
-                    Hand = game.PlayerDrawPile.TakeLast(6).ToImmutableList()
+                    Hand = initialGame.PlayerDrawPile.TakeLast(6).ToImmutableList()
                 })
             };
 
@@ -202,10 +202,17 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
+            // act
             (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand[0]);
+
+            Assert.AreEqual(initialGame.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
+            Assert.AreEqual(initialGame.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
+            Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
         }
 
-        // todo: cities infected after player discards
-        // todo: discarded card goes to pile
+        private static int TotalNumCubesOnCities(PandemicGame game)
+        {
+            return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
+        }
     }
 }
