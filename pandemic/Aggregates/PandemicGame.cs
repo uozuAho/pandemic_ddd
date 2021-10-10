@@ -69,8 +69,7 @@ namespace pandemic.Aggregates
                     $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
             game = game.SetDifficulty(options.Difficulty, events);
-            (game, tempEvents) = game.SetInfectionRate(2);
-            events.AddRange(tempEvents);
+            game = game.SetInfectionRate(2, events);
             (game, tempEvents) = game.SetOutbreakCounter(0);
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetupInfectionDeck();
@@ -102,9 +101,9 @@ namespace pandemic.Aggregates
             return ApplyEvent(new DifficultySet(difficulty), events);
         }
 
-        private (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
+        private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
         {
-            return ApplyEvents(new InfectionRateSet(rate));
+            return ApplyEvent(new InfectionRateSet(rate), events);
         }
 
         private (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
