@@ -152,9 +152,9 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(string city)
+        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
         {
-            var (game, events) = ApplyEvents(new PlayerCardDiscarded(city));
+            var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
             if (CurrentPlayer.ActionsRemaining == 0)
             {
@@ -310,13 +310,11 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
         {
-            var discardedCard = game.CurrentPlayer.Hand.Single(c => c.City == discarded.Card);
-
             return game with
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.CurrentPlayer.Hand.Remove(discardedCard)
+                    Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
                 })
             };
         }

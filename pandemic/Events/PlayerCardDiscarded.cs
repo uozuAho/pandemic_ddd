@@ -1,5 +1,6 @@
+using pandemic.Values;
+
 namespace pandemic.Events
 {
-    // todo: change city to player card
-    public record PlayerCardDiscarded(string Card) : IEvent;
+    public record PlayerCardDiscarded(PlayerCard Card) : IEvent;
 }

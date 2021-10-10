@@ -178,7 +178,7 @@ namespace pandemic.test
 
             Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
             Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
-            Assert.True(new PlayerMoveGenerator().LegalMoves(game).All(move => move.MoveType == MoveType.Discard));
+            Assert.True(new PlayerMoveGenerator().LegalMoves(game).All(move => move is DiscardPlayerCardCommand));
         }
 
         [Test]
@@ -204,7 +204,7 @@ namespace pandemic.test
 
             // todo: discard any card here. this is a temp workaround around half-implemented code
             var toDiscard = game.PlayerByRole(Role.Medic).Hand.First(c => c.City != "");
-            (game, _) = game.DiscardPlayerCard(toDiscard.City);
+            (game, _) = game.DiscardPlayerCard(toDiscard);
         }
 
         // todo: cities infected after player discards

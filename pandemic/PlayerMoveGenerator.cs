@@ -14,7 +14,7 @@ namespace pandemic
         /// - playing an event card
         /// - drawing player cards
         /// </summary>
-        public IEnumerable<PlayerCommand> LegalMoves(PandemicGame game)
+        public IEnumerable<PlayerCommandBase> LegalMoves(PandemicGame game)
         {
             if (game.IsOver) yield break;
 
@@ -32,17 +32,25 @@ namespace pandemic
                 {
                     // todo: remove this check! it's just to get tests passing. need to implement epidemic cards
                     if (!string.IsNullOrEmpty(card.City))
-                        yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.Discard, card.City);
+                        yield return new DiscardPlayerCardCommand(card);
                 }
             }
         }
     }
 
+    // todo: remove
     public enum MoveType
     {
         DriveOrFerry,
         Discard
     }
 
-    public record PlayerCommand(Role Role, MoveType MoveType, string City);
+    // todo: rename
+    public abstract record PlayerCommandBase
+    {
+    }
+
+    public record PlayerCommand(Role Role, MoveType MoveType, string City) : PlayerCommandBase;
+
+    public record DiscardPlayerCardCommand(PlayerCard card) : PlayerCommandBase;
 }
