@@ -14,7 +14,7 @@ namespace pandemic
         /// - playing an event card
         /// - drawing player cards
         /// </summary>
-        public IEnumerable<PlayerCommandBase> LegalMoves(PandemicGame game)
+        public IEnumerable<PlayerCommand> LegalMoves(PandemicGame game)
         {
             if (game.IsOver) yield break;
 
@@ -22,7 +22,7 @@ namespace pandemic
             {
                 foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
-                    yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
+                    yield return new DriveFerryPlayerCommand(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
                 }
             }
 
@@ -42,15 +42,13 @@ namespace pandemic
     public enum MoveType
     {
         DriveOrFerry,
-        Discard
     }
 
-    // todo: rename
-    public abstract record PlayerCommandBase
+    public abstract record PlayerCommand
     {
     }
 
-    public record PlayerCommand(Role Role, MoveType MoveType, string City) : PlayerCommandBase;
+    public record DriveFerryPlayerCommand(Role Role, MoveType MoveType, string City) : PlayerCommand;
 
-    public record DiscardPlayerCardCommand(PlayerCard card) : PlayerCommandBase;
+    public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
 }

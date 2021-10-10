@@ -34,7 +34,7 @@ namespace pandemic
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PlayerCommandBase> LegalActions()
+        public IEnumerable<PlayerCommand> LegalActions()
         {
             return _moveGenerator.LegalMoves(Game);
         }
@@ -49,17 +49,17 @@ namespace pandemic
             throw new NotImplementedException();
         }
 
-        public IEnumerable<IEvent> ApplyAction(PlayerCommandBase action)
+        public IEnumerable<IEvent> ApplyAction(PlayerCommand action)
         {
             IEnumerable<IEvent> events;
 
             switch (action)
             {
-                case PlayerCommand command:
+                case DriveFerryPlayerCommand command:
                     (Game, events) = Game.DriveOrFerryPlayer(command.Role, command.City);
                     return events;
                 case DiscardPlayerCardCommand command:
-                    (Game, events) = Game.DiscardPlayerCard(command.card);
+                    (Game, events) = Game.DiscardPlayerCard(command.Card);
                     return events;
                 default:
                     throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
