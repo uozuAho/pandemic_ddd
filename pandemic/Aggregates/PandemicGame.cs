@@ -62,7 +62,6 @@ namespace pandemic.Aggregates
         {
             var game = CreateUninitialisedGame();
             var events = new List<IEvent>();
-            ICollection<IEvent> tempEvents;
 
             if (options.Roles.Count < 2 || options.Roles.Count > 4)
                 throw new GameRuleViolatedException(
@@ -79,8 +78,7 @@ namespace pandemic.Aggregates
 
             foreach (var role in options.Roles)
             {
-                (game, tempEvents) = game.AddPlayer(role);
-                events.AddRange(tempEvents);
+                game = game.AddPlayer(role, events);
                 game = game.DealPlayerCards(role, 4, events);
             }
 
@@ -94,35 +92,6 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        // todo: these setup commands dont need to be public
-        private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
-        {
-            return ApplyEvent(new DifficultySet(difficulty), events);
-        }
-
-        private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
-        {
-            return ApplyEvent(new InfectionRateSet(rate), events);
-        }
-
-        private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
-        {
-            return ApplyEvent(new OutbreakCounterSet(value), events);
-        }
-
-        private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
-        {
-            // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
-
-            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
-        }
-
-        private (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
-        {
-            return ApplyEvents(new PlayerAdded(role));
-        }
-
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
@@ -164,6 +133,34 @@ namespace pandemic.Aggregates
             }
 
             return (game, events);
+        }
+
+        private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new DifficultySet(difficulty), events);
+        }
+
+        private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new InfectionRateSet(rate), events);
+        }
+
+        private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new OutbreakCounterSet(value), events);
+        }
+
+        private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
+        {
+            // todo: shuffle
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
+
+            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
+        }
+
+        private PandemicGame AddPlayer(Role role, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerAdded(role), events);
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
