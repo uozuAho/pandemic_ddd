@@ -18,6 +18,7 @@ namespace pandemic.Aggregates
         public int CurrentPlayerIdx { get; init; } = 0;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
+        public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
@@ -31,6 +32,7 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
         }
 
         public bool IsSameStateAs(PandemicGame other)
@@ -60,24 +62,24 @@ namespace pandemic.Aggregates
         {
             var game = CreateUninitialisedGame();
             var events = new List<IEvent>();
-            ICollection<IEvent> tempEvents;
 
             if (options.Roles.Count < 2 || options.Roles.Count > 4)
                 throw new GameRuleViolatedException(
                     $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
-            (game, tempEvents) = game.SetDifficulty(options.Difficulty);
-            events.AddRange(tempEvents);
-            (game, tempEvents) = game.SetInfectionRate(2);
-            events.AddRange(tempEvents);
-            (game, tempEvents) = game.SetOutbreakCounter(0);
-            events.AddRange(tempEvents);
-            (game, tempEvents) = game.SetupInfectionDeck();
-            events.AddRange(tempEvents);
+            game = game
+                .SetDifficulty(options.Difficulty, events)
+                .SetInfectionRate(2, events)
+                .SetOutbreakCounter(0, events)
+                .SetupInfectionDeck(events);
+
+            // todo: setup draw pile correctly
+            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(), 5))};
+
             foreach (var role in options.Roles)
             {
-                (game, tempEvents) = game.AddPlayer(role);
-                events.AddRange(tempEvents);
+                game = game.AddPlayer(role, events);
+                game = game.DealPlayerCards(role, 4, events);
             }
 
             return (game, events);
@@ -90,34 +92,6 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
-        {
-            return ApplyEvents(new DifficultySet(difficulty));
-        }
-
-        public (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
-        {
-            return ApplyEvents(new InfectionRateSet(rate));
-        }
-
-        public (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
-        {
-            return ApplyEvents(new OutbreakCounterSet(value));
-        }
-
-        public (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
-        {
-            // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
-
-            return ApplyEvents(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()));
-        }
-
-        public (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
-        {
-            return ApplyEvents(new PlayerAdded(role));
-        }
-
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
@@ -138,24 +112,72 @@ namespace pandemic.Aggregates
 
             var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
 
-            if (player.ActionsRemaining == 1)
+            if (currentState.CurrentPlayer.ActionsRemaining == 0)
                 currentState = DoStuffAfterActions(currentState, events);
 
             return (currentState, events);
+        }
+
+        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
+        {
+            var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
+
+            if (CurrentPlayer.ActionsRemaining == 0)
+                game = InfectCities(game, events);
+
+            return (game, events);
+        }
+
+        private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
+        {
+            game = InfectCity(game, events);
+            if (!game.IsOver) game = InfectCity(game, events);
+            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+            return game;
+        }
+
+        private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new DifficultySet(difficulty), events);
+        }
+
+        private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new InfectionRateSet(rate), events);
+        }
+
+        private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new OutbreakCounterSet(value), events);
+        }
+
+        private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
+        {
+            // todo: shuffle
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
+
+            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
+        }
+
+        private PandemicGame AddPlayer(Role role, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerAdded(role), events);
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
 
+            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
             game = PickUpCard(game, events);
+
+            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
             game = PickUpCard(game, events);
 
-            game = InfectCity(game, events);
+            if (game.CurrentPlayer.Hand.Count > 7)
+                return game;
 
-            if (!game.IsOver) game = InfectCity(game, events);
-
-            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+            game = InfectCities(game, events);
 
             return game;
         }
@@ -164,11 +186,7 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            // todo: pick up cards from player draw pile here
-            game = game.ApplyEvent(
-                new PlayerCardPickedUp(game.CurrentPlayer.Role, new PlayerCard("Atlanta")),
-                events);
-            return game;
+            return game.ApplyEvent(new PlayerCardPickedUp(), events);
         }
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
@@ -216,11 +234,29 @@ namespace pandemic.Aggregates
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
-                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game, p),
+                PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
+                PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
+                PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
+        {
+            var (role, numCards) = dealt;
+            var cards = game.PlayerDrawPile.TakeLast(numCards).ToList();
+            var player = game.PlayerByRole(role);
+
+            return game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
+                Players = game.Players.Replace(player, player with
+                {
+                    Hand = cards.ToImmutableList()
+                })
             };
         }
 
@@ -246,18 +282,28 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyPlayerCardPickedUp(
-            PandemicGame game,
-            PlayerCardPickedUp playerCardPickedUp)
+        private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game)
         {
-            var newPlayers = game.Players.Select(p => p).ToList();
-            var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
-            var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
-            currentPlayerHand.Add(playerCardPickedUp.Card);
+            var pickedCard = game.PlayerDrawPile.Last();
+            return game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.Remove(pickedCard),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(pickedCard)
+                })
+            };
+        }
 
-            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with { Hand = currentPlayerHand.ToImmutableList() };
-
-            return game with {Players = newPlayers.ToImmutableList()};
+        private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
+        {
+            return game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
+                })
+            };
         }
 
         private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
@@ -266,6 +312,11 @@ namespace pandemic.Aggregates
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };
+        }
+
+        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)

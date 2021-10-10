@@ -11,12 +11,14 @@ namespace pandemic.test
     class PandemicGameEventTests
     {
         [Test]
+        [Ignore("enable this test after more todos covered")]
+        // todo: run this test from various starting states, eg number of players & difficulties
         public void State_built_from_events_is_same_as_final_state()
         {
             var random = new Random();
             var options = new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
+                Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Medic, Role.Scientist }
             };
             PandemicGame game;

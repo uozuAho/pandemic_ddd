@@ -6,4 +6,3 @@ Using the rules here: https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # todo
 - check code todos
-- assert building game state from recorded events = current game state
