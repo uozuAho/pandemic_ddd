@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
@@ -8,9 +9,7 @@ namespace pandemic.test
 {
     public class GameSetup
     {
-        [TestCase(Difficulty.Introductory)]
-        [TestCase(Difficulty.Normal)]
-        [TestCase(Difficulty.Heroic)]
+        [TestCaseSource(nameof(AllDifficulties))]
         public void Do_all_the_stuff_to_start_a_game(Difficulty difficulty)
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
@@ -30,6 +29,17 @@ namespace pandemic.test
             Assert.IsTrue(game.Players.All(p => p.Hand.Count == 4));
             Assert.IsFalse(game.IsOver);
         }
+
+        private static IEnumerable<Difficulty> AllDifficulties()
+        {
+            return Enum.GetValues<Difficulty>();
+        }
+
+        // private static IEnumerable<Role[]> AllPlayerNumbers()
+        // {
+        //     yield return new [] {Role.Medic, Role.Scientist};
+        //     // todo: more players
+        // }
 
         // todo: different player numbers draw different numbers of cards
     }
