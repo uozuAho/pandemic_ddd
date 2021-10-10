@@ -78,7 +78,7 @@ namespace pandemic.Aggregates
             events.AddRange(tempEvents);
 
             // todo: setup draw pile correctly
-            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new PlayerCard(), 5))};
+            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new PlayerCard(""), 5))};
 
             foreach (var role in options.Roles)
             {
