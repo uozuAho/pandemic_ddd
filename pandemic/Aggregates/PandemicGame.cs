@@ -286,17 +286,15 @@ namespace pandemic.Aggregates
             PandemicGame game,
             PlayerCardPickedUp playerCardPickedUp)
         {
-            // todo: make this shorter?
-            var newPlayers = game.Players.Select(p => p).ToList();
-            var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
-            var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
-
-            var card = game.PlayerDrawPile.Last();
-            currentPlayerHand.Add(card);
-
-            newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with { Hand = currentPlayerHand.ToImmutableList() };
-
-            return game with { Players = newPlayers.ToImmutableList(), PlayerDrawPile = game.PlayerDrawPile.Remove(card) };
+            var pickedCard = game.PlayerDrawPile.Last();
+            return game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.Remove(pickedCard),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(pickedCard)
+                })
+            };
         }
 
         private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
