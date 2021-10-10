@@ -71,9 +71,8 @@ namespace pandemic.Aggregates
             game = game
                 .SetDifficulty(options.Difficulty, events)
                 .SetInfectionRate(2, events)
-                .SetOutbreakCounter(0, events);
-            (game, tempEvents) = game.SetupInfectionDeck();
-            events.AddRange(tempEvents);
+                .SetOutbreakCounter(0, events)
+                .SetupInfectionDeck(events);
 
             // todo: setup draw pile correctly
             game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(), 5))};
@@ -111,12 +110,12 @@ namespace pandemic.Aggregates
             return ApplyEvent(new OutbreakCounterSet(value), events);
         }
 
-        private (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
+        private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
         {
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
 
-            return ApplyEvents(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()));
+            return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
         }
 
         private (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
