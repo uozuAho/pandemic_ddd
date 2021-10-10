@@ -30,9 +30,7 @@ namespace pandemic
             {
                 foreach (var card in game.CurrentPlayer.Hand)
                 {
-                    // todo: remove this check! it's just to get tests passing. need to implement epidemic cards
-                    if (!string.IsNullOrEmpty(card.City))
-                        yield return new DiscardPlayerCardCommand(card);
+                    yield return new DiscardPlayerCardCommand(card);
                 }
             }
         }
