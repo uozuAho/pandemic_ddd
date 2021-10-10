@@ -24,16 +24,10 @@ namespace pandemic.Aggregates
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
 
-        public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
-        public City CityByName(string city) => Cities.Single(c => c.Name == city);
-
         public readonly StandardGameBoard Board = new();
 
-        private PandemicGame()
-        {
-            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
-            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
-        }
+        public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
+        public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -51,6 +45,23 @@ namespace pandemic.Aggregates
             if (!Cubes.SequenceEqual(other.Cubes)) return false;
 
             return true;
+        }
+
+        public static int NumberOfEpidemicCards(Difficulty difficulty)
+        {
+            return difficulty switch
+            {
+                Difficulty.Introductory => 4,
+                Difficulty.Normal => 5,
+                Difficulty.Heroic => 6,
+                _ => throw new ArgumentOutOfRangeException(nameof(difficulty), difficulty, null)
+            };
+        }
+
+        private PandemicGame()
+        {
+            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
         }
 
         public static PandemicGame CreateUninitialisedGame() => new ();
@@ -73,8 +84,12 @@ namespace pandemic.Aggregates
                 .SetOutbreakCounter(0, events)
                 .SetupInfectionDeck(events);
 
-            // todo: setup draw pile correctly
-            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(), 5))};
+            // todo: setup as per game rules
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(),
+                    NumberOfEpidemicCards(options.Difficulty)))
+            };
 
             foreach (var role in options.Roles)
             {
