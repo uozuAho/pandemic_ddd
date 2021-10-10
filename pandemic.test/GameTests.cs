@@ -178,6 +178,33 @@ namespace pandemic.test
 
             Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
             Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
+            Assert.True(new PlayerMoveGenerator().LegalMoves(game).All(move => move.MoveType == MoveType.Discard));
+        }
+
+        [Test]
+        public void Cities_are_infected_after_player_discards()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.PlayerDrawPile.TakeLast(6).ToImmutableList()
+                })
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            // todo: discard any card here. this is a temp workaround around half-implemented code
+            var toDiscard = game.PlayerByRole(Role.Medic).Hand.First(c => c.City != "");
+            (game, _) = game.DiscardPlayerCard(Role.Medic, toDiscard.City);
         }
 
         // todo: cities infected after player discards

@@ -154,14 +154,29 @@ namespace pandemic.Aggregates
 
         public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(Role role, string city)
         {
-            return ApplyEvents(new PlayerCardDiscarded(role, city));
+            var (game, events) = ApplyEvents(new PlayerCardDiscarded(role, city));
+
+            if (CurrentPlayer.ActionsRemaining == 0)
+            {
+                // todo: extract this, use in DoStuffAfterActions
+                game = InfectCity(game, events);
+
+                if (!game.IsOver) game = InfectCity(game, events);
+
+                if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+            }
+
+            return (game, events);
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
 
+            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
             game = PickUpCard(game, events);
+
+            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
             game = PickUpCard(game, events);
 
             if (game.CurrentPlayer.Hand.Count > 7)
@@ -180,11 +195,7 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            // todo: pick up cards from player draw pile here
-            game = game.ApplyEvent(
-                new PlayerCardPickedUp(game.CurrentPlayer.Role, new PlayerCard("Atlanta")),
-                events);
-            return game;
+            return game.ApplyEvent(new PlayerCardPickedUp(game.CurrentPlayer.Role), events);
         }
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
@@ -288,11 +299,13 @@ namespace pandemic.Aggregates
             var newPlayers = game.Players.Select(p => p).ToList();
             var currentPlayerIdx = newPlayers.FindIndex(p => p.Role == playerCardPickedUp.Role);
             var currentPlayerHand = newPlayers[currentPlayerIdx].Hand.Select(h => h).ToList();
-            currentPlayerHand.Add(playerCardPickedUp.Card);
+
+            var card = game.PlayerDrawPile.Last();
+            currentPlayerHand.Add(card);
 
             newPlayers[currentPlayerIdx] = newPlayers[currentPlayerIdx] with { Hand = currentPlayerHand.ToImmutableList() };
 
-            return game with {Players = newPlayers.ToImmutableList()};
+            return game with { Players = newPlayers.ToImmutableList(), PlayerDrawPile = game.PlayerDrawPile.Remove(card) };
         }
 
         private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)

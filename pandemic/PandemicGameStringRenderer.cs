@@ -13,6 +13,7 @@ namespace pandemic
             sb.AppendLine($"infection rate: {game.InfectionRate}");
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
+            sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
             sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
