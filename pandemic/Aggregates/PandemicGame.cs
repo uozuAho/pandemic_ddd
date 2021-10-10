@@ -68,7 +68,7 @@ namespace pandemic.Aggregates
                 throw new GameRuleViolatedException(
                     $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
-            game = SetDifficulty(game, options.Difficulty, events);
+            game = game.SetDifficulty(options.Difficulty, events);
             (game, tempEvents) = game.SetInfectionRate(2);
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetOutbreakCounter(0);
@@ -97,9 +97,9 @@ namespace pandemic.Aggregates
         // oh god I'm using regions! what have I become...
         #region Commands
         // todo: these setup commands dont need to be public
-        private static PandemicGame SetDifficulty(PandemicGame game, Difficulty difficulty, ICollection<IEvent> events)
+        private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
         {
-            return game.ApplyEvent(new DifficultySet(difficulty), events);
+            return ApplyEvent(new DifficultySet(difficulty), events);
         }
 
         private (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
