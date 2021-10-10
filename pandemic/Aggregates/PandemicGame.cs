@@ -70,9 +70,8 @@ namespace pandemic.Aggregates
 
             game = game
                 .SetDifficulty(options.Difficulty, events)
-                .SetInfectionRate(2, events);
-            (game, tempEvents) = game.SetOutbreakCounter(0);
-            events.AddRange(tempEvents);
+                .SetInfectionRate(2, events)
+                .SetOutbreakCounter(0, events);
             (game, tempEvents) = game.SetupInfectionDeck();
             events.AddRange(tempEvents);
 
@@ -107,9 +106,9 @@ namespace pandemic.Aggregates
             return ApplyEvent(new InfectionRateSet(rate), events);
         }
 
-        private (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
+        private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
         {
-            return ApplyEvents(new OutbreakCounterSet(value));
+            return ApplyEvent(new OutbreakCounterSet(value), events);
         }
 
         private (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
