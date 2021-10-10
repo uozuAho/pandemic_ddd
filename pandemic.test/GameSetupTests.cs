@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Values;
@@ -24,7 +25,7 @@ namespace pandemic.test
             Assert.AreEqual(48, game.InfectionDrawPile.Count);
             Assert.AreEqual(0, game.InfectionDiscardPile.Count);
             Assert.AreEqual(48 + numberOfEpidemicCards - 8, game.PlayerDrawPile.Count);
-            // todo: players have 4 cards in hand
+            Assert.IsTrue(game.Players.All(p => p.Hand.Count == 4));
             Assert.IsFalse(game.IsOver);
         }
 
