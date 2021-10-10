@@ -4,5 +4,6 @@ namespace pandemic.Values
 
     public record PlayerCityCard(string City) : PlayerCard;
 
-    public record EpidemicCard : PlayerCard;
+    // todo: remove city
+    public record EpidemicCard(string City) : PlayerCard;
 }
