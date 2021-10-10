@@ -68,8 +68,7 @@ namespace pandemic.Aggregates
                 throw new GameRuleViolatedException(
                     $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
-            (game, tempEvents) = game.SetDifficulty(options.Difficulty);
-            events.AddRange(tempEvents);
+            game = SetDifficulty(game, options.Difficulty, events);
             (game, tempEvents) = game.SetInfectionRate(2);
             events.AddRange(tempEvents);
             (game, tempEvents) = game.SetOutbreakCounter(0);
@@ -98,22 +97,22 @@ namespace pandemic.Aggregates
         // oh god I'm using regions! what have I become...
         #region Commands
         // todo: these setup commands dont need to be public
-        public (PandemicGame, ICollection<IEvent>) SetDifficulty(Difficulty difficulty)
+        private static PandemicGame SetDifficulty(PandemicGame game, Difficulty difficulty, ICollection<IEvent> events)
         {
-            return ApplyEvents(new DifficultySet(difficulty));
+            return game.ApplyEvent(new DifficultySet(difficulty), events);
         }
 
-        public (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
+        private (PandemicGame, ICollection<IEvent>) SetInfectionRate(int rate)
         {
             return ApplyEvents(new InfectionRateSet(rate));
         }
 
-        public (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
+        private (PandemicGame, ICollection<IEvent>) SetOutbreakCounter(int value)
         {
             return ApplyEvents(new OutbreakCounterSet(value));
         }
 
-        public (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
+        private (PandemicGame, ICollection<IEvent>) SetupInfectionDeck()
         {
             // todo: shuffle
             var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
@@ -121,7 +120,7 @@ namespace pandemic.Aggregates
             return ApplyEvents(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()));
         }
 
-        public (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
+        private (PandemicGame, ICollection<IEvent>) AddPlayer(Role role)
         {
             return ApplyEvents(new PlayerAdded(role));
         }
