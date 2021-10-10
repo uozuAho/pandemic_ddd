@@ -8,7 +8,7 @@ namespace pandemic.Values
     {
         public Role Role { get; init; }
         public string Location { get; init; } = "Atlanta";
-        public ImmutableList<PlayerCard> Hand { get; init; } = ImmutableList<PlayerCard>.Empty;
+        public ImmutableList<PlayerCityCard> Hand { get; init; } = ImmutableList<PlayerCityCard>.Empty;
         public int ActionsRemaining { get; init; } = 4;
 
         public bool IsSameStateAs(Player other)
