@@ -32,7 +32,7 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
-            PlayerDrawPile = Board.Cities.Select(c => new PlayerCard(c.Name)).ToImmutableList();
+            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
         }
 
         public bool IsSameStateAs(PandemicGame other)
@@ -78,7 +78,7 @@ namespace pandemic.Aggregates
             events.AddRange(tempEvents);
 
             // todo: setup draw pile correctly
-            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new PlayerCard(), 5))};
+            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(), 5))};
 
             foreach (var role in options.Roles)
             {
@@ -152,9 +152,9 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(Role role, string city)
+        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
         {
-            var (game, events) = ApplyEvents(new PlayerCardDiscarded(role, city));
+            var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
             if (CurrentPlayer.ActionsRemaining == 0)
             {
@@ -310,13 +310,11 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
         {
-            var discardedCard = game.CurrentPlayer.Hand.Single(c => c.City == discarded.City);
-
             return game with
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.CurrentPlayer.Hand.Remove(discardedCard)
+                    Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
                 })
             };
         }

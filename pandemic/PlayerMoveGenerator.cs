@@ -22,7 +22,7 @@ namespace pandemic
             {
                 foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
                 {
-                    yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.DriveOrFerry, city);
+                    yield return new DriveFerryPlayerCommand(game.CurrentPlayer.Role, city);
                 }
             }
 
@@ -30,19 +30,17 @@ namespace pandemic
             {
                 foreach (var card in game.CurrentPlayer.Hand)
                 {
-                    // todo: remove this check! it's just to get tests passing. need to implement epidemic cards
-                    if (!string.IsNullOrEmpty(card.City))
-                        yield return new PlayerCommand(game.CurrentPlayer.Role, MoveType.Discard, card.City);
+                    yield return new DiscardPlayerCardCommand(card);
                 }
             }
         }
     }
 
-    public enum MoveType
+    public abstract record PlayerCommand
     {
-        DriveOrFerry,
-        Discard
     }
 
-    public record PlayerCommand(Role Role, MoveType MoveType, string City);
+    public record DriveFerryPlayerCommand(Role Role, string City) : PlayerCommand;
+
+    public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
 }

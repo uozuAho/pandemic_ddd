@@ -53,13 +53,13 @@ namespace pandemic
         {
             IEnumerable<IEvent> events;
 
-            switch (action.MoveType)
+            switch (action)
             {
-                case MoveType.DriveOrFerry:
-                    (Game, events) = Game.DriveOrFerryPlayer(action.Role, action.City);
+                case DriveFerryPlayerCommand command:
+                    (Game, events) = Game.DriveOrFerryPlayer(command.Role, command.City);
                     return events;
-                case MoveType.Discard:
-                    (Game, events) = Game.DiscardPlayerCard(action.Role, action.City);
+                case DiscardPlayerCardCommand command:
+                    (Game, events) = Game.DiscardPlayerCard(command.Card);
                     return events;
                 default:
                     throw new ArgumentOutOfRangeException($"Unsupported action: {action}");

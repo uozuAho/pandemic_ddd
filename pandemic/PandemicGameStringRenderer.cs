@@ -18,7 +18,7 @@ namespace pandemic
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
             sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
             sb.AppendLine($"  remaining actions: {game.CurrentPlayer.ActionsRemaining}");
-            sb.AppendLine($"  hand: {string.Join(',', game.CurrentPlayer.Hand.Select(c => c.City))}");
+            sb.AppendLine($"  hand: {string.Join(',', game.CurrentPlayer.Hand)}");
             sb.AppendLine("cities with cubes:");
             foreach (var city in game.Cities)
             {
