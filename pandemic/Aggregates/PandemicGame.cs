@@ -123,16 +123,17 @@ namespace pandemic.Aggregates
             var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
             if (CurrentPlayer.ActionsRemaining == 0)
-            {
-                // todo: extract this, use in DoStuffAfterActions
-                game = InfectCity(game, events);
-
-                if (!game.IsOver) game = InfectCity(game, events);
-
-                if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
-            }
+                game = InfectCities(game, events);
 
             return (game, events);
+        }
+
+        private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
+        {
+            game = InfectCity(game, events);
+            if (!game.IsOver) game = InfectCity(game, events);
+            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+            return game;
         }
 
         private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
@@ -176,11 +177,7 @@ namespace pandemic.Aggregates
             if (game.CurrentPlayer.Hand.Count > 7)
                 return game;
 
-            game = InfectCity(game, events);
-
-            if (!game.IsOver) game = InfectCity(game, events);
-
-            if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
+            game = InfectCities(game, events);
 
             return game;
         }
