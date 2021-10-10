@@ -78,7 +78,7 @@ namespace pandemic.Aggregates
             events.AddRange(tempEvents);
 
             // todo: setup draw pile correctly
-            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new PlayerCityCard(""), 5))};
+            game = game with {PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(""), 5))};
 
             foreach (var role in options.Roles)
             {
@@ -152,9 +152,9 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(Role role, string city)
+        public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(string city)
         {
-            var (game, events) = ApplyEvents(new PlayerCardDiscarded(role, city));
+            var (game, events) = ApplyEvents(new PlayerCardDiscarded(city));
 
             if (CurrentPlayer.ActionsRemaining == 0)
             {
@@ -310,7 +310,7 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
         {
-            var discardedCard = game.CurrentPlayer.Hand.Single(c => c.City == discarded.City);
+            var discardedCard = game.CurrentPlayer.Hand.Single(c => c.City == discarded.Card);
 
             return game with
             {

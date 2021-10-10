@@ -59,7 +59,7 @@ namespace pandemic
                     (Game, events) = Game.DriveOrFerryPlayer(action.Role, action.City);
                     return events;
                 case MoveType.Discard:
-                    (Game, events) = Game.DiscardPlayerCard(action.Role, action.City);
+                    (Game, events) = Game.DiscardPlayerCard(action.City);
                     return events;
                 default:
                     throw new ArgumentOutOfRangeException($"Unsupported action: {action}");

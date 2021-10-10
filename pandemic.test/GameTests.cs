@@ -204,7 +204,7 @@ namespace pandemic.test
 
             // todo: discard any card here. this is a temp workaround around half-implemented code
             var toDiscard = game.PlayerByRole(Role.Medic).Hand.First(c => c.City != "");
-            (game, _) = game.DiscardPlayerCard(Role.Medic, toDiscard.City);
+            (game, _) = game.DiscardPlayerCard(toDiscard.City);
         }
 
         // todo: cities infected after player discards
