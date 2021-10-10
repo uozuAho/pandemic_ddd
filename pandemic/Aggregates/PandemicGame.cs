@@ -18,7 +18,7 @@ namespace pandemic.Aggregates
         public int CurrentPlayerIdx { get; init; } = 0;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
-        public ImmutableList<PlayerCityCard> PlayerDrawPile { get; init; }
+        public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
@@ -32,7 +32,7 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
-            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name)).ToImmutableList();
+            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
         }
 
         public bool IsSameStateAs(PandemicGame other)

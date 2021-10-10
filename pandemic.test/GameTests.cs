@@ -167,7 +167,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = ImmutableList.Create(Enumerable.Repeat(new PlayerCityCard("asdf"), 7).ToArray())
+                    Hand = ImmutableList.Create(Enumerable.Repeat(new PlayerCityCard("asdf") as PlayerCard, 7).ToArray())
                 })
             };
 

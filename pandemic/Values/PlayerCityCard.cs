@@ -1,7 +1,7 @@
 namespace pandemic.Values
 {
     // todo: remove city
-    public abstract record PlayerCard(string City) { }
+    public record PlayerCard(string City) { }
 
     public record PlayerCityCard : PlayerCard
     {
