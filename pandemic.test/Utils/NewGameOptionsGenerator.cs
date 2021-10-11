@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Values;
 
 namespace pandemic.test.Utils
@@ -10,14 +11,16 @@ namespace pandemic.test.Utils
         {
             foreach (var difficulty in Enum.GetValues<Difficulty>())
             {
-                yield return new NewGameOptions
+                foreach (var numPlayers in new[] {2, 3, 4})
                 {
-                    Difficulty = difficulty,
-                    Roles = new[] {Role.Medic, Role.Scientist}
-                };
+                    yield return new NewGameOptions
+                    {
+                        Difficulty = difficulty,
+                        Roles = Enum.GetValues<Role>().Take(numPlayers).ToArray()
+                    };
+                }
+                
             }
-
-            // todo: more players
         }
     }
 }
