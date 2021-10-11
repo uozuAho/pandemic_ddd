@@ -59,6 +59,17 @@ namespace pandemic.Aggregates
             };
         }
 
+        public static int InitialPlayerHandSize(int numberOfPlayers)
+        {
+            return numberOfPlayers switch
+            {
+                2 => 4,
+                3 => 3,
+                4 => 2,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
@@ -86,10 +97,12 @@ namespace pandemic.Aggregates
                 .SetupInfectionDeck(events)
                 .SetupPlayerDrawPile(events);
 
+            // todo: infect cities
+
             foreach (var role in options.Roles)
             {
                 game = game.AddPlayer(role, events);
-                game = game.DealPlayerCards(role, 4, events);
+                game = game.DealPlayerCards(role, InitialPlayerHandSize(options.Roles.Count), events);
             }
 
             return (game, events);

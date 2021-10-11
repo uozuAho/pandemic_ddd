@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
@@ -15,13 +14,7 @@ namespace pandemic.test
             var (game, _) = PandemicGame.CreateNewGame(options);
 
             var numberOfPlayers = options.Roles.Count;
-            var numberOfCardsPerPlayer = options.Roles.Count switch
-            {
-                2 => 4,
-                3 => 3,
-                4 => 2,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            var numberOfCardsPerPlayer = PandemicGame.InitialPlayerHandSize(numberOfPlayers);
             var numberOfEpidemicCards = PandemicGame.NumberOfEpidemicCards(options.Difficulty);
 
             Assert.AreEqual(options.Difficulty, game.Difficulty);
