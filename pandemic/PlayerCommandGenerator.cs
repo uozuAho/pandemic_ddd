@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Values;
 
@@ -33,6 +34,7 @@ namespace pandemic
                 {
                     yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
                 }
+                // todo: yield build research station
             }
         }
     }

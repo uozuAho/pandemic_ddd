@@ -73,7 +73,8 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
-            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
+            PlayerDrawPile = Board.Cities
+                .Select(c => new PlayerCityCard(c) as PlayerCard).ToImmutableList();
         }
 
         public static PandemicGame CreateUninitialisedGame() => new ();
@@ -194,7 +195,7 @@ namespace pandemic.Aggregates
         {
             // todo: shuffle
             var playerCards = Board.Cities
-                .Select(c => new PlayerCityCard(c.Name) as PlayerCard)
+                .Select(c => new PlayerCityCard(c) as PlayerCard)
                 .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
                 .ToImmutableList();
 
