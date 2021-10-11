@@ -105,7 +105,9 @@ namespace pandemic.Aggregates
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
-            PreCommandValidityCheck(role);
+            ThrowIfNotRolesTurn(role);
+            ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfPlayerMustDiscard(CurrentPlayer);
 
             var player = PlayerByRole(role);
 
@@ -125,21 +127,10 @@ namespace pandemic.Aggregates
             return (currentState, events);
         }
 
-        private void PreCommandValidityCheck(Role role)
-        {
-            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
-
-            var player = PlayerByRole(role);
-
-            if (player.ActionsRemaining == 0)
-                throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
-
-            if (player.Hand.Count > 7)
-                throw new GameRuleViolatedException($"Action not allowed: Player {role} has more than 7 cards in hand");
-        }
-
         public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
         {
+            ThrowIfGameOver(this);
+
             var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
             if (CurrentPlayer.ActionsRemaining == 0)
@@ -150,6 +141,8 @@ namespace pandemic.Aggregates
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
+            ThrowIfGameOver(game);
+
             game = InfectCity(game, events);
             if (!game.IsOver) game = InfectCity(game, events);
             if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
@@ -223,6 +216,7 @@ namespace pandemic.Aggregates
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
+
             if (game.InfectionDrawPile.Count == 0)
                 return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
 
@@ -237,6 +231,23 @@ namespace pandemic.Aggregates
         private static void ThrowIfGameOver(PandemicGame game)
         {
             if (game.IsOver) throw new GameRuleViolatedException("Game is over!");
+        }
+
+        private void ThrowIfNotRolesTurn(Role role)
+        {
+            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
+        }
+
+        private static void ThrowIfNoActionsRemaining(Player player)
+        {
+            if (player.ActionsRemaining == 0)
+                throw new GameRuleViolatedException($"Action not allowed: Player {player.Role} has no actions remaining");
+        }
+
+        private static void ThrowIfPlayerMustDiscard(Player player)
+        {
+            if (player.Hand.Count > 7)
+                throw new GameRuleViolatedException($"Action not allowed: Player {player.Role} has more than 7 cards in hand");
         }
 
         #endregion
