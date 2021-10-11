@@ -12,7 +12,7 @@ namespace pandemic
     public class PandemicSpielGameState
     {
         public PandemicGame Game;
-        private readonly PlayerMoveGenerator _moveGenerator = new ();
+        private readonly PlayerCommandGenerator _commandGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
         {
@@ -36,7 +36,7 @@ namespace pandemic
 
         public IEnumerable<PlayerCommand> LegalActions()
         {
-            return _moveGenerator.LegalMoves(Game);
+            return _commandGenerator.LegalMoves(Game);
         }
 
         public string ActionToString(int currentPlayer, int action)
@@ -55,7 +55,7 @@ namespace pandemic
 
             switch (action)
             {
-                case DriveFerryPlayerCommand command:
+                case DriveFerryCommand command:
                     (Game, events) = Game.DriveOrFerryPlayer(command.Role, command.City);
                     return events;
                 case DiscardPlayerCardCommand command:
