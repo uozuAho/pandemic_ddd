@@ -10,9 +10,13 @@ namespace pandemic.Values
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0);
 
+        public bool HasResearchStation { get; init; }
+
         public bool IsSameStateAs(City other)
         {
-            return Name == other.Name && Cubes.SequenceEqual(other.Cubes);
+            return Name == other.Name
+                   && Cubes.SequenceEqual(other.Cubes)
+                   && HasResearchStation == other.HasResearchStation;
         }
 
         public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();

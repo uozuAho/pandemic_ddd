@@ -153,6 +153,15 @@ namespace pandemic.Aggregates
             return (game, events);
         }
 
+        public (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
+        {
+            ThrowIfGameOver(this);
+            ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+            return ApplyEvents(new ResearchStationBuilt(city));
+        }
+
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
@@ -294,6 +303,7 @@ namespace pandemic.Aggregates
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
+                ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
                 PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
@@ -302,6 +312,19 @@ namespace pandemic.Aggregates
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
+        {
+            var city = game.Cities.Single(c => c.Name == @event.City);
+
+            return game with
+            {
+                Cities = game.Cities.Replace(city, city with
+                {
+                    HasResearchStation = true
+                })
             };
         }
 

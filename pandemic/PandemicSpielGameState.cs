@@ -61,6 +61,9 @@ namespace pandemic
                 case DiscardPlayerCardCommand command:
                     (Game, events) = Game.DiscardPlayerCard(command.Card);
                     return events;
+                case BuildResearchStationCommand command:
+                    (Game, events) = Game.BuildResearchStation(command.City);
+                    return events;
                 default:
                     throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
             }
