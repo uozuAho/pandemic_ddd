@@ -4,22 +4,17 @@ using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
 {
     class PandemicGameEventTests
     {
-        [Test]
-        // todo: run this test from various starting states, eg number of players & difficulties
-        public void State_built_from_events_is_same_as_final_state()
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
+        public void State_built_from_events_is_same_as_final_state(NewGameOptions options)
         {
             var random = new Random();
-            var options = new NewGameOptions
-            {
-                Difficulty = Difficulty.Normal,
-                Roles = new[] { Role.Medic, Role.Scientist }
-            };
             PandemicGame game;
             List<IEvent> events;
             (game, events) = PandemicGame.CreateNewGame(options);
