@@ -82,14 +82,8 @@ namespace pandemic.Aggregates
                 .SetDifficulty(options.Difficulty, events)
                 .SetInfectionRate(2, events)
                 .SetOutbreakCounter(0, events)
-                .SetupInfectionDeck(events);
-
-            // todo: setup as per game rules
-            game = game with
-            {
-                PlayerDrawPile = game.PlayerDrawPile.AddRange(Enumerable.Repeat(new EpidemicCard(),
-                    NumberOfEpidemicCards(options.Difficulty)))
-            };
+                .SetupInfectionDeck(events)
+                .SetupPlayerDrawPile(events);
 
             foreach (var role in options.Roles)
             {
@@ -179,6 +173,17 @@ namespace pandemic.Aggregates
             return ApplyEvent(new PlayerAdded(role), events);
         }
 
+        private PandemicGame SetupPlayerDrawPile(ICollection<IEvent> events)
+        {
+            // todo: shuffle
+            var playerCards = Board.Cities
+                .Select(c => new PlayerCityCard(c.Name) as PlayerCard)
+                .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
+                .ToImmutableList();
+
+            return ApplyEvent(new PlayerDrawPileSetUp(playerCards), events);
+        }
+
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
@@ -251,11 +256,20 @@ namespace pandemic.Aggregates
                 PlayerMoved p => ApplyPlayerMoved(game, p),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
+                PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyPlayerDrawPileSetUp(PandemicGame game, PlayerDrawPileSetUp @event)
+        {
+            return game with
+            {
+                PlayerDrawPile = @event.Pile
             };
         }
 
