@@ -34,7 +34,22 @@ namespace pandemic
                 {
                     yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
                 }
-                // todo: yield build research station
+
+                var playerCardMatchingCurrentLocation = game.CurrentPlayer.Hand
+                    .SingleOrDefault(c => c is PlayerCityCard cityCard
+                                          && cityCard.City.Name == game.CurrentPlayer.Location)
+                    as PlayerCityCard;
+
+                if (playerCardMatchingCurrentLocation != null)
+                    yield return new BuildResearchStationCommand(
+                        playerCardMatchingCurrentLocation.City.Name);
+
+                // var canCure = game.CurrentPlayer.Hand
+                //     .Where(c => c is PlayerCityCard).Cast<PlayerCityCard>()
+                //     .GroupBy(c => c.City.Colour)
+                //     .Where(g => g.Count() >= 5)
+                //     .Select(g => g.Key);
+                // todo: yield cure actions
             }
         }
     }
@@ -46,4 +61,6 @@ namespace pandemic
     public record DriveFerryCommand(Role Role, string City) : PlayerCommand;
 
     public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
+
+    public record BuildResearchStationCommand(string City) : PlayerCommand;
 }
