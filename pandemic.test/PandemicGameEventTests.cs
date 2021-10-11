@@ -25,7 +25,7 @@ namespace pandemic.test
             (game, events) = PandemicGame.CreateNewGame(options);
             var state = new PandemicSpielGameState(game);
             var tempgame2 = PandemicGame.FromEvents(events);
-            Assert.AreEqual(state.Game, tempgame2);
+            Assert.IsTrue(state.Game.IsSameStateAs(tempgame2));
 
             for (var i = 0; i < 1000 && !state.IsTerminal; i++)
             {
@@ -37,7 +37,8 @@ namespace pandemic.test
                 var action = RandomChoice(state.LegalActions(), random);
                 events.AddRange(state.ApplyAction(action));
                 var tempgame = PandemicGame.FromEvents(events);
-                Assert.AreEqual(state.Game, tempgame);
+                var asdf = state.Game.IsSameStateAs(tempgame);
+                Assert.IsTrue(state.Game.IsSameStateAs(tempgame));
             }
 
             var builtFromEvents = PandemicGame.FromEvents(events);

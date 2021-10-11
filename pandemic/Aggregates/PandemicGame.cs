@@ -42,6 +42,7 @@ namespace pandemic.Aggregates
             if (!Cities.SequenceEqual(other.Cities, City.DefaultEqualityComparer)) return false;
             if (!InfectionDrawPile.SequenceEqual(other.InfectionDrawPile)) return false;
             if (!InfectionDiscardPile.SequenceEqual(other.InfectionDiscardPile)) return false;
+            if (!PlayerDrawPile.SequenceEqual(other.PlayerDrawPile)) return false;
             if (!Cubes.SequenceEqual(other.Cubes)) return false;
 
             return true;
@@ -104,14 +105,11 @@ namespace pandemic.Aggregates
         public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
-            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
-
-            if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
+            PreCommandValidityCheck(role);
 
             var player = PlayerByRole(role);
 
-            if (player.ActionsRemaining == 0)
-                throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
+            if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
 
             if (!Board.IsAdjacent(player.Location, city))
             {
@@ -125,6 +123,19 @@ namespace pandemic.Aggregates
                 currentState = DoStuffAfterActions(currentState, events);
 
             return (currentState, events);
+        }
+
+        private void PreCommandValidityCheck(Role role)
+        {
+            if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
+
+            var player = PlayerByRole(role);
+
+            if (player.ActionsRemaining == 0)
+                throw new GameRuleViolatedException($"Action not allowed: Player {role} has no actions remaining");
+
+            if (player.Hand.Count > 7)
+                throw new GameRuleViolatedException($"Action not allowed: Player {role} has more than 7 cards in hand");
         }
 
         public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
