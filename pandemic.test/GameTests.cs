@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -181,6 +182,8 @@ namespace pandemic.test
             Assert.True(new PlayerCommandGenerator().LegalMoves(game).All(move => move is DiscardPlayerCardCommand));
         }
 
+        // todo: discard puts card on discard pile
+
         [Test]
         public void Cities_are_infected_after_player_discards()
         {
@@ -209,6 +212,37 @@ namespace pandemic.test
             Assert.AreEqual(initialGame.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
             Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
         }
+
+        // todo: build research station works
+        [Test]
+        public void Build_research_station_works()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Chicago",
+                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(new CityData() with
+                    {
+                        Name = "Chicago"
+                    }))
+                })
+            };
+
+            (game, _) = game.BuildResearchStation("Chicago");
+
+            Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
+            // todo: card discarded
+            // todo: card is on discard pile
+        }
+
+        // todo: build research station at non-location throws
+        // todo: build research station where one already exists throws
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
