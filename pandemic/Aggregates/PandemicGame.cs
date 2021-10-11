@@ -192,10 +192,14 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
+            if (!game.PlayerDrawPile.Any())
+                return game.ApplyEvent(new GameLost("No more player cards"), events);
+
             game = PickUpCard(game, events);
 
-            if (!game.PlayerDrawPile.Any()) return ApplyEvent(game, new GameLost("No more player cards"));
+            if (!game.PlayerDrawPile.Any())
+                return game.ApplyEvent(new GameLost("No more player cards"), events);
+
             game = PickUpCard(game, events);
 
             if (game.CurrentPlayer.Hand.Count > 7)
