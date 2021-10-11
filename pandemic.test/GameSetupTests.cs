@@ -1,42 +1,31 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
 {
     public class GameSetup
     {
-        [TestCaseSource(nameof(NewGameOptionCases))]
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Do_all_the_stuff_to_start_a_game(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
 
+            var numberOfPlayers = options.Roles.Count;
+            var numberOfCardsPerPlayer = PandemicGame.InitialPlayerHandSize(numberOfPlayers);
+            var numberOfEpidemicCards = PandemicGame.NumberOfEpidemicCards(options.Difficulty);
+
             Assert.AreEqual(options.Difficulty, game.Difficulty);
             Assert.AreEqual(2, game.InfectionRate);
             Assert.AreEqual(0, game.OutbreakCounter);
-            Assert.AreEqual(2, game.Players.Count);
+            Assert.AreEqual(options.Roles.Count, game.Players.Count);
             Assert.AreEqual(48, game.InfectionDrawPile.Count);
             Assert.AreEqual(0, game.InfectionDiscardPile.Count);
-            Assert.AreEqual(48 + PandemicGame.NumberOfEpidemicCards(options.Difficulty) - 8, game.PlayerDrawPile.Count);
-            Assert.IsTrue(game.Players.All(p => p.Hand.Count == 4));
+            Assert.AreEqual(48 + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer, game.PlayerDrawPile.Count);
+            Assert.IsTrue(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
             Assert.IsFalse(game.IsOver);
-        }
-
-        private static IEnumerable<NewGameOptions> NewGameOptionCases()
-        {
-            foreach (var difficulty in Enum.GetValues<Difficulty>())
-            {
-                yield return new NewGameOptions
-                {
-                    Difficulty = difficulty,
-                    Roles = new[] {Role.Medic, Role.Scientist}
-                };
-            }
-
-            // todo: more players
         }
     }
 }

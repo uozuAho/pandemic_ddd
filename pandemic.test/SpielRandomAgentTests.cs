@@ -4,21 +4,17 @@ using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
 {
     class SpielRandomAgentTests
     {
-        [Test]
-        public void PlaysGameToCompletion()
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
+        public void PlaysGameToCompletion(NewGameOptions options)
         {
             var random = new Random();
-            var options = new NewGameOptions
-            {
-                Difficulty = Difficulty.Introductory,
-                Roles = new[] {Role.Medic, Role.Scientist}
-            };
             PandemicGame game;
             List<IEvent> events;
             (game, events) = PandemicGame.CreateNewGame(options);

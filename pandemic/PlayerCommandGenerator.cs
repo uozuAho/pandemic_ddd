@@ -4,7 +4,7 @@ using pandemic.Values;
 
 namespace pandemic
 {
-    public class PlayerMoveGenerator
+    public class PlayerCommandGenerator
     {
         /// <summary>
         /// Determines available 'player commands' from the given game state.
@@ -18,19 +18,20 @@ namespace pandemic
         {
             if (game.IsOver) yield break;
 
-            if (game.CurrentPlayer.ActionsRemaining > 0)
-            {
-                foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
-                {
-                    yield return new DriveFerryPlayerCommand(game.CurrentPlayer.Role, city);
-                }
-            }
-
             if (game.CurrentPlayer.Hand.Count > 7)
             {
                 foreach (var card in game.CurrentPlayer.Hand)
                 {
                     yield return new DiscardPlayerCardCommand(card);
+                }
+                yield break;
+            }
+
+            if (game.CurrentPlayer.ActionsRemaining > 0)
+            {
+                foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
+                {
+                    yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
                 }
             }
         }
@@ -40,7 +41,7 @@ namespace pandemic
     {
     }
 
-    public record DriveFerryPlayerCommand(Role Role, string City) : PlayerCommand;
+    public record DriveFerryCommand(Role Role, string City) : PlayerCommand;
 
     public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
 }
