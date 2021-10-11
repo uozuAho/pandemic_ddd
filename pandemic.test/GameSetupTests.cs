@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
 {
     public class GameSetup
     {
-        [TestCaseSource(nameof(NewGameOptionCases))]
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Do_all_the_stuff_to_start_a_game(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
@@ -23,20 +22,6 @@ namespace pandemic.test
             Assert.AreEqual(48 + PandemicGame.NumberOfEpidemicCards(options.Difficulty) - 8, game.PlayerDrawPile.Count);
             Assert.IsTrue(game.Players.All(p => p.Hand.Count == 4));
             Assert.IsFalse(game.IsOver);
-        }
-
-        private static IEnumerable<NewGameOptions> NewGameOptionCases()
-        {
-            foreach (var difficulty in Enum.GetValues<Difficulty>())
-            {
-                yield return new NewGameOptions
-                {
-                    Difficulty = difficulty,
-                    Roles = new[] {Role.Medic, Role.Scientist}
-                };
-            }
-
-            // todo: more players
         }
     }
 }
