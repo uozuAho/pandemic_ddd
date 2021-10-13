@@ -403,7 +403,8 @@ namespace pandemic.Aggregates
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
-                })
+                }),
+                PlayerDiscardPile = game.PlayerDiscardPile.Add(discarded.Card)
             };
         }
 

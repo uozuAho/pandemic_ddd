@@ -205,7 +205,7 @@ namespace pandemic.test
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            game.DiscardPlayerCard(cardToDiscard);
+            (game, _) = game.DiscardPlayerCard(cardToDiscard);
 
             Assert.IsFalse(game.CurrentPlayer.Hand.CityCards.Contains(cardToDiscard));
             Assert.IsTrue(game.PlayerDiscardPile.Contains(cardToDiscard));
