@@ -168,7 +168,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.PlayerDrawPile.Take(7).ToImmutableList()
+                    Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
                 })
             };
 
@@ -194,7 +194,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.PlayerDrawPile.Take(7).ToImmutableList()
+                    Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
                 })
             };
 
@@ -222,7 +222,7 @@ namespace pandemic.test
             {
                 Players = initialGame.Players.Replace(initialGame.CurrentPlayer, initialGame.CurrentPlayer with
                 {
-                    Hand = initialGame.PlayerDrawPile.TakeLast(6).ToImmutableList()
+                    Hand = new PlayerHand(initialGame.PlayerDrawPile.TakeLast(6))
                 })
             };
 
@@ -232,7 +232,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             // act
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand[0]);
+            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
 
             Assert.AreEqual(initialGame.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(initialGame.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);

@@ -358,7 +358,7 @@ namespace pandemic.Aggregates
                 PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
                 Players = game.Players.Replace(player, player with
                 {
-                    Hand = cards.ToImmutableList()
+                    Hand = new PlayerHand(cards)
                 })
             };
         }
