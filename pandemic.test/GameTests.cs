@@ -182,7 +182,33 @@ namespace pandemic.test
             Assert.True(new PlayerCommandGenerator().LegalMoves(game).All(move => move is DiscardPlayerCardCommand));
         }
 
-        // todo: discard puts card on discard pile
+        [Test]
+        public void Player_discarded_card_goes_to_discard_pile()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.PlayerDrawPile.Take(7).ToImmutableList()
+                })
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            // act
+            var cardToDiscard = game.CurrentPlayer.Hand.First();
+            game.DiscardPlayerCard(cardToDiscard);
+
+            // todo: finish asserts when hand has CityCards method
+        }
 
         [Test]
         public void Cities_are_infected_after_player_discards()
