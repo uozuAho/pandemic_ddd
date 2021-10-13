@@ -237,7 +237,7 @@ namespace pandemic.test
 
             Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
             Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
-            // todo: card is on discard pile
+            Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
         }
 
         // todo: build research station at non-location throws
