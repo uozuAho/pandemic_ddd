@@ -7,8 +7,7 @@ namespace pandemic.Values
 {
     public record PlayerHand : IEnumerable<PlayerCard>
     {
-        // todo: make this private?
-        public ImmutableList<PlayerCard> Cards { get; init; } = ImmutableList<PlayerCard>.Empty;
+        private ImmutableList<PlayerCard> Cards { get; init; } = ImmutableList<PlayerCard>.Empty;
 
         private PlayerHand()
         {
@@ -27,12 +26,6 @@ namespace pandemic.Values
 
         public IEnumerable<PlayerCityCard> CityCards =>
             Cards.Where(c => c is PlayerCityCard).Cast<PlayerCityCard>();
-
-        // todo: rename to IsSameAs
-        public bool SequenceEqual(PlayerHand otherHand)
-        {
-            return Cards.SequenceEqual(otherHand.Cards);
-        }
 
         public PlayerHand Add(PlayerCard card)
         {
