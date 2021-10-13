@@ -213,7 +213,6 @@ namespace pandemic.test
             Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
         }
 
-        // todo: build research station works
         [Test]
         public void Build_research_station_works()
         {
@@ -222,22 +221,22 @@ namespace pandemic.test
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] {Role.Medic, Role.Scientist}
             });
+
+            var chicagoPlayerCard = new PlayerCityCard(new CityData {Name = "Chicago"});
+
             game = game with
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Location = "Chicago",
-                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(new CityData() with
-                    {
-                        Name = "Chicago"
-                    }))
+                    Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard)
                 })
             };
 
             (game, _) = game.BuildResearchStation("Chicago");
 
             Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
-            // todo: card discarded
+            Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
             // todo: card is on discard pile
         }
 
