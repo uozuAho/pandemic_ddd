@@ -334,7 +334,8 @@ namespace pandemic.Aggregates
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Hand = game.CurrentPlayer.Hand.Remove(playerCard)
-                })
+                }),
+                PlayerDiscardPile = game.PlayerDiscardPile.Add(playerCard)
             };
         }
 
