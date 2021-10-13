@@ -320,9 +320,7 @@ namespace pandemic.Aggregates
         private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
         {
             var city = game.Cities.Single(c => c.Name == @event.City);
-            // todo: hand needs a citycards method
-            var playerCard = game.CurrentPlayer.Hand
-                .Where(c => c is PlayerCityCard).Cast<PlayerCityCard>()
+            var playerCard = game.CurrentPlayer.Hand.CityCards
                 .Single(c => c.City.Name == @event.City);
 
             return game with
