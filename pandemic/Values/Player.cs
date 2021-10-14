@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace pandemic.Values
@@ -8,7 +7,7 @@ namespace pandemic.Values
     {
         public Role Role { get; init; }
         public string Location { get; init; } = "Atlanta";
-        public ImmutableList<PlayerCard> Hand { get; init; } = ImmutableList<PlayerCard>.Empty;
+        public PlayerHand Hand { get; init; } = PlayerHand.Empty;
         public int ActionsRemaining { get; init; } = 4;
 
         public bool IsSameStateAs(Player other)

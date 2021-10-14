@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Values;
 
@@ -14,7 +15,7 @@ namespace pandemic
         /// - playing an event card
         /// - drawing player cards
         /// </summary>
-        public IEnumerable<PlayerCommand> LegalMoves(PandemicGame game)
+        public IEnumerable<PlayerCommand> LegalCommands(PandemicGame game)
         {
             if (game.IsOver) yield break;
 
@@ -33,7 +34,25 @@ namespace pandemic
                 {
                     yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
                 }
+
+                if (CurrentPlayerCanBuildResearchStation(game))
+                    yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
+
+                // var canCure = game.CurrentPlayer.Hand
+                //     .Where(c => c is PlayerCityCard).Cast<PlayerCityCard>()
+                //     .GroupBy(c => c.City.Colour)
+                //     .Where(g => g.Count() >= 5)
+                //     .Select(g => g.Key);
+                // todo: yield cure actions
             }
+        }
+
+        private static bool CurrentPlayerCanBuildResearchStation(PandemicGame game)
+        {
+            if (game.CityByName(game.CurrentPlayer.Location).HasResearchStation)
+                return false;
+
+            return game.CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == game.CurrentPlayer.Location);
         }
     }
 
@@ -44,4 +63,6 @@ namespace pandemic
     public record DriveFerryCommand(Role Role, string City) : PlayerCommand;
 
     public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
+
+    public record BuildResearchStationCommand(string City) : PlayerCommand;
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace pandemic.Aggregates
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
         public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
+        public ImmutableList<PlayerCard> PlayerDiscardPile { get; init; } = ImmutableList<PlayerCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
@@ -73,7 +75,12 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
-            PlayerDrawPile = Board.Cities.Select(c => new PlayerCityCard(c.Name) as PlayerCard).ToImmutableList();
+
+            var atlanta = CityByName("Atlanta");
+            Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
+
+            PlayerDrawPile = Board.Cities
+                .Select(c => new PlayerCityCard(c) as PlayerCard).ToImmutableList();
         }
 
         public static PandemicGame CreateUninitialisedGame() => new ();
@@ -152,6 +159,25 @@ namespace pandemic.Aggregates
             return (game, events);
         }
 
+        public (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
+        {
+            ThrowIfGameOver(this);
+            ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+            if (CurrentPlayer.Location != city)
+                throw new GameRuleViolatedException($"Player must be in {city} to build research station");
+            // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
+            if (!CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == city))
+                throw new GameRuleViolatedException($"Current player does not have {city} in hand");
+            if (CityByName(city).HasResearchStation)
+                throw new GameRuleViolatedException($"{city} already has a research station");
+
+            var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
+
+            return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
+        }
+
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
@@ -194,7 +220,7 @@ namespace pandemic.Aggregates
         {
             // todo: shuffle
             var playerCards = Board.Cities
-                .Select(c => new PlayerCityCard(c.Name) as PlayerCard)
+                .Select(c => new PlayerCityCard(c) as PlayerCard)
                 .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
                 .ToImmutableList();
 
@@ -293,6 +319,7 @@ namespace pandemic.Aggregates
                 OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
                 PlayerAdded p => ApplyPlayerAdded(game, p),
                 PlayerMoved p => ApplyPlayerMoved(game, p),
+                ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
                 PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
@@ -301,6 +328,19 @@ namespace pandemic.Aggregates
                 GameLost g => game with { IsOver = true },
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
+        {
+            var city = game.Cities.Single(c => c.Name == @event.City);
+
+            return game with
+            {
+                Cities = game.Cities.Replace(city, city with
+                {
+                    HasResearchStation = true
+                })
             };
         }
 
@@ -323,7 +363,7 @@ namespace pandemic.Aggregates
                 PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
                 Players = game.Players.Replace(player, player with
                 {
-                    Hand = cards.ToImmutableList()
+                    Hand = new PlayerHand(cards)
                 })
             };
         }
@@ -370,7 +410,8 @@ namespace pandemic.Aggregates
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
-                })
+                }),
+                PlayerDiscardPile = game.PlayerDiscardPile.Add(discarded.Card)
             };
         }
 

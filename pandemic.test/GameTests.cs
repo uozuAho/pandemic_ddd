@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -167,7 +168,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = ImmutableList.Create(Enumerable.Repeat(new PlayerCityCard("asdf") as PlayerCard, 7).ToArray())
+                    Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
                 })
             };
 
@@ -178,7 +179,36 @@ namespace pandemic.test
 
             Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
             Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
-            Assert.True(new PlayerCommandGenerator().LegalMoves(game).All(move => move is DiscardPlayerCardCommand));
+            Assert.True(new PlayerCommandGenerator().LegalCommands(game).All(move => move is DiscardPlayerCardCommand));
+        }
+
+        [Test]
+        public void Player_discarded_card_goes_to_discard_pile()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
+                })
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+
+            // act
+            var cardToDiscard = game.CurrentPlayer.Hand.First();
+            (game, _) = game.DiscardPlayerCard(cardToDiscard);
+
+            Assert.IsFalse(game.CurrentPlayer.Hand.CityCards.Contains(cardToDiscard));
+            Assert.IsTrue(game.PlayerDiscardPile.Contains(cardToDiscard));
         }
 
         [Test]
@@ -193,7 +223,7 @@ namespace pandemic.test
             {
                 Players = initialGame.Players.Replace(initialGame.CurrentPlayer, initialGame.CurrentPlayer with
                 {
-                    Hand = initialGame.PlayerDrawPile.TakeLast(6).ToImmutableList()
+                    Hand = new PlayerHand(initialGame.PlayerDrawPile.TakeLast(6))
                 })
             };
 
@@ -203,11 +233,101 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             // act
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand[0]);
+            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
 
             Assert.AreEqual(initialGame.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(initialGame.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
             Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
+        }
+
+        [Test]
+        public void Build_research_station_works()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
+
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Chicago",
+                    Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard)
+                })
+            };
+
+            (game, _) = game.BuildResearchStation("Chicago");
+
+            Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
+            Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
+            Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
+        }
+
+        [Test]
+        public void Build_research_station_when_not_in_city_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(game.Board.City("Chicago")))
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+        }
+
+        [Test]
+        public void Build_research_station_without_correct_city_card_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty
+                })
+            };
+
+            Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+        }
+
+        [Test]
+        public void Build_research_station_where_already_exists_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(atlantaPlayerCard)
+                })
+            };
+
+            // atlanta starts with a research station
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
