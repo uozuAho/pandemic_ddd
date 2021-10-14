@@ -35,15 +35,8 @@ namespace pandemic
                     yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
                 }
 
-                var playerCardMatchingCurrentLocation = game.CurrentPlayer.Hand
-                    .SingleOrDefault(c => c is PlayerCityCard cityCard
-                                          && cityCard.City.Name == game.CurrentPlayer.Location)
-                    as PlayerCityCard;
-
-                // todo: don't yield if current city already has a station
-                if (playerCardMatchingCurrentLocation != null)
-                    yield return new BuildResearchStationCommand(
-                        playerCardMatchingCurrentLocation.City.Name);
+                if (CurrentPlayerCanBuildResearchStation(game))
+                    yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
 
                 // var canCure = game.CurrentPlayer.Hand
                 //     .Where(c => c is PlayerCityCard).Cast<PlayerCityCard>()
@@ -52,6 +45,14 @@ namespace pandemic
                 //     .Select(g => g.Key);
                 // todo: yield cure actions
             }
+        }
+
+        private static bool CurrentPlayerCanBuildResearchStation(PandemicGame game)
+        {
+            if (game.CityByName(game.CurrentPlayer.Location).HasResearchStation)
+                return false;
+
+            return game.CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == game.CurrentPlayer.Location);
         }
     }
 

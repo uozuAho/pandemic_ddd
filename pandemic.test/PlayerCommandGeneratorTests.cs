@@ -7,7 +7,7 @@ using pandemic.Values;
 
 namespace pandemic.test
 {
-    class PlayerCommandGeneratorTests
+    public class PlayerCommandGeneratorTests
     {
         [Test]
         public void Cannot_build_research_station_when_one_already_exists()
