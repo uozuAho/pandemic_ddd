@@ -267,7 +267,69 @@ namespace pandemic.test
             Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
         }
 
-        // todo: build research station at non-location throws
+        [Test]
+        public void Build_research_station_when_not_in_city_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(new CityData { Name = "Chicago" }))
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+        }
+
+        [Test]
+        public void Build_research_station_without_correct_city_card_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty
+                })
+            };
+
+            Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+        }
+
+        [Test]
+        public void Build_research_station_where_already_exists_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlantaPlayerCard = new PlayerCityCard(new CityData { Name = "Atlanta" });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(atlantaPlayerCard)
+                })
+            };
+
+            // atlanta starts with a research station
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+        }
+
         // todo: build research station where one already exists throws
 
         private static int TotalNumCubesOnCities(PandemicGame game)

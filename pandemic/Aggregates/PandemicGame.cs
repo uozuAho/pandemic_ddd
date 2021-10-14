@@ -75,6 +75,10 @@ namespace pandemic.Aggregates
         private PandemicGame()
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+
+            var atlanta = CityByName("Atlanta");
+            Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
+
             PlayerDrawPile = Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard).ToImmutableList();
         }
@@ -160,6 +164,14 @@ namespace pandemic.Aggregates
             ThrowIfGameOver(this);
             ThrowIfNoActionsRemaining(CurrentPlayer);
             ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+            if (CurrentPlayer.Location != city)
+                throw new GameRuleViolatedException($"Player must be in {city} to build research station");
+            // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
+            if (!CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == city))
+                throw new GameRuleViolatedException($"Current player does not have {city} in hand");
+            if (CityByName(city).HasResearchStation)
+                throw new GameRuleViolatedException($"{city} already has a research station");
 
             return ApplyEvents(new ResearchStationBuilt(city));
         }
@@ -329,6 +341,7 @@ namespace pandemic.Aggregates
                 {
                     HasResearchStation = true
                 }),
+                // todo: move this to discard player card event in command handler
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Hand = game.CurrentPlayer.Hand.Remove(playerCard)
