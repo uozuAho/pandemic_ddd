@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
-using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -13,9 +12,10 @@ namespace pandemic.test
         public void Cannot_build_research_station_when_one_already_exists()
         {
             var generator = new PlayerCommandGenerator();
-            var atlantaPlayerCard = new PlayerCityCard(new CityData {Name = "Atlanta"});
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
 
-            var game = PandemicGame.CreateUninitialisedGame() with
+            game = game with
             {
                 Players = ImmutableList.Create(new Player
                 {

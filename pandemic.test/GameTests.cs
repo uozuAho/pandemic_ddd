@@ -249,7 +249,7 @@ namespace pandemic.test
                 Roles = new[] {Role.Medic, Role.Scientist}
             });
 
-            var chicagoPlayerCard = new PlayerCityCard(new CityData {Name = "Chicago"});
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
 
             game = game with
             {
@@ -279,7 +279,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(new CityData { Name = "Chicago" }))
+                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(game.Board.City("Chicago")))
                 })
             };
 
@@ -316,7 +316,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            var atlantaPlayerCard = new PlayerCityCard(new CityData { Name = "Atlanta" });
+            var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
 
             game = game with
             {

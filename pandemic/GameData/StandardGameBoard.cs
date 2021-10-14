@@ -16,251 +16,74 @@ namespace pandemic.GameData
             return AdjacentCities[city1].Contains(city2);
         }
 
+        public CityData City(string name) => CityLookup[name];
+
         public IEnumerable<CityData> Cities => _cities.Select(c => c);
 
         public readonly Dictionary<string, List<string>> AdjacentCities = CreateAdjacencyLookup();
 
-        private static readonly CityData[] _cities = {
-            new CityData
+        private static Dictionary<string, List<string>> CreateAdjacencyLookup()
+        {
+            var lookup = _cities.ToDictionary(c => c.Name, _ => new List<string>());
+
+            foreach (var (city1, city2) in Edges)
             {
-                Name = "San Francisco",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Chicago",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Montreal",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "New York",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Washington",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Atlanta",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Madrid",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "London",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Paris",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Essen",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Milan",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "St. Petersburg",
-                Colour = Colour.Blue,
-            },
-            new CityData
-            {
-                Name = "Algiers",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Istanbul",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Moscow",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Cairo",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Baghdad",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Tehran",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Delhi",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Karachi",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Riyadh",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Mumbai",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Chennai",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Kolkata",
-                Colour = Colour.Black,
-            },
-            new CityData
-            {
-                Name = "Beijing",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Seoul",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Tokyo",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Shanghai",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Hong Kong",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Taipei",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Osaka",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Bangkok",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Ho Chi Minh City",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Manila",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Jakarta",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Sydney",
-                Colour = Colour.Red,
-            },
-            new CityData
-            {
-                Name = "Khartoum",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Johannesburg",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Kinshasa",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Lagos",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Sao Paulo",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Buenos Aires",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Santiago",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Lima",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Bogota",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Mexico City",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Los Angeles",
-                Colour = Colour.Yellow,
-            },
-            new CityData
-            {
-                Name = "Miami",
-                Colour = Colour.Yellow,
+                lookup[city1].Add(city2);
+                lookup[city2].Add(city1);
             }
+
+            return lookup;
+        }
+
+        private static readonly CityData[] _cities = {
+            new("San Francisco", Colour.Blue),
+            new("Chicago", Colour.Blue),
+            new("Montreal", Colour.Blue),
+            new("New York", Colour.Blue),
+            new("Washington", Colour.Blue),
+            new("Atlanta", Colour.Blue),
+            new("Madrid", Colour.Blue),
+            new("London", Colour.Blue),
+            new("Paris", Colour.Blue),
+            new("Essen", Colour.Blue),
+            new("Milan", Colour.Blue),
+            new("St. Petersburg", Colour.Blue),
+            new("Algiers", Colour.Black),
+            new("Istanbul", Colour.Black),
+            new("Moscow", Colour.Black),
+            new("Cairo", Colour.Black),
+            new("Baghdad", Colour.Black),
+            new("Tehran", Colour.Black),
+            new("Delhi", Colour.Black),
+            new("Karachi", Colour.Black),
+            new("Riyadh", Colour.Black),
+            new("Mumbai", Colour.Black),
+            new("Chennai", Colour.Black),
+            new("Kolkata", Colour.Black),
+            new("Beijing", Colour.Red),
+            new("Seoul", Colour.Red),
+            new("Tokyo", Colour.Red),
+            new("Shanghai", Colour.Red),
+            new("Hong Kong", Colour.Red),
+            new("Taipei", Colour.Red),
+            new("Osaka", Colour.Red),
+            new("Bangkok", Colour.Red),
+            new("Ho Chi Minh City", Colour.Red),
+            new("Manila", Colour.Red),
+            new("Jakarta", Colour.Red),
+            new("Sydney", Colour.Red),
+            new("Khartoum", Colour.Yellow),
+            new("Johannesburg", Colour.Yellow),
+            new("Kinshasa", Colour.Yellow),
+            new("Lagos", Colour.Yellow),
+            new("Sao Paulo", Colour.Yellow),
+            new("Buenos Aires", Colour.Yellow),
+            new("Santiago", Colour.Yellow),
+            new("Lima", Colour.Yellow),
+            new("Bogota", Colour.Yellow),
+            new("Mexico City", Colour.Yellow),
+            new("Los Angeles", Colour.Yellow),
+            new("Miami", Colour.Yellow)
         };
 
         private static readonly List<(string, string)> Edges = new()
@@ -361,18 +184,5 @@ namespace pandemic.GameData
         };
 
         private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
-
-        private static Dictionary<string, List<string>> CreateAdjacencyLookup()
-        {
-            var lookup = _cities.ToDictionary(c => c.Name, _ => new List<string>());
-
-            foreach (var (city1, city2) in Edges)
-            {
-                lookup[city1].Add(city2);
-                lookup[city2].Add(city1);
-            }
-
-            return lookup;
-        }
     }
 }
