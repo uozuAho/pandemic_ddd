@@ -36,7 +36,7 @@ namespace pandemic
 
         public IEnumerable<PlayerCommand> LegalActions()
         {
-            return _commandGenerator.LegalMoves(Game);
+            return _commandGenerator.LegalCommands(Game);
         }
 
         public string ActionToString(int currentPlayer, int action)

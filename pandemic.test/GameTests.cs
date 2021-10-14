@@ -179,7 +179,7 @@ namespace pandemic.test
 
             Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
             Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
-            Assert.True(new PlayerCommandGenerator().LegalMoves(game).All(move => move is DiscardPlayerCardCommand));
+            Assert.True(new PlayerCommandGenerator().LegalCommands(game).All(move => move is DiscardPlayerCardCommand));
         }
 
         [Test]

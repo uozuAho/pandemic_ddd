@@ -15,7 +15,7 @@ namespace pandemic
         /// - playing an event card
         /// - drawing player cards
         /// </summary>
-        public IEnumerable<PlayerCommand> LegalMoves(PandemicGame game)
+        public IEnumerable<PlayerCommand> LegalCommands(PandemicGame game)
         {
             if (game.IsOver) yield break;
 

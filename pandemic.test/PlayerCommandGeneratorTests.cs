@@ -25,8 +25,7 @@ namespace pandemic.test
                 })
             };
 
-            // todo: rename LegalMoves to legal commands
-            Assert.False(generator.LegalMoves(game).Any(c => c is BuildResearchStationCommand));
+            Assert.False(generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
         }
     }
 }
