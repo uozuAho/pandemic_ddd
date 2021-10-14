@@ -173,7 +173,9 @@ namespace pandemic.Aggregates
             if (CityByName(city).HasResearchStation)
                 throw new GameRuleViolatedException($"{city} already has a research station");
 
-            return ApplyEvents(new ResearchStationBuilt(city));
+            var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
+
+            return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -332,21 +334,13 @@ namespace pandemic.Aggregates
         private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
         {
             var city = game.Cities.Single(c => c.Name == @event.City);
-            var playerCard = game.CurrentPlayer.Hand.CityCards
-                .Single(c => c.City.Name == @event.City);
 
             return game with
             {
                 Cities = game.Cities.Replace(city, city with
                 {
                     HasResearchStation = true
-                }),
-                // todo: move this to discard player card event in command handler
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    Hand = game.CurrentPlayer.Hand.Remove(playerCard)
-                }),
-                PlayerDiscardPile = game.PlayerDiscardPile.Add(playerCard)
+                })
             };
         }
 

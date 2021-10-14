@@ -330,8 +330,6 @@ namespace pandemic.test
             Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
         }
 
-        // todo: build research station where one already exists throws
-
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));

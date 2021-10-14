@@ -40,6 +40,7 @@ namespace pandemic
                                           && cityCard.City.Name == game.CurrentPlayer.Location)
                     as PlayerCityCard;
 
+                // todo: don't yield if current city already has a station
                 if (playerCardMatchingCurrentLocation != null)
                     yield return new BuildResearchStationCommand(
                         playerCardMatchingCurrentLocation.City.Name);
