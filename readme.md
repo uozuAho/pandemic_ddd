@@ -7,5 +7,10 @@ Using the rules here: https://www.ultraboardgames.com/pandemic/game-rules.php
 # todo
 - enable win
     - build research stations: done
-    - discard 5 cards of same colour to cure disease of that colour
+    - cure
+        - cured marker for each colour
+        - discard 5 cards of same colour at a research station to cure disease
+          of that colour
+            - set cured marker to true
+        - if all cured, win
 - check code todos

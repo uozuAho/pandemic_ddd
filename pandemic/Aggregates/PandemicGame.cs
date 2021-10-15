@@ -25,6 +25,8 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
+        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
+            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => false);
 
         public readonly StandardGameBoard Board = new();
 
