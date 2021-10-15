@@ -330,6 +330,31 @@ namespace pandemic.test
             Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
         }
 
+        [Test]
+        public void Cure_disease_works()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+                })
+            };
+
+            //(game, _) = game.DiscoverCure(Colour.Black);
+        }
+
+        // todo: cure a non research station throws
+        // todo: cure with not enough cards throws
+        // todo: cure when already cured throws
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
