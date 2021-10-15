@@ -348,9 +348,15 @@ namespace pandemic.test
                 })
             };
 
-            //(game, _) = game.DiscoverCure(Colour.Black);
+            (game, _) = game.DiscoverCure(Colour.Black);
+
+            Assert.IsTrue(game.CureDiscovered[Colour.Black]);
+            Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
+            Assert.AreEqual(5, game.PlayerDiscardPile.Count);
+            Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
         }
 
+        // todo: cure action: player chooses 5 cards
         // todo: cure a non research station throws
         // todo: cure with not enough cards throws
         // todo: cure when already cured throws

@@ -180,6 +180,15 @@ namespace pandemic.Aggregates
             return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
         }
 
+        public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(Colour colour)
+        {
+            ThrowIfGameOver(this);
+            ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+            return ApplyEvents(new CureDiscovered(colour));
+        }
+
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
             ThrowIfGameOver(game);
@@ -327,7 +336,8 @@ namespace pandemic.Aggregates
                 PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
-                GameLost g => game with { IsOver = true },
+                CureDiscovered c => game with {CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true)},
+                GameLost g => game with {IsOver = true},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
