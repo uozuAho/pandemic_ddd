@@ -19,6 +19,7 @@ namespace pandemic
         {
             if (game.IsOver) yield break;
 
+            // todo: extract and concat these
             if (game.CurrentPlayer.Hand.Count > 7)
             {
                 foreach (var card in game.CurrentPlayer.Hand)
@@ -38,14 +39,22 @@ namespace pandemic
                 if (CurrentPlayerCanBuildResearchStation(game))
                     yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
 
-                foreach (var cureCards in game.CurrentPlayer.Hand
-                    .CityCards
-                    .GroupBy(c => c.City.Colour)
-                    .Where(g => g.Count() >= 5))
-                {
-                    // todo: yield all combinations of cards
-                    yield return new DiscoverCureCommand(cureCards.ToArray());
-                }
+                foreach (var playerCommand in AvailableCureCommands(game)) yield return playerCommand;
+            }
+        }
+
+        private static IEnumerable<PlayerCommand> AvailableCureCommands(PandemicGame game)
+        {
+            if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
+
+            foreach (var cureCards in game.CurrentPlayer.Hand
+                .CityCards
+                .GroupBy(c => c.City.Colour)
+                .Where(g => g.Count() >= 5))
+            {
+                if (!game.CureDiscovered[cureCards.Key])
+                    // todo: yield all combinations if > 5 cards
+                    yield return new DiscoverCureCommand(cureCards.Take(5).ToArray());
             }
         }
 

@@ -56,5 +56,29 @@ namespace pandemic.test
 
             Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is DiscoverCureCommand));
         }
+
+        [Test]
+        public void Cure_uses_5_cards()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(6))
+                })
+            };
+
+            var cureCommand =
+                (DiscoverCureCommand) _generator.LegalCommands(game).Single(c => c is DiscoverCureCommand);
+
+            Assert.AreEqual(5, cureCommand.Cards.Length);
+        }
     }
 }
