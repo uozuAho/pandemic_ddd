@@ -17,20 +17,20 @@ namespace pandemic
         /// </summary>
         public IEnumerable<PlayerCommand> LegalCommands(PandemicGame game)
         {
-            if (game.IsOver) yield break;
+            if (game.IsOver) return Enumerable.Empty<PlayerCommand>();
 
-            // todo: extract and concat these
-
-            foreach (var playerCommand in DiscardCommands(game)) yield return playerCommand;
+            var discards = DiscardCommands(game).ToList();
+            if (discards.Any())
+                return discards;
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
-                foreach (var playerCommand in DriveFerryCommands(game)) yield return playerCommand;
-
-                foreach (var playerCommand in BuildResearchStationCommands(game)) yield return playerCommand;
-
-                foreach (var playerCommand in AvailableCureCommands(game)) yield return playerCommand;
+                return DriveFerryCommands(game)
+                    .Concat(BuildResearchStationCommands(game))
+                    .Concat(AvailableCureCommands(game));
             }
+
+            return Enumerable.Empty<PlayerCommand>();
         }
 
         private static IEnumerable<PlayerCommand> DiscardCommands(PandemicGame game)
