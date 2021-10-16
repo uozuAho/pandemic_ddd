@@ -30,6 +30,7 @@ namespace pandemic.Aggregates
 
         public readonly StandardGameBoard Board = new();
 
+        public bool IsWon => CureDiscovered.All(c => c.Value);
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
@@ -369,6 +370,7 @@ namespace pandemic.Aggregates
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 CureDiscovered c => ApplyCureDiscovered(game, c),
+                // todo: add loss reason?
                 GameLost g => game with {IsOver = true},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)

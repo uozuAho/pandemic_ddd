@@ -449,6 +449,37 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Cure_last_disease_wins()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                CureDiscovered = new Dictionary<Colour, bool>
+                {
+                    {Colour.Black, false},
+                    {Colour.Blue, true},
+                    {Colour.Red, true},
+                    {Colour.Yellow, true}
+                }.ToImmutableDictionary(),
+
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5)),
+                })
+            };
+
+            (game, _) = game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray());
+
+            Assert.IsTrue(game.IsWon);
+        }
+
+        [Test]
         public void Cure_when_not_at_research_station_throws()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
