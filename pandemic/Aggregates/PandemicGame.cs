@@ -11,7 +11,7 @@ namespace pandemic.Aggregates
 {
     public record PandemicGame
     {
-        public bool IsOver { get; init; } = false;
+        public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
@@ -25,15 +25,20 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
+        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
+            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => false);
 
         public readonly StandardGameBoard Board = new();
 
+        public bool IsOver => IsLost || IsWon;
+        public bool IsWon => CureDiscovered.All(c => c.Value);
+        public bool IsLost => LossReason != "";
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
         public bool IsSameStateAs(PandemicGame other)
         {
-            if (IsOver != other.IsOver) return false;
+            if (LossReason != other.LossReason) return false;
             if (Difficulty != other.Difficulty) return false;
             if (InfectionRate != other.InfectionRate) return false;
             if (OutbreakCounter != other.OutbreakCounter) return false;
@@ -46,6 +51,7 @@ namespace pandemic.Aggregates
             if (!InfectionDiscardPile.SequenceEqual(other.InfectionDiscardPile)) return false;
             if (!PlayerDrawPile.SequenceEqual(other.PlayerDrawPile)) return false;
             if (!Cubes.SequenceEqual(other.Cubes)) return false;
+            if (!CureDiscovered.SequenceEqual(other.CureDiscovered)) return false;
 
             return true;
         }
@@ -122,7 +128,7 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
+        public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
             ThrowIfNotRolesTurn(role);
@@ -139,12 +145,7 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
-
-            if (currentState.CurrentPlayer.ActionsRemaining == 0)
-                currentState = DoStuffAfterActions(currentState, events);
-
-            return (currentState, events);
+            return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
         }
 
         public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
@@ -153,7 +154,7 @@ namespace pandemic.Aggregates
 
             var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
-            if (CurrentPlayer.ActionsRemaining == 0)
+            if (game.CurrentPlayer.ActionsRemaining == 0 && game.CurrentPlayer.Hand.Count <= 7)
                 game = InfectCities(game, events);
 
             return (game, events);
@@ -175,7 +176,46 @@ namespace pandemic.Aggregates
 
             var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
-            return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
+            return ApplyAndEndTurnIfNeeded(new List<IEvent>
+            {
+                new ResearchStationBuilt(city),
+                new PlayerCardDiscarded(playerCard)
+            });
+        }
+
+        public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
+        {
+            ThrowIfGameOver(this);
+            ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+            if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+                throw new GameRuleViolatedException("Can only cure at a city with a research station");
+
+            if (cards.Length != 5)
+                throw new GameRuleViolatedException("Exactly 5 cards must be used to cure");
+
+            var colour = cards.First().City.Colour;
+
+            if (CureDiscovered[colour])
+                throw new GameRuleViolatedException($"{colour} is already cured");
+
+            if (cards.Any(c => c.City.Colour != colour))
+                throw new GameRuleViolatedException("Cure: All cards must be the same colour");
+
+            return ApplyAndEndTurnIfNeeded(cards
+                .Select(c => new PlayerCardDiscarded(c))
+                .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+        }
+
+        private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
+        {
+            var (currentState, eventList) = ApplyEvents(events);
+
+            if (currentState.CurrentPlayer.ActionsRemaining == 0)
+                currentState = DoStuffAfterActions(currentState, eventList);
+
+            return (currentState, eventList);
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -296,10 +336,16 @@ namespace pandemic.Aggregates
         #endregion
 
         #region Events
+        private (PandemicGame, ICollection<IEvent>) ApplyEvents(IEnumerable<IEvent> events)
+        {
+            var eventList = events.ToList();
+            var state = eventList.Aggregate(this, ApplyEvent);
+            return (state, eventList);
+        }
+
         private (PandemicGame, ICollection<IEvent>) ApplyEvents(params IEvent[] events)
         {
-            var state = events.Aggregate(this, ApplyEvent);
-            return (state, events.ToList());
+            return ApplyEvents(events.AsEnumerable());
         }
 
         private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
@@ -325,9 +371,22 @@ namespace pandemic.Aggregates
                 PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
-                GameLost g => game with { IsOver = true },
+                CureDiscovered c => ApplyCureDiscovered(game, c),
+                GameLost g => game with {LossReason = g.Reason},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyCureDiscovered(PandemicGame game, CureDiscovered c)
+        {
+            return game with
+            {
+                CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
+                })
             };
         }
 
@@ -340,6 +399,10 @@ namespace pandemic.Aggregates
                 Cities = game.Cities.Replace(city, city with
                 {
                     HasResearchStation = true
+                }),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
                 })
             };
         }

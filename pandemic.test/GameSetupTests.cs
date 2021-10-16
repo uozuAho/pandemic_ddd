@@ -26,6 +26,7 @@ namespace pandemic.test
             Assert.AreEqual(48 + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer, game.PlayerDrawPile.Count);
             Assert.IsTrue(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
             Assert.IsTrue(game.CityByName("Atlanta").HasResearchStation);
+            Assert.IsTrue(game.CureDiscovered.All(kv => !kv.Value));
             Assert.IsFalse(game.IsOver);
         }
     }
