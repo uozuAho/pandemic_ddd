@@ -193,6 +193,10 @@ namespace pandemic.Aggregates
                 throw new GameRuleViolatedException("5 cards are needed to cure");
 
             var colour = cards.First().City.Colour;
+
+            if (cards.Any(c => c.City.Colour != colour))
+                throw new GameRuleViolatedException("Cure: All cards must be the same colour");
+
             var events = cards
                 .Select(c => new PlayerCardDiscarded(c))
                 .Concat<IEvent>(new[] {new CureDiscovered(colour)})

@@ -400,7 +400,35 @@ namespace pandemic.test
                 game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
         }
 
-        // todo: cure with not enough cards throws
+        [Test]
+        public void Cure_with_different_colours_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(new []
+                    {
+                        new PlayerCityCard(new CityData("asdf", Colour.Black)),
+                        new PlayerCityCard(new CityData("asdf", Colour.Black)),
+                        new PlayerCityCard(new CityData("asdf", Colour.Black)),
+                        new PlayerCityCard(new CityData("asdf", Colour.Black)),
+                        new PlayerCityCard(new CityData("asdf", Colour.Blue)),
+                    })
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+        }
+
         // todo: cure with not same colour throws
         // todo: cure when already cured throws
 
