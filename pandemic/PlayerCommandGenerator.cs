@@ -65,4 +65,6 @@ namespace pandemic
     public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
 
     public record BuildResearchStationCommand(string City) : PlayerCommand;
+
+    public record CureDiseaseCommand(PlayerCityCard[] Cards) : PlayerCommand;
 }

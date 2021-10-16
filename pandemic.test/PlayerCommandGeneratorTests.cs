@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -26,6 +27,29 @@ namespace pandemic.test
             };
 
             Assert.False(generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
+        public void Can_cure()
+        {
+            var generator = new PlayerCommandGenerator();
+
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+                })
+            };
+
+            Assert.IsTrue(generator.LegalCommands(game).Any(c => c is CureDiseaseCommand));
         }
     }
 }
