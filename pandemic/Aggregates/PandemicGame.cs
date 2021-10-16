@@ -48,6 +48,7 @@ namespace pandemic.Aggregates
             if (!InfectionDiscardPile.SequenceEqual(other.InfectionDiscardPile)) return false;
             if (!PlayerDrawPile.SequenceEqual(other.PlayerDrawPile)) return false;
             if (!Cubes.SequenceEqual(other.Cubes)) return false;
+            if (!CureDiscovered.SequenceEqual(other.CureDiscovered)) return false;
 
             return true;
         }
@@ -190,7 +191,6 @@ namespace pandemic.Aggregates
                 throw new GameRuleViolatedException("Can only cure at a city with a research station");
 
             if (cards.Length != 5)
-                // todo: generator attempts to cure with > 5
                 throw new GameRuleViolatedException("Exactly 5 cards must be used to cure");
 
             var colour = cards.First().City.Colour;

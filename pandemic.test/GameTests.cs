@@ -177,8 +177,6 @@ namespace pandemic.test
             Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
         }
 
-        // todo: all other actions can end turn
-
         [Test]
         public void Player_must_discard_when_hand_is_full()
         {

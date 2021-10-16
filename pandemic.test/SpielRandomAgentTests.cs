@@ -25,7 +25,6 @@ namespace pandemic.test
                 var legalActions = state.LegalActions();
                 if (!legalActions.Any())
                 {
-                    // todo: this sometimes fails: include cured in state comparison?
                     Assert.Fail($"No legal actions! State: \n\n{state}\n\n Events:\n{string.Join('\n', events)}");
                 }
                 var action = RandomChoice(state.LegalActions(), random);
