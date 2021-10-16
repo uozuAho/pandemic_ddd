@@ -351,7 +351,14 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyCureDiscovered(PandemicGame game, CureDiscovered c)
         {
-            return game with {CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true)};
+            return game with
+            {
+                CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
+                })
+            };
         }
 
         private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
