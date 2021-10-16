@@ -186,6 +186,9 @@ namespace pandemic.Aggregates
             ThrowIfNoActionsRemaining(CurrentPlayer);
             ThrowIfPlayerMustDiscard(CurrentPlayer);
 
+            if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+                throw new GameRuleViolatedException("Can only cure at a city with a research station");
+
             var colour = cards.First().City.Colour;
             var events = cards
                 .Select(c => new PlayerCardDiscarded(c))

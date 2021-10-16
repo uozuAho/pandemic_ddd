@@ -356,8 +356,28 @@ namespace pandemic.test
             Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
         }
 
-        // todo: cure action: player chooses 5 cards
-        // todo: cure a non research station throws
+        [Test]
+        public void Cure_when_not_at_research_station_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+        }
+
         // todo: cure with not enough cards throws
         // todo: cure when already cured throws
 
