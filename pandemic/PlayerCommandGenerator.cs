@@ -25,10 +25,7 @@ namespace pandemic
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
-                foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
-                {
-                    yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
-                }
+                foreach (var playerCommand in DriveFerryCommands(game)) yield return playerCommand;
 
                 if (CurrentPlayerCanBuildResearchStation(game))
                     yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
@@ -48,6 +45,12 @@ namespace pandemic
                     yield return new DiscardPlayerCardCommand(card);
                 }
             }
+        }
+
+        private static IEnumerable<PlayerCommand> DriveFerryCommands(PandemicGame game)
+        {
+            return game.Board.AdjacentCities[game.CurrentPlayer.Location]
+                .Select(city => new DriveFerryCommand(game.CurrentPlayer.Role, city));
         }
 
         private static IEnumerable<PlayerCommand> AvailableCureCommands(PandemicGame game)
