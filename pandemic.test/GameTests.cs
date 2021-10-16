@@ -348,7 +348,7 @@ namespace pandemic.test
                 })
             };
 
-            (game, _) = game.DiscoverCure(Colour.Black);
+            (game, _) = game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray());
 
             Assert.IsTrue(game.CureDiscovered[Colour.Black]);
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);

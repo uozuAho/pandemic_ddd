@@ -180,13 +180,19 @@ namespace pandemic.Aggregates
             return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
         }
 
-        public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(Colour colour)
+        public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
         {
             ThrowIfGameOver(this);
             ThrowIfNoActionsRemaining(CurrentPlayer);
             ThrowIfPlayerMustDiscard(CurrentPlayer);
 
-            return ApplyEvents(new CureDiscovered(colour));
+            var colour = cards.First().City.Colour;
+            var events = cards
+                .Select(c => new PlayerCardDiscarded(c))
+                .Concat<IEvent>(new[] {new CureDiscovered(colour)})
+                .ToArray();
+
+            return ApplyEvents(events);
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -336,11 +342,16 @@ namespace pandemic.Aggregates
                 PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
-                CureDiscovered c => game with {CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true)},
+                CureDiscovered c => ApplyCureDiscovered(game, c),
                 GameLost g => game with {IsOver = true},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
+        }
+
+        private static PandemicGame ApplyCureDiscovered(PandemicGame game, CureDiscovered c)
+        {
+            return game with {CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true)};
         }
 
         private static PandemicGame ApplyResearchStationBuilt(PandemicGame game, ResearchStationBuilt @event)
