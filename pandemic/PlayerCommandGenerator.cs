@@ -38,12 +38,14 @@ namespace pandemic
                 if (CurrentPlayerCanBuildResearchStation(game))
                     yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
 
-                // var canCure = game.CurrentPlayer.Hand
-                //     .Where(c => c is PlayerCityCard).Cast<PlayerCityCard>()
-                //     .GroupBy(c => c.City.Colour)
-                //     .Where(g => g.Count() >= 5)
-                //     .Select(g => g.Key);
-                // todo: yield cure actions
+                foreach (var cureCards in game.CurrentPlayer.Hand
+                    .CityCards
+                    .GroupBy(c => c.City.Colour)
+                    .Where(g => g.Count() >= 5))
+                {
+                    // todo: yield all combinations of cards
+                    yield return new CureDiseaseCommand(cureCards.ToArray());
+                }
             }
         }
 
