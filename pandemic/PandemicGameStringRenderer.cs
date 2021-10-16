@@ -9,7 +9,8 @@ namespace pandemic
         public static string ToString(PandemicGame game)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"is game over?: {game.IsOver}");
+            if (game.IsWon) sb.AppendLine("Game won!");
+            else sb.AppendLine("Game lost. " + game.LossReason);
             sb.AppendLine($"infection rate: {game.InfectionRate}");
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
@@ -18,7 +19,7 @@ namespace pandemic
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
             sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
             sb.AppendLine($"  remaining actions: {game.CurrentPlayer.ActionsRemaining}");
-            sb.AppendLine($"  hand: {string.Join(',', game.CurrentPlayer.Hand)}");
+            sb.AppendLine($"  hand: {string.Join("\n    ", game.CurrentPlayer.Hand)}");
             sb.AppendLine("cities with cubes:");
             foreach (var city in game.Cities)
             {
