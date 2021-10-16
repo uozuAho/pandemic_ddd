@@ -9,10 +9,17 @@ namespace pandemic.test
 {
     public class PlayerCommandGeneratorTests
     {
+        private PlayerCommandGenerator _generator;
+
+        [SetUp]
+        public void Setup()
+        {
+            _generator = new PlayerCommandGenerator();
+        }
+
         [Test]
         public void Cannot_build_research_station_when_one_already_exists()
         {
-            var generator = new PlayerCommandGenerator();
             var game = PandemicGame.CreateUninitialisedGame();
             var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
 
@@ -26,14 +33,12 @@ namespace pandemic.test
                 })
             };
 
-            Assert.False(generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
+            Assert.False(_generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
         }
 
         [Test]
         public void Can_cure()
         {
-            var generator = new PlayerCommandGenerator();
-
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
@@ -49,7 +54,7 @@ namespace pandemic.test
                 })
             };
 
-            Assert.IsTrue(generator.LegalCommands(game).Any(c => c is CureDiseaseCommand));
+            Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is CureDiseaseCommand));
         }
     }
 }
