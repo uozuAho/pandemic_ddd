@@ -204,7 +204,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Player_discarded_card_goes_to_discard_pile()
+        public void Discard_player_card_goes_to_discard_pile()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -233,7 +233,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cities_are_infected_after_player_discards()
+        public void Discard_player_card_when_no_actions_infects_cities()
         {
             var (initialGame, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -260,6 +260,8 @@ namespace pandemic.test
             Assert.AreEqual(initialGame.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
             Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
         }
+
+        // todo: discard another when 9 cards in hand
 
         [Test]
         public void Build_research_station_works()
