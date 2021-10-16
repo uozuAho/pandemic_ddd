@@ -141,12 +141,7 @@ namespace pandemic.Aggregates
                     $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
             }
 
-            var (currentState, events) = ApplyEvents(new PlayerMoved(role, city));
-
-            if (currentState.CurrentPlayer.ActionsRemaining == 0)
-                currentState = DoStuffAfterActions(currentState, events);
-
-            return (currentState, events);
+            return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
         }
 
         public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
@@ -155,6 +150,7 @@ namespace pandemic.Aggregates
 
             var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
+            // todo: does this break if another card needs to be discarded?
             if (CurrentPlayer.ActionsRemaining == 0)
                 game = InfectCities(game, events);
 
@@ -177,7 +173,11 @@ namespace pandemic.Aggregates
 
             var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
-            return ApplyEvents(new ResearchStationBuilt(city), new PlayerCardDiscarded(playerCard));
+            return ApplyAndEndTurnIfNeeded(new List<IEvent>
+            {
+                new ResearchStationBuilt(city),
+                new PlayerCardDiscarded(playerCard)
+            });
         }
 
         public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
@@ -201,14 +201,20 @@ namespace pandemic.Aggregates
             if (cards.Any(c => c.City.Colour != colour))
                 throw new GameRuleViolatedException("Cure: All cards must be the same colour");
 
-            var events = cards
+            return ApplyAndEndTurnIfNeeded(cards
                 .Select(c => new PlayerCardDiscarded(c))
-                .Concat<IEvent>(new[] {new CureDiscovered(colour)})
-                .ToArray();
+                .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+        }
 
-            // todo: if last action, do end of turn stuff
+        // todo: return enumerable instead?
+        private (PandemicGame, ICollection<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
+        {
+            var (currentState, eventList) = ApplyEvents(events);
 
-            return ApplyEvents(events);
+            if (currentState.CurrentPlayer.ActionsRemaining == 0)
+                currentState = DoStuffAfterActions(currentState, eventList);
+
+            return (currentState, eventList);
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -329,10 +335,16 @@ namespace pandemic.Aggregates
         #endregion
 
         #region Events
+        private (PandemicGame, ICollection<IEvent>) ApplyEvents(IEnumerable<IEvent> events)
+        {
+            var eventList = events.ToList();
+            var state = eventList.Aggregate(this, ApplyEvent);
+            return (state, eventList);
+        }
+
         private (PandemicGame, ICollection<IEvent>) ApplyEvents(params IEvent[] events)
         {
-            var state = events.Aggregate(this, ApplyEvent);
-            return (state, events.ToList());
+            return ApplyEvents(events.AsEnumerable());
         }
 
         private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
@@ -386,6 +398,10 @@ namespace pandemic.Aggregates
                 Cities = game.Cities.Replace(city, city with
                 {
                     HasResearchStation = true
+                }),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
                 })
             };
         }

@@ -288,6 +288,7 @@ namespace pandemic.test
             Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
             Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
             Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
+            Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
         }
 
         [Test]
@@ -401,6 +402,28 @@ namespace pandemic.test
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
             Assert.AreEqual(5, game.PlayerDiscardPile.Count);
             Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
+        }
+
+        [Test]
+        public void Cure_can_end_turn()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5)),
+                    ActionsRemaining = 1
+                })
+            };
+
+            AssertEndsTurn(() => game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
         }
 
         [Test]
