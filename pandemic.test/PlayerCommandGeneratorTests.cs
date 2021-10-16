@@ -54,7 +54,7 @@ namespace pandemic.test
                 })
             };
 
-            Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is CureDiseaseCommand));
+            Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is DiscoverCureCommand));
         }
     }
 }

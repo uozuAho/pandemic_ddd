@@ -44,7 +44,7 @@ namespace pandemic
                     .Where(g => g.Count() >= 5))
                 {
                     // todo: yield all combinations of cards
-                    yield return new CureDiseaseCommand(cureCards.ToArray());
+                    yield return new DiscoverCureCommand(cureCards.ToArray());
                 }
             }
         }
@@ -68,5 +68,5 @@ namespace pandemic
 
     public record BuildResearchStationCommand(string City) : PlayerCommand;
 
-    public record CureDiseaseCommand(PlayerCityCard[] Cards) : PlayerCommand;
+    public record DiscoverCureCommand(PlayerCityCard[] Cards) : PlayerCommand;
 }
