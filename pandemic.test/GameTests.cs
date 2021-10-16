@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
@@ -429,8 +430,35 @@ namespace pandemic.test
                 game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
         }
 
-        // todo: cure with not same colour throws
-        // todo: cure when already cured throws
+        [Test]
+        public void Cure_already_cured_disease_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                CureDiscovered = new Dictionary<Colour, bool>
+                {
+                    {Colour.Black, true},
+                    {Colour.Blue, false},
+                    {Colour.Red, false},
+                    {Colour.Yellow, false}
+                }.ToImmutableDictionary(),
+
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+        }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
