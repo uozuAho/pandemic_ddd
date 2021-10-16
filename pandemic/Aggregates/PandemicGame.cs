@@ -11,7 +11,7 @@ namespace pandemic.Aggregates
 {
     public record PandemicGame
     {
-        public bool IsOver { get; init; } = false;
+        public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
@@ -30,13 +30,15 @@ namespace pandemic.Aggregates
 
         public readonly StandardGameBoard Board = new();
 
+        // todo: rename to islost?
+        public bool IsOver => LossReason != "";
         public bool IsWon => CureDiscovered.All(c => c.Value);
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
         public bool IsSameStateAs(PandemicGame other)
         {
-            if (IsOver != other.IsOver) return false;
+            if (LossReason != other.LossReason) return false;
             if (Difficulty != other.Difficulty) return false;
             if (InfectionRate != other.InfectionRate) return false;
             if (OutbreakCounter != other.OutbreakCounter) return false;
@@ -370,8 +372,7 @@ namespace pandemic.Aggregates
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 CureDiscovered c => ApplyCureDiscovered(game, c),
-                // todo: add loss reason?
-                GameLost g => game with {IsOver = true},
+                GameLost g => game with {LossReason = g.Reason},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
             };
