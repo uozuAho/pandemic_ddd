@@ -27,8 +27,7 @@ namespace pandemic
             {
                 foreach (var playerCommand in DriveFerryCommands(game)) yield return playerCommand;
 
-                if (CurrentPlayerCanBuildResearchStation(game))
-                    yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
+                foreach (var playerCommand in BuildResearchStationCommands(game)) yield return playerCommand;
 
                 foreach (var playerCommand in AvailableCureCommands(game)) yield return playerCommand;
             }
@@ -36,8 +35,6 @@ namespace pandemic
 
         private static IEnumerable<PlayerCommand> DiscardCommands(PandemicGame game)
         {
-            if (game.IsOver) yield break;
-
             if (game.CurrentPlayer.Hand.Count > 7)
             {
                 foreach (var card in game.CurrentPlayer.Hand)
@@ -66,6 +63,12 @@ namespace pandemic
                     // todo: yield all combinations if > 5 cards
                     yield return new DiscoverCureCommand(cureCards.Take(5).ToArray());
             }
+        }
+
+        private static IEnumerable<PlayerCommand> BuildResearchStationCommands(PandemicGame game)
+        {
+            if (CurrentPlayerCanBuildResearchStation(game))
+                yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
         }
 
         private static bool CurrentPlayerCanBuildResearchStation(PandemicGame game)
