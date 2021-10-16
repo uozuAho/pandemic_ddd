@@ -189,6 +189,9 @@ namespace pandemic.Aggregates
             if (!CityByName(CurrentPlayer.Location).HasResearchStation)
                 throw new GameRuleViolatedException("Can only cure at a city with a research station");
 
+            if (cards.Length != 5)
+                throw new GameRuleViolatedException("5 cards are needed to cure");
+
             var colour = cards.First().City.Colour;
             var events = cards
                 .Select(c => new PlayerCardDiscarded(c))

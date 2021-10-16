@@ -378,7 +378,30 @@ namespace pandemic.test
                 game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
         }
 
+        [Test]
+        public void Cure_when_not_enough_cards_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(4))
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+        }
+
         // todo: cure with not enough cards throws
+        // todo: cure with not same colour throws
         // todo: cure when already cured throws
 
         private static int TotalNumCubesOnCities(PandemicGame game)
