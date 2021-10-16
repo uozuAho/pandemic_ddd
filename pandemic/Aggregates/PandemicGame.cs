@@ -151,8 +151,7 @@ namespace pandemic.Aggregates
 
             var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
-            // todo: does this break if another card needs to be discarded?
-            if (CurrentPlayer.ActionsRemaining == 0)
+            if (game.CurrentPlayer.ActionsRemaining == 0 && game.CurrentPlayer.Hand.Count <= 7)
                 game = InfectCities(game, events);
 
             return (game, events);
