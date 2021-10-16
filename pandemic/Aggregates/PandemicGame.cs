@@ -206,6 +206,8 @@ namespace pandemic.Aggregates
                 .Concat<IEvent>(new[] {new CureDiscovered(colour)})
                 .ToArray();
 
+            // todo: if last action, do end of turn stuff
+
             return ApplyEvents(events);
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
 
@@ -157,6 +158,31 @@ namespace pandemic.test
             Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
         }
 
+        // todo: all other actions can end turn
+        // todo: rename to drive ferry can end turn
+        [Test]
+        public void Turn_ends_after_last_drive_ferry()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1
+                })
+            };
+
+            // todo: extract 'assert ends turn'
+            ICollection<IEvent> events;
+            (_, events) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+
+            Assert.IsTrue(events.Any(e => e is TurnEnded));
+        }
+
         [Test]
         public void Player_must_discard_when_hand_is_full()
         {
@@ -266,6 +292,33 @@ namespace pandemic.test
             Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
             Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
             Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
+        }
+
+        [Test]
+        public void Build_research_station_can_end_turn()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Chicago",
+                    Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard),
+                    ActionsRemaining = 1
+                })
+            };
+
+            IEnumerable<IEvent> events;
+            (_, events) = game.BuildResearchStation("Chicago");
+
+            Assert.IsTrue(events.Any(e => e is TurnEnded));
         }
 
         [Test]

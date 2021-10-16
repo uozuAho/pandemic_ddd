@@ -13,4 +13,5 @@ Using the rules here: https://www.ultraboardgames.com/pandemic/game-rules.php
           of that colour
             - set cured marker to true
         - if all cured, win
+- console app: play lots of games?
 - check code todos
