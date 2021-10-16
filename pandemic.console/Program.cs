@@ -29,9 +29,12 @@ namespace pandemic.console
             var lastNumGames = 0;
             var lastTime = sw.Elapsed;
 
+            var state = new PandemicSpielGameState(PandemicGame.CreateUninitialisedGame());
+            var events = Enumerable.Empty<IEvent>();
+
             for (var i = 0; !won; i++)
             {
-                var (state, _) = PlayRandomGame(options);
+                (state, events) = PlayRandomGame(options);
                 won = state.Game.IsWon;
 
                 if ((sw.Elapsed - lastTime).TotalMilliseconds > 1000)
@@ -42,7 +45,7 @@ namespace pandemic.console
                 }
             }
 
-            Console.WriteLine("won!");
+            PrintEventsAndState(events, state);
         }
 
         private static void PlaySingleRandomGameVerbose()
@@ -55,6 +58,11 @@ namespace pandemic.console
 
             var (state, events) = PlayRandomGame(options);
 
+            PrintEventsAndState(events, state);
+        }
+
+        private static void PrintEventsAndState(IEnumerable<IEvent> events, PandemicSpielGameState state)
+        {
             Console.WriteLine("Game over! Events:");
             Console.WriteLine();
             foreach (var @event in events)

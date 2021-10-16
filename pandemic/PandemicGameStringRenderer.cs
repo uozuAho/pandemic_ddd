@@ -16,6 +16,7 @@ namespace pandemic
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
             sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
+            sb.AppendLine($"cured: {string.Join(' ', game.CureDiscovered)}");
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
             sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
             sb.AppendLine($"  remaining actions: {game.CurrentPlayer.ActionsRemaining}");
