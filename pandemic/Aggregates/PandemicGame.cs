@@ -30,9 +30,9 @@ namespace pandemic.Aggregates
 
         public readonly StandardGameBoard Board = new();
 
-        // todo: rename to islost?
-        public bool IsOver => LossReason != "";
+        public bool IsOver => IsLost || IsWon;
         public bool IsWon => CureDiscovered.All(c => c.Value);
+        public bool IsLost => LossReason != "";
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
