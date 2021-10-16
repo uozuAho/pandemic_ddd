@@ -20,14 +20,8 @@ namespace pandemic
             if (game.IsOver) yield break;
 
             // todo: extract and concat these
-            if (game.CurrentPlayer.Hand.Count > 7)
-            {
-                foreach (var card in game.CurrentPlayer.Hand)
-                {
-                    yield return new DiscardPlayerCardCommand(card);
-                }
-                yield break;
-            }
+
+            foreach (var playerCommand in DiscardCommands(game)) yield return playerCommand;
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
@@ -40,6 +34,19 @@ namespace pandemic
                     yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
 
                 foreach (var playerCommand in AvailableCureCommands(game)) yield return playerCommand;
+            }
+        }
+
+        private static IEnumerable<PlayerCommand> DiscardCommands(PandemicGame game)
+        {
+            if (game.IsOver) yield break;
+
+            if (game.CurrentPlayer.Hand.Count > 7)
+            {
+                foreach (var card in game.CurrentPlayer.Hand)
+                {
+                    yield return new DiscardPlayerCardCommand(card);
+                }
             }
         }
 
