@@ -125,7 +125,7 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
-        public (PandemicGame, ICollection<IEvent>) DriveOrFerryPlayer(Role role, string city)
+        public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
             ThrowIfNotRolesTurn(role);
@@ -205,8 +205,7 @@ namespace pandemic.Aggregates
                 .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
         }
 
-        // todo: return enumerable instead?
-        private (PandemicGame, ICollection<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
+        private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
         {
             var (currentState, eventList) = ApplyEvents(events);
 
