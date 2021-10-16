@@ -261,7 +261,29 @@ namespace pandemic.test
             Assert.AreEqual(TotalNumCubesOnCities(initialGame) + 2, TotalNumCubesOnCities(game));
         }
 
-        // todo: discard another when 9 cards in hand
+        [Test]
+        public void Discard_player_card_when_no_actions_and_nine_cards_must_discard_another()
+        {
+            var (initialGame, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var game = initialGame with
+            {
+                Players = initialGame.Players.Replace(initialGame.CurrentPlayer, initialGame.CurrentPlayer with
+                {
+                    Hand = new PlayerHand(initialGame.PlayerDrawPile.TakeLast(9)),
+                    ActionsRemaining = 0
+                })
+            };
+
+            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
+
+            Assert.AreEqual(Role.Medic, game.CurrentPlayer.Role);
+            Assert.AreEqual(0, game.CurrentPlayer.ActionsRemaining);
+            Assert.True(new PlayerCommandGenerator().LegalCommands(game).All(move => move is DiscardPlayerCardCommand));
+        }
 
         [Test]
         public void Build_research_station_works()
