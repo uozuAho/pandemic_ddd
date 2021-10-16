@@ -27,7 +27,7 @@ namespace pandemic
             {
                 return DriveFerryCommands(game)
                     .Concat(BuildResearchStationCommands(game))
-                    .Concat(AvailableCureCommands(game));
+                    .Concat(CureCommands(game));
             }
 
             return Enumerable.Empty<PlayerCommand>();
@@ -50,7 +50,7 @@ namespace pandemic
                 .Select(city => new DriveFerryCommand(game.CurrentPlayer.Role, city));
         }
 
-        private static IEnumerable<PlayerCommand> AvailableCureCommands(PandemicGame game)
+        private static IEnumerable<PlayerCommand> CureCommands(PandemicGame game)
         {
             if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
 
