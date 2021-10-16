@@ -54,6 +54,25 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Drive_or_ferry_can_end_turn()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1
+                })
+            };
+
+            AssertEndsTurn(() => game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var (startingState, _) = PandemicGame.CreateNewGame(new NewGameOptions
@@ -159,29 +178,6 @@ namespace pandemic.test
         }
 
         // todo: all other actions can end turn
-        // todo: rename to drive ferry can end turn
-        [Test]
-        public void Turn_ends_after_last_drive_ferry()
-        {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            {
-                Difficulty = Difficulty.Introductory,
-                Roles = new[] {Role.Medic, Role.Scientist}
-            });
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    ActionsRemaining = 1
-                })
-            };
-
-            // todo: extract 'assert ends turn'
-            ICollection<IEvent> events;
-            (_, events) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-
-            Assert.IsTrue(events.Any(e => e is TurnEnded));
-        }
 
         [Test]
         public void Player_must_discard_when_hand_is_full()
@@ -315,10 +311,7 @@ namespace pandemic.test
                 })
             };
 
-            IEnumerable<IEvent> events;
-            (_, events) = game.BuildResearchStation("Chicago");
-
-            Assert.IsTrue(events.Any(e => e is TurnEnded));
+            AssertEndsTurn(() => game.BuildResearchStation("Chicago"));
         }
 
         [Test]
@@ -516,6 +509,15 @@ namespace pandemic.test
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
+        }
+
+        private static void AssertEndsTurn(Func<(PandemicGame, IEnumerable<IEvent>)> action)
+        {
+            IEnumerable<IEvent> events;
+
+            (_, events) = action();
+
+            Assert.IsTrue(events.Any(e => e is TurnEnded));
         }
     }
 }
