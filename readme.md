@@ -12,7 +12,7 @@ implemented.
 ```sh
 dotnet test
 cd pandemic.console
-# plays random games until a game is won
+# see Program.cs: does various things:
 dotnet run
 ```
 
