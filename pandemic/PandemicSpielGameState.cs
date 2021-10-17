@@ -20,6 +20,7 @@ namespace pandemic
         }
 
         public bool IsTerminal => Game.IsOver;
+        public bool IsWin => Game.IsWon;
 
         public override string ToString()
         {
