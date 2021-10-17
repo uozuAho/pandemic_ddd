@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using pandemic.Aggregates;
+using pandemic.Values;
 
 namespace pandemic.agents
 {
@@ -41,8 +43,8 @@ namespace pandemic.agents
                 diagnostics.Loss(node.State.Game.LossReason);
 
             var legalActions = node.State.LegalActions()
-                .OrderBy(CommandPriority)
-                // shuffle, otherwise we're at the mercy of however I ordered the move generator
+                .OrderBy(a => CommandPriority(a, node.State.Game))
+                // shuffle, otherwise we're at the mercy of the order of the move generator
                 .ThenBy(_ => _rng.Next()).ToList();
 
             foreach (var action in legalActions)
@@ -58,7 +60,10 @@ namespace pandemic.agents
             return null;
         }
 
-        private static int CommandPriority(PlayerCommand command)
+        /// <summary>
+        /// Lower number = higher priority
+        /// </summary>
+        private static int CommandPriority(PlayerCommand command, PandemicGame game)
         {
             return command switch
             {
@@ -66,9 +71,25 @@ namespace pandemic.agents
                 // todo: implement research station limit
                 BuildResearchStationCommand => 1,
                 DriveFerryCommand => 2,
-                DiscardPlayerCardCommand => 3,
+                DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
                 _ => throw new ArgumentOutOfRangeException(nameof(command))
             };
+        }
+
+        private static int DiscardPriority(int basePriority, DiscardPlayerCardCommand command, PandemicGame game)
+        {
+            // prefer to keep cards with matching colours. returns, for example:
+            // -> [(blue, 1), (red, 2)]
+            var handByNumberOfColoursAscending = game.CurrentPlayer.Hand.CityCards
+                .GroupBy(c => c.City.Colour)
+                .OrderBy(g => g.Count())
+                .ToList();
+
+            // todo: don't put epidemic cards in hand
+            var cardToDiscard = command.Card as PlayerCityCard;
+            if (cardToDiscard == null) return basePriority;
+
+            return basePriority + handByNumberOfColoursAscending.FindIndex(c => c.Key == cardToDiscard.City.Colour);
         }
     }
 
