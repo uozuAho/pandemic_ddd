@@ -38,7 +38,7 @@ namespace pandemic.agents
             if (node.State.IsLoss)
                 diagnostics.Loss(node.State.Game.LossReason);
 
-            foreach (var action in node.State.LegalActions())
+            foreach (var action in node.State.LegalActions().OrderBy(CommandPriority))
             {
                 var childState = new PandemicSpielGameState(node.State.Game);
                 childState.ApplyAction(action);
@@ -49,6 +49,19 @@ namespace pandemic.agents
             }
 
             return null;
+        }
+
+        private static int CommandPriority(PlayerCommand command)
+        {
+            return command switch
+            {
+                DiscoverCureCommand => 0,
+                // todo: implement research station limit
+                BuildResearchStationCommand => 1,
+                DriveFerryCommand => 2,
+                DiscardPlayerCardCommand => 3,
+                _ => throw new ArgumentOutOfRangeException(nameof(command))
+            };
         }
     }
 
