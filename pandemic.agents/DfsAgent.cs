@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace pandemic.agents
@@ -10,7 +11,8 @@ namespace pandemic.agents
         {
             var root = new SearchNode(state, null, null);
 
-            var win = Hunt(root);
+            var diagnostics = Diagnostics.StartNew();
+            var win = Hunt(root, diagnostics);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -28,16 +30,17 @@ namespace pandemic.agents
             return winningCommands;
         }
 
-        private static SearchNode? Hunt(SearchNode node)
+        private static SearchNode? Hunt(SearchNode node, Diagnostics diagnostics)
         {
             if (node.State.IsWin) return node;
+            diagnostics.NodeExplored();
 
             foreach (var action in node.State.LegalActions())
             {
                 var childState = new PandemicSpielGameState(node.State.Game);
                 childState.ApplyAction(action);
                 var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child);
+                var winningNode = Hunt(child, diagnostics);
                 if (winningNode != null)
                     return winningNode;
             }
@@ -54,4 +57,33 @@ namespace pandemic.agents
         PlayerCommand? Command,
         SearchNode? Parent
     );
+
+    internal class Diagnostics
+    {
+        private readonly Stopwatch _stopwatch;
+
+        private Diagnostics(Stopwatch stopwatch)
+        {
+            _stopwatch = stopwatch;
+        }
+
+        public static Diagnostics StartNew()
+        {
+            return new Diagnostics(Stopwatch.StartNew());
+        }
+
+        public void NodeExplored()
+        {
+            Report();
+        }
+
+        private void Report()
+        {
+            if (_stopwatch.ElapsedMilliseconds > 1000)
+            {
+                Console.WriteLine("yo");
+                _stopwatch.Restart();
+            }
+        }
+    }
 }
