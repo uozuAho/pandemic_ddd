@@ -12,7 +12,7 @@ namespace pandemic.agents
             var root = new SearchNode(state, null, null);
 
             var diagnostics = Diagnostics.StartNew();
-            var win = Hunt(root, diagnostics);
+            var win = Hunt(root, 0, diagnostics);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -30,17 +30,20 @@ namespace pandemic.agents
             return winningCommands;
         }
 
-        private static SearchNode? Hunt(SearchNode node, Diagnostics diagnostics)
+        private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
         {
             if (node.State.IsWin) return node;
             diagnostics.NodeExplored();
+            diagnostics.Depth(depth);
+            if (node.State.IsLoss)
+                diagnostics.Loss(node.State.Game.LossReason);
 
             foreach (var action in node.State.LegalActions())
             {
                 var childState = new PandemicSpielGameState(node.State.Game);
                 childState.ApplyAction(action);
                 var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child, diagnostics);
+                var winningNode = Hunt(child, depth + 1, diagnostics);
                 if (winningNode != null)
                     return winningNode;
             }
@@ -61,6 +64,9 @@ namespace pandemic.agents
     internal class Diagnostics
     {
         private readonly Stopwatch _stopwatch;
+        private int _nodesExplored;
+        private int _maxDepth;
+        private readonly Dictionary<string, int> _losses = new();
 
         private Diagnostics(Stopwatch stopwatch)
         {
@@ -74,6 +80,7 @@ namespace pandemic.agents
 
         public void NodeExplored()
         {
+            _nodesExplored++;
             Report();
         }
 
@@ -81,9 +88,23 @@ namespace pandemic.agents
         {
             if (_stopwatch.ElapsedMilliseconds > 1000)
             {
-                Console.WriteLine("yo");
+                Console.WriteLine($"nodes explored: {_nodesExplored}. Max depth {_maxDepth}. Losses: {string.Join(',', _losses)}");
                 _stopwatch.Restart();
             }
+        }
+
+        public void Depth(int depth)
+        {
+            if (depth > _maxDepth)
+                _maxDepth = depth;
+        }
+
+        public void Loss(string reason)
+        {
+            if (_losses.ContainsKey(reason))
+                _losses[reason]++;
+            else
+                _losses[reason] = 1;
         }
     }
 }
