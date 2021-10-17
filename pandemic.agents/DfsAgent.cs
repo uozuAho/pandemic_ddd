@@ -7,6 +7,8 @@ namespace pandemic.agents
 {
     public class DfsAgent
     {
+        private static Random _rng = new Random();
+
         public IEnumerable<PlayerCommand> CommandsToWin(PandemicSpielGameState state)
         {
             var root = new SearchNode(state, null, null);
@@ -38,7 +40,12 @@ namespace pandemic.agents
             if (node.State.IsLoss)
                 diagnostics.Loss(node.State.Game.LossReason);
 
-            foreach (var action in node.State.LegalActions().OrderBy(CommandPriority))
+            var legalActions = node.State.LegalActions()
+                .OrderBy(CommandPriority)
+                // shuffle, otherwise we're at the mercy of however I ordered the move generator
+                .ThenBy(_ => _rng.Next()).ToList();
+
+            foreach (var action in legalActions)
             {
                 var childState = new PandemicSpielGameState(node.State.Game);
                 childState.ApplyAction(action);
