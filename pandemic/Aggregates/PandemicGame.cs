@@ -120,6 +120,8 @@ namespace pandemic.Aggregates
                 game = game.DealPlayerCards(role, InitialPlayerHandSize(options.Roles.Count), events);
             }
 
+            // todo: set up draw pile
+
             return (game, events);
         }
 
@@ -245,6 +247,11 @@ namespace pandemic.Aggregates
         private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
         {
             return ApplyEvent(new OutbreakCounterSet(value), events);
+        }
+
+        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
         private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
@@ -488,11 +495,6 @@ namespace pandemic.Aggregates
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };
-        }
-
-        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
-        {
-            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
