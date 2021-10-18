@@ -17,6 +17,7 @@ namespace pandemic.Aggregates
         public int OutbreakCounter { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
+        public int ResearchStationPile { get; init; } = 6;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
         public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
@@ -33,6 +34,7 @@ namespace pandemic.Aggregates
         public bool IsOver => IsLost || IsWon;
         public bool IsWon => CureDiscovered.All(c => c.Value);
         public bool IsLost => LossReason != "";
+
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities.Single(c => c.Name == city);
 
@@ -166,6 +168,8 @@ namespace pandemic.Aggregates
             ThrowIfNoActionsRemaining(CurrentPlayer);
             ThrowIfPlayerMustDiscard(CurrentPlayer);
 
+            if (ResearchStationPile == 0)
+                throw new GameRuleViolatedException("No research stations left");
             if (CurrentPlayer.Location != city)
                 throw new GameRuleViolatedException($"Player must be in {city} to build research station");
             // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better

@@ -18,6 +18,24 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Can_build_research_station()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+
+            game = game with
+            {
+                Players = ImmutableList.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
+                })
+            };
+
+            Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
         public void Cannot_build_research_station_when_one_already_exists()
         {
             var game = PandemicGame.CreateUninitialisedGame();
@@ -34,6 +52,25 @@ namespace pandemic.test
             };
 
             Assert.False(_generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
+        public void Cannot_build_research_station_if_none_left()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+
+            game = game with
+            {
+                ResearchStationPile = 0,
+                Players = ImmutableList.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
+                })
+            };
+
+            Assert.IsFalse(_generator.LegalCommands(game).Any(c => c is BuildResearchStationCommand));
         }
 
         [Test]
