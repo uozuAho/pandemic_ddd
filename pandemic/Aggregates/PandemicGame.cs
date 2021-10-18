@@ -120,7 +120,7 @@ namespace pandemic.Aggregates
                 game = game.DealPlayerCards(role, InitialPlayerHandSize(options.Roles.Count), events);
             }
 
-            // todo: set up draw pile
+            game = game.SetupPlayerDrawPileWithEpidemicCards(events);
 
             return (game, events);
         }
@@ -254,6 +254,17 @@ namespace pandemic.Aggregates
             return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
+        private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
+        {
+            var rng = new Random();
+            var drawPile = PlayerDrawPile
+                .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
+                // todo: distribute epidemic cards as per game rules
+                .OrderBy(_ => rng.Next());
+
+            return ApplyEvent(new PlayerDrawPileSetupWithEpidemicCards(drawPile), events);
+        }
+
         private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
         {
             var rng = new Random();
@@ -380,6 +391,7 @@ namespace pandemic.Aggregates
                 ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
+                PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile.ToImmutableList()},
                 PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
