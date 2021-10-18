@@ -249,8 +249,8 @@ namespace pandemic.Aggregates
 
         private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
         {
-            // todo: shuffle
-            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c));
+            var rng = new Random();
+            var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => rng.Next());
 
             return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
         }
