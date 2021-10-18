@@ -110,7 +110,7 @@ namespace pandemic.Aggregates
                 .SetInfectionRate(2, events)
                 .SetOutbreakCounter(0, events)
                 .SetupInfectionDeck(events)
-                .SetupPlayerDrawPile(events);
+                .ShufflePlayerDrawPileForDealing(events);
 
             // todo: infect cities
 
@@ -267,15 +267,16 @@ namespace pandemic.Aggregates
             return ApplyEvent(new PlayerAdded(role), events);
         }
 
-        private PandemicGame SetupPlayerDrawPile(ICollection<IEvent> events)
+        private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
         {
             // todo: shuffle
             var playerCards = Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard)
+                // todo: remove epidemic cards
                 .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
                 .ToImmutableList();
 
-            return ApplyEvent(new PlayerDrawPileSetUp(playerCards), events);
+            return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
@@ -379,7 +380,7 @@ namespace pandemic.Aggregates
                 ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-                PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
+                PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 CureDiscovered c => ApplyCureDiscovered(game, c),
@@ -418,7 +419,7 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyPlayerDrawPileSetUp(PandemicGame game, PlayerDrawPileSetUp @event)
+        private static PandemicGame ApplyPlayerDrawPileSetUp(PandemicGame game, PlayerDrawPileShuffledForDealing @event)
         {
             return game with
             {
