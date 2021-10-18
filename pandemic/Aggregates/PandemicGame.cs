@@ -269,11 +269,11 @@ namespace pandemic.Aggregates
 
         private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
         {
-            // todo: shuffle
+            var rng = new Random();
+
             var playerCards = Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard)
-                // todo: remove epidemic cards
-                .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
+                .OrderBy(_ => rng.Next())
                 .ToImmutableList();
 
             return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
