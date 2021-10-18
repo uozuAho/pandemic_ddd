@@ -64,7 +64,10 @@ namespace pandemic.agents
         }
 
         /// <summary>
-        /// Lower number = higher priority
+        /// Lower number = higher priority. There's plenty more that could be done here:
+        /// - prefer to move towards research stations
+        /// - don't build research stations with cards that could be used to cure
+        /// - players work together: aim to cure different diseases per player
         /// </summary>
         private static int CommandPriority(PlayerCommand command, PandemicGame game)
         {
