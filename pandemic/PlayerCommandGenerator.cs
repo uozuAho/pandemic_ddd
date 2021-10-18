@@ -67,7 +67,8 @@ namespace pandemic
 
         private static IEnumerable<PlayerCommand> BuildResearchStationCommands(PandemicGame game)
         {
-            // todo: only if research stations left
+            if (game.ResearchStationPile == 0) yield break;
+
             if (CurrentPlayerCanBuildResearchStation(game))
                 yield return new BuildResearchStationCommand(game.CurrentPlayer.Location);
         }
