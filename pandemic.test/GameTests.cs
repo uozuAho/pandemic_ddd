@@ -401,6 +401,32 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Build_research_station_when_none_left_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+
+            game = game with
+            {
+                ResearchStationPile = 0,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Chicago",
+                    Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard)
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+        }
+
+        // todo: game starts with 6 research stations
+
+        [Test]
         public void Cure_disease_works()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
