@@ -45,6 +45,7 @@ namespace pandemic.Aggregates
             if (InfectionRate != other.InfectionRate) return false;
             if (OutbreakCounter != other.OutbreakCounter) return false;
             if (CurrentPlayerIdx != other.CurrentPlayerIdx) return false;
+            if (ResearchStationPile != other.ResearchStationPile) return false;
 
             // order is expected to be the same and significant (different order means not equal)
             if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer)) return false;
@@ -260,7 +261,8 @@ namespace pandemic.Aggregates
             var drawPile = PlayerDrawPile
                 .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
                 // todo: distribute epidemic cards as per game rules
-                .OrderBy(_ => rng.Next());
+                .OrderBy(_ => rng.Next())
+                .ToImmutableList();
 
             return ApplyEvent(new PlayerDrawPileSetupWithEpidemicCards(drawPile), events);
         }
@@ -391,7 +393,7 @@ namespace pandemic.Aggregates
                 ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-                PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile.ToImmutableList()},
+                PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile},
                 PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
