@@ -74,7 +74,6 @@ namespace pandemic.agents
             return command switch
             {
                 DiscoverCureCommand => 0,
-                // todo: implement research station limit
                 BuildResearchStationCommand => 1,
                 DriveFerryCommand => 2,
                 DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
