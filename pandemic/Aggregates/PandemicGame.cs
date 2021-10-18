@@ -210,12 +210,12 @@ namespace pandemic.Aggregates
 
         private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
         {
-            var (currentState, eventList) = ApplyEvents(events);
+            var (game, eventList) = ApplyEvents(events);
 
-            if (currentState.CurrentPlayer.ActionsRemaining == 0)
-                currentState = DoStuffAfterActions(currentState, eventList);
+            if (game.CurrentPlayer.ActionsRemaining == 0 && !game.IsOver)
+                game = DoStuffAfterActions(game, eventList);
 
-            return (currentState, eventList);
+            return (game, eventList);
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)

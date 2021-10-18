@@ -10,9 +10,11 @@ implemented.
 - install dotnet core (tested with v5)
 
 ```sh
+# run tests
 dotnet test
 cd pandemic.console
-# plays random games until a game is won
+# Play around with running the game in a console app.
+# See Program.cs: it does whatever's not commented out.
 dotnet run
 ```
 

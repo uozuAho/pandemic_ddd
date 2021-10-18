@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using pandemic.agents;
 using pandemic.Aggregates;
 using pandemic.Events;
 using pandemic.Values;
@@ -14,6 +15,31 @@ namespace pandemic.console
         {
             // PlaySingleRandomGameVerbose();
             PlayRandomGamesUntilWon();
+            // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            // {
+            //     Difficulty = Difficulty.Introductory,
+            //     Roles = new[] {Role.Medic, Role.Scientist}
+            // });
+            // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
+            // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
+        }
+
+        private static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
+        {
+            var commands = solver.CommandsToWin(new PandemicSpielGameState(game)).ToList();
+
+            if (commands.Any())
+            {
+                Console.WriteLine("found win!");
+                foreach (var command in commands)
+                {
+                    Console.WriteLine(command);
+                }
+            }
+            else
+            {
+                Console.WriteLine("no win found");
+            }
         }
 
         private static void PlayRandomGamesUntilWon()
