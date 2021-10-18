@@ -45,6 +45,7 @@ namespace pandemic.Aggregates
             if (InfectionRate != other.InfectionRate) return false;
             if (OutbreakCounter != other.OutbreakCounter) return false;
             if (CurrentPlayerIdx != other.CurrentPlayerIdx) return false;
+            if (ResearchStationPile != other.ResearchStationPile) return false;
 
             // order is expected to be the same and significant (different order means not equal)
             if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer)) return false;
@@ -110,7 +111,7 @@ namespace pandemic.Aggregates
                 .SetInfectionRate(2, events)
                 .SetOutbreakCounter(0, events)
                 .SetupInfectionDeck(events)
-                .SetupPlayerDrawPile(events);
+                .ShufflePlayerDrawPileForDealing(events);
 
             // todo: infect cities
 
@@ -119,6 +120,8 @@ namespace pandemic.Aggregates
                 game = game.AddPlayer(role, events);
                 game = game.DealPlayerCards(role, InitialPlayerHandSize(options.Roles.Count), events);
             }
+
+            game = game.SetupPlayerDrawPileWithEpidemicCards(events);
 
             return (game, events);
         }
@@ -247,6 +250,23 @@ namespace pandemic.Aggregates
             return ApplyEvent(new OutbreakCounterSet(value), events);
         }
 
+        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
+        {
+            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
+        }
+
+        private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
+        {
+            var rng = new Random();
+            var drawPile = PlayerDrawPile
+                .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
+                // todo: distribute epidemic cards as per game rules
+                .OrderBy(_ => rng.Next())
+                .ToImmutableList();
+
+            return ApplyEvent(new PlayerDrawPileSetupWithEpidemicCards(drawPile), events);
+        }
+
         private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
         {
             var rng = new Random();
@@ -260,15 +280,16 @@ namespace pandemic.Aggregates
             return ApplyEvent(new PlayerAdded(role), events);
         }
 
-        private PandemicGame SetupPlayerDrawPile(ICollection<IEvent> events)
+        private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
         {
-            // todo: shuffle
+            var rng = new Random();
+
             var playerCards = Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard)
-                .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
+                .OrderBy(_ => rng.Next())
                 .ToImmutableList();
 
-            return ApplyEvent(new PlayerDrawPileSetUp(playerCards), events);
+            return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
@@ -297,6 +318,8 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
+            // todo: discard epidemic card
+            // todo: handle epidemic
             return game.ApplyEvent(new PlayerCardPickedUp(), events);
         }
 
@@ -372,7 +395,8 @@ namespace pandemic.Aggregates
                 ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
                 PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
                 PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-                PlayerDrawPileSetUp p => ApplyPlayerDrawPileSetUp(game, p),
+                PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile},
+                PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
                 PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
                 CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
                 CureDiscovered c => ApplyCureDiscovered(game, c),
@@ -411,7 +435,7 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyPlayerDrawPileSetUp(PandemicGame game, PlayerDrawPileSetUp @event)
+        private static PandemicGame ApplyPlayerDrawPileSetUp(PandemicGame game, PlayerDrawPileShuffledForDealing @event)
         {
             return game with
             {
@@ -488,11 +512,6 @@ namespace pandemic.Aggregates
             newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
 
             return pandemicGame with { Players = newPlayers.ToImmutableList() };
-        }
-
-        private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
-        {
-            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
         }
 
         private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
