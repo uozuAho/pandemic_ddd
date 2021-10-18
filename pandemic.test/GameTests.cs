@@ -424,8 +424,6 @@ namespace pandemic.test
             Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
         }
 
-        // todo: game starts with 6 research stations
-
         [Test]
         public void Cure_disease_works()
         {
