@@ -19,6 +19,7 @@ dotnet run
 ```
 
 # todo
+- implement epidemic
 - implement more game rules
 - check code todos
 

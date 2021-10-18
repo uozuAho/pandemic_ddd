@@ -318,6 +318,8 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
+            // todo: discard epidemic card
+            // todo: handle epidemic
             return game.ApplyEvent(new PlayerCardPickedUp(), events);
         }
 
