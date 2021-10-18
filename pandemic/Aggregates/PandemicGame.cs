@@ -168,6 +168,8 @@ namespace pandemic.Aggregates
             ThrowIfNoActionsRemaining(CurrentPlayer);
             ThrowIfPlayerMustDiscard(CurrentPlayer);
 
+            if (ResearchStationPile == 0)
+                throw new GameRuleViolatedException("No research stations left");
             if (CurrentPlayer.Location != city)
                 throw new GameRuleViolatedException($"Player must be in {city} to build research station");
             // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
