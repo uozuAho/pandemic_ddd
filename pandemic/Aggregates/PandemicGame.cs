@@ -252,7 +252,9 @@ namespace pandemic.Aggregates
 
         private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
         {
-            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
+            var cards = PlayerDrawPile.TakeLast(numCards).ToArray();
+
+            return ApplyEvent(new PlayerCardsDealt(role, cards), events);
         }
 
         private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
@@ -318,11 +320,11 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            var nextCard = game.PlayerDrawPile.Last();
+            var card = game.PlayerDrawPile.Last();
 
-            game = game.ApplyEvent(new PlayerCardPickedUp(), events);
+            game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-            if (nextCard is EpidemicCard epidemicCard)
+            if (card is EpidemicCard epidemicCard)
                 game = Epidemic(game, epidemicCard, events);
 
             return game;
@@ -343,7 +345,7 @@ namespace pandemic.Aggregates
                 return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
 
             var infectionCard = game.InfectionDrawPile.Last();
-            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
             return game.Cubes[infectionCard.City.Colour] == 0
                 ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
@@ -473,9 +475,8 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
         {
-            var (role, numCards) = dealt;
-            var cards = game.PlayerDrawPile.TakeLast(numCards).ToList();
-            var player = game.PlayerByRole(role);
+            var cards = game.PlayerDrawPile.TakeLast(dealt.Cards.Length).ToList();
+            var player = game.PlayerByRole(dealt.Role);
 
             return game with
             {
@@ -487,12 +488,12 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn infectionCardDrawn)
+        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn drawn)
         {
             return game with
             {
                 InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(drawn.Card),
             };
         }
 
