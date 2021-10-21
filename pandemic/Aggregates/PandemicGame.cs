@@ -421,11 +421,12 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicCardDiscarded e)
         {
+            var player = game.PlayerByRole(e.Player.Role);
             var discardedCard = game.PlayerByRole(e.Player.Role).Hand.First(c => c is EpidemicCard);
 
             return game with
             {
-                Players = game.Players.Replace(e.Player, e.Player with
+                Players = game.Players.Replace(player, player with
                 {
                     Hand = e.Player.Hand.Remove(discardedCard)
                 }),
