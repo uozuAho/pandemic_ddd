@@ -318,9 +318,21 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            // todo: discard epidemic card
+            var nextCard = game.PlayerDrawPile.Last();
+
+            game = game.ApplyEvent(new PlayerCardPickedUp(), events);
+
+            if (nextCard is EpidemicCard epidemicCard)
+                game = Epidemic(game, epidemicCard, events);
+
+            return game;
+        }
+
+        private static PandemicGame Epidemic(PandemicGame game, EpidemicCard card, ICollection<IEvent> events)
+        {
+            return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
+
             // todo: handle epidemic
-            return game.ApplyEvent(new PlayerCardPickedUp(), events);
         }
 
         private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
@@ -386,6 +398,7 @@ namespace pandemic.Aggregates
             return @event switch
             {
                 DifficultySet d => game with {Difficulty = d.Difficulty},
+                EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
                 InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
                 InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
                 InfectionRateSet i => game with {InfectionRate = i.Rate},
@@ -403,6 +416,21 @@ namespace pandemic.Aggregates
                 GameLost g => game with {LossReason = g.Reason},
                 TurnEnded t => ApplyTurnEnded(game),
                 _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+            };
+        }
+
+        private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicCardDiscarded e)
+        {
+            var player = game.PlayerByRole(e.Player.Role);
+            var discardedCard = game.PlayerByRole(e.Player.Role).Hand.First(c => c is EpidemicCard);
+
+            return game with
+            {
+                Players = game.Players.Replace(player, player with
+                {
+                    Hand = e.Player.Hand.Remove(discardedCard)
+                }),
+                PlayerDiscardPile = game.PlayerDiscardPile.Add(discardedCard)
             };
         }
 

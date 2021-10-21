@@ -19,6 +19,10 @@ dotnet run
 ```
 
 # todo
+- direction change: feed objects to events, eg
+    - pickup card
+    - discard card
+    - etc.
 - implement epidemic
 - implement more game rules
 - check code todos
