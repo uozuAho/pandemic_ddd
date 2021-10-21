@@ -252,7 +252,9 @@ namespace pandemic.Aggregates
 
         private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
         {
-            return ApplyEvent(new PlayerCardsDealt(role, numCards), events);
+            var cards = PlayerDrawPile.TakeLast(numCards).ToArray();
+
+            return ApplyEvent(new PlayerCardsDealt(role, cards), events);
         }
 
         private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
@@ -473,9 +475,8 @@ namespace pandemic.Aggregates
 
         private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
         {
-            var (role, numCards) = dealt;
-            var cards = game.PlayerDrawPile.TakeLast(numCards).ToList();
-            var player = game.PlayerByRole(role);
+            var cards = game.PlayerDrawPile.TakeLast(dealt.Cards.Length).ToList();
+            var player = game.PlayerByRole(dealt.Role);
 
             return game with
             {
