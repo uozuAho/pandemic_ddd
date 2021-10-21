@@ -638,6 +638,30 @@ namespace pandemic.test
                 game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
         }
 
+        [Test]
+        public void Epidemic_card_goes_to_discard_pile()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.Add(new EpidemicCard()),
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1
+                })
+            };
+
+            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+
+            Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
+            Assert.AreEqual(1, game.PlayerDiscardPile.Count(c => c is EpidemicCard));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
