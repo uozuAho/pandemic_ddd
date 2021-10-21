@@ -649,7 +649,11 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.Add(new EpidemicCard()),
+                PlayerDrawPile = game.PlayerDrawPile.AddRange(new List<PlayerCard>
+                {
+                    new EpidemicCard(),
+                    new PlayerCityCard(new CityData("asdf", Colour.Black))
+                }),
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     ActionsRemaining = 1
