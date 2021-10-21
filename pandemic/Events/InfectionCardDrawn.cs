@@ -1,6 +1,6 @@
-using pandemic.GameData;
+using pandemic.Values;
 
 namespace pandemic.Events
 {
-    public record InfectionCardDrawn(CityData City) : IEvent;
+    public record InfectionCardDrawn(InfectionCard Card) : IEvent;
 }

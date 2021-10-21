@@ -343,7 +343,7 @@ namespace pandemic.Aggregates
                 return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
 
             var infectionCard = game.InfectionDrawPile.Last();
-            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard.City), events);
+            game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
             return game.Cubes[infectionCard.City.Colour] == 0
                 ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
@@ -487,12 +487,12 @@ namespace pandemic.Aggregates
             };
         }
 
-        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn infectionCardDrawn)
+        private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn drawn)
         {
             return game with
             {
                 InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-                InfectionDiscardPile = game.InfectionDiscardPile.Add(new InfectionCard(infectionCardDrawn.City)),
+                InfectionDiscardPile = game.InfectionDiscardPile.Add(drawn.Card),
             };
         }
 
