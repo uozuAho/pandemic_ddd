@@ -318,11 +318,11 @@ namespace pandemic.Aggregates
         {
             ThrowIfGameOver(game);
 
-            var nextCard = game.PlayerDrawPile.Last();
+            var card = game.PlayerDrawPile.Last();
 
-            game = game.ApplyEvent(new PlayerCardPickedUp(), events);
+            game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-            if (nextCard is EpidemicCard epidemicCard)
+            if (card is EpidemicCard epidemicCard)
                 game = Epidemic(game, epidemicCard, events);
 
             return game;

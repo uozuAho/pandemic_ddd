@@ -1,4 +1,6 @@
+using pandemic.Values;
+
 namespace pandemic.Events
 {
-    public record PlayerCardPickedUp : IEvent;
+    public record PlayerCardPickedUp(PlayerCard Card) : IEvent;
 }
