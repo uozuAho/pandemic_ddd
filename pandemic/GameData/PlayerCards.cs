@@ -8,6 +8,8 @@ namespace pandemic.GameData
     {
         public static IEnumerable<PlayerCityCard> CityCards => _allCards;
 
+        public static PlayerCityCard CityCard(string name) => _allCards.Single(c => c.City.Name == name);
+
         private static IEnumerable<PlayerCityCard> _allCards =>
             new StandardGameBoard().Cities.Select(c => new PlayerCityCard(c)).ToList();
     }

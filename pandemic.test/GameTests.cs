@@ -286,7 +286,7 @@ namespace pandemic.test
                 Roles = new[] {Role.Medic, Role.Scientist}
             });
 
-            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+            var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
 
             game = game with
             {
@@ -310,7 +310,7 @@ namespace pandemic.test
         {
             var game = NewGameWithNoEpidemicCards();
 
-            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+            var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
 
             game = game with
             {
@@ -335,7 +335,7 @@ namespace pandemic.test
 
             return game with
             {
-                PlayerDrawPile = game.Board.PlayerCityCards().Cast<PlayerCard>().ToImmutableList()
+                PlayerDrawPile = PlayerCards.CityCards.Cast<PlayerCard>().ToImmutableList()
             };
         }
 
@@ -351,7 +351,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.CurrentPlayer.Hand.Add(new PlayerCityCard(game.Board.City("Chicago")))
+                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Chicago"))
                 })
             };
 
@@ -388,7 +388,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
+            var atlantaPlayerCard = PlayerCards.CityCard("Atlanta");
 
             game = game with
             {
@@ -411,7 +411,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+            var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
 
             game = game with
             {

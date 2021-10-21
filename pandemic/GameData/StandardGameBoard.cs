@@ -20,8 +20,6 @@ namespace pandemic.GameData
 
         public IEnumerable<CityData> Cities => _cities;
 
-        public IEnumerable<PlayerCityCard> PlayerCityCards() => _playerCityCards;
-
         public readonly Dictionary<string, List<string>> AdjacentCities = CreateAdjacencyLookup();
 
         private static Dictionary<string, List<string>> CreateAdjacencyLookup()
@@ -87,9 +85,6 @@ namespace pandemic.GameData
             new("Los Angeles", Colour.Yellow),
             new("Miami", Colour.Yellow)
         };
-
-        private static readonly PlayerCityCard[]
-            _playerCityCards = _cities.Select(c => new PlayerCityCard(c)).ToArray();
 
         private static readonly List<(string, string)> Edges = new()
         {
