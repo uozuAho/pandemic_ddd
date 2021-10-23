@@ -11,6 +11,7 @@ namespace pandemic.console
 {
     class Program
     {
+        // todo: clean up this file
         static void Main(string[] args)
         {
             // PlaySingleRandomGameVerbose();
@@ -54,13 +55,14 @@ namespace pandemic.console
             var sw = Stopwatch.StartNew();
             var lastNumGames = 0;
             var lastTime = sw.Elapsed;
+            var stats = new GameStats();
 
             var state = new PandemicSpielGameState(PandemicGame.CreateUninitialisedGame());
             var events = Enumerable.Empty<IEvent>();
 
-            for (var i = 0; !won; i++)
+            for (var i = 0; !won && i < 1000; i++)
             {
-                (state, events) = PlayRandomGame(options);
+                (state, events) = PlayRandomGame(options, stats);
                 won = state.Game.IsWon;
 
                 if ((sw.Elapsed - lastTime).TotalMilliseconds > 1000)
@@ -71,7 +73,8 @@ namespace pandemic.console
                 }
             }
 
-            PrintEventsAndState(events, state);
+            // PrintEventsAndState(events, state);
+            PrintStats(stats);
         }
 
         private static void PlaySingleRandomGameVerbose()
@@ -82,7 +85,7 @@ namespace pandemic.console
                 Roles = new[] {Role.Medic, Role.Scientist}
             };
 
-            var (state, events) = PlayRandomGame(options);
+            var (state, events) = PlayRandomGame(options, new GameStats());
 
             PrintEventsAndState(events, state);
         }
@@ -102,23 +105,32 @@ namespace pandemic.console
             Console.WriteLine(state);
         }
 
-        private static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(NewGameOptions options)
+        private static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
+            NewGameOptions options,
+            GameStats stats)
         {
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
             var state = new PandemicSpielGameState(game);
+            var numActions = 0;
 
-            for (var i = 0; i < 1000 && !state.IsTerminal; i++)
+            for (; numActions < 1000 && !state.IsTerminal; numActions++)
             {
-                var legalActions = state.LegalActions();
+                if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
+
+                var legalActions = state.LegalActions().ToList();
                 if (!legalActions.Any())
                 {
                     throw new InvalidOperationException("oh no!");
                 }
 
+                stats.AddLegalActionCount(legalActions.Count);
+
                 var action = RandomChoice(state.LegalActions(), random);
                 events.AddRange(state.ApplyAction(action));
             }
+
+            stats.AddNumActionsInGame(numActions);
 
             return (state, events);
         }
@@ -130,6 +142,50 @@ namespace pandemic.console
 
             var idx = random.Next(0, itemList.Count);
             return itemList[idx];
+        }
+
+        private static void PrintStats(GameStats stats)
+        {
+            Console.WriteLine("actions, count");
+            foreach (var (actions, count) in stats.ActionsPerGameCounts.OrderBy(c => c.Key))
+            {
+                Console.WriteLine($"{actions}, {count}");
+            }
+
+            Console.WriteLine("legal actions, count");
+            foreach (var (actions, count) in stats.LegalActionCounts.OrderBy(c => c.Key))
+            {
+                Console.WriteLine($"{actions}, {count}");
+            }
+        }
+
+        private class GameStats
+        {
+            /// <summary>
+            /// {num actions : count}
+            /// </summary>
+            public readonly Dictionary<int, int> ActionsPerGameCounts = new();
+
+            /// <summary>
+            /// {num legal actions : count}
+            /// </summary>
+            public readonly Dictionary<int, int> LegalActionCounts = new();
+
+            public void AddNumActionsInGame(int numActions)
+            {
+                if (ActionsPerGameCounts.ContainsKey(numActions))
+                    ActionsPerGameCounts[numActions]++;
+                else
+                    ActionsPerGameCounts[numActions] = 1;
+            }
+
+            public void AddLegalActionCount(int numLegalActions)
+            {
+                if (LegalActionCounts.ContainsKey(numLegalActions))
+                    LegalActionCounts[numLegalActions]++;
+                else
+                    LegalActionCounts[numLegalActions] = 1;
+            }
         }
     }
 }
