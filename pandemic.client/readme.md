@@ -1,3 +1,4 @@
 # Pandemic game client
 
-Connects to a game server via ZeroMQ.
+Currently a debug client used to test the game server. Connects to a game server
+via ZeroMQ.
