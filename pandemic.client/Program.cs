@@ -1,6 +1,4 @@
 using System;
-using NetMQ;
-using NetMQ.Sockets;
 
 namespace pandemic.client
 {
@@ -8,11 +6,21 @@ namespace pandemic.client
     {
         static void Main(string[] args)
         {
-            using var client = new RequestSocket();
-            client.Connect("tcp://localhost:5555");
-            client.SendFrame("Hello");
-            var msg = client.ReceiveFrameString();
-            Console.WriteLine($"From Server: {msg}");
+            var bot = new RandomBot();
+            using var game = new ZmqGameClient();
+
+            while (!game.State.IsTerminal)
+            {
+                var action = bot.Step(game.State);
+                game.State.ApplyAction(action);
+            }
+        }
+
+        static void ZmqDemo()
+        {
+            using var client = new ZmqGameClient();
+            var response = client.Send("Hello");
+            Console.WriteLine($"From Server: {response}");
         }
     }
 }
