@@ -28,16 +28,37 @@ namespace pandemic.server
             {
                 var req = server.ReceiveFrameString();
                 var reqD = JsonConvert.DeserializeObject<Request>(req);
-                if (reqD.type == "exit") done = true;
-                var state = new StateResponse(
-                    game.CurrentPlayerIdx.ToString(),
-                    ToIntArray(_commandGenerator.LegalCommands(game)),
-                    game.IsOver,
-                    false,
-                    new double []{1},
-                    "asdf"
-                );
-                server.SendFrame(JsonConvert.SerializeObject(state));
+                switch (reqD.type)
+                {
+                    case "exit":
+                        done = true;
+                        server.SendFrame("aasdf");
+                        break;
+                    case "apply_action":
+                        var state = new StateResponse(
+                            game.CurrentPlayerIdx.ToString(),
+                            ToIntArray(_commandGenerator.LegalCommands(game)),
+                            game.IsOver,
+                            false,
+                            new double[] { 1 },
+                            "asdf"
+                        );
+                        server.SendFrame(JsonConvert.SerializeObject(state));
+                        break;
+                    case "new_initial_state":
+                        var state2 = new StateResponse(
+                            game.CurrentPlayerIdx.ToString(),
+                            ToIntArray(_commandGenerator.LegalCommands(game)),
+                            game.IsOver,
+                            false,
+                            new double[] { 1 },
+                            "asdf"
+                        );
+                        server.SendFrame(JsonConvert.SerializeObject(state2));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
+                }
             }
         }
 
