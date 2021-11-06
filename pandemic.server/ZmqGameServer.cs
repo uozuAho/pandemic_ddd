@@ -28,6 +28,8 @@ namespace pandemic.server
                 var req = server.ReceiveFrameString();
                 Console.WriteLine($"From client: {req}");
                 var reqD = JsonConvert.DeserializeObject<Request>(req);
+                server.SendFrame("yo");
+                done = true;
                 // var response = reqD.RequestType switch
                 // {
                 //     RequestType.GetLegalActions => HandleGetLegalActions(JsonConvert.DeserializeObject<LegalActionsRequest>(req)),

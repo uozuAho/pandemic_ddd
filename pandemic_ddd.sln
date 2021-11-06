@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.server", "pandemic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.client", "pandemic.client\pandemic.client.csproj", "{6F66335F-027D-4F07-BF8A-6E3AFEC84567}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.server.test", "pandemic.server.test\pandemic.server.test.csproj", "{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,18 @@ Global
 		{6F66335F-027D-4F07-BF8A-6E3AFEC84567}.Release|x64.Build.0 = Release|Any CPU
 		{6F66335F-027D-4F07-BF8A-6E3AFEC84567}.Release|x86.ActiveCfg = Release|Any CPU
 		{6F66335F-027D-4F07-BF8A-6E3AFEC84567}.Release|x86.Build.0 = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x64.Build.0 = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x86.Build.0 = Debug|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x64.ActiveCfg = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x64.Build.0 = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.ActiveCfg = Release|Any CPU
+		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
