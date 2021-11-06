@@ -5,9 +5,9 @@ namespace pandemic.server.test
     public class NetworkState
     {
         public bool IsTerminal { get; set; } = true;
-        private readonly GameClient _client;
+        private readonly NetworkGame _client;
 
-        public NetworkState(GameClient client)
+        public NetworkState(NetworkGame client)
         {
             _client = client;
         }

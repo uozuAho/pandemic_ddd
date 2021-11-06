@@ -24,7 +24,7 @@ namespace pandemic.server.test
                 server.Run();
             }).Start();
 
-            using var gameClient = new GameClient("tcp://localhost:5555");
+            using var gameClient = new NetworkGame("tcp://localhost:5555");
 
             var state = gameClient.NewInitialState();
             while (!state.IsTerminal)

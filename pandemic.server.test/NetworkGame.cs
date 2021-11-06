@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 
 namespace pandemic.server.test
 {
-    public class GameClient : IDisposable
+    public class NetworkGame : IDisposable
     {
         private readonly RequestSocket _client;
 
-        public GameClient(string url)
+        public NetworkGame(string url)
         {
             _client = new RequestSocket();
             _client.Connect(url);
