@@ -9,11 +9,10 @@ namespace pandemic.server.test
     {
         private readonly RequestSocket _client;
 
-        public GameClient()
+        public GameClient(string url)
         {
             _client = new RequestSocket();
-            _client.Connect("tcp://localhost:5555");
-            Send(new Request("apply_action"));
+            _client.Connect(url);
         }
 
         public void Dispose()
@@ -24,6 +23,7 @@ namespace pandemic.server.test
 
         public NetworkState NewInitialState()
         {
+            Send(new Request("apply_action"));
             return new NetworkState(this);
         }
 
