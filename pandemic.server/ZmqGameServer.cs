@@ -63,29 +63,29 @@ namespace pandemic.server
             }
         }
 
-        private GameStateResponse HandleDoAction(DoActionRequest req)
-        {
-            var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
-
-            var nextState = DoAction(game, req.Action);
-
-            return new GameStateResponse
-            {
-                IsTerminal = nextState.IsOver,
-                SerialisedState = JsonConvert.SerializeObject(nextState)
-            };
-        }
-
-        private LegalActionsResponse HandleGetLegalActions(LegalActionsRequest req)
-        {
-            var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
-            var numActions = gen.LegalCommands(game).Count();
-
-            return new LegalActionsResponse
-            {
-                LegalActions = Enumerable.Range(0, numActions).ToArray()
-            };
-        }
+        // private GameStateResponse HandleDoAction(DoActionRequest req)
+        // {
+        //     var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
+        //
+        //     var nextState = DoAction(game, req.Action);
+        //
+        //     return new GameStateResponse
+        //     {
+        //         IsTerminal = nextState.IsOver,
+        //         SerialisedState = JsonConvert.SerializeObject(nextState)
+        //     };
+        // }
+        //
+        // private LegalActionsResponse HandleGetLegalActions(LegalActionsRequest req)
+        // {
+        //     var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
+        //     var numActions = gen.LegalCommands(game).Count();
+        //
+        //     return new LegalActionsResponse
+        //     {
+        //         LegalActions = Enumerable.Range(0, numActions).ToArray()
+        //     };
+        // }
 
         private PandemicGame DoAction(PandemicGame game, int actionIdx)
         {

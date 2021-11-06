@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace pandemic.server.test
@@ -32,6 +33,15 @@ namespace pandemic.server.test
                 var action = RandomChoice(state.LegalActions());
                 state.ApplyAction(action);
             }
+        }
+
+        [Test]
+        public void asdf()
+        {
+            var request = new Request("asdf");
+            var serRequest = JsonConvert.SerializeObject(request);
+            var desRequest = JsonConvert.DeserializeObject<Request>(serRequest);
+            Assert.AreEqual(request, desRequest);
         }
 
         private int RandomChoice(IEnumerable<int> ints)

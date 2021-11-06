@@ -13,8 +13,7 @@ namespace pandemic.server.test
         {
             _client = new RequestSocket();
             _client.Connect("tcp://localhost:5555");
-            var request = new Request(RequestType.DoAction);
-            Send(JsonConvert.SerializeObject(request));
+            Send(new Request("apply_action"));
         }
 
         public void Dispose()
