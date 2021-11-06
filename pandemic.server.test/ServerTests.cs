@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 
@@ -5,6 +8,8 @@ namespace pandemic.server.test
 {
     public class ServerTests
     {
+        private readonly Random _random = new();
+
         [SetUp]
         public void Setup()
         {
@@ -19,7 +24,21 @@ namespace pandemic.server.test
                 server.Run();
             }).Start();
 
-            using var client = new RandomClient();
+            using var gameClient = new GameClient();
+
+            var state = gameClient.NewInitialState();
+            while (!state.IsTerminal)
+            {
+                var actions = RandomChoice(state.LegalActions());
+                // var action = client.Step(state);
+                // state.ApplyAction(action);
+            }
+        }
+
+        private int RandomChoice(IEnumerable<int> ints)
+        {
+            var list = ints.ToList();
+            return list[_random.Next(list.Count)];
         }
     }
 }
