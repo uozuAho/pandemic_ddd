@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
@@ -26,23 +25,13 @@ namespace pandemic.server.test
 
         public NetworkState NewInitialState()
         {
-            return new NetworkState();
+            return new NetworkState(this);
         }
 
-        private string Send(string msg)
+        public string Send(object message)
         {
-            _client.SendFrame(msg);
+            _client.SendFrame(JsonConvert.SerializeObject(message));
             return _client.ReceiveFrameString();
-        }
-    }
-
-    public class NetworkState
-    {
-        public bool IsTerminal { get; set; } = true;
-
-        public IEnumerable<int> LegalActions()
-        {
-            yield return 1;
         }
     }
 }

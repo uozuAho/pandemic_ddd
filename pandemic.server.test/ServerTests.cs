@@ -29,9 +29,8 @@ namespace pandemic.server.test
             var state = gameClient.NewInitialState();
             while (!state.IsTerminal)
             {
-                var actions = RandomChoice(state.LegalActions());
-                // var action = client.Step(state);
-                // state.ApplyAction(action);
+                var action = RandomChoice(state.LegalActions());
+                state.ApplyAction(action);
             }
         }
 
