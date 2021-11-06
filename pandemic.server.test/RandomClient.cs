@@ -1,32 +1,10 @@
 using System;
-using System.Threading;
 using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
-using NUnit.Framework;
 
 namespace pandemic.server.test
 {
-    public class Tests
-    {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [Test]
-        public void Test1()
-        {
-            new Thread(() =>
-            {
-                var server = new ZmqGameServer();
-                server.Run();
-            }).Start();
-
-            using var client = new RandomClient();
-        }
-    }
-
     internal class RandomClient : IDisposable
     {
         private readonly RequestSocket _client;
