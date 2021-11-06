@@ -16,7 +16,7 @@ namespace pandemic.server.test
         }
 
         [Test]
-        public void Test1()
+        public void Play_one_game_with_random_moves()
         {
             new Thread(() =>
             {
