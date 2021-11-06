@@ -4,7 +4,8 @@ namespace pandemic.server.test
 {
     public class NetworkState
     {
-        public bool IsTerminal { get; set; } = true;
+        public bool IsTerminal => _stateResponse.is_terminal;
+
         private readonly NetworkGame _client;
         private readonly StateResponse _stateResponse;
 
