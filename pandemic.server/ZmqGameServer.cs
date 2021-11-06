@@ -28,6 +28,7 @@ namespace pandemic.server
             {
                 var req = server.ReceiveFrameString();
                 var reqD = JsonConvert.DeserializeObject<Request>(req);
+                if (reqD.type == "exit") done = true;
                 var state = new StateResponse(
                     game.CurrentPlayerIdx.ToString(),
                     ToIntArray(_commandGenerator.LegalCommands(game)),
@@ -37,7 +38,6 @@ namespace pandemic.server
                     "asdf"
                 );
                 server.SendFrame(JsonConvert.SerializeObject(state));
-                done = true;
             }
         }
 

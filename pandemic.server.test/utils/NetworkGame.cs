@@ -3,7 +3,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
 
-namespace pandemic.server.test
+namespace pandemic.server.test.utils
 {
     public class NetworkGame : IDisposable
     {
@@ -26,6 +26,11 @@ namespace pandemic.server.test
             var stateStr = Send(new Request("new_initial_state"));
             var state = JsonConvert.DeserializeObject<StateResponse>(stateStr);
             return new NetworkState(this, state);
+        }
+
+        public void Exit()
+        {
+            Send(new Request("exit"));
         }
 
         public string Send(object message)

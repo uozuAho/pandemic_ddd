@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using NUnit.Framework;
+using pandemic.server.test.utils;
 
 namespace pandemic.server.test
 {
@@ -24,13 +25,15 @@ namespace pandemic.server.test
                 server.Run();
             }).Start();
 
-            using var gameClient = new NetworkGame("tcp://localhost:5555");
+            using var game = new NetworkGame("tcp://localhost:5555");
 
-            var state = gameClient.NewInitialState();
+            var state = game.NewInitialState();
             while (!state.IsTerminal)
             {
                 var action = RandomChoice(state.LegalActions());
                 state.ApplyAction(action);
+                game.Exit();
+                break;
             }
         }
 

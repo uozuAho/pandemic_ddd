@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace pandemic.server.test
+namespace pandemic.server.test.utils
 {
     public class NetworkState
     {
