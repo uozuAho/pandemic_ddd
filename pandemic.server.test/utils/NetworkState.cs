@@ -1,18 +1,19 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace pandemic.server.test.utils
 {
     public class NetworkState
     {
-        public bool IsTerminal => _stateResponse.is_terminal;
+        public bool IsTerminal => _state.is_terminal;
 
         private readonly NetworkGame _client;
-        private readonly StateResponse _stateResponse;
+        private StateResponse _state;
 
-        public NetworkState(NetworkGame client, StateResponse stateResponse)
+        public NetworkState(NetworkGame client, StateResponse state)
         {
             _client = client;
-            _stateResponse = stateResponse;
+            _state = state;
         }
 
         public IEnumerable<int> LegalActions()
@@ -22,12 +23,9 @@ namespace pandemic.server.test.utils
 
         public void ApplyAction(int action)
         {
-            _client.Send(new
-            {
-                type = "apply_action",
-                action,
-                state_str = "todo: implement me"
-            });
+            var request = new ApplyActionRequest(action, _state.state_str);
+            var response = _client.Send(request);
+            _state = JsonConvert.DeserializeObject<StateResponse>(response);
         }
     }
 }

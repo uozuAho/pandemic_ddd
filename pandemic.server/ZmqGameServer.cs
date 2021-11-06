@@ -17,11 +17,6 @@ namespace pandemic.server
         {
             using var server = new ResponseSocket();
             server.Bind("tcp://*:5555");
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            {
-                Difficulty = Difficulty.Normal,
-                Roles = new[] {Role.Medic, Role.Scientist}
-            });
 
             var done = false;
             while (!done)
@@ -35,23 +30,33 @@ namespace pandemic.server
                         server.SendFrame("aasdf");
                         break;
                     case "apply_action":
-                        var state = new StateResponse(
-                            game.CurrentPlayerIdx.ToString(),
-                            ToIntArray(_commandGenerator.LegalCommands(game)),
-                            game.IsOver,
+                        var applyActionRequest = JsonConvert.DeserializeObject<ApplyActionRequest>(req);
+                        var state = JsonConvert.DeserializeObject<PandemicGame>(applyActionRequest.state_str);
+                        var newState = DoAction(state, applyActionRequest.action);
+                        var response = new StateResponse(
+                            newState.CurrentPlayerIdx.ToString(),
+                            ToIntArray(_commandGenerator.LegalCommands(newState)),
+                            newState.IsOver,
                             false,
                             new double[] { 1 },
+                            JsonConvert.SerializeObject(newState),
                             "asdf"
                         );
                         server.SendFrame(JsonConvert.SerializeObject(state));
                         break;
                     case "new_initial_state":
+                        var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+                        {
+                            Difficulty = Difficulty.Normal,
+                            Roles = new[] { Role.Medic, Role.Scientist }
+                        });
                         var state2 = new StateResponse(
                             game.CurrentPlayerIdx.ToString(),
                             ToIntArray(_commandGenerator.LegalCommands(game)),
                             game.IsOver,
                             false,
                             new double[] { 1 },
+                            JsonConvert.SerializeObject(game),
                             "asdf"
                         );
                         server.SendFrame(JsonConvert.SerializeObject(state2));
