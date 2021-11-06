@@ -23,8 +23,9 @@ namespace pandemic.server.test
 
         public NetworkState NewInitialState()
         {
-            Send(new Request("apply_action"));
-            return new NetworkState(this);
+            var stateStr = Send(new Request("new_initial_state"));
+            var state = JsonConvert.DeserializeObject<StateResponse>(stateStr);
+            return new NetworkState(this, state);
         }
 
         public string Send(object message)

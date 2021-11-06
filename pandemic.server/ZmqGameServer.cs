@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NetMQ;
 using NetMQ.Sockets;
@@ -10,7 +11,7 @@ namespace pandemic.server
 {
     public class ZmqGameServer
     {
-        PlayerCommandGenerator gen = new PlayerCommandGenerator();
+        readonly PlayerCommandGenerator _commandGenerator = new();
 
         public void Run()
         {
@@ -26,66 +27,25 @@ namespace pandemic.server
             while (!done)
             {
                 var req = server.ReceiveFrameString();
-                Console.WriteLine($"From client: {req}");
                 var reqD = JsonConvert.DeserializeObject<Request>(req);
-                server.SendFrame("yo");
+                var state = new StateResponse(
+                    game.CurrentPlayerIdx.ToString(),
+                    ToIntArray(_commandGenerator.LegalCommands(game)),
+                    game.IsOver,
+                    false,
+                    new double []{1},
+                    "asdf"
+                );
+                server.SendFrame(JsonConvert.SerializeObject(state));
                 done = true;
-                // var response = reqD.RequestType switch
-                // {
-                //     RequestType.GetLegalActions => HandleGetLegalActions(JsonConvert.DeserializeObject<LegalActionsRequest>(req)),
-                //     RequestType.DoAction => HandleDoAction(JsonConvert.DeserializeObject<DoActionRequest>(req))
-                // };
-
-                // string response;
-                // switch (req)
-                // {
-                //     case "a":
-                //         var gen = new PlayerCommandGenerator();
-                //         var numActions = gen.LegalCommands(game).Count();
-                //         response = string.Join(',', Enumerable.Range(0, numActions));
-                //         break;
-                //     case "s":
-                //         response = JsonConvert.SerializeObject(game);
-                //         break;
-                //     case "q":
-                //         response = "bye!";
-                //         done = true;
-                //         break;
-                //     default:
-                //         var isAction = int.TryParse(req, out var action);
-                //         if (!isAction)
-                //             throw new InvalidOperationException($"unhandled request {req}");
-                //         game = DoAction(game, action);
-                //         response = JsonConvert.SerializeObject(game);
-                //         break;
-                // };
-                // server.SendFrame(response);
             }
         }
 
-        // private GameStateResponse HandleDoAction(DoActionRequest req)
-        // {
-        //     var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
-        //
-        //     var nextState = DoAction(game, req.Action);
-        //
-        //     return new GameStateResponse
-        //     {
-        //         IsTerminal = nextState.IsOver,
-        //         SerialisedState = JsonConvert.SerializeObject(nextState)
-        //     };
-        // }
-        //
-        // private LegalActionsResponse HandleGetLegalActions(LegalActionsRequest req)
-        // {
-        //     var game = JsonConvert.DeserializeObject<PandemicGame>(req.SerialisedState);
-        //     var numActions = gen.LegalCommands(game).Count();
-        //
-        //     return new LegalActionsResponse
-        //     {
-        //         LegalActions = Enumerable.Range(0, numActions).ToArray()
-        //     };
-        // }
+        private static int[] ToIntArray(IEnumerable<PlayerCommand> commands)
+        {
+            return Enumerable.Range(0, commands.Count()).ToArray();
+        }
+
 
         private PandemicGame DoAction(PandemicGame game, int actionIdx)
         {

@@ -6,10 +6,12 @@ namespace pandemic.server.test
     {
         public bool IsTerminal { get; set; } = true;
         private readonly NetworkGame _client;
+        private readonly StateResponse _stateResponse;
 
-        public NetworkState(NetworkGame client)
+        public NetworkState(NetworkGame client, StateResponse stateResponse)
         {
             _client = client;
+            _stateResponse = stateResponse;
         }
 
         public IEnumerable<int> LegalActions()
