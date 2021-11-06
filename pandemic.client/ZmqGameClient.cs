@@ -10,7 +10,7 @@ namespace pandemic.client
     {
         public bool IsTerminal { get; }
         private readonly ZmqGameClient _client;
-        private readonly string _stateString;
+        private string _stateString;
 
         public ZmqGameState(ZmqGameClient client, string stateString)
         {
@@ -20,7 +20,7 @@ namespace pandemic.client
 
         public void ApplyAction(int action)
         {
-            _client.Send(action.ToString());
+            _stateString = _client.Send(action.ToString());
         }
 
         public IEnumerable<int> LegalActions()
