@@ -4,7 +4,7 @@ using pandemic.GameData;
 
 namespace pandemic.Values
 {
-    public record PlayerCard
+    public abstract record PlayerCard
     {
         public static IEqualityComparer<PlayerCard> DefaultEqualityComparer = new PlayerCardEqualityComparer();
     }

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.GameData;
+using pandemic.server.Dto;
 using pandemic.Values;
 
 namespace pandemic.server.test
@@ -19,7 +21,7 @@ namespace pandemic.server.test
             var serialisable = SerializablePandemicGame.From(game);
             var ser = serialisable.Serialise();
             var deser = SerializablePandemicGame.Deserialise(ser);
-            var deserGame = deser.ToPandemicGame();
+            var deserGame = deser.ToPandemicGame(new StandardGameBoard());
 
             Assert.IsTrue(deserGame.IsSameStateAs(game));
         }

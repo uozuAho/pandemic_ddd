@@ -5,6 +5,8 @@ using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
 using pandemic.Aggregates;
+using pandemic.GameData;
+using pandemic.server.Dto;
 using pandemic.Values;
 
 namespace pandemic.server
@@ -23,6 +25,7 @@ namespace pandemic.server
             {
                 var req = server.ReceiveFrameString();
                 var reqD = JsonConvert.DeserializeObject<Request>(req);
+                if (reqD == null) throw new InvalidOperationException("doh");
                 switch (reqD.type)
                 {
                     case "exit":
@@ -31,7 +34,10 @@ namespace pandemic.server
                         break;
                     case "apply_action":
                         var applyActionRequest = JsonConvert.DeserializeObject<ApplyActionRequest>(req);
-                        var state = JsonConvert.DeserializeObject<PandemicGame>(applyActionRequest.state_str);
+                        if (applyActionRequest == null) throw new InvalidOperationException("doh");
+                        var state = SerializablePandemicGame
+                            .Deserialise(applyActionRequest.state_str)
+                            .ToPandemicGame(new StandardGameBoard());
                         var newState = DoAction(state, applyActionRequest.action);
                         var response = new StateResponse(
                             newState.CurrentPlayerIdx.ToString(),
