@@ -16,7 +16,7 @@ namespace pandemic.server.Dto
         public int OutbreakCounter { get; init; }
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; }
-        public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
+        public ImmutableList<SerializablePlayer> Players { get; init; } = ImmutableList<SerializablePlayer>.Empty;
         public ImmutableList<City> Cities { get; init; } = ImmutableList<City>.Empty;
         public ImmutableList<SerializablePlayerCard> PlayerDrawPile { get; init; } = ImmutableList<SerializablePlayerCard>.Empty;
         public ImmutableList<SerializablePlayerCard> PlayerDiscardPile { get; init; } = ImmutableList<SerializablePlayerCard>.Empty;
@@ -35,7 +35,7 @@ namespace pandemic.server.Dto
                 OutbreakCounter = game.OutbreakCounter,
                 CurrentPlayerIdx = game.CurrentPlayerIdx,
                 ResearchStationPile = game.ResearchStationPile,
-                Players = game.Players,
+                Players = game.Players.Select(SerializablePlayer.From).ToImmutableList(),
                 Cities = game.Cities,
                 PlayerDrawPile = game.PlayerDrawPile
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
@@ -58,7 +58,7 @@ namespace pandemic.server.Dto
                 OutbreakCounter = OutbreakCounter,
                 CurrentPlayerIdx = CurrentPlayerIdx,
                 ResearchStationPile = ResearchStationPile,
-                Players = Players,
+                Players = Players.Select(p => p.ToPlayer(board)).ToImmutableList(),
                 Cities = Cities,
                 PlayerDrawPile = PlayerDrawPile
                     .Select(c => c.ToPlayerCard(board)).ToImmutableList(),
