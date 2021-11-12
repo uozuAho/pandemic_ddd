@@ -45,26 +45,17 @@ namespace pandemic.server
             var reqD = JsonConvert.DeserializeObject<Request>(req);
             if (reqD == null) throw new InvalidOperationException("doh");
 
-            var keepServing = true;
-            object resppp;
-
-            switch (reqD.type)
+            object response = reqD.type switch
             {
-                case "exit":
-                    resppp = "shutting down server...";
-                    keepServing = false;
-                    break;
-                case "apply_action":
-                    resppp = HandleApplyAction(req);
-                    break;
-                case "new_initial_state":
-                    resppp = HandleNewInitialState();
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
-            }
+                "exit" => "shutting down server...",
+                "apply_action" => HandleApplyAction(req),
+                "new_initial_state" => HandleNewInitialState(),
+                _ => throw new InvalidOperationException($"Unhandled request type '{reqD.type}")
+            };
 
-            _server.SendFrame(JsonConvert.SerializeObject(resppp));
+            _server.SendFrame(JsonConvert.SerializeObject(response));
+
+            var keepServing = reqD.type != "exit";
             return keepServing;
         }
 
