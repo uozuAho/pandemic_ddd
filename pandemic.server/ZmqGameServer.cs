@@ -11,39 +11,52 @@ using pandemic.Values;
 
 namespace pandemic.server
 {
-    public class ZmqGameServer
+    public class ZmqGameServer : IDisposable
     {
+        private readonly string _url;
         readonly PlayerCommandGenerator _commandGenerator = new();
+        private readonly ResponseSocket _server;
+
+        public ZmqGameServer(string url)
+        {
+            _url = url;
+            _server = new ResponseSocket();
+        }
+
+        public void Dispose()
+        {
+            _server.Dispose();
+        }
 
         public void Run()
         {
-            using var server = new ResponseSocket();
-            server.Bind("tcp://*:5555");
-
+            _server.Bind(_url);
             var keepServing = true;
             while (keepServing)
             {
-                var req = server.ReceiveFrameString();
-                keepServing = Handle(req, server);
+                var req = _server.ReceiveFrameString();
+                keepServing = Handle(req);
             }
+            _server.Close();
         }
 
-        private bool Handle(string? req, ResponseSocket? server)
+        private bool Handle(string req)
         {
             var reqD = JsonConvert.DeserializeObject<Request>(req);
             if (reqD == null) throw new InvalidOperationException("doh");
+
             switch (reqD.type)
             {
                 case "exit":
-                    server.SendFrame("shutting down server...");
+                    _server.SendFrame("shutting down server...");
                     return false;
                 case "apply_action":
                     var response = HandleApplyAction(req);
-                    server.SendFrame(JsonConvert.SerializeObject(response));
+                    _server.SendFrame(JsonConvert.SerializeObject(response));
                     break;
                 case "new_initial_state":
                     var response2 = HandleNewInitialState();
-                    server.SendFrame(JsonConvert.SerializeObject(response2));
+                    _server.SendFrame(JsonConvert.SerializeObject(response2));
                     break;
                 default:
                     throw new InvalidOperationException($"Unhandled request type '{reqD.type}");

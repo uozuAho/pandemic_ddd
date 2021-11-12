@@ -4,7 +4,7 @@ namespace pandemic.server
     {
         static void Main(string[] args)
         {
-            var server = new ZmqGameServer();
+            var server = new ZmqGameServer("tcp://*:5555");
             server.Run();
         }
     }

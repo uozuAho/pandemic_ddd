@@ -21,7 +21,7 @@ namespace pandemic.server.test
         {
             new Thread(() =>
             {
-                var server = new ZmqGameServer();
+                var server = new ZmqGameServer("tcp://*:5555");
                 server.Run();
             }).Start();
 
