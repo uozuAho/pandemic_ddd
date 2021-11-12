@@ -18,7 +18,7 @@ namespace pandemic.server.test.utils
 
         public IEnumerable<int> LegalActions()
         {
-            yield return 1;
+            return _state.legal_actions;
         }
 
         public void ApplyAction(int action)
