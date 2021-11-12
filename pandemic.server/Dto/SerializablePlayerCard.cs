@@ -29,14 +29,17 @@ namespace pandemic.server.Dto
 
         public PlayerCard ToPlayerCard(StandardGameBoard board)
         {
-            if (City == null) throw new NullReferenceException(nameof(City));
-
             return Type switch
             {
                 "Epidemic" => new EpidemicCard(),
-                "City" => new PlayerCityCard(board.City(City)),
+                "City" => ToPlayerCityCard(board),
                 _ => throw new InvalidOperationException($"Unknown type {Type}")
             };
+        }
+
+        private PlayerCityCard ToPlayerCityCard(StandardGameBoard board)
+        {
+            return new PlayerCityCard(board.City(City ?? throw new InvalidOperationException("Null city!")));
         }
     }
 }
