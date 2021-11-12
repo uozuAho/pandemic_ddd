@@ -32,9 +32,8 @@ namespace pandemic.server.test
             {
                 var action = RandomChoice(state.LegalActions());
                 state.ApplyAction(action);
-                game.Exit();
-                break;
             }
+            game.Exit();
         }
 
         private int RandomChoice(IEnumerable<int> ints)

@@ -78,7 +78,6 @@ namespace pandemic.server
             return Enumerable.Range(0, commands.Count()).ToArray();
         }
 
-
         private PandemicGame DoAction(PandemicGame game, int actionIdx)
         {
             var gen = new PlayerCommandGenerator();
