@@ -45,10 +45,10 @@ namespace pandemic.server
                             newState.IsOver,
                             false,
                             new double[] { 1 },
-                            JsonConvert.SerializeObject(newState),
+                            JsonConvert.SerializeObject(SerializablePandemicGame.From(newState)),
                             "asdf"
                         );
-                        server.SendFrame(JsonConvert.SerializeObject(state));
+                        server.SendFrame(JsonConvert.SerializeObject(response));
                         break;
                     case "new_initial_state":
                         var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
@@ -56,16 +56,16 @@ namespace pandemic.server
                             Difficulty = Difficulty.Normal,
                             Roles = new[] { Role.Medic, Role.Scientist }
                         });
-                        var state2 = new StateResponse(
+                        var response2 = new StateResponse(
                             game.CurrentPlayerIdx.ToString(),
                             ToIntArray(_commandGenerator.LegalCommands(game)),
                             game.IsOver,
                             false,
                             new double[] { 1 },
-                            JsonConvert.SerializeObject(game),
+                            JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
                             "asdf"
                         );
-                        server.SendFrame(JsonConvert.SerializeObject(state2));
+                        server.SendFrame(JsonConvert.SerializeObject(response2));
                         break;
                     default:
                         throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
