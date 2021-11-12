@@ -35,17 +35,18 @@ namespace pandemic.server
             while (keepServing)
             {
                 var req = _server.ReceiveFrameString();
-                keepServing = Handle(req);
+                keepServing = Handle(req, out var response);
+                _server.SendFrame(response);
             }
             _server.Close();
         }
 
-        private bool Handle(string req)
+        private bool Handle(string req, out string response)
         {
             var reqD = JsonConvert.DeserializeObject<Request>(req);
             if (reqD == null) throw new InvalidOperationException("doh");
 
-            object response = reqD.type switch
+            object responseObj = reqD.type switch
             {
                 "exit" => "shutting down server...",
                 "apply_action" => HandleApplyAction(req),
@@ -53,7 +54,7 @@ namespace pandemic.server
                 _ => throw new InvalidOperationException($"Unhandled request type '{reqD.type}")
             };
 
-            _server.SendFrame(JsonConvert.SerializeObject(response));
+            response = JsonConvert.SerializeObject(responseObj);
 
             var keepServing = reqD.type != "exit";
             return keepServing;
@@ -67,15 +68,7 @@ namespace pandemic.server
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            return new StateResponse(
-                game.CurrentPlayerIdx.ToString(),
-                ToIntArray(_commandGenerator.LegalCommands(game)),
-                game.IsOver,
-                false,
-                new double[] { 1 },
-                JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
-                "asdf"
-            );
+            return NewStateResponse(game);
         }
 
         private StateResponse HandleApplyAction(string req)
@@ -89,13 +82,18 @@ namespace pandemic.server
 
             var newState = DoAction(state, applyActionRequest.action);
 
+            return NewStateResponse(newState);
+        }
+
+        private StateResponse NewStateResponse(PandemicGame game)
+        {
             return new StateResponse(
-                newState.CurrentPlayerIdx.ToString(),
-                ToIntArray(_commandGenerator.LegalCommands(newState)),
-                newState.IsOver,
+                game.CurrentPlayerIdx.ToString(),
+                ToIntArray(_commandGenerator.LegalCommands(game)),
+                game.IsOver,
                 false,
                 new double[] { 1 },
-                JsonConvert.SerializeObject(SerializablePandemicGame.From(newState)),
+                JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
                 "todo: pretty string of game state"
             );
         }
