@@ -20,43 +20,55 @@ namespace pandemic.server
             using var server = new ResponseSocket();
             server.Bind("tcp://*:5555");
 
-            var done = false;
-            while (!done)
+            var keepServing = true;
+            while (keepServing)
             {
                 var req = server.ReceiveFrameString();
-                var reqD = JsonConvert.DeserializeObject<Request>(req);
-                if (reqD == null) throw new InvalidOperationException("doh");
-                switch (reqD.type)
-                {
-                    case "exit":
-                        done = true;
-                        server.SendFrame("shutting down server...");
-                        break;
-                    case "apply_action":
-                        var response = HandleApplyAction(req);
-                        server.SendFrame(JsonConvert.SerializeObject(response));
-                        break;
-                    case "new_initial_state":
-                        var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-                        {
-                            Difficulty = Difficulty.Normal,
-                            Roles = new[] { Role.Medic, Role.Scientist }
-                        });
-                        var response2 = new StateResponse(
-                            game.CurrentPlayerIdx.ToString(),
-                            ToIntArray(_commandGenerator.LegalCommands(game)),
-                            game.IsOver,
-                            false,
-                            new double[] { 1 },
-                            JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
-                            "asdf"
-                        );
-                        server.SendFrame(JsonConvert.SerializeObject(response2));
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
-                }
+                keepServing = Handle(req, server);
             }
+        }
+
+        private bool Handle(string? req, ResponseSocket? server)
+        {
+            var reqD = JsonConvert.DeserializeObject<Request>(req);
+            if (reqD == null) throw new InvalidOperationException("doh");
+            switch (reqD.type)
+            {
+                case "exit":
+                    server.SendFrame("shutting down server...");
+                    return false;
+                case "apply_action":
+                    var response = HandleApplyAction(req);
+                    server.SendFrame(JsonConvert.SerializeObject(response));
+                    break;
+                case "new_initial_state":
+                    var response2 = HandleNewInitialState();
+                    server.SendFrame(JsonConvert.SerializeObject(response2));
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
+            }
+
+            return true;
+        }
+
+        private StateResponse HandleNewInitialState()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Normal,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            return new StateResponse(
+                game.CurrentPlayerIdx.ToString(),
+                ToIntArray(_commandGenerator.LegalCommands(game)),
+                game.IsOver,
+                false,
+                new double[] { 1 },
+                JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
+                "asdf"
+            );
         }
 
         private StateResponse HandleApplyAction(string req)
