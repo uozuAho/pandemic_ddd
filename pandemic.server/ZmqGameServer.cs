@@ -30,24 +30,10 @@ namespace pandemic.server
                 {
                     case "exit":
                         done = true;
-                        server.SendFrame("aasdf");
+                        server.SendFrame("shutting down server...");
                         break;
                     case "apply_action":
-                        var applyActionRequest = JsonConvert.DeserializeObject<ApplyActionRequest>(req);
-                        if (applyActionRequest == null) throw new InvalidOperationException("doh");
-                        var state = SerializablePandemicGame
-                            .Deserialise(applyActionRequest.state_str)
-                            .ToPandemicGame(new StandardGameBoard());
-                        var newState = DoAction(state, applyActionRequest.action);
-                        var response = new StateResponse(
-                            newState.CurrentPlayerIdx.ToString(),
-                            ToIntArray(_commandGenerator.LegalCommands(newState)),
-                            newState.IsOver,
-                            false,
-                            new double[] { 1 },
-                            JsonConvert.SerializeObject(SerializablePandemicGame.From(newState)),
-                            "asdf"
-                        );
+                        var response = HandleApplyAction(req);
                         server.SendFrame(JsonConvert.SerializeObject(response));
                         break;
                     case "new_initial_state":
@@ -71,6 +57,28 @@ namespace pandemic.server
                         throw new InvalidOperationException($"Unhandled request type '{reqD.type}");
                 }
             }
+        }
+
+        private StateResponse HandleApplyAction(string req)
+        {
+            var applyActionRequest = JsonConvert.DeserializeObject<ApplyActionRequest>(req);
+            if (applyActionRequest == null) throw new InvalidOperationException("doh");
+
+            var state = SerializablePandemicGame
+                .Deserialise(applyActionRequest.state_str)
+                .ToPandemicGame(new StandardGameBoard());
+
+            var newState = DoAction(state, applyActionRequest.action);
+
+            return new StateResponse(
+                newState.CurrentPlayerIdx.ToString(),
+                ToIntArray(_commandGenerator.LegalCommands(newState)),
+                newState.IsOver,
+                false,
+                new double[] { 1 },
+                JsonConvert.SerializeObject(SerializablePandemicGame.From(newState)),
+                "todo: pretty string of game state"
+            );
         }
 
         private static int[] ToIntArray(IEnumerable<PlayerCommand> commands)
