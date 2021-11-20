@@ -136,7 +136,7 @@ namespace pandemic.server
             if (game.IsLost) returns = Enumerable.Repeat(-1.0, game.Players.Count).ToArray();
 
             return new StateResponse(
-                game.CurrentPlayerIdx.ToString(),
+                game.CurrentPlayerIdx,
                 ToIntArray(_commandGenerator.LegalCommands(game)),
                 game.IsOver,
                 false,
