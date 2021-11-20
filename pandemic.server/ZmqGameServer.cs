@@ -46,12 +46,13 @@ namespace pandemic.server
             var reqD = JsonConvert.DeserializeObject<Request>(req);
             if (reqD == null) throw new InvalidOperationException("doh");
 
-            object responseObj = reqD.type switch
+            var responseObj = reqD.type switch
             {
                 "exit" => "shutting down server...",
                 "apply_action" => HandleApplyAction(req),
                 "new_initial_state" => HandleNewInitialState(),
                 "game_type" => HandleGameType(),
+                "game_info" => HandleGameInfo(),
                 _ => throw new InvalidOperationException($"Unhandled request type '{reqD.type}")
             };
 
@@ -84,6 +85,22 @@ namespace pandemic.server
                 provides_observation_string = false,
                 provides_observation_tensor = false,
                 parameter_specification = new Dictionary<string, string>()
+            };
+        }
+
+        private static object HandleGameInfo()
+        {
+            return new
+            {
+                // todo: how many distinct actions are there?
+                num_distinct_actions = 1000,
+                max_chance_outcomes = 0, // N/A for deterministic games
+                num_players = -1, // todo: game doesn't know the number of players. How is this supposed to work?
+                // todo: game is win/lose. What should utility be?
+                min_utility = -1.0,
+                max_utility = 1.0,
+                utility_sum = 0.0, // todo: dunno about this
+                max_game_length = 1000, // todo: what is the actual max game length? Does it matter?
             };
         }
 
