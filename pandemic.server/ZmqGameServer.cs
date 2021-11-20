@@ -14,7 +14,7 @@ namespace pandemic.server
     public class ZmqGameServer : IDisposable
     {
         private readonly string _url;
-        readonly PlayerCommandGenerator _commandGenerator = new();
+        private readonly PlayerCommandGenerator _commandGenerator = new();
         private readonly ResponseSocket _server;
 
         public ZmqGameServer(string url)
@@ -94,7 +94,7 @@ namespace pandemic.server
                 false,
                 new double[] { 1 },
                 JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
-                "todo: pretty string of game state"
+                $"win: {game.IsWon}, loss reason: {game.LossReason}"
             );
         }
 
