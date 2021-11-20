@@ -131,12 +131,16 @@ namespace pandemic.server
 
         private StateResponse NewStateResponse(PandemicGame game)
         {
+            var returns = Enumerable.Repeat(0.0, game.Players.Count).ToArray();
+            if (game.IsWon) returns = Enumerable.Repeat(1.0, game.Players.Count).ToArray();
+            if (game.IsLost) returns = Enumerable.Repeat(-1.0, game.Players.Count).ToArray();
+
             return new StateResponse(
                 game.CurrentPlayerIdx.ToString(),
                 ToIntArray(_commandGenerator.LegalCommands(game)),
                 game.IsOver,
                 false,
-                new double[] { 1 },
+                returns,
                 JsonConvert.SerializeObject(SerializablePandemicGame.From(game)),
                 $"win: {game.IsWon}, loss reason: {game.LossReason}"
             );
