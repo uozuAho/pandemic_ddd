@@ -83,7 +83,7 @@ namespace pandemic.server
                 provides_information_state_tensor = false,
                 provides_observation_string = false,
                 provides_observation_tensor = false,
-                parameter_specification = Array.Empty<int>()
+                parameter_specification = new Dictionary<string, string>()
             };
         }
 
