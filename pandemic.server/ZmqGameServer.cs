@@ -51,6 +51,7 @@ namespace pandemic.server
                 "exit" => "shutting down server...",
                 "apply_action" => HandleApplyAction(req),
                 "new_initial_state" => HandleNewInitialState(),
+                "game_type" => HandleGameType(),
                 _ => throw new InvalidOperationException($"Unhandled request type '{reqD.type}")
             };
 
@@ -58,6 +59,32 @@ namespace pandemic.server
 
             var keepServing = reqD.type != "exit";
             return keepServing;
+        }
+
+        private static object HandleGameType()
+        {
+            return new
+            {
+                short_name = "Pandemic",
+                long_name = "Pandemic",
+                // kSequential: https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/spiel.h#L60
+                dynamics = 1,
+                // kDeterministic: https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/spiel.h#L73
+                chance_mode = 0,
+                // kPerfectInformation: https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/spiel.h#L84
+                information = 1,
+                // kIdentical: https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/spiel.h#L94
+                utility = 3,
+                // kTerminal: https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/spiel.h#L103
+                reward_model = 1,
+                max_num_players = 4,
+                min_num_players = 2,
+                provides_information_state_string = false,
+                provides_information_state_tensor = false,
+                provides_observation_string = false,
+                provides_observation_tensor = false,
+                // parameter_specification = null
+            };
         }
 
         private StateResponse HandleNewInitialState()
