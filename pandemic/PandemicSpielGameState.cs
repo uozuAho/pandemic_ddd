@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.Values;
 
 namespace pandemic
 {
@@ -12,6 +13,14 @@ namespace pandemic
     public class PandemicSpielGameState
     {
         public PandemicGame Game;
+
+        public bool IsTerminal => Game.IsOver;
+        public bool IsWin => Game.IsWon;
+        public bool IsLoss => Game.IsLost;
+        public int CurrentPlayerIdx => Game.CurrentPlayerIdx;
+        /// this doesn't conform to spiel state. Use CurrentPlayerIdx for the player idx.
+        public Player CurrentPlayer => Game.CurrentPlayer;
+
         private readonly PlayerCommandGenerator _commandGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
@@ -19,9 +28,10 @@ namespace pandemic
             Game = game;
         }
 
-        public bool IsTerminal => Game.IsOver;
-        public bool IsWin => Game.IsWon;
-        public bool IsLoss => Game.IsLost;
+        public PandemicSpielGameState Clone()
+        {
+            return new PandemicSpielGameState(Game with { });
+        }
 
         public override string ToString()
         {
