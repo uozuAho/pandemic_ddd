@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.server", "pandemic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.server.test", "pandemic.server.test\pandemic.server.test.csproj", "{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.agents.test", "pandemic.agents.test\pandemic.agents.test.csproj", "{F4A58D9A-070B-4324-8CA0-586A0B115FBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,18 @@ Global
 		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x64.Build.0 = Release|Any CPU
 		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.ActiveCfg = Release|Any CPU
 		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.Build.0 = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|x64.Build.0 = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|x86.Build.0 = Debug|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|x64.ActiveCfg = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|x64.Build.0 = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|x86.ActiveCfg = Release|Any CPU
+		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

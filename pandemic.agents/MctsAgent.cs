@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace pandemic.agents
@@ -9,13 +8,12 @@ namespace pandemic.agents
     /// Monte-Carlo Tree Search.
     /// I'm planning to copy https://github.com/deepmind/open_spiel/blob/master/open_spiel/python/algorithms/mcts.py
     /// </summary>
-    internal class MctsAgent
+    public class MctsAgent
     {
-        public RandomRolloutEvaluator _evaluator;
-
         private readonly int _maxSimulations;
-        private bool _solve = false;
+        private readonly bool _solve = false;
         private const double _maxUtility = 1.0;
+        private readonly RandomRolloutEvaluator _evaluator;
 
         public MctsAgent(int maxSimulations)
         {
@@ -24,7 +22,7 @@ namespace pandemic.agents
         }
 
         // done
-        private PlayerCommand Step(PandemicSpielGameState state)
+        public PlayerCommand Step(PandemicSpielGameState state)
         {
             var root = MctsSearch(state);
             var best = root.BestChild();
