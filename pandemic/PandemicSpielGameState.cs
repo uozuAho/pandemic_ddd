@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Events;
 using pandemic.Values;
@@ -20,6 +21,13 @@ namespace pandemic
         public int CurrentPlayerIdx => Game.CurrentPlayerIdx;
         /// this doesn't conform to spiel state. Use CurrentPlayerIdx for the player idx.
         public Player CurrentPlayer => Game.CurrentPlayer;
+
+        public double[] Returns =>
+            IsWin
+            ? Enumerable.Repeat(1.0, Game.Players.Count).ToArray()
+            : IsLoss
+            ? Enumerable.Repeat(-1.0, Game.Players.Count).ToArray()
+            : Enumerable.Repeat(0.0, Game.Players.Count).ToArray();
 
         private readonly PlayerCommandGenerator _commandGenerator = new ();
 

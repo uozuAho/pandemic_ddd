@@ -11,8 +11,11 @@ namespace pandemic.agents
     /// </summary>
     internal class MctsAgent
     {
-        private readonly int _maxSimulations;
         public RandomRolloutEvaluator _evaluator;
+
+        private readonly int _maxSimulations;
+        private bool _solve = false;
+        private const double _maxUtility = 1.0;
 
         public MctsAgent(int maxSimulations)
         {
@@ -20,6 +23,7 @@ namespace pandemic.agents
             _evaluator = new RandomRolloutEvaluator();
         }
 
+        // done
         private PlayerCommand Step(PandemicSpielGameState state)
         {
             var root = MctsSearch(state);
@@ -31,6 +35,7 @@ namespace pandemic.agents
             return best.Command;
         }
 
+        // done
         private SearchNode MctsSearch(PandemicSpielGameState state)
         {
             var rootPlayer = state.CurrentPlayerIdx;
@@ -39,11 +44,58 @@ namespace pandemic.agents
             for (var i = 0; i < _maxSimulations; i++)
             {
                 var (visitPath, workingState) = ApplyTreePolicy(root, state);
+                double[] returns;
+                var solved = false;
+
+                if (workingState.IsTerminal)
+                {
+                    returns = workingState.Returns;
+                    visitPath.Last().Outcomes = returns;
+                    solved = _solve;
+                }
+                else
+                {
+                    returns = _evaluator.Evaluate(workingState);
+                    solved = false;
+                }
+
+                foreach (var node in visitPath.Reversed())
+                {
+                    node.TotalReward += returns[node.PlayerIdx];
+                    node.ExploreCount++;
+
+                    if (solved && !node.IsLeaf)
+                    {
+                        var player = node.PlayerIdx;
+                        SearchNode? best = null;
+                        var allSolved = true;
+
+                        foreach (var child in node.Children)
+                        {
+                            if (child.Outcomes == null)
+                                allSolved = false;
+                            // todo: remove null forgiving operator here
+                            // it's here to stay true to the python code I'm copying from
+                            else if (best == null || child.Outcomes[player] > best.Outcomes![player])
+                                best = child;
+                        }
+
+                        if (best != null &&
+                            (allSolved || best.Outcomes![player] == _maxUtility))
+                            node.Outcomes = best.Outcomes;
+                        else
+                            solved = false;
+                    }
+                }
+
+                if (root.Outcomes != null)
+                    break;
             }
 
             return root;
         }
 
+        // done
         private (List<SearchNode> visitPath, PandemicSpielGameState workingState)
             ApplyTreePolicy(SearchNode root, PandemicSpielGameState state)
         {
@@ -56,7 +108,7 @@ namespace pandemic.agents
                 if (currentNode.IsLeaf)
                 {
                     var legalActions = _evaluator.Prior(workingState).Shuffle();
-                    currentNode.SetChildren(legalActions.Select(a =>
+                    currentNode.Children.AddRange(legalActions.Select(a =>
                         new SearchNode(workingState.CurrentPlayerIdx, a.Item1)
                         {
                             Prior = a.Item2
@@ -64,10 +116,11 @@ namespace pandemic.agents
                     ));
                 }
 
-                if (currentNode.Children.IsEmpty)
+                if (!currentNode.Children.Any())
                     throw new InvalidOperationException("non terminal state must have children");
 
-                var chosenChild = currentNode.Children.MaxBy(c => c.UctValue())!;
+                var exploreCount = currentNode.ExploreCount;
+                var chosenChild = currentNode.Children.MaxBy(c => c.UctValue(exploreCount))!;
 
                 workingState.ApplyAction(chosenChild.Command!);
                 currentNode = chosenChild;
@@ -86,6 +139,14 @@ namespace pandemic.agents
             var rng = new Random();
             return items.OrderBy(_ => rng.Next());
         }
+
+        public static IEnumerable<T> Reversed<T>(this IEnumerable<T> items)
+        {
+            var temp = new List<T>();
+            temp.AddRange(items);
+            temp.Reverse();
+            return temp;
+        }
     }
 
     internal class RandomRolloutEvaluator
@@ -100,6 +161,11 @@ namespace pandemic.agents
             var legalActions = state.LegalActions().ToList();
             return legalActions.Select(a => (a, 1.0 / legalActions.Count));
         }
+
+        public double[] Evaluate(PandemicSpielGameState workingState)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>
@@ -108,29 +174,28 @@ namespace pandemic.agents
     /// <param name="Command">The command that lead to this node</param>
     internal record SearchNode(int PlayerIdx, PlayerCommand? Command)
     {
-        public int ExploreCount { get; init; }
-        public double Prior { get; init; }
-        public double[]? Outcomes { get; init; }
-        public double TotalReward { get; init; }
-        public ImmutableList<SearchNode> Children { get; private set; } = ImmutableList<SearchNode>.Empty;
+        public int ExploreCount { get; set; }
+        public double Prior { get; set; }
+        public double[]? Outcomes { get; set; }
+        public double TotalReward { get; set; }
+        public List<SearchNode> Children { get; set; } = new();
 
         public bool IsLeaf => !Children.Any();
 
         public SearchNode BestChild()
         {
-            if (Children.IsEmpty) throw new InvalidOperationException("No children");
+            if (!Children.Any()) throw new InvalidOperationException("No children");
 
             return Children.MaxBy(c => c.SortKey())!;
         }
 
-        public void SetChildren(IEnumerable<SearchNode> children)
+        public double UctValue(int parentExploreCount)
         {
-            Children = children.ToImmutableList();
-        }
+            if (Outcomes != null) return Outcomes[PlayerIdx];
+            if (ExploreCount == 0) return double.PositiveInfinity;
 
-        public double UctValue()
-        {
-            throw new NotImplementedException();
+            return TotalReward / ExploreCount + Math.Sqrt(2) * Math.Sqrt(
+                Math.Log(parentExploreCount) / ExploreCount);
         }
 
         // https://github.com/deepmind/open_spiel/blob/dbfb14322c8c3ebc089310032a56bfaed0dc4c01/open_spiel/python/algorithms/mcts.py#L144

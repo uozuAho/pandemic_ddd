@@ -19,6 +19,12 @@ dotnet run
 ```
 
 # todo
+- mcts agent
+    - copy all mcts code DONE
+    - copy mcts tests
+    - refactor
+        - address warnings
+        - remove null forgiving operators
 - implement epidemic
 - implement more game rules
 - check code todos
