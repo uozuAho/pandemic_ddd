@@ -23,6 +23,7 @@ dotnet run
     - copy all mcts code DONE
     - copy mcts tests
     - refactor
+        - address todos
         - address warnings
         - remove null forgiving operators
 - implement epidemic

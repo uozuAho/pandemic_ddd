@@ -28,9 +28,9 @@ namespace pandemic.agents
             var best = root.BestChild();
 
             // how to remove need for all these null checks? Root node needs a null command, others don't
-            if (best.Command == null) throw new InvalidOperationException("this shouldn't happen!");
+            if (best.Action == null) throw new InvalidOperationException("this shouldn't happen!");
 
-            return best.Command;
+            return best.Action;
         }
 
         // done
@@ -120,7 +120,7 @@ namespace pandemic.agents
                 var exploreCount = currentNode.ExploreCount;
                 var chosenChild = currentNode.Children.MaxBy(c => c.UctValue(exploreCount))!;
 
-                workingState.ApplyAction(chosenChild.Command!);
+                workingState.ApplyAction(chosenChild.Action!);
                 currentNode = chosenChild;
                 visitPath.Add(currentNode);
             }
@@ -130,7 +130,7 @@ namespace pandemic.agents
     }
 
     // todo: move somewhere else
-    internal static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> items)
         {
@@ -147,7 +147,8 @@ namespace pandemic.agents
         }
     }
 
-    internal static class RandomExtensions
+    // todo: move somewhere else
+    public static class RandomExtensions
     {
         public static T Choice<T>(this Random random, IEnumerable<T> items)
         {
@@ -199,8 +200,8 @@ namespace pandemic.agents
     /// <summary>
     /// </summary>
     /// <param name="PlayerIdx"></param>
-    /// <param name="Command">The command that lead to this node</param>
-    internal record SearchNode(int PlayerIdx, PlayerCommand? Command)
+    /// <param name="Action">The command that lead to this node</param>
+    public record SearchNode(int PlayerIdx, PlayerCommand? Action)
     {
         public int ExploreCount { get; set; }
         public double Prior { get; set; }
@@ -209,6 +210,7 @@ namespace pandemic.agents
         public List<SearchNode> Children { get; set; } = new();
 
         public bool IsLeaf => !Children.Any();
+        public int ActionIdx { get; set; }
 
         public SearchNode BestChild()
         {
