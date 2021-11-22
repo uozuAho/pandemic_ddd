@@ -147,8 +147,19 @@ namespace pandemic.agents
         }
     }
 
+    internal static class RandomExtensions
+    {
+        public static T Choice<T>(this Random random, IEnumerable<T> items)
+        {
+            var itemList = items.ToList();
+            return itemList[random.Next(itemList.Count)];
+        }
+    }
+
     internal class RandomRolloutEvaluator
     {
+        private readonly int _numRollouts = 1;
+        private readonly Random _random = new();
         private readonly PlayerCommandGenerator _commandGenerator = new();
 
         /// <summary>
@@ -160,9 +171,28 @@ namespace pandemic.agents
             return legalActions.Select(a => (a, 1.0 / legalActions.Count));
         }
 
-        public double[] Evaluate(PandemicSpielGameState workingState)
+        public double[] Evaluate(PandemicSpielGameState state)
         {
-            throw new NotImplementedException();
+            double[]? result = null;
+
+            for (var i = 0; i < _numRollouts; i++)
+            {
+                var workingState = state.Clone();
+
+                while (!workingState.IsTerminal)
+                {
+                    var action = _random.Choice(workingState.LegalActions());
+                    workingState.ApplyAction(action);
+                }
+
+                result = result == null
+                    ? workingState.Returns
+                    : result.Zip(workingState.Returns, (a, b) => a + b).ToArray();
+            }
+
+            if (result == null) throw new InvalidOperationException("doh");
+
+            return result.Select(r => r / _numRollouts).ToArray();
         }
     }
 
