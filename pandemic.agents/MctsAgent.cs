@@ -22,13 +22,10 @@ namespace pandemic.agents
         }
 
         // done
-        public PlayerCommand Step(PandemicSpielGameState state)
+        public int Step(PandemicSpielGameState state)
         {
             var root = MctsSearch(state);
             var best = root.BestChild();
-
-            // how to remove need for all these null checks? Root node needs a null command, others don't
-            if (best.Action == null) throw new InvalidOperationException("this shouldn't happen!");
 
             return best.Action;
         }
@@ -37,7 +34,11 @@ namespace pandemic.agents
         private SearchNode MctsSearch(PandemicSpielGameState state)
         {
             var rootPlayer = state.CurrentPlayerIdx;
-            var root = new SearchNode(state.CurrentPlayerIdx, null) { Prior = 1.0 };
+            var root = new SearchNode
+            {
+                PlayerIdx = state.CurrentPlayerIdx,
+                Prior = 1.0
+            };
 
             for (var i = 0; i < _maxSimulations; i++)
             {
@@ -107,8 +108,10 @@ namespace pandemic.agents
                 {
                     var legalActions = _evaluator.Prior(workingState).Shuffle();
                     currentNode.Children.AddRange(legalActions.Select(a =>
-                        new SearchNode(workingState.CurrentPlayerIdx, a.Item1)
+                        new SearchNode
                         {
+                            PlayerIdx = workingState.CurrentPlayerIdx,
+                            Action = a.Item1,
                             Prior = a.Item2
                         }
                     ));
@@ -120,7 +123,7 @@ namespace pandemic.agents
                 var exploreCount = currentNode.ExploreCount;
                 var chosenChild = currentNode.Children.MaxBy(c => c.UctValue(exploreCount))!;
 
-                workingState.ApplyAction(chosenChild.Action!);
+                workingState.ApplyAction(chosenChild.Action);
                 currentNode = chosenChild;
                 visitPath.Add(currentNode);
             }
@@ -166,10 +169,10 @@ namespace pandemic.agents
         /// <summary>
         /// Returns (command, probability)
         /// </summary>
-        public IEnumerable<(PlayerCommand, double)> Prior(PandemicSpielGameState state)
+        public IEnumerable<(int, double)> Prior(PandemicSpielGameState state)
         {
             var legalActions = state.LegalActions().ToList();
-            return legalActions.Select(a => (a, 1.0 / legalActions.Count));
+            return Enumerable.Range(0, legalActions.Count).Select(i => (i, 1.0 / legalActions.Count));
         }
 
         public double[] Evaluate(PandemicSpielGameState state)
@@ -197,12 +200,10 @@ namespace pandemic.agents
         }
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="PlayerIdx"></param>
-    /// <param name="Action">The command that lead to this node</param>
-    public record SearchNode(int PlayerIdx, PlayerCommand? Action)
+    public class SearchNode
     {
+        public int PlayerIdx { get; set; }
+        public int Action { get; set; }
         public int ExploreCount { get; set; }
         public double Prior { get; set; }
         public double[]? Outcomes { get; set; }
@@ -210,7 +211,6 @@ namespace pandemic.agents
         public List<SearchNode> Children { get; set; } = new();
 
         public bool IsLeaf => !Children.Any();
-        public int ActionIdx { get; set; }
 
         public SearchNode BestChild()
         {

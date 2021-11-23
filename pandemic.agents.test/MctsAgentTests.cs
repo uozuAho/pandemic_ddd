@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
@@ -10,12 +7,9 @@ namespace pandemic.agents.test;
 
 public class MctsAgentTests
 {
-    private Random _random;
-
     [SetUp]
     public void Setup()
     {
-        _random = new Random();
     }
 
     [Test]
@@ -44,15 +38,23 @@ public class MctsAgentTests
     [Test]
     public void Chooses_most_visited_when_not_solved()
     {
-        AssertBestChild(0,
-            new SearchNode(0, null) { ExploreCount = 50, TotalReward = 30 },
-            new SearchNode(1, null) { ExploreCount = 40, TotalReward = 40 });
+        AssertBestChildIs(0,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30 },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40 });
     }
 
-    private void AssertBestChild(int choice, params SearchNode[] children)
+    [Test]
+    public void Chooses_win_over_most_visited()
+    {
+        AssertBestChildIs(1,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30 },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new [] {1.0}});
+    }
+
+    private static void AssertBestChildIs(int choice, params SearchNode[] children)
     {
         children.Shuffle();
-        var root = new SearchNode(-1, null) { Children = children.ToList() };
-        Assert.AreEqual(root.BestChild().ActionIdx, choice);
+        var root = new SearchNode { Children = children.ToList() };
+        Assert.AreEqual(root.BestChild().Action, choice);
     }
 }

@@ -69,6 +69,12 @@ namespace pandemic
             throw new NotImplementedException();
         }
 
+        public IEnumerable<IEvent> ApplyAction(int action)
+        {
+            var legalActions = _commandGenerator.LegalCommands(Game).ToList();
+            return ApplyAction(legalActions[action]);
+        }
+
         public IEnumerable<IEvent> ApplyAction(PlayerCommand action)
         {
             IEnumerable<IEvent> events;
