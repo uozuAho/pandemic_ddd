@@ -22,7 +22,7 @@ public class MctsAgentTests
         });
         var state = new PandemicSpielGameState(game);
 
-        const int maxSimulations = 1;
+        const int maxSimulations = 2;
         var agent = new MctsAgent(maxSimulations);
 
         while (!state.IsTerminal)

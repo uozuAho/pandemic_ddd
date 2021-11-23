@@ -11,12 +11,15 @@ namespace pandemic.agents
     public class MctsAgent
     {
         private readonly int _maxSimulations;
-        private readonly bool _solve = false;
+        private readonly bool _solve = true;
         private const double _maxUtility = 1.0;
         private readonly RandomRolloutEvaluator _evaluator;
 
         public MctsAgent(int maxSimulations)
         {
+            // this is the same quirk as in the OpenSpiel version. One sim means the root node is not
+            // expanded, thus no options are evaluated!
+            if (maxSimulations < 2) throw new ArgumentException($"{nameof(maxSimulations)} must be > 1");
             _maxSimulations = maxSimulations;
             _evaluator = new RandomRolloutEvaluator();
         }
