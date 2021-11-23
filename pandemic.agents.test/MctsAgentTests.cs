@@ -51,6 +51,62 @@ public class MctsAgentTests
             new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new [] {1.0}});
     }
 
+    [Test]
+    public void Chooses_best_over_good()
+    {
+        AssertBestChildIs(1,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30, Outcomes = new[] { 0.5 } },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new[] { 0.8 } });
+    }
+
+    [Test]
+    public void Chooses_bad_over_worst()
+    {
+        AssertBestChildIs(0,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30, Outcomes = new[] { -0.5 } },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new[] { -0.8 } });
+    }
+
+    [Test]
+    public void Chooses_positive_reward_over_promising()
+    {
+        AssertBestChildIs(1,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 40 },
+            new SearchNode { Action = 1, ExploreCount = 10, TotalReward = 1, Outcomes = new[] { 0.1 } });
+    }
+
+    [Test]
+    public void Chooses_most_visited_over_loss()
+    {
+        AssertBestChildIs(0,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30 },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new[] { -1.0 } });
+    }
+
+    [Test]
+    public void Chooses_most_visited_over_draw()
+    {
+        AssertBestChildIs(0,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30 },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40, Outcomes = new[] { 0.0 } });
+    }
+
+    [Test]
+    public void Chooses_uncertainty_over_most_visited_loss()
+    {
+        AssertBestChildIs(1,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 30, Outcomes = new[] { -1.0 } },
+            new SearchNode { Action = 1, ExploreCount = 40, TotalReward = 40 });
+    }
+
+    [Test]
+    public void Chooses_slowest_loss()
+    {
+        AssertBestChildIs(1,
+            new SearchNode { Action = 0, ExploreCount = 50, TotalReward = 10, Outcomes = new[] { -1.0 } },
+            new SearchNode { Action = 1, ExploreCount = 60, TotalReward = 15, Outcomes = new[] { -1.0 } });
+    }
+
     private static void AssertBestChildIs(int choice, params SearchNode[] children)
     {
         children.Shuffle();
