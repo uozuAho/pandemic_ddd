@@ -15,7 +15,7 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // PlaySingleRandomGameVerbose();
-            PlayRandomGamesUntilWon();
+            // PlayRandomGamesUntilWon();
             // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             // {
             //     Difficulty = Difficulty.Introductory,
@@ -23,6 +23,7 @@ namespace pandemic.console
             // });
             // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
             // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
+            PlayInfiniteMctsGames();
         }
 
         private static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
@@ -75,6 +76,48 @@ namespace pandemic.console
 
             // PrintEventsAndState(events, state);
             PrintStats(stats);
+        }
+
+        private static void PlayInfiniteMctsGames()
+        {
+            var options = new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            };
+
+            const int numSimulations = 2;
+            const int numRollouts = 1;
+            var agent = new MctsAgent(numSimulations, numRollouts);
+
+            var sw = Stopwatch.StartNew();
+            var numGames = 0;
+            var wins = 0;
+            var losses = 0;
+
+            while (true)
+            {
+                var (game, _) = PandemicGame.CreateNewGame(options);
+                var state = new PandemicSpielGameState(game);
+
+                for (var step = 0; step < 1000 && !state.IsTerminal; step++)
+                {
+                    if (step == 999) throw new InvalidOperationException("didn't expect this many turns");
+                    var action = agent.Step(state);
+                    state.ApplyAction(action);
+                }
+
+                numGames++;
+                if (state.IsWin) wins++;
+                else losses++;
+
+                if (sw.ElapsedMilliseconds > 1000)
+                {
+                    Console.WriteLine($"{numGames} games/sec. {wins} wins, {losses} losses");
+                    numGames = 0;
+                    sw.Restart();
+                }
+            }
         }
 
         private static void PlaySingleRandomGameVerbose()

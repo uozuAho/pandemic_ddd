@@ -23,7 +23,8 @@ public class MctsAgentTests
         var state = new PandemicSpielGameState(game);
 
         const int maxSimulations = 2;
-        var agent = new MctsAgent(maxSimulations);
+        const int numRollouts = 2;
+        var agent = new MctsAgent(maxSimulations, numRollouts);
 
         while (!state.IsTerminal)
         {

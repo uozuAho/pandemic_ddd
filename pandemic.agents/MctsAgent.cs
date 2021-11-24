@@ -15,16 +15,15 @@ namespace pandemic.agents
         private const double _maxUtility = 1.0;
         private readonly RandomRolloutEvaluator _evaluator;
 
-        public MctsAgent(int maxSimulations)
+        public MctsAgent(int maxSimulations, int numRollouts)
         {
             // this is the same quirk as in the OpenSpiel version. One sim means the root node is not
             // expanded, thus no options are evaluated!
             if (maxSimulations < 2) throw new ArgumentException($"{nameof(maxSimulations)} must be > 1");
             _maxSimulations = maxSimulations;
-            _evaluator = new RandomRolloutEvaluator();
+            _evaluator = new RandomRolloutEvaluator(numRollouts);
         }
 
-        // done
         public int Step(PandemicSpielGameState state)
         {
             var root = MctsSearch(state);
@@ -33,7 +32,6 @@ namespace pandemic.agents
             return best.Action;
         }
 
-        // done
         private SearchNode MctsSearch(PandemicSpielGameState state)
         {
             var rootPlayer = state.CurrentPlayerIdx;
@@ -165,9 +163,14 @@ namespace pandemic.agents
 
     internal class RandomRolloutEvaluator
     {
-        private readonly int _numRollouts = 1;
+        private readonly int _numRollouts;
         private readonly Random _random = new();
         private readonly PlayerCommandGenerator _commandGenerator = new();
+
+        public RandomRolloutEvaluator(int numRollouts)
+        {
+            _numRollouts = numRollouts;
+        }
 
         /// <summary>
         /// Returns (command, probability)
