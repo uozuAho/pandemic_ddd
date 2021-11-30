@@ -99,12 +99,13 @@ namespace pandemic.console
             {
                 var (game, _) = PandemicGame.CreateNewGame(options);
                 var state = new PandemicSpielGameState(game);
+                var events = new List<IEvent>();
 
                 for (var step = 0; step < 1000 && !state.IsTerminal; step++)
                 {
                     if (step == 999) throw new InvalidOperationException("didn't expect this many turns");
                     var action = agent.Step(state);
-                    state.ApplyAction(action);
+                    events.AddRange(state.ApplyAction(action));
                 }
 
                 numGames++;

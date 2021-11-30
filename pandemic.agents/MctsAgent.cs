@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using pandemic.Events;
 
 namespace pandemic.agents
 {
@@ -165,7 +166,7 @@ namespace pandemic.agents
     {
         private readonly int _numRollouts;
         private readonly Random _random = new();
-        private readonly PlayerCommandGenerator _commandGenerator = new();
+        private readonly PlayerCommandGeneratorFast _commandGenerator = new();
 
         public RandomRolloutEvaluator(int numRollouts)
         {
@@ -187,12 +188,13 @@ namespace pandemic.agents
 
             for (var i = 0; i < _numRollouts; i++)
             {
+                var events = new List<IEvent>();
                 var workingState = state.Clone();
 
                 while (!workingState.IsTerminal)
                 {
                     var action = _random.Choice(workingState.LegalActions());
-                    workingState.ApplyAction(action);
+                    events.AddRange(workingState.ApplyAction(action));
                 }
 
                 result = result == null

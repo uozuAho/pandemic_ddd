@@ -21,7 +21,11 @@ dotnet run
 # todo
 - mcts agent
     - copy all mcts code DONE
-    - copy mcts tests
+    - copy mcts tests DONE
+    - mcts speedups
+        - command generator: DONE
+        - city by name
+        - colour.allcolours
     - refactor
         - address todos
         - address warnings

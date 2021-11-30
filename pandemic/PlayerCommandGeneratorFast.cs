@@ -27,7 +27,7 @@ namespace pandemic
                 SetCureCommands(game);
             }
 
-            return Enumerable.Empty<PlayerCommand>();
+            return new ArraySegment<PlayerCommand>(_buffer, 0, _bufIdx);
         }
 
         private void SetDiscardCommands(PandemicGame game)
