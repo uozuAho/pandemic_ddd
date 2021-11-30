@@ -24,8 +24,8 @@ dotnet run
     - copy mcts tests DONE
     - mcts speedups
         - command generator: DONE
-        - city by name
-        - colour.allcolours
+        - city by name: DONE
+        - colour.allcolours: DONE
     - refactor
         - address todos
         - address warnings

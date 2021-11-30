@@ -141,7 +141,7 @@ namespace pandemic.test
             });
             game = game with
             {
-                Cubes = Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0)
+                Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
