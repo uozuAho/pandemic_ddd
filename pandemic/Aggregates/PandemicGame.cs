@@ -36,19 +36,9 @@ namespace pandemic.Aggregates
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
-        private Dictionary<string, City>? _cityLookup;
-        // this is a hack to refresh the lookup when the game instance has been cloned
-        // see https://stackoverflow.com/questions/66136363/ignoring-specific-fields-when-using-with-on-a-c-sharp-9-record
-        private PandemicGame? _prevPandemicGame;
         public City CityByName(string city)
         {
-            if (_cityLookup == null || !ReferenceEquals(this, _prevPandemicGame))
-            {
-                _cityLookup = Cities.ToDictionary(c => c.Name, c => c);
-                _prevPandemicGame = this;
-            }
-
-            return _cityLookup[city];
+            return Cities[Board.CityIdx(city)];
         }
 
         public bool IsSameStateAs(PandemicGame other)

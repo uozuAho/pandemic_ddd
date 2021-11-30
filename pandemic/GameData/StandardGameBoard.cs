@@ -20,6 +20,11 @@ namespace pandemic.GameData
 
         public IEnumerable<CityData> Cities => _cities;
 
+        public int CityIdx(string name)
+        {
+            return _cityIdxLookup[name];
+        }
+
         public readonly Dictionary<string, List<string>> AdjacentCities = CreateAdjacencyLookup();
 
         private static Dictionary<string, List<string>> CreateAdjacencyLookup()
@@ -184,5 +189,19 @@ namespace pandemic.GameData
         };
 
         private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
+
+        private static Dictionary<string, int> _cityIdxLookup = CreateCityIdxLookup();
+
+        private static Dictionary<string, int> CreateCityIdxLookup()
+        {
+            var lookup = new Dictionary<string, int>();
+
+            for (var i = 0; i < _cities.Length; i++)
+            {
+                lookup[_cities[i].Name] = i;
+            }
+
+            return lookup;
+        }
     }
 }
