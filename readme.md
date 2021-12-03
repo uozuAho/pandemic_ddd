@@ -19,6 +19,18 @@ dotnet run
 ```
 
 # todo
+- mcts agent
+    - copy all mcts code DONE
+    - copy mcts tests DONE
+    - mcts speedups
+        - clean up pandemic.console
+        - don't go forever! try alpha beta or something
+        - make a note of the mutable2 branch. Mutability gives 4x speedup
+          in situations where less cloning is needed, eg. MCTS rollout
+    - refactor
+        - address todos
+        - address warnings
+        - remove null forgiving operators
 - implement epidemic
 - implement more game rules
 - check code todos

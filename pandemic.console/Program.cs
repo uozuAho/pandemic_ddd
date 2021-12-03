@@ -15,14 +15,17 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // PlaySingleRandomGameVerbose();
-            PlayRandomGamesUntilWon();
-            // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            // {
-            //     Difficulty = Difficulty.Introductory,
-            //     Roles = new[] {Role.Medic, Role.Scientist}
-            // });
+            // PlayRandomGamesUntilWon();
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
             // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
             // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
+            // PlayInfiniteMctsGames();
+            // RandomPlaythroughDrawer.DoIt();
+            DfsDrawer.DrawSearch(game);
         }
 
         private static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
@@ -55,12 +58,12 @@ namespace pandemic.console
             var sw = Stopwatch.StartNew();
             var lastNumGames = 0;
             var lastTime = sw.Elapsed;
-            var stats = new GameStats();
+            var stats = new Program.GameStats();
 
             var state = new PandemicSpielGameState(PandemicGame.CreateUninitialisedGame());
             var events = Enumerable.Empty<IEvent>();
 
-            for (var i = 0; !won && i < 1000; i++)
+            for (var i = 0; !won && i < int.MaxValue; i++)
             {
                 (state, events) = PlayRandomGame(options, stats);
                 won = state.Game.IsWon;
@@ -77,6 +80,49 @@ namespace pandemic.console
             PrintStats(stats);
         }
 
+        private static void PlayInfiniteMctsGames()
+        {
+            var options = new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            };
+
+            const int numSimulations = 3;
+            const int numRollouts = 3;
+            var agent = new MctsAgent(numSimulations, numRollouts);
+
+            var sw = Stopwatch.StartNew();
+            var numGames = 0;
+            var wins = 0;
+            var losses = 0;
+
+            while (true)
+            {
+                var (game, _) = PandemicGame.CreateNewGame(options);
+                var state = new PandemicSpielGameState(game);
+                var events = new List<IEvent>();
+
+                for (var step = 0; step < 1000 && !state.IsTerminal; step++)
+                {
+                    if (step == 999) throw new InvalidOperationException("didn't expect this many turns");
+                    var action = agent.Step(state);
+                    events.AddRange(state.ApplyAction(action));
+                }
+
+                numGames++;
+                if (state.IsWin) wins++;
+                else losses++;
+
+                if (sw.ElapsedMilliseconds > 1000)
+                {
+                    Console.WriteLine($"{numGames} games/sec. {wins} wins, {losses} losses");
+                    numGames = 0;
+                    sw.Restart();
+                }
+            }
+        }
+
         private static void PlaySingleRandomGameVerbose()
         {
             var options = new NewGameOptions
@@ -85,7 +131,7 @@ namespace pandemic.console
                 Roles = new[] {Role.Medic, Role.Scientist}
             };
 
-            var (state, events) = PlayRandomGame(options, new GameStats());
+            var (state, events) = PlayRandomGame(options, new Program.GameStats());
 
             PrintEventsAndState(events, state);
         }
@@ -106,8 +152,7 @@ namespace pandemic.console
         }
 
         private static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
-            NewGameOptions options,
-            GameStats stats)
+            NewGameOptions options, Program.GameStats stats)
         {
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
@@ -144,7 +189,7 @@ namespace pandemic.console
             return itemList[idx];
         }
 
-        private static void PrintStats(GameStats stats)
+        private static void PrintStats(Program.GameStats stats)
         {
             Console.WriteLine("actions, count");
             foreach (var (actions, count) in stats.ActionsPerGameCounts.OrderBy(c => c.Key))

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Events;
+using pandemic.Values;
 
 namespace pandemic
 {
@@ -12,16 +14,32 @@ namespace pandemic
     public class PandemicSpielGameState
     {
         public PandemicGame Game;
-        private readonly PlayerCommandGenerator _commandGenerator = new ();
+
+        public bool IsTerminal => Game.IsOver;
+        public bool IsWin => Game.IsWon;
+        public bool IsLoss => Game.IsLost;
+        public int CurrentPlayerIdx => Game.CurrentPlayerIdx;
+        /// this doesn't conform to spiel state. Use CurrentPlayerIdx for the player idx.
+        public Player CurrentPlayer => Game.CurrentPlayer;
+
+        public double[] Returns =>
+            IsWin
+            ? Enumerable.Repeat(1.0, Game.Players.Count).ToArray()
+            : IsLoss
+            ? Enumerable.Repeat(-1.0, Game.Players.Count).ToArray()
+            : Enumerable.Repeat(0.0, Game.Players.Count).ToArray();
+
+        private readonly PlayerCommandGeneratorFast _commandGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
         {
             Game = game;
         }
 
-        public bool IsTerminal => Game.IsOver;
-        public bool IsWin => Game.IsWon;
-        public bool IsLoss => Game.IsLost;
+        public PandemicSpielGameState Clone()
+        {
+            return new PandemicSpielGameState(Game with { });
+        }
 
         public override string ToString()
         {
@@ -49,6 +67,12 @@ namespace pandemic
         public void ApplyActionInt(int action)
         {
             throw new NotImplementedException();
+        }
+
+        public IEnumerable<IEvent> ApplyAction(int action)
+        {
+            var legalActions = _commandGenerator.LegalCommands(Game).ToList();
+            return ApplyAction(legalActions[action]);
         }
 
         public IEnumerable<IEvent> ApplyAction(PlayerCommand action)

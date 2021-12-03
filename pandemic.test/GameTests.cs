@@ -141,7 +141,7 @@ namespace pandemic.test
             });
             game = game with
             {
-                Cubes = Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0)
+                Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
@@ -293,7 +293,7 @@ namespace pandemic.test
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Location = "Chicago",
-                    Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard)
+                    Hand = new PlayerHand(new []{chicagoPlayerCard})
                 })
             };
 

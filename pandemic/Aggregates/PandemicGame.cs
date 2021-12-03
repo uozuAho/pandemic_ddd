@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -25,9 +24,9 @@ namespace pandemic.Aggregates
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
-            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 24);
+            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24);
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
-            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => false);
+            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
 
         public readonly StandardGameBoard Board = new();
 
@@ -36,7 +35,11 @@ namespace pandemic.Aggregates
         public bool IsLost => LossReason != "";
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
-        public City CityByName(string city) => Cities.Single(c => c.Name == city);
+
+        public City CityByName(string city)
+        {
+            return Cities[Board.CityIdx(city)];
+        }
 
         public bool IsSameStateAs(PandemicGame other)
         {

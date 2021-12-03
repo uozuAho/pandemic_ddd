@@ -61,7 +61,7 @@ namespace pandemic.agents
         }
 
         /// <summary>
-        /// Command: command that resulted in State
+        /// Action: command that resulted in State
         /// </summary>
         private record SearchNode(
             PandemicSpielGameState State,

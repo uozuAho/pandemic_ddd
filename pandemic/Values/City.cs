@@ -8,7 +8,7 @@ namespace pandemic.Values
     public record City(string Name)
     {
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
-            Enum.GetValues<Colour>().ToImmutableDictionary(c => c, _ => 0);
+            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0);
 
         public bool HasResearchStation { get; init; }
 
