@@ -16,14 +16,16 @@ namespace pandemic.console
         {
             // PlaySingleRandomGameVerbose();
             // PlayRandomGamesUntilWon();
-            // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            // {
-            //     Difficulty = Difficulty.Introductory,
-            //     Roles = new[] {Role.Medic, Role.Scientist}
-            // });
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] {Role.Medic, Role.Scientist}
+            });
             // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
             // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
-            PlayInfiniteMctsGames();
+            // PlayInfiniteMctsGames();
+            // RandomPlaythroughDrawer.DoIt();
+            DfsDrawer.DrawSearch(game);
         }
 
         private static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
@@ -56,12 +58,12 @@ namespace pandemic.console
             var sw = Stopwatch.StartNew();
             var lastNumGames = 0;
             var lastTime = sw.Elapsed;
-            var stats = new GameStats();
+            var stats = new Program.GameStats();
 
             var state = new PandemicSpielGameState(PandemicGame.CreateUninitialisedGame());
             var events = Enumerable.Empty<IEvent>();
 
-            for (var i = 0; !won && i < 1000; i++)
+            for (var i = 0; !won && i < int.MaxValue; i++)
             {
                 (state, events) = PlayRandomGame(options, stats);
                 won = state.Game.IsWon;
@@ -86,8 +88,8 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.Scientist }
             };
 
-            const int numSimulations = 2;
-            const int numRollouts = 1;
+            const int numSimulations = 3;
+            const int numRollouts = 3;
             var agent = new MctsAgent(numSimulations, numRollouts);
 
             var sw = Stopwatch.StartNew();
@@ -129,7 +131,7 @@ namespace pandemic.console
                 Roles = new[] {Role.Medic, Role.Scientist}
             };
 
-            var (state, events) = PlayRandomGame(options, new GameStats());
+            var (state, events) = PlayRandomGame(options, new Program.GameStats());
 
             PrintEventsAndState(events, state);
         }
@@ -150,8 +152,7 @@ namespace pandemic.console
         }
 
         private static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
-            NewGameOptions options,
-            GameStats stats)
+            NewGameOptions options, Program.GameStats stats)
         {
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
@@ -188,7 +189,7 @@ namespace pandemic.console
             return itemList[idx];
         }
 
-        private static void PrintStats(GameStats stats)
+        private static void PrintStats(Program.GameStats stats)
         {
             Console.WriteLine("actions, count");
             foreach (var (actions, count) in stats.ActionsPerGameCounts.OrderBy(c => c.Key))

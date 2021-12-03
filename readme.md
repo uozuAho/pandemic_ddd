@@ -23,10 +23,7 @@ dotnet run
     - copy all mcts code DONE
     - copy mcts tests DONE
     - mcts speedups
-        - command generator: DONE
-        - city by name: DONE
-        - colour.allcolours: DONE
-        - city by name: order by city name, then no need for dict creation
+        - clean up pandemic.console
         - don't go forever! try alpha beta or something
         - make a note of the mutable2 branch. Mutability gives 4x speedup
           in situations where less cloning is needed, eg. MCTS rollout

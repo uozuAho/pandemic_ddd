@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
@@ -86,11 +87,40 @@ namespace pandemic
     {
     }
 
-    public record DriveFerryCommand(Role Role, string City) : PlayerCommand;
+    public record DriveFerryCommand(Role Role, string City) : PlayerCommand
+    {
+        public override string ToString()
+        {
+            return $"go to {City}";
+        }
+    }
 
-    public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand;
+    public record DiscardPlayerCardCommand(PlayerCard Card) : PlayerCommand
+    {
+        public override string ToString()
+        {
+            return Card switch
+            {
+                EpidemicCard => "discard epidemic card",
+                PlayerCityCard cityCard => $"discard {cityCard.City.Name}",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+    }
 
-    public record BuildResearchStationCommand(string City) : PlayerCommand;
+    public record BuildResearchStationCommand(string City) : PlayerCommand
+    {
+        public override string ToString()
+        {
+            return $"build research station at {City}";
+        }
+    }
 
-    public record DiscoverCureCommand(PlayerCityCard[] Cards) : PlayerCommand;
+    public record DiscoverCureCommand(PlayerCityCard[] Cards) : PlayerCommand
+    {
+        public override string ToString()
+        {
+            return $"Cure {Cards.First().City.Colour}";
+        }
+    }
 }
