@@ -7,7 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # Quick start
-- install dotnet core (tested with v5)
+- install dotnet core (tested with v6)
 
 ```sh
 # run tests

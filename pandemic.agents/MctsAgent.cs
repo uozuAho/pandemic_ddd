@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Events;
+using utils;
 
 namespace pandemic.agents
 {
     /// <summary>
     /// Monte-Carlo Tree Search.
-    /// I'm planning to copy https://github.com/deepmind/open_spiel/blob/master/open_spiel/python/algorithms/mcts.py
+    /// Copied from https://github.com/deepmind/open_spiel/blob/master/open_spiel/python/algorithms/mcts.py
     /// </summary>
     public class MctsAgent
     {
@@ -96,7 +97,6 @@ namespace pandemic.agents
             return root;
         }
 
-        // done
         private (List<SearchNode> visitPath, PandemicSpielGameState workingState)
             ApplyTreePolicy(SearchNode root, PandemicSpielGameState state)
         {
@@ -131,34 +131,6 @@ namespace pandemic.agents
             }
 
             return (visitPath, workingState);
-        }
-    }
-
-    // todo: move somewhere else
-    public static class EnumerableExtensions
-    {
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> items)
-        {
-            var rng = new Random();
-            return items.OrderBy(_ => rng.Next());
-        }
-
-        public static IEnumerable<T> Reversed<T>(this IEnumerable<T> items)
-        {
-            var temp = new List<T>();
-            temp.AddRange(items);
-            temp.Reverse();
-            return temp;
-        }
-    }
-
-    // todo: move somewhere else
-    public static class RandomExtensions
-    {
-        public static T Choice<T>(this Random random, IEnumerable<T> items)
-        {
-            var itemList = items.ToList();
-            return itemList[random.Next(itemList.Count)];
         }
     }
 

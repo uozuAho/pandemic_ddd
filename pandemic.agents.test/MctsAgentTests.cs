@@ -2,6 +2,7 @@ using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
 using pandemic.Values;
+using utils;
 
 namespace pandemic.agents.test
 {
