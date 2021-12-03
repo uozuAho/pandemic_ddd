@@ -11,10 +11,26 @@ namespace pandemic.console
 {
     class Program
     {
-        // todo: clean up this file
         static void Main(string[] args)
         {
-            SingleGame.PlaySingleRandomGameVerbose();
+            var gameOptions = new NewGameOptions
+            {
+                Difficulty = Difficulty.Normal,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            };
+            var stats = new GameStats();
+
+            var (endState, events) = SingleGame.PlayRandomGame(gameOptions, stats);
+
+            Console.WriteLine("events:");
+            PrintEvents(events);
+
+            Console.WriteLine();
+            Console.WriteLine("state:");
+            PrintState(endState);
+            PrintStats(stats);
+
+            // SingleGame.PlaySingleRandomGameVerbose();
             // PlayRandomGamesUntilWon();
             // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             // {
@@ -120,6 +136,19 @@ namespace pandemic.console
                     numGames = 0;
                     sw.Restart();
                 }
+            }
+        }
+
+        private static void PrintState(PandemicSpielGameState state)
+        {
+            Console.WriteLine(state);
+        }
+
+        private static void PrintEvents(IEnumerable<IEvent> events)
+        {
+            foreach (var @event in events)
+            {
+                Console.WriteLine(@event);
             }
         }
 

@@ -4,40 +4,13 @@ using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Events;
 using pandemic.Values;
+using utils;
 
 namespace pandemic.console;
 
-class SingleGame
+internal class SingleGame
 {
-    public static void PlaySingleRandomGameVerbose()
-    {
-        var options = new NewGameOptions
-        {
-            Difficulty = Difficulty.Introductory,
-            Roles = new[] {Role.Medic, Role.Scientist}
-        };
-
-        var (state, events) = PlayRandomGame(options, new GameStats());
-
-        PrintEventsAndState(events, state);
-    }
-
-    private static void PrintEventsAndState(IEnumerable<IEvent> events, PandemicSpielGameState state)
-    {
-        Console.WriteLine("Game over! Events:");
-        Console.WriteLine();
-        foreach (var @event in events)
-        {
-            Console.WriteLine(@event);
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("Final state:");
-        Console.WriteLine();
-        Console.WriteLine(state);
-    }
-
-    private static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
+    public static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
         NewGameOptions options, GameStats stats)
     {
         var random = new Random();
@@ -57,21 +30,12 @@ class SingleGame
 
             stats.AddLegalActionCount(legalActions.Count);
 
-            var action = RandomChoice(state.LegalActions(), random);
+            var action = random.Choice(state.LegalActions());
             events.AddRange(state.ApplyAction(action));
         }
 
         stats.AddNumActionsInGame(numActions);
 
         return (state, events);
-    }
-
-    private static T RandomChoice<T>(IEnumerable<T> items, Random random)
-    {
-        var itemList = items.ToList();
-        if (!itemList.Any()) throw new InvalidOperationException("no items to choose from!");
-
-        var idx = random.Next(0, itemList.Count);
-        return itemList[idx];
     }
 }
