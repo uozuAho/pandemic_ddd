@@ -6,6 +6,11 @@ implemented in C#. Intended for usage by AI agents.
 Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
+# todo
+- implement epidemic
+- implement more game rules
+- check code todos
+
 # Quick start
 - install dotnet core (tested with v6)
 
@@ -18,22 +23,16 @@ cd pandemic.console
 dotnet run
 ```
 
-# todo
-- mcts agent
-    - copy all mcts code DONE
-    - copy mcts tests DONE
-    - mcts speedups
-        - clean up pandemic.console
-        - don't go forever! try alpha beta or something
-        - make a note of the mutable2 branch. Mutability gives 4x speedup
-          in situations where less cloning is needed, eg. MCTS rollout
-    - refactor
-        - address todos
-        - address warnings
-        - remove null forgiving operators
-- implement epidemic
-- implement more game rules
-- check code todos
+# What's in this project
+- pandemic: core game logic. Immutable & DDD-like.
+- pandemic.agents: agents that can play games
+- pandemic.console: scratchpad console app
+- pandemic.drawing: draw game trees
+- pandemic.server: host a game of pandemic over a network. Intended for use by
+  https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
+
+# notes
+- mutable2 branch: mutable pandemic aggregate gives 4x speedup in mcts
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
