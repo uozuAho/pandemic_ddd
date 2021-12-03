@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Events;
-using pandemic.Values;
 using utils;
 
 namespace pandemic.console;
@@ -11,12 +10,12 @@ namespace pandemic.console;
 internal class SingleGame
 {
     public static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(
-        NewGameOptions options, GameStats stats)
+        PandemicGame game, GameStats stats)
     {
-        var random = new Random();
-        var (game, events) = PandemicGame.CreateNewGame(options);
-        var state = new PandemicSpielGameState(game);
         var numActions = 0;
+        var random = new Random();
+        var state = new PandemicSpielGameState(game);
+        var events = new List<IEvent>();
 
         for (; numActions < 1000 && !state.IsTerminal; numActions++)
         {

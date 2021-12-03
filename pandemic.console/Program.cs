@@ -13,14 +13,17 @@ namespace pandemic.console
     {
         static void Main(string[] args)
         {
+            // single playthrough
             var gameOptions = new NewGameOptions
             {
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Medic, Role.Scientist }
             };
+            var (game, events) = PandemicGame.CreateNewGame(gameOptions);
             var stats = new GameStats();
 
-            var (endState, events) = SingleGame.PlayRandomGame(gameOptions, stats);
+            var (endState, events2) = SingleGame.PlayRandomGame(game, stats);
+            events.AddRange(events2);
 
             Console.WriteLine("events:");
             PrintEvents(events);
@@ -30,36 +33,13 @@ namespace pandemic.console
             PrintState(endState);
             PrintStats(stats);
 
-            // SingleGame.PlaySingleRandomGameVerbose();
+            // WinFinder.FindWinWithSolver(game, new DfsAgent());
             // PlayRandomGamesUntilWon();
-            // var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            // {
-            //     Difficulty = Difficulty.Introductory,
-            //     Roles = new[] {Role.Medic, Role.Scientist}
-            // });
             // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
             // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
             // DfsDrawer.DrawSearch(game);
-        }
-
-        private static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
-        {
-            var commands = solver.CommandsToWin(new PandemicSpielGameState(game)).ToList();
-
-            if (commands.Any())
-            {
-                Console.WriteLine("found win!");
-                foreach (var command in commands)
-                {
-                    Console.WriteLine(command);
-                }
-            }
-            else
-            {
-                Console.WriteLine("no win found");
-            }
         }
 
         // private static void PlayRandomGamesUntilWon()
