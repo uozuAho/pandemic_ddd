@@ -22,20 +22,19 @@ namespace pandemic.console
             var (game, events) = PandemicGame.CreateNewGame(gameOptions);
             var stats = new GameStats();
 
-            var (endState, events2) = SingleGame.PlayRandomGame(game, stats);
-            events.AddRange(events2);
-
-            Console.WriteLine("events:");
-            PrintEvents(events);
-
-            Console.WriteLine();
-            Console.WriteLine("state:");
-            PrintState(endState);
-            PrintStats(stats);
+            // var (endState, events2) = SingleGame.PlayRandomGame(game, stats);
+            // events.AddRange(events2);
+            //
+            // Console.WriteLine("events:");
+            // PrintEvents(events);
+            //
+            // Console.WriteLine();
+            // Console.WriteLine("state:");
+            // PrintState(endState);
+            // PrintStats(stats);
 
             // WinFinder.FindWinWithSolver(game, new DfsAgent());
             // PlayRandomGamesUntilWon();
-            // FindWinWithSolver(game, new DfsAgent()); // ~1M games/8 seconds
             // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
