@@ -40,10 +40,14 @@ namespace pandemic.agents
         private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
         {
             if (node.State.IsWin) return node;
+            if (ReasonGameCannotBeWon(node.State.Game) != string.Empty) return null;
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
             if (node.State.IsLoss)
+            {
                 diagnostics.Loss(node.State.Game.LossReason);
+                return null;
+            }
 
             var legalActions = node.State.LegalActions()
                 .OrderBy(a => CommandPriority(a, node.State.Game))
@@ -61,6 +65,16 @@ namespace pandemic.agents
             }
 
             return null;
+        }
+
+        private static string ReasonGameCannotBeWon(PandemicGame game)
+        {
+            var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
+            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
+
+            if (cardsAvailable < cardsNeededForAllCures) return "not enough cards left to cure";
+
+            return string.Empty;
         }
 
         /// <summary>
