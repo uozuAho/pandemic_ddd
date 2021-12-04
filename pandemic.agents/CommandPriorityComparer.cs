@@ -49,6 +49,11 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return Greater;
     }
     private int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
+
+    public PlayerCommand HighestPriority(IEnumerable<PlayerCommand> commands)
+    {
+        return commands.OrderByDescending(c => c, this).First();
+    }
 }
 
 internal static class PandemicGameExtensions

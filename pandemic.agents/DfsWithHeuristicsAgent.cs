@@ -48,7 +48,6 @@ namespace pandemic.agents
         {
             if (game.IsLost)
             {
-                var a = 1;
                 return $"game is lost: {game.LossReason}";
             }
             if (cardCounter != null)
