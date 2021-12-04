@@ -37,6 +37,39 @@ namespace pandemic.agents
             return winningCommands;
         }
 
+        public static bool CanWin(PandemicGame game)
+        {
+            return ReasonGameCannotBeWon(game) == string.Empty;
+        }
+
+        public static string ReasonGameCannotBeWon(PandemicGame game)
+        {
+            var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
+            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
+
+            if (cardsAvailable < cardsNeededForAllCures) return "not enough cards left to cure";
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Lower number = higher priority. There's plenty more that could be done here:
+        /// - prefer to move towards research stations
+        /// - don't build research stations with cards that could be used to cure
+        /// - players work together: aim to cure different diseases per player
+        /// </summary>
+        public static int CommandPriority(PlayerCommand command, PandemicGame game)
+        {
+            return command switch
+            {
+                DiscoverCureCommand => 0,
+                BuildResearchStationCommand => 1,
+                DriveFerryCommand => 2,
+                DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
+                _ => throw new ArgumentOutOfRangeException(nameof(command))
+            };
+        }
+
         private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
         {
             if (node.State.IsWin) return node;
@@ -65,34 +98,6 @@ namespace pandemic.agents
             }
 
             return null;
-        }
-
-        private static string ReasonGameCannotBeWon(PandemicGame game)
-        {
-            var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
-            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
-
-            if (cardsAvailable < cardsNeededForAllCures) return "not enough cards left to cure";
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// Lower number = higher priority. There's plenty more that could be done here:
-        /// - prefer to move towards research stations
-        /// - don't build research stations with cards that could be used to cure
-        /// - players work together: aim to cure different diseases per player
-        /// </summary>
-        private static int CommandPriority(PlayerCommand command, PandemicGame game)
-        {
-            return command switch
-            {
-                DiscoverCureCommand => 0,
-                BuildResearchStationCommand => 1,
-                DriveFerryCommand => 2,
-                DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
-                _ => throw new ArgumentOutOfRangeException(nameof(command))
-            };
         }
 
         private static int DiscardPriority(int basePriority, DiscardPlayerCardCommand command, PandemicGame game)

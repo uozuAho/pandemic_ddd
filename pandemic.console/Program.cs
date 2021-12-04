@@ -15,10 +15,11 @@ namespace pandemic.console
             // SingleGame.PlayGameAndPrintPlaythrough();
             // DepthAndBranchStats.RunGamesAndPrintStats();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
-            WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
+            // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
-            // DfsDrawer.DrawSearch(game);
+            // DfsDrawer.DrawSearch(CreateNewGame());
+            HeuristicDfsDrawer.DrawSearch(CreateNewGame());
         }
 
         private static PandemicGame CreateNewGame()
