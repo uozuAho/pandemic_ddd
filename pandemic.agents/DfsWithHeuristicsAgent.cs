@@ -46,6 +46,7 @@ namespace pandemic.agents
 
         public static string ReasonGameCannotBeWon(PandemicGame game, CardCounter? cardCounter = null)
         {
+            if (game.IsLost) return $"game is lost: {game.LossReason}";
             if (cardCounter != null)
             {
                 if (!EnoughCardsLeftToCureAll(game, cardCounter, out var reason)) return reason;
@@ -110,11 +111,9 @@ namespace pandemic.agents
             diagnostics.Depth(depth);
 
             if (node.State.IsWin) return node;
-            if (!CanWin(node.State.Game)) return null;
-
-            if (node.State.IsLoss)
+            if (!CanWin(node.State.Game, cardCounter))
             {
-                diagnostics.Loss(node.State.Game.LossReason);
+                diagnostics.StoppedExploringBecause(ReasonGameCannotBeWon(node.State.Game, cardCounter));
                 return null;
             }
 
@@ -172,7 +171,7 @@ namespace pandemic.agents
             private readonly Stopwatch _stopwatch;
             private int _nodesExplored;
             private int _maxDepth;
-            private readonly Dictionary<string, int> _losses = new();
+            private readonly Dictionary<string, int> _stopReasons = new();
 
             private Diagnostics(Stopwatch stopwatch)
             {
@@ -194,7 +193,7 @@ namespace pandemic.agents
             {
                 if (_stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    Console.WriteLine($"nodes explored: {_nodesExplored}. Max depth {_maxDepth}. Losses: {string.Join(',', _losses)}");
+                    Console.WriteLine($"nodes explored: {_nodesExplored}. Stops: {string.Join(',', _stopReasons)}");
                     _stopwatch.Restart();
                 }
             }
@@ -205,12 +204,12 @@ namespace pandemic.agents
                     _maxDepth = depth;
             }
 
-            public void Loss(string reason)
+            public void StoppedExploringBecause(string reason)
             {
-                if (_losses.ContainsKey(reason))
-                    _losses[reason]++;
+                if (_stopReasons.ContainsKey(reason))
+                    _stopReasons[reason]++;
                 else
-                    _losses[reason] = 1;
+                    _stopReasons[reason] = 1;
             }
         }
     }
