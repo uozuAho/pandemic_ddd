@@ -8,12 +8,12 @@ using pandemic.Values;
 
 namespace pandemic.agents.test
 {
-    internal class DfsWithHeuristicsAgentTests
+    internal class Heuristics_CommandPriority
     {
         private static readonly StandardGameBoard Board = new();
 
         [Test]
-        public void Command_priorities()
+        public void Gets_basics_right()
         {
             var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -36,6 +36,29 @@ namespace pandemic.agents.test
             Assert.AreEqual(typeof(DiscardPlayerCardCommand), sortedCommands[3].GetType());
         }
 
+        [Test]
+        public void Avoids_building_unnecessary_research_stations()
+        {
+            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Normal,
+                Roles = new[] { Role.Scientist, Role.Medic }
+            });
+
+            var commands = new List<PlayerCommand>
+            {
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
+                new BuildResearchStationCommand("Atlanta"),
+            };
+
+            var sortedCommands = commands.OrderBy(c => DfsWithHeuristicsAgent.CommandPriority(c, game)).ToList();
+
+            Assert.That(sortedCommands.Last(), Is.TypeOf<BuildResearchStationCommand>());
+        }
+    }
+
+    internal class Heuristics_CanWin
+    {
         [Test]
         public void Can_win_new_game()
         {

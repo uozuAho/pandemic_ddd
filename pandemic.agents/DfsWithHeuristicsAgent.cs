@@ -154,9 +154,7 @@ namespace pandemic.agents
                 .OrderBy(g => g.Count())
                 .ToList();
 
-            // todo: don't put epidemic cards in hand
-            var cardToDiscard = command.Card as PlayerCityCard;
-            if (cardToDiscard == null) return basePriority;
+            if (command.Card is not PlayerCityCard cardToDiscard) return basePriority;
 
             return basePriority + handByNumberOfColoursAscending.FindIndex(c => c.Key == cardToDiscard.City.Colour);
         }
