@@ -121,8 +121,10 @@ namespace pandemic.agents
                 return null;
             }
 
+            var comparer = new CommandPriorityComparer(node.State.Game);
             var legalActions = node.State.LegalActions()
-                .OrderBy(a => CommandPriority(a, node.State.Game))
+                // .OrderBy(a => CommandPriority(a, node.State.Game))
+                .OrderBy(a => a, comparer)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .ThenBy(_ => _rng.Next()).ToList();
 
