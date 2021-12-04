@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Values;
 
 namespace pandemic.agents;
 
@@ -25,7 +27,7 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return CompareMulti(a, b, 0);
     }
 
-    private static int CompareMulti(PlayerCommand a, PlayerCommand b, int _)
+    private int CompareMulti(PlayerCommand a, PlayerCommand b, int _)
     {
         var result = CompareMulti((dynamic)a, (dynamic)b);
         if (result != Unmatched) return result;
@@ -35,12 +37,29 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         throw new ArgumentException("Undefined comparison");
     }
 
-    private static int CompareMulti(PlayerCommand a, PlayerCommand b) => Unmatched;
-    private static int CompareMulti<T>(T a, T b) where T : PlayerCommand => Same;
-    private static int CompareMulti(DiscoverCureCommand a, BuildResearchStationCommand b) => Greater;
-    private static int CompareMulti(DiscoverCureCommand a, DriveFerryCommand b) => Greater;
-    private static int CompareMulti(DiscoverCureCommand a, DiscardPlayerCardCommand b) => Greater;
-    private static int CompareMulti(BuildResearchStationCommand a, DriveFerryCommand b) => Greater;
-    private static int CompareMulti(BuildResearchStationCommand a, DiscardPlayerCardCommand b) => Greater;
-    private static int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
+    private int CompareMulti(PlayerCommand a, PlayerCommand b) => Unmatched;
+    private int CompareMulti<T>(T a, T b) where T : PlayerCommand => Same;
+    private int CompareMulti(DiscoverCureCommand a, BuildResearchStationCommand b) => Greater;
+    private int CompareMulti(DiscoverCureCommand a, DriveFerryCommand b) => Greater;
+    private int CompareMulti(DiscoverCureCommand a, DiscardPlayerCardCommand b) => Greater;
+
+    private int CompareMulti(BuildResearchStationCommand a, DriveFerryCommand b)
+    {
+        if (_game.HasResearchStationOnColour(_game.Board.City(a.City).Colour))
+            return Less;
+
+        return Greater;
+    }
+
+    private int CompareMulti(BuildResearchStationCommand a, DiscardPlayerCardCommand b) => Greater;
+    private int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
+}
+
+internal static class PandemicGameExtensions
+{
+    public static bool HasResearchStationOnColour(this PandemicGame game, Colour colour)
+    {
+        return game.Board.Cities.Where(c => c.Colour == colour)
+            .Any(c => game.CityByName(c.Name).HasResearchStation);
+    }
 }

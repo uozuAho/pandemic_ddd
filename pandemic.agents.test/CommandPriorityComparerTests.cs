@@ -21,8 +21,8 @@ namespace pandemic.agents.test
             {
                 new DiscardPlayerCardCommand(new EpidemicCard()),
                 new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
-                new DriveFerryCommand(Role.Scientist, "asdf"),
-                new BuildResearchStationCommand("asdf"),
+                new DriveFerryCommand(Role.Scientist, "Atlanta"),
+                new BuildResearchStationCommand("Miami"),
             };
 
             var sortedCommands = commands.OrderByDescending(c => c, comparer).ToList();
