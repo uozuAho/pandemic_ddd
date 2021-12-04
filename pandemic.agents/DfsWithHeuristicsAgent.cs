@@ -98,9 +98,9 @@ namespace pandemic.agents
             return command switch
             {
                 DiscoverCureCommand => 0,
-                BuildResearchStationCommand => 1,
-                DriveFerryCommand => 2,
-                DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
+                BuildResearchStationCommand => 10,
+                DriveFerryCommand => 20,
+                DiscardPlayerCardCommand d => DiscardPriority(30, d, game),
                 _ => throw new ArgumentOutOfRangeException(nameof(command))
             };
         }
