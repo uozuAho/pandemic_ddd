@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using pandemic.agents;
 using pandemic.Aggregates;
 using pandemic.Events;
@@ -13,34 +12,26 @@ namespace pandemic.console
     {
         static void Main(string[] args)
         {
-            // single playthrough
-            // var gameOptions = new NewGameOptions
-            // {
-            //     Difficulty = Difficulty.Normal,
-            //     Roles = new[] { Role.Medic, Role.Scientist }
-            // };
-            // var (game, events) = PandemicGame.CreateNewGame(gameOptions);
-            // var stats = new GameStats();
-            //
-            // var (endState, events2) = SingleGame.PlayRandomGame(game, stats);
-            // events.AddRange(events2);
-            //
-            // Console.WriteLine("events:");
-            // PrintEvents(events);
-            //
-            // Console.WriteLine();
-            // Console.WriteLine("state:");
-            // PrintState(endState);
-            // RunGamesAndPrintStats(stats);
-
-            DepthAndBranchStats.RunGamesAndPrintStats();
-
-            // WinFinder.FindWinWithSolver(game, new DfsAgent());
-            // PlayRandomGamesUntilWon();
-            // FindWinWithSolver(game, new DfsWithHeuristicsAgent());  // ~1M games/8 seconds
+            // SingleGame.PlayGameAndPrintPlaythrough();
+            // DepthAndBranchStats.RunGamesAndPrintStats();
+            // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
+            WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
             // DfsDrawer.DrawSearch(game);
+        }
+
+        private static PandemicGame CreateNewGame()
+        {
+            var options = new NewGameOptions
+            {
+                Difficulty = Difficulty.Normal,
+                Roles = new[] { Role.Scientist, Role.Medic }
+            };
+
+            var (game, events) = PandemicGame.CreateNewGame(options);
+
+            return game;
         }
 
         private static void PlayInfiniteMctsGames()
@@ -83,34 +74,6 @@ namespace pandemic.console
                     numGames = 0;
                     sw.Restart();
                 }
-            }
-        }
-
-        private static void PrintState(PandemicSpielGameState state)
-        {
-            Console.WriteLine(state);
-        }
-
-        private static void PrintEvents(IEnumerable<IEvent> events)
-        {
-            foreach (var @event in events)
-            {
-                Console.WriteLine(@event);
-            }
-        }
-
-        private static void PrintStats(GameStats stats)
-        {
-            Console.WriteLine("actions, count");
-            foreach (var (actions, count) in stats.ActionsPerGameCounts.OrderBy(c => c.Key))
-            {
-                Console.WriteLine($"{actions}, {count}");
-            }
-
-            Console.WriteLine("legal actions, count");
-            foreach (var (actions, count) in stats.LegalActionCounts.OrderBy(c => c.Key))
-            {
-                Console.WriteLine($"{actions}, {count}");
             }
         }
     }
