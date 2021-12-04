@@ -8,6 +8,9 @@ implemented.
 
 # todo
 - agents
+    - dfs with action preferences
+        - build research stations early, in right spots
+        - move to research stations when can cure
     - minimax
     - alpha beta
 - implement epidemic

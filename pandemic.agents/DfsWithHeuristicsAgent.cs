@@ -46,7 +46,11 @@ namespace pandemic.agents
 
         public static string ReasonGameCannotBeWon(PandemicGame game, CardCounter? cardCounter = null)
         {
-            if (game.IsLost) return $"game is lost: {game.LossReason}";
+            if (game.IsLost)
+            {
+                var a = 1;
+                return $"game is lost: {game.LossReason}";
+            }
             if (cardCounter != null)
             {
                 if (!EnoughCardsLeftToCureAll(game, cardCounter, out var reason)) return reason;
@@ -193,7 +197,7 @@ namespace pandemic.agents
             {
                 if (_stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    Console.WriteLine($"nodes explored: {_nodesExplored}. Stops: {string.Join(',', _stopReasons)}");
+                    Console.WriteLine($"nodes explored: {_nodesExplored}. Stops: \n  {string.Join("\n  ", _stopReasons)}");
                     _stopwatch.Restart();
                 }
             }
