@@ -14,14 +14,14 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // single playthrough
-            var gameOptions = new NewGameOptions
-            {
-                Difficulty = Difficulty.Normal,
-                Roles = new[] { Role.Medic, Role.Scientist }
-            };
-            var (game, events) = PandemicGame.CreateNewGame(gameOptions);
-            var stats = new GameStats();
-
+            // var gameOptions = new NewGameOptions
+            // {
+            //     Difficulty = Difficulty.Normal,
+            //     Roles = new[] { Role.Medic, Role.Scientist }
+            // };
+            // var (game, events) = PandemicGame.CreateNewGame(gameOptions);
+            // var stats = new GameStats();
+            //
             // var (endState, events2) = SingleGame.PlayRandomGame(game, stats);
             // events.AddRange(events2);
             //
@@ -31,7 +31,9 @@ namespace pandemic.console
             // Console.WriteLine();
             // Console.WriteLine("state:");
             // PrintState(endState);
-            // PrintStats(stats);
+            // RunGamesAndPrintStats(stats);
+
+            DepthAndBranchStats.RunGamesAndPrintStats();
 
             // WinFinder.FindWinWithSolver(game, new DfsAgent());
             // PlayRandomGamesUntilWon();
@@ -40,40 +42,6 @@ namespace pandemic.console
             // RandomPlaythroughDrawer.DoIt();
             // DfsDrawer.DrawSearch(game);
         }
-
-        // private static void PlayRandomGamesUntilWon()
-        // {
-        //     var options = new NewGameOptions
-        //     {
-        //         Difficulty = Difficulty.Introductory,
-        //         Roles = new[] { Role.Medic, Role.Scientist }
-        //     };
-        //
-        //     var won = false;
-        //     var sw = Stopwatch.StartNew();
-        //     var lastNumGames = 0;
-        //     var lastTime = sw.Elapsed;
-        //     var stats = new Program.GameStats();
-        //
-        //     var state = new PandemicSpielGameState(PandemicGame.CreateUninitialisedGame());
-        //     var events = Enumerable.Empty<IEvent>();
-        //
-        //     for (var i = 0; !won && i < int.MaxValue; i++)
-        //     {
-        //         (state, events) = PlayRandomGame(options, stats);
-        //         won = state.Game.IsWon;
-        //
-        //         if ((sw.Elapsed - lastTime).TotalMilliseconds > 1000)
-        //         {
-        //             Console.WriteLine($"{i - lastNumGames} games/sec");
-        //             lastTime = sw.Elapsed;
-        //             lastNumGames = i;
-        //         }
-        //     }
-        //
-        //     // PrintEventsAndState(events, state);
-        //     PrintStats(stats);
-        // }
 
         private static void PlayInfiniteMctsGames()
         {
