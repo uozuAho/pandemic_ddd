@@ -39,19 +39,15 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
 
     private int CompareMulti(PlayerCommand a, PlayerCommand b) => Unmatched;
     private int CompareMulti<T>(T a, T b) where T : PlayerCommand => Same;
-    private int CompareMulti(DiscoverCureCommand a, BuildResearchStationCommand b) => Greater;
-    private int CompareMulti(DiscoverCureCommand a, DriveFerryCommand b) => Greater;
-    private int CompareMulti(DiscoverCureCommand a, DiscardPlayerCardCommand b) => Greater;
-
-    private int CompareMulti(BuildResearchStationCommand a, DriveFerryCommand b)
+    private int CompareMulti(DiscoverCureCommand a, PlayerCommand b) => Greater;
+    private int CompareMulti(BuildResearchStationCommand a, DiscoverCureCommand b) => Less;
+    private int CompareMulti(BuildResearchStationCommand a, PlayerCommand b)
     {
         if (_game.HasResearchStationOnColour(_game.Board.City(a.City).Colour))
             return Less;
 
         return Greater;
     }
-
-    private int CompareMulti(BuildResearchStationCommand a, DiscardPlayerCardCommand b) => Greater;
     private int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
 }
 
