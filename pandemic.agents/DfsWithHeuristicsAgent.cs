@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Events;
 using pandemic.Values;
 
 namespace pandemic.agents
@@ -19,7 +20,8 @@ namespace pandemic.agents
             var root = new SearchNode(state, null, null);
 
             var diagnostics = Diagnostics.StartNew();
-            var win = Hunt(root, 0, diagnostics);
+            var cardCounter = new CardCounter();
+            var win = Hunt(root, 0, diagnostics, cardCounter);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -37,19 +39,47 @@ namespace pandemic.agents
             return winningCommands;
         }
 
-        public static bool CanWin(PandemicGame game)
+        public static bool CanWin(PandemicGame game, CardCounter? cardCounter = null)
         {
-            return ReasonGameCannotBeWon(game) == string.Empty;
+            return ReasonGameCannotBeWon(game, cardCounter) == string.Empty;
         }
 
-        public static string ReasonGameCannotBeWon(PandemicGame game)
+        public static string ReasonGameCannotBeWon(PandemicGame game, CardCounter? cardCounter = null)
+        {
+            if (cardCounter != null)
+            {
+                if (!EnoughCardsLeftToCureAll(game, cardCounter, out var reason)) return reason;
+            }
+            else if (!EnoughCardsLeftToCureAll(game)) return "not enough cards left to cure";
+
+            return string.Empty;
+        }
+
+        private static bool EnoughCardsLeftToCureAll(PandemicGame game, CardCounter cardCounter, out string reason)
+        {
+            foreach (var colour in ColourExtensions.AllColours)
+            {
+                // 5 cards needed to cure. Ignores role special abilities
+                if (!game.CureDiscovered[colour] && cardCounter.CardsAvailable[colour] < 5)
+                {
+                    reason = $"Cannot cure {colour}";
+                    return false;
+                }
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if there are not enough cards to cure all diseases, regardless of card colours
+        /// </summary>
+        private static bool EnoughCardsLeftToCureAll(PandemicGame game)
         {
             var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
             var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
 
-            if (cardsAvailable < cardsNeededForAllCures) return "not enough cards left to cure";
-
-            return string.Empty;
+            return cardsAvailable >= cardsNeededForAllCures;
         }
 
         /// <summary>
@@ -70,12 +100,18 @@ namespace pandemic.agents
             };
         }
 
-        private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
+        private static SearchNode? Hunt(
+            SearchNode node,
+            int depth,
+            Diagnostics diagnostics,
+            CardCounter cardCounter)
         {
-            if (node.State.IsWin) return node;
-            if (ReasonGameCannotBeWon(node.State.Game) != string.Empty) return null;
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
+
+            if (node.State.IsWin) return node;
+            if (!CanWin(node.State.Game)) return null;
+
             if (node.State.IsLoss)
             {
                 diagnostics.Loss(node.State.Game.LossReason);
@@ -90,9 +126,15 @@ namespace pandemic.agents
             foreach (var action in legalActions)
             {
                 var childState = new PandemicSpielGameState(node.State.Game);
-                childState.ApplyAction(action);
+                var childCardCounter = cardCounter.Clone();
+                var events = childState.ApplyAction(action);
+                foreach (var @event in events.OfType<PlayerCardDiscarded>())
+                {
+                    if (@event.Card is PlayerCityCard cityCard)
+                        childCardCounter.CardsAvailable[cityCard.City.Colour]--;
+                }
                 var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child, depth + 1, diagnostics);
+                var winningNode = Hunt(child, depth + 1, diagnostics, childCardCounter);
                 if (winningNode != null)
                     return winningNode;
             }
