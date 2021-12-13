@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Events;
 using pandemic.Values;
 
 namespace pandemic.agents
@@ -19,7 +20,8 @@ namespace pandemic.agents
             var root = new SearchNode(state, null, null);
 
             var diagnostics = Diagnostics.StartNew();
-            var win = Hunt(root, 0, diagnostics);
+            var cardCounter = new CardCounter();
+            var win = Hunt(root, 0, diagnostics, cardCounter);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -37,30 +39,54 @@ namespace pandemic.agents
             return winningCommands;
         }
 
-        private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
+        /// <summary>
+        /// Returns true if it's possible to win from the given state (not checked exhaustively)
+        /// </summary>
+        public static bool CanWin(PandemicGame game, CardCounter? cardCounter = null)
         {
-            if (node.State.IsWin) return node;
-            diagnostics.NodeExplored();
-            diagnostics.Depth(depth);
-            if (node.State.IsLoss)
-                diagnostics.Loss(node.State.Game.LossReason);
+            return ReasonGameCannotBeWon(game, cardCounter) == string.Empty;
+        }
 
-            var legalActions = node.State.LegalActions()
-                .OrderBy(a => CommandPriority(a, node.State.Game))
-                // shuffle, otherwise we're at the mercy of the order of the move generator
-                .ThenBy(_ => _rng.Next()).ToList();
-
-            foreach (var action in legalActions)
+        public static string ReasonGameCannotBeWon(PandemicGame game, CardCounter? cardCounter = null)
+        {
+            if (game.IsLost)
             {
-                var childState = new PandemicSpielGameState(node.State.Game);
-                childState.ApplyAction(action);
-                var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child, depth + 1, diagnostics);
-                if (winningNode != null)
-                    return winningNode;
+                return $"game is lost: {game.LossReason}";
+            }
+            if (cardCounter != null)
+            {
+                if (!EnoughCardsLeftToCureAll(game, cardCounter, out var reason)) return reason;
+            }
+            else if (!EnoughCardsLeftToCureAll(game)) return "not enough cards left to cure";
+
+            return string.Empty;
+        }
+
+        private static bool EnoughCardsLeftToCureAll(PandemicGame game, CardCounter cardCounter, out string reason)
+        {
+            foreach (var colour in ColourExtensions.AllColours)
+            {
+                // 5 cards needed to cure. Ignores role special abilities
+                if (!game.CureDiscovered[colour] && cardCounter.CardsAvailable[colour] < 5)
+                {
+                    reason = $"Cannot cure {colour}";
+                    return false;
+                }
             }
 
-            return null;
+            reason = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if there are not enough cards to cure all diseases, regardless of card colours
+        /// </summary>
+        private static bool EnoughCardsLeftToCureAll(PandemicGame game)
+        {
+            var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
+            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
+
+            return cardsAvailable >= cardsNeededForAllCures;
         }
 
         /// <summary>
@@ -69,16 +95,58 @@ namespace pandemic.agents
         /// - don't build research stations with cards that could be used to cure
         /// - players work together: aim to cure different diseases per player
         /// </summary>
-        private static int CommandPriority(PlayerCommand command, PandemicGame game)
+        public static int CommandPriority(PlayerCommand command, PandemicGame game)
         {
             return command switch
             {
                 DiscoverCureCommand => 0,
-                BuildResearchStationCommand => 1,
-                DriveFerryCommand => 2,
-                DiscardPlayerCardCommand d => DiscardPriority(3, d, game),
+                BuildResearchStationCommand => 10,
+                DriveFerryCommand => 20,
+                DiscardPlayerCardCommand d => DiscardPriority(30, d, game),
                 _ => throw new ArgumentOutOfRangeException(nameof(command))
             };
+        }
+
+        private static SearchNode? Hunt(
+            SearchNode node,
+            int depth,
+            Diagnostics diagnostics,
+            CardCounter cardCounter)
+        {
+            diagnostics.NodeExplored();
+            diagnostics.Depth(depth);
+
+            if (node.State.IsWin) return node;
+            if (!CanWin(node.State.Game, cardCounter))
+            {
+                diagnostics.StoppedExploringBecause(ReasonGameCannotBeWon(node.State.Game, cardCounter));
+                return null;
+            }
+
+            var comparer = new CommandPriorityComparer(node.State.Game);
+            var legalActions = node.State.LegalActions()
+                // .OrderBy(a => CommandPriority(a, node.State.Game))
+                .OrderBy(a => a, comparer)
+                // shuffle, otherwise we're at the mercy of the order of the move generator
+                .ThenBy(_ => _rng.Next()).ToList();
+
+            foreach (var action in legalActions)
+            {
+                var childState = new PandemicSpielGameState(node.State.Game);
+                var childCardCounter = cardCounter.Clone();
+                var events = childState.ApplyAction(action);
+                foreach (var @event in events.OfType<PlayerCardDiscarded>())
+                {
+                    if (@event.Card is PlayerCityCard cityCard)
+                        childCardCounter.CardsAvailable[cityCard.City.Colour]--;
+                }
+                var child = new SearchNode(childState, action, node);
+                var winningNode = Hunt(child, depth + 1, diagnostics, childCardCounter);
+                if (winningNode != null)
+                    return winningNode;
+            }
+
+            return null;
         }
 
         private static int DiscardPriority(int basePriority, DiscardPlayerCardCommand command, PandemicGame game)
@@ -90,9 +158,7 @@ namespace pandemic.agents
                 .OrderBy(g => g.Count())
                 .ToList();
 
-            // todo: don't put epidemic cards in hand
-            var cardToDiscard = command.Card as PlayerCityCard;
-            if (cardToDiscard == null) return basePriority;
+            if (command.Card is not PlayerCityCard cardToDiscard) return basePriority;
 
             return basePriority + handByNumberOfColoursAscending.FindIndex(c => c.Key == cardToDiscard.City.Colour);
         }
@@ -111,7 +177,7 @@ namespace pandemic.agents
             private readonly Stopwatch _stopwatch;
             private int _nodesExplored;
             private int _maxDepth;
-            private readonly Dictionary<string, int> _losses = new();
+            private readonly Dictionary<string, int> _stopReasons = new();
 
             private Diagnostics(Stopwatch stopwatch)
             {
@@ -133,7 +199,7 @@ namespace pandemic.agents
             {
                 if (_stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    Console.WriteLine($"nodes explored: {_nodesExplored}. Max depth {_maxDepth}. Losses: {string.Join(',', _losses)}");
+                    Console.WriteLine($"nodes explored: {_nodesExplored}. Stops: \n  {string.Join("\n  ", _stopReasons)}");
                     _stopwatch.Restart();
                 }
             }
@@ -144,12 +210,12 @@ namespace pandemic.agents
                     _maxDepth = depth;
             }
 
-            public void Loss(string reason)
+            public void StoppedExploringBecause(string reason)
             {
-                if (_losses.ContainsKey(reason))
-                    _losses[reason]++;
+                if (_stopReasons.ContainsKey(reason))
+                    _stopReasons[reason]++;
                 else
-                    _losses[reason] = 1;
+                    _stopReasons[reason] = 1;
             }
         }
     }

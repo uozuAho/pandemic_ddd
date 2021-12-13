@@ -18,7 +18,8 @@ namespace pandemic.console
             WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
-            // DfsDrawer.DrawSearch(game);
+            // DfsDrawer.DrawSearch(CreateNewGame());
+            // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
         }
 
         private static PandemicGame CreateNewGame()

@@ -7,6 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- estimate number of possible games
 - agents
     - minimax
     - alpha beta
@@ -30,7 +31,7 @@ dotnet run
 - pandemic: core game logic. Immutable & DDD-like.
 - pandemic.agents: agents that can play games
 - pandemic.console: scratchpad console app
-- pandemic.drawing: draw game trees
+- pandemic.drawing: draw game trees (graphviz dot output)
 - pandemic.server: host a game of pandemic over a network. Intended for use by
   https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
 
