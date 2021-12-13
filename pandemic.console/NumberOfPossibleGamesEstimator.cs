@@ -8,9 +8,9 @@ using utils;
 
 namespace pandemic.console;
 
-internal class DepthAndBranchStats
+internal class NumberOfPossibleGamesEstimator
 {
-    public static void RunGamesAndPrintStats()
+    public static void Estimate()
     {
         var stats = new GameStats();
         Console.WriteLine("Playing games...");

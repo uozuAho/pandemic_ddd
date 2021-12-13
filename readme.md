@@ -7,7 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- estimate number of possible games
 - agents
     - minimax
     - alpha beta
@@ -36,6 +35,9 @@ dotnet run
   https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
 
 # notes
+- I estimate about 9 x 10^85 possible games of pandemic. This is based on a
+  simple calculation of average branching factor and game length. See
+  `NumberOfPossibleGamesEstimator`
 - mutable2 branch: mutable pandemic aggregate gives 4x speedup in mcts
 
 # References

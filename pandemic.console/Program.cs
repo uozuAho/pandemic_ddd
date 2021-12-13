@@ -13,9 +13,9 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // SingleGame.PlayGameAndPrintPlaythrough();
-            // DepthAndBranchStats.RunGamesAndPrintStats();
+            NumberOfPossibleGamesEstimator.Estimate();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
-            WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
+            // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
             // DfsDrawer.DrawSearch(CreateNewGame());
