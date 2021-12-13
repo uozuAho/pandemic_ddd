@@ -47,33 +47,6 @@ namespace pandemic.agents.test
                     .Using(comparer));
         }
 
-        [Test]
-        public void Moves_towards_research_station_to_cure()
-        {
-            var game = ANewGame();
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Blue).Take(5)),
-                    Location = "Chicago"
-                })
-            };
-            var comparer = new CommandPriorityComparer(game);
-
-            var gotoAtlanta = new DriveFerryCommand(game.CurrentPlayer.Role, "Atlanta");
-            var commands = new List<PlayerCommand>
-            {
-                new DiscardPlayerCardCommand(new EpidemicCard()),
-                new DriveFerryCommand(game.CurrentPlayer.Role, "New York"),
-                new DriveFerryCommand(game.CurrentPlayer.Role, "Paris"),
-                gotoAtlanta,
-                new BuildResearchStationCommand("Chicago"),
-            };
-
-            Assert.That(comparer.HighestPriority(commands), Is.EqualTo(gotoAtlanta));
-        }
-
         private static PandemicGame ANewGame()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
