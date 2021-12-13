@@ -6,7 +6,7 @@ using pandemic.Values;
 
 namespace pandemic.agents.test
 {
-    internal class Heuristics_CanWin
+    internal class DfsWithHeuristicsAgent_CanWin
     {
         [Test]
         public void Can_win_new_game()

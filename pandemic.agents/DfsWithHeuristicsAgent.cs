@@ -39,6 +39,9 @@ namespace pandemic.agents
             return winningCommands;
         }
 
+        /// <summary>
+        /// Returns true if it's possible to win from the given state (not checked exhaustively)
+        /// </summary>
         public static bool CanWin(PandemicGame game, CardCounter? cardCounter = null)
         {
             return ReasonGameCannotBeWon(game, cardCounter) == string.Empty;
