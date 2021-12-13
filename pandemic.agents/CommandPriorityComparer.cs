@@ -6,6 +6,11 @@ using pandemic.Values;
 
 namespace pandemic.agents;
 
+/// <summary>
+/// Hand-crafter comparer that attempts to rank commands by likelihood
+/// that they'll lead to a win. Uses multiple dispatch as found here:
+/// https://stackoverflow.com/questions/480443/what-is-single-and-multiple-dispatch-in-relation-to-net/4810826#4810826
+/// </summary>
 public class CommandPriorityComparer : IComparer<PlayerCommand>
 {
     private const int Less = -1;
@@ -27,6 +32,8 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return CompareMulti(a, b, 0);
     }
 
+    // int parameter is just to distinguish from other overloads. This
+    // allows multiple dispatch by casting the given commands as dynamic
     private int CompareMulti(PlayerCommand a, PlayerCommand b, int _)
     {
         var result = CompareMulti((dynamic)a, (dynamic)b);
