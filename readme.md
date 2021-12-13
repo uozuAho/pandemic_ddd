@@ -7,8 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- estimate number of possible games
 - agents
-    - dfs with action preferences
     - minimax
     - alpha beta
 - implement epidemic
