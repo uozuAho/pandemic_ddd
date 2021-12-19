@@ -39,6 +39,9 @@ dotnet run
   simple calculation of average branching factor and game length. See
   `NumberOfPossibleGamesEstimator`
 - mutable2 branch: mutable pandemic aggregate gives 4x speedup in mcts
+- it has been shown that determining whether a game is winnable is NP-complete:
+  https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
+  found via: https://github.com/captn3m0/boardgame-research#pandemic
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
