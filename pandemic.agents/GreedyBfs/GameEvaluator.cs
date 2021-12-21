@@ -1,9 +1,9 @@
 using System.Linq;
 using pandemic.Aggregates;
 
-namespace pandemic.agents
+namespace pandemic.agents.GreedyBfs
 {
-    internal class GameEvaluator
+    public class GameEvaluator
     {
         /// <summary>
         /// Return a value that evaluates how 'good' a state is, ie.

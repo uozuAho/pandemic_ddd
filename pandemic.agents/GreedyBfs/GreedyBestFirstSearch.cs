@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace pandemic.agents.GreedyBfs
 {
-    internal class GreedyBestFirstSearch<TState, TAction> : BestFirstSearch<TState, TAction>
+    public class GreedyBestFirstSearch<TState, TAction> : BestFirstSearch<TState, TAction>
     {
         private readonly Func<TState, int> _heuristic;
 
