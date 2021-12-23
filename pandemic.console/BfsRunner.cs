@@ -25,15 +25,19 @@ namespace pandemic.console
             Console.WriteLine("Searching...");
             var steps = 0;
             var sw = Stopwatch.StartNew();
+            var bestState = new SearchNode(game, null, null, 234, int.MinValue);
 
             while (!searcher.IsFinished)
             {
-                searcher.Step();
+                var state = searcher.Step();
+                if (state.Score > bestState.Score)
+                    bestState = state;
                 steps++;
 
                 if (sw.ElapsedMilliseconds > 1000)
                 {
-                    Console.WriteLine($"explored: {steps}. queued: {searcher.Frontier.Size}");
+                    Console.WriteLine($"explored: {steps}. queued: {searcher.Frontier.Size}. Best state found:");
+                    Console.WriteLine(NodeLabel(bestState.State));
                     sw.Restart();
                 }
             }

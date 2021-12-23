@@ -4,6 +4,18 @@ using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs
 {
+    /// <summary>
+    /// Search for a win by greedily picking the next 'best' state, as determined
+    /// by the <see cref="GameEvaluator"/>. Seems to get stuck in 'local maxima',
+    /// where a couple of cures have been found, but can't get to a win.
+    ///
+    /// Ideas:
+    /// - take more game aspects into account in GameEvaluator, eg.
+    ///     - prefer earlier cures
+    ///     - count cards, don't explore states that can't win
+    /// - visualise how this agent is getting stuck. Is it searching where
+    ///   it shouldn't be?
+    /// </summary>
     public class GreedyBestFirstSearch
     {
         public bool IsFinished { get; private set; }

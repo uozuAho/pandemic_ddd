@@ -7,9 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- agents
-    - minimax
-    - alpha beta
 - implement epidemic
 - implement more game rules
 - check code todos
