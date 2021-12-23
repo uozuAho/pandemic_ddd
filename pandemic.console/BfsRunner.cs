@@ -30,7 +30,7 @@ namespace pandemic.console
             while (!searcher.IsFinished)
             {
                 var state = searcher.Step();
-                if (state.Score > bestState.Score)
+                if (state != null && state.Score > bestState.Score)
                     bestState = state;
                 steps++;
 
@@ -78,7 +78,7 @@ namespace pandemic.console
                 if (node.Parent != null && visitedNodes.ContainsKey(node.Parent))
                 {
                     var parent = visitedNodes[node.Parent];
-                    graph.CreateEdge(parent, drawerNode, node.Action.ToString());
+                    graph.CreateEdge(parent, drawerNode, node.Action?.ToString() ?? string.Empty);
                 }
             }
 

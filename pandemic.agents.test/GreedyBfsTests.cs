@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
@@ -38,8 +39,8 @@ namespace pandemic.agents.test
             var bfs = new GreedyBestFirstSearch(problem);
 
             bfs.Step(); // first node is root
-            var nextNode = bfs.Step(); 
-            Assert.That(nextNode, Is.Not.Null);
+            var nextNode = bfs.Step();
+            Debug.Assert(nextNode != null);
             Assert.That(nextNode.Action, Is.TypeOf<DiscoverCureCommand>());
         }
 
@@ -66,6 +67,7 @@ namespace pandemic.agents.test
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();
+            Debug.Assert(nextNode != null);
             Assert.That(nextNode.Action, Is.TypeOf<BuildResearchStationCommand>());
         }
 
@@ -104,14 +106,14 @@ namespace pandemic.agents.test
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();
-            Assert.That(nextNode.Action, Is.TypeOf<DiscardPlayerCardCommand>());
-            var discardedCard = (nextNode.Action as DiscardPlayerCardCommand).Card as PlayerCityCard;
-            Assert.That(discardedCard.City.Name, Is.AnyOf("Jakarta", "Cairo"));
+            Assert.That(nextNode?.Action, Is.TypeOf<DiscardPlayerCardCommand>());
+            var discardedCard = (nextNode?.Action as DiscardPlayerCardCommand)?.Card as PlayerCityCard;
+            Assert.That(discardedCard?.City.Name, Is.AnyOf("Jakarta", "Cairo"));
 
             nextNode = bfs.Step();
-            Assert.That(nextNode.Action, Is.TypeOf<DiscardPlayerCardCommand>());
-            discardedCard = (nextNode.Action as DiscardPlayerCardCommand).Card as PlayerCityCard;
-            Assert.That(discardedCard.City.Name, Is.AnyOf("Jakarta", "Cairo"));
+            Assert.That(nextNode?.Action, Is.TypeOf<DiscardPlayerCardCommand>());
+            discardedCard = (nextNode?.Action as DiscardPlayerCardCommand)?.Card as PlayerCityCard;
+            Assert.That(discardedCard?.City.Name, Is.AnyOf("Jakarta", "Cairo"));
         }
 
         private static PandemicGame ANewGame()
