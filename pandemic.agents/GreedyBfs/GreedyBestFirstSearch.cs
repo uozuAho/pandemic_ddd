@@ -12,10 +12,10 @@ namespace pandemic.agents.GreedyBfs
 
         public MinPriorityFrontier<PandemicGame, PlayerCommand> Frontier;
 
-        private readonly ISearchProblem<PandemicGame, PlayerCommand> _problem;
+        private readonly PandemicSearchProblem _problem;
         private readonly Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>> _explored;
 
-        public GreedyBestFirstSearch(ISearchProblem<PandemicGame, PlayerCommand> problem)
+        public GreedyBestFirstSearch(PandemicSearchProblem problem)
         {
             _problem = problem;
             CurrentState = problem.InitialState;
@@ -167,25 +167,6 @@ namespace pandemic.agents.GreedyBfs
             Action = action;
             PathCost = pathCost;
         }
-    }
-
-    public interface ISearchProblem<TState, TAction>
-    {
-        TState InitialState { get; }
-
-        /// <summary>
-        /// Get available actions at the given state
-        /// </summary>
-        IEnumerable<TAction> GetActions(TState state);
-
-        /// <summary>
-        /// Do the given action and return the resultant state
-        /// </summary>
-        TState DoAction(TState state, TAction action);
-
-        bool IsGoal(TState state);
-
-        double PathCost(TState state, TAction action);
     }
 
     /// <summary>

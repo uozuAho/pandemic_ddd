@@ -4,7 +4,7 @@ using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs;
 
-public class PandemicSearchProblem : ISearchProblem<PandemicGame, PlayerCommand>
+public class PandemicSearchProblem
 {
     public PandemicGame InitialState { get; }
 
