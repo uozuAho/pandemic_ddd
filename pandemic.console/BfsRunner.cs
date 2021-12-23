@@ -34,7 +34,7 @@ namespace pandemic.console
 
                 if (sw.ElapsedMilliseconds > 1000)
                 {
-                    Console.WriteLine($"Steps: {steps}");
+                    Console.WriteLine($"explored: {steps}. queued: {searcher.Frontier.Size}");
                     sw.Restart();
                 }
             }

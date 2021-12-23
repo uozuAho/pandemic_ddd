@@ -72,7 +72,7 @@ namespace pandemic.agents.GreedyBfs
         public bool IsSolved { get; private set; }
         public TState CurrentState { get; private set; }
 
-        internal ISearchFrontier<TState, TAction> Frontier;
+        public ISearchFrontier<TState, TAction> Frontier;
 
         private readonly ISearchProblem<TState, TAction> _problem;
         private readonly Dictionary<TState, SearchNode<TState, TAction>> _explored;
@@ -167,12 +167,13 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    internal interface ISearchFrontier<TState, TAction>
+    public interface ISearchFrontier<TState, TAction>
     {
         void Push(SearchNode<TState, TAction> node);
         SearchNode<TState, TAction> Pop();
         bool ContainsState(TState state);
         bool IsEmpty();
+        int Size { get; }
     }
 
     public class SearchNode<TState, TAction>
@@ -233,6 +234,8 @@ namespace pandemic.agents.GreedyBfs
     {
         private readonly MinPriorityQueue<SearchNode<TState, TAction>> _queue;
         private readonly HashSet<TState> _states;
+
+        public int Size => _states.Count;
 
         public MinPriorityFrontier(IComparer<SearchNode<TState, TAction>> nodeComparer)
         {
