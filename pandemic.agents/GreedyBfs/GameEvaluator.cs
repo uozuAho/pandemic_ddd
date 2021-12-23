@@ -10,7 +10,7 @@ namespace pandemic.agents.GreedyBfs
         /// how likely a win is from this state. Higher values are
         /// better.
         /// </summary>
-        public int Evaluate(PandemicGame game)
+        public static int Evaluate(PandemicGame game)
         {
             if (game.IsWon) return int.MaxValue;
             if (game.IsLost) return int.MinValue;
@@ -33,7 +33,7 @@ namespace pandemic.agents.GreedyBfs
             // outbreaks are bad
             score -= game.OutbreakCounter * 100;
 
-            return 0;
+            return score;
         }
     }
 }

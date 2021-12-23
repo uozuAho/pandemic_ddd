@@ -56,7 +56,7 @@ namespace pandemic.agents.GreedyBfs
                 _compare = compare;
             }
 
-            public int Compare(SearchNode<TState, TAction> x, SearchNode<TState, TAction> y)
+            public int Compare(SearchNode<TState, TAction>? x, SearchNode<TState, TAction>? y)
             {
                 if (x == null) throw new NullReferenceException(nameof(x));
                 if (y == null) throw new NullReferenceException(nameof(y));
@@ -71,8 +71,6 @@ namespace pandemic.agents.GreedyBfs
         public bool IsFinished { get; private set; }
         public bool IsSolved { get; private set; }
         public TState CurrentState { get; private set; }
-
-        public int NumberOfExploredStates => _explored.Count;
 
         internal ISearchFrontier<TState, TAction> Frontier;
 
@@ -187,7 +185,7 @@ namespace pandemic.agents.GreedyBfs
         /// <summary>
         /// Action that resulted in this state. Arbitrary value if parent is null.
         /// </summary>
-        public TAction Action { get; }
+        public TAction? Action { get; }
 
         /// <summary>
         /// Previous state
@@ -198,8 +196,8 @@ namespace pandemic.agents.GreedyBfs
         public readonly double PathCost;
 
         public SearchNode(TState state,
-            SearchNode<TState, TAction> parent,
-            TAction action,
+            SearchNode<TState, TAction>? parent,
+            TAction? action,
             double pathCost)
         {
             State = state;
