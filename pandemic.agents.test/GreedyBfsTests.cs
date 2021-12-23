@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
@@ -10,7 +9,7 @@ namespace pandemic.agents.test
 {
     internal class GreedyBfsTests
     {
-        private static StandardGameBoard Board = new();
+        private static readonly StandardGameBoard Board = new();
 
         [Test]
         public void Does_step()
@@ -44,12 +43,80 @@ namespace pandemic.agents.test
             Assert.That(nextNode.Action, Is.TypeOf<DiscoverCureCommand>());
         }
 
-        // choose build research station over move
-        // keep cards of same colour
-
-        private PandemicGame ANewGame()
+        [Test]
+        public void Chooses_build_research_station_over_other_actions()
         {
-            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = ANewGame();
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Miami",
+                    Hand = new PlayerHand(new []
+                    {
+                        new PlayerCityCard(Board.City("Miami")),
+                        new PlayerCityCard(Board.City("Atlanta")),
+                        new PlayerCityCard(Board.City("Paris")),
+                    })
+                })
+            };
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+
+            var bfs = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(problem, state => -GameEvaluator.Evaluate(state));
+
+            bfs.Step(); // first node is root
+            var nextNode = bfs.Step();
+            Assert.That(nextNode.Action, Is.TypeOf<BuildResearchStationCommand>());
+        }
+
+        [Test]
+        public void Keeps_cards_of_same_colour()
+        {
+            var game = ANewGame();
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Miami",
+                    Hand = new PlayerHand(new[]
+                    {
+                        // 4 yellows
+                        new PlayerCityCard(Board.City("Miami")),
+                        new PlayerCityCard(Board.City("Mexico City")),
+                        new PlayerCityCard(Board.City("Los Angeles")),
+                        new PlayerCityCard(Board.City("Lagos")),
+
+                        // 2 others
+                        new PlayerCityCard(Board.City("Jakarta")),
+                        new PlayerCityCard(Board.City("Cairo")),
+
+                        // 3 blues
+                        new PlayerCityCard(Board.City("Paris")),
+                        new PlayerCityCard(Board.City("Atlanta")),
+                        new PlayerCityCard(Board.City("Chicago")),
+                    }),
+                    ActionsRemaining = 0
+                })
+            };
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+
+            var bfs = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(problem, state => -GameEvaluator.Evaluate(state));
+
+            bfs.Step(); // first node is root
+            var nextNode = bfs.Step();
+            Assert.That(nextNode.Action, Is.TypeOf<DiscardPlayerCardCommand>());
+            var discardedCard = (nextNode.Action as DiscardPlayerCardCommand).Card as PlayerCityCard;
+            Assert.That(discardedCard.City.Name, Is.AnyOf("Jakarta", "Cairo"));
+
+            nextNode = bfs.Step();
+            Assert.That(nextNode.Action, Is.TypeOf<DiscardPlayerCardCommand>());
+            discardedCard = (nextNode.Action as DiscardPlayerCardCommand).Card as PlayerCityCard;
+            Assert.That(discardedCard.City.Name, Is.AnyOf("Jakarta", "Cairo"));
+        }
+
+        private static PandemicGame ANewGame()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist },
