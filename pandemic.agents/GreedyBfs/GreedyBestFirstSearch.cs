@@ -29,34 +29,6 @@ namespace pandemic.agents.GreedyBfs
             Frontier.Push(root);
         }
 
-        public IEnumerable<PlayerCommand> GetSolutionTo(PandemicGame state)
-        {
-            if (!_explored.ContainsKey(state)) throw new ArgumentException("cannot get solution to unexplored state");
-
-            var actions = new List<PlayerCommand>();
-            var currentNode = _explored[state];
-            while (currentNode != null && currentNode.Action != null)
-            {
-                actions.Add(currentNode.Action);
-                currentNode = currentNode.Parent;
-            }
-
-            actions.Reverse();
-            return actions;
-        }
-
-        public IEnumerable<PlayerCommand> GetSolution()
-        {
-            if (!IsSolved) throw new InvalidOperationException("No solution!");
-
-            return GetSolutionTo(CurrentState);
-        }
-
-        public bool IsExplored(PandemicGame state)
-        {
-            return _explored.ContainsKey(state);
-        }
-
         public SearchNode? Step()
         {
             if (IsFinished) return null;
@@ -99,14 +71,6 @@ namespace pandemic.agents.GreedyBfs
             }
 
             return node;
-        }
-
-        public void Solve()
-        {
-            while (!IsFinished)
-            {
-                Step();
-            }
         }
 
         protected class SearchNodeComparer : IComparer<SearchNode>
@@ -241,32 +205,10 @@ namespace pandemic.agents.GreedyBfs
             Swim(Size - 1);
         }
 
-        public void Remove(T item)
-        {
-            if (Size == 0) throw new InvalidOperationException("cannot remove from empty");
-
-            var idx = IndexOf(item, 0);
-
-            if (idx == -1) throw new InvalidOperationException("cannot remove item not in heap");
-
-            RemoveAtIdx(idx);
-        }
-
-        public bool Contains(T item)
-        {
-            return IndexOf(item, 0) >= 0;
-        }
-
         public T RemoveMin()
         {
             if (Size == 0) throw new InvalidOperationException("cannot remove from empty");
             return RemoveAtIdx(0);
-        }
-
-        public T PeekMin()
-        {
-            if (Size == 0) throw new InvalidOperationException("cannot peek when empty");
-            return _buf[0];
         }
 
         private T RemoveAtIdx(int idx)
@@ -281,29 +223,6 @@ namespace pandemic.agents.GreedyBfs
             // sink last item placed at idx
             Sink(idx);
             return temp;
-        }
-
-        private int IndexOf(T item, int subRoot)
-        {
-            if (subRoot >= Size)
-            {
-                // gone past leaf
-                return -1;
-            }
-            if (_comparer.Compare(item, _buf[subRoot]) == -1)
-            {
-                // item is less than current node - will not be in this subtree
-                return -1;
-            }
-            if (item.Equals(_buf[subRoot]))
-            {
-                return subRoot;
-            }
-
-            var idx = IndexOf(item, subRoot * 2 + 1);
-            return idx >= 0
-                ? idx
-                : IndexOf(item, subRoot * 2 + 2);
         }
 
         private void Swim(int idx)
