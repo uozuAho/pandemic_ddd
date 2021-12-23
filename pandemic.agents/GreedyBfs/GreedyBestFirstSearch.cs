@@ -96,8 +96,8 @@ namespace pandemic.agents.GreedyBfs
 
         protected int CompareStates(SearchNode a, SearchNode b)
         {
-            var priorityA = (double)-GameEvaluator.Evaluate(a.State);
-            var priorityB = (double)-GameEvaluator.Evaluate(b.State);
+            var priorityA = (double)-a.Score;
+            var priorityB = (double)-b.Score;
             return priorityA < priorityB ? -1 : priorityA > priorityB ? 1 : 0;
         }
     }
