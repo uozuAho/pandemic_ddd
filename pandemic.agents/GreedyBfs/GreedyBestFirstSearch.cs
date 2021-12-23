@@ -15,9 +15,8 @@ namespace pandemic.agents.GreedyBfs
         public GreedyBestFirstSearch(ISearchProblem<TState, TAction> problem, Func<TState, int> heuristic) : base(problem)
         {
             _heuristic = heuristic;
-            // todo: this should be in BestFirst Init function.. or something. have to call same frontier push
-            //       in all subclasses
-            Frontier.Push(new SearchNode<TState, TAction>(problem.InitialState, null, default(TAction), 0));
+            var root = new SearchNode<TState, TAction>(problem.InitialState, null, default(TAction), 0);
+            Frontier.Push(root);
         }
 
         protected override double PriorityFunc(SearchNode<TState, TAction> node)
