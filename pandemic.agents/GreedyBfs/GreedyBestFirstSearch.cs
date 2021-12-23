@@ -4,7 +4,7 @@ using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs
 {
-    public class GreedyBestFirstSearch : BestFirstSearch<PandemicGame, PlayerCommand>
+    public class GreedyBestFirstSearch : BestFirstSearch
     {
         private readonly Func<PandemicGame, int> _heuristic;
 
@@ -23,37 +23,39 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public abstract class BestFirstSearch<TState, TAction> : GenericSearch<TState, TAction>
+    public abstract class BestFirstSearch : GenericSearch<PandemicGame, PlayerCommand>
     {
-        protected BestFirstSearch(ISearchProblem<TState, TAction> problem) : base(problem)
+        protected BestFirstSearch(PandemicSearchProblem problem) : base(problem)
         {
             var nodeComparer = new SearchNodeComparer(CompareStates);
-            Frontier = new MinPriorityFrontier<TState, TAction>(nodeComparer);
+            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
         }
 
         /// <summary>
         /// The priority function determines in what order search nodes should be expanded.
         /// In the case of this best first search, nodes are expanded in lowest-value order.
         /// </summary>
-        protected abstract double PriorityFunc(SearchNode<TState, TAction> node);
+        protected abstract double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node);
 
-        private int CompareStates(SearchNode<TState, TAction> a, SearchNode<TState, TAction> b)
+        private int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
         {
             var priorityA = PriorityFunc(a);
             var priorityB = PriorityFunc(b);
             return priorityA < priorityB ? -1 : priorityA > priorityB ? 1 : 0;
         }
 
-        private class SearchNodeComparer : IComparer<SearchNode<TState, TAction>>
+        private class SearchNodeComparer : IComparer<SearchNode<PandemicGame, PlayerCommand>>
         {
-            private readonly Func<SearchNode<TState, TAction>, SearchNode<TState, TAction>, int> _compare;
+            private readonly Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> _compare;
 
-            public SearchNodeComparer(Func<SearchNode<TState, TAction>, SearchNode<TState, TAction>, int> compare)
+            public SearchNodeComparer(Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> compare)
             {
                 _compare = compare;
             }
 
-            public int Compare(SearchNode<TState, TAction>? x, SearchNode<TState, TAction>? y)
+            public int Compare(
+                SearchNode<PandemicGame, PlayerCommand>? x,
+                SearchNode<PandemicGame, PlayerCommand>? y)
             {
                 if (x == null) throw new NullReferenceException(nameof(x));
                 if (y == null) throw new NullReferenceException(nameof(y));
