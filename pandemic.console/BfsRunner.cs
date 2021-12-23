@@ -50,7 +50,7 @@ namespace pandemic.console
             var searcher = new GreedyBestFirstSearch(searchProblem);
 
             Console.WriteLine("Searching...");
-            var nodesSearched = new List<SearchNode<PandemicGame, PlayerCommand>>();
+            var nodesSearched = new List<SearchNode>();
 
             for (var i = 0; i < numNodes && !searcher.IsFinished; i++)
             {
@@ -62,10 +62,10 @@ namespace pandemic.console
             CsDotDrawer.FromGraph(graph).SaveToFile("bfs.dot");
         }
 
-        private static DrawerGraph ToDrawerGraph(List<SearchNode<PandemicGame, PlayerCommand>> nodes)
+        private static DrawerGraph ToDrawerGraph(List<SearchNode> nodes)
         {
             var graph = new DrawerGraph();
-            var visitedNodes = new Dictionary<SearchNode<PandemicGame, PlayerCommand>, DrawerNode>();
+            var visitedNodes = new Dictionary<SearchNode, DrawerNode>();
 
             foreach (var node in nodes)
             {

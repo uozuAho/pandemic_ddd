@@ -10,22 +10,22 @@ namespace pandemic.agents.GreedyBfs
         public bool IsSolved { get; private set; }
         public PandemicGame CurrentState { get; private set; }
 
-        public MinPriorityFrontier<PandemicGame, PlayerCommand> Frontier;
+        public MinPriorityFrontier Frontier;
 
         private readonly PandemicSearchProblem _problem;
-        private readonly Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>> _explored;
+        private readonly Dictionary<PandemicGame, SearchNode> _explored;
 
         public GreedyBestFirstSearch(PandemicSearchProblem problem)
         {
             _problem = problem;
             CurrentState = problem.InitialState;
-            _explored = new Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>>();
+            _explored = new Dictionary<PandemicGame, SearchNode>();
 
             IsFinished = false;
 
             var nodeComparer = new SearchNodeComparer(CompareStates);
-            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
-            var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
+            Frontier = new MinPriorityFrontier(nodeComparer);
+            var root = new SearchNode(problem.InitialState, null, default, 0);
             Frontier.Push(root);
         }
 
@@ -57,11 +57,11 @@ namespace pandemic.agents.GreedyBfs
             return _explored.ContainsKey(state);
         }
 
-        public SearchNode<PandemicGame, PlayerCommand>? Step()
+        public SearchNode? Step()
         {
             if (IsFinished) return null;
 
-            SearchNode<PandemicGame, PlayerCommand> node;
+            SearchNode node;
 
             do
             {
@@ -80,7 +80,7 @@ namespace pandemic.agents.GreedyBfs
             {
                 var childState = _problem.DoAction(node.State, action);
                 var childCost = node.PathCost + _problem.PathCost(node.State, action);
-                var child = new SearchNode<PandemicGame, PlayerCommand>(childState, node, action, childCost);
+                var child = new SearchNode(childState, node, action, childCost);
 
                 if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState)) continue;
 
@@ -109,18 +109,18 @@ namespace pandemic.agents.GreedyBfs
             }
         }
 
-        protected class SearchNodeComparer : IComparer<SearchNode<PandemicGame, PlayerCommand>>
+        protected class SearchNodeComparer : IComparer<SearchNode>
         {
-            private readonly Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> _compare;
+            private readonly Func<SearchNode, SearchNode, int> _compare;
 
-            public SearchNodeComparer(Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> compare)
+            public SearchNodeComparer(Func<SearchNode, SearchNode, int> compare)
             {
                 _compare = compare;
             }
 
             public int Compare(
-                SearchNode<PandemicGame, PlayerCommand>? x,
-                SearchNode<PandemicGame, PlayerCommand>? y)
+                SearchNode? x,
+                SearchNode? y)
             {
                 if (x == null) throw new NullReferenceException(nameof(x));
                 if (y == null) throw new NullReferenceException(nameof(y));
@@ -129,7 +129,7 @@ namespace pandemic.agents.GreedyBfs
             }
         }
 
-        protected int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
+        protected int CompareStates(SearchNode a, SearchNode b)
         {
             var priorityA = (double)-GameEvaluator.Evaluate(a.State);
             var priorityB = (double)-GameEvaluator.Evaluate(b.State);
@@ -137,29 +137,22 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public class SearchNode<TState, TAction>
+    public class SearchNode
     {
-        /// <summary>
-        /// State at this node
-        /// </summary>
-        public TState State { get; }
+        public PandemicGame State { get; }
+        public SearchNode? Parent { get; }
 
         /// <summary>
         /// Action that resulted in this state. Arbitrary value if parent is null.
         /// </summary>
-        public TAction? Action { get; }
-
-        /// <summary>
-        /// Previous state
-        /// </summary>
-        public SearchNode<TState, TAction>? Parent { get; }
+        public PlayerCommand? Action { get; }
 
         /// Path cost at this node = parent.path_cost + step_cost(parent, action) */
         public readonly double PathCost;
 
-        public SearchNode(TState state,
-            SearchNode<TState, TAction>? parent,
-            TAction? action,
+        public SearchNode(PandemicGame state,
+            SearchNode? parent,
+            PlayerCommand? action,
             double pathCost)
         {
             State = state;
@@ -172,33 +165,33 @@ namespace pandemic.agents.GreedyBfs
     /// <summary>
     /// Search nodes are popped in minimum-priority order
     /// </summary>
-    public class MinPriorityFrontier<TState, TAction>
+    public class MinPriorityFrontier
     {
-        private readonly MinPriorityQueue<SearchNode<TState, TAction>> _queue;
-        private readonly HashSet<TState> _states;
+        private readonly MinPriorityQueue<SearchNode> _queue;
+        private readonly HashSet<PandemicGame> _states;
 
         public int Size => _states.Count;
 
-        public MinPriorityFrontier(IComparer<SearchNode<TState, TAction>> nodeComparer)
+        public MinPriorityFrontier(IComparer<SearchNode> nodeComparer)
         {
-            _queue = new MinPriorityQueue<SearchNode<TState, TAction>>(nodeComparer);
-            _states = new HashSet<TState>();
+            _queue = new MinPriorityQueue<SearchNode>(nodeComparer);
+            _states = new HashSet<PandemicGame>();
         }
 
-        public void Push(SearchNode<TState, TAction> node)
+        public void Push(SearchNode node)
         {
             _states.Add(node.State);
             _queue.Push(node);
         }
 
-        public SearchNode<TState, TAction> Pop()
+        public SearchNode Pop()
         {
             var node = _queue.Pop();
             _states.Remove(node.State);
             return node;
         }
 
-        public bool ContainsState(TState state)
+        public bool ContainsState(PandemicGame state)
         {
             return _states.Contains(state);
         }
