@@ -6,20 +6,15 @@ namespace pandemic.agents.GreedyBfs
 {
     public class GreedyBestFirstSearch : BestFirstSearch
     {
-        private readonly Func<PandemicGame, int> _heuristic;
-
-        public GreedyBestFirstSearch(
-            PandemicSearchProblem problem,
-            Func<PandemicGame, int> heuristic) : base(problem)
+        public GreedyBestFirstSearch(PandemicSearchProblem problem) : base(problem)
         {
-            _heuristic = heuristic;
             var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
             Frontier.Push(root);
         }
 
         protected override double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node)
         {
-            return _heuristic(node.State);
+            return -GameEvaluator.Evaluate(node.State);
         }
     }
 

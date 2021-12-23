@@ -17,7 +17,7 @@ namespace pandemic.agents.test
             var game = ANewGame();
             var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
 
-            var bfs = new GreedyBestFirstSearch(problem, state => -GameEvaluator.Evaluate(state));
+            var bfs = new GreedyBestFirstSearch(problem);
 
             bfs.Step();
         }
@@ -35,7 +35,7 @@ namespace pandemic.agents.test
             };
             var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
 
-            var bfs = new GreedyBestFirstSearch(problem, state => -GameEvaluator.Evaluate(state));
+            var bfs = new GreedyBestFirstSearch(problem);
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step(); 
@@ -62,7 +62,7 @@ namespace pandemic.agents.test
             };
             var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
 
-            var bfs = new GreedyBestFirstSearch(problem, state => -GameEvaluator.Evaluate(state));
+            var bfs = new GreedyBestFirstSearch(problem);
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();
@@ -100,7 +100,7 @@ namespace pandemic.agents.test
             };
             var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
 
-            var bfs = new GreedyBestFirstSearch(problem, state => -GameEvaluator.Evaluate(state));
+            var bfs = new GreedyBestFirstSearch(problem);
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();
