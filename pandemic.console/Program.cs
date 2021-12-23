@@ -13,13 +13,15 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // SingleGame.PlayGameAndPrintPlaythrough();
-            NumberOfPossibleGamesEstimator.Estimate();
+            // NumberOfPossibleGamesEstimator.Estimate();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
             // PlayInfiniteMctsGames();
             // RandomPlaythroughDrawer.DoIt();
             // DfsDrawer.DrawSearch(CreateNewGame());
             // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
+            // BfsRunner.Run();
+            BfsRunner.Draw(500);
         }
 
         private static PandemicGame CreateNewGame()
