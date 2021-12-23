@@ -21,7 +21,7 @@ namespace pandemic.console
             // DfsDrawer.DrawSearch(CreateNewGame());
             // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
             // BfsRunner.Run();
-            BfsRunner.Draw(100);
+            BfsRunner.Draw(300);
         }
 
         private static PandemicGame CreateNewGame()

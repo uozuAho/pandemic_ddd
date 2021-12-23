@@ -1,5 +1,6 @@
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Values;
 
 namespace pandemic.agents.GreedyBfs
 {
@@ -27,13 +28,29 @@ namespace pandemic.agents.GreedyBfs
                 .GroupBy(c => game.Board.City(c.Name).Colour)
                 .Sum(_ => 100);
 
-            // todo: cards of same colour in hand
+            score += game.Players.Select(p => p.Hand).Sum(PlayerHandScore);
 
             // bad stuff -----------------------
             // outbreaks are bad
             score -= game.OutbreakCounter * 100;
 
             return score;
+        }
+
+        public static int PlayerHandScore(PlayerHand hand)
+        {
+            // more cards of same colour = good
+            //
+            // each extra card of the same colour gains more points:
+            // 1 blue = 0
+            // 2 blue = 1 (0 + 1)
+            // 3 blue = 3 (0 + 1 + 2)
+            // 4 blue = 6 (0 + 1 + 2 + 3)
+            // = n(n-1)/2
+            return hand.CityCards
+                .GroupBy(c => c.City.Colour)
+                .Select(g => g.Count())
+                .Sum(n => n * (n - 1) / 2);
         }
     }
 }
