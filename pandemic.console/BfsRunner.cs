@@ -92,7 +92,7 @@ namespace pandemic.console
                 .Select(c => c.Name));
 
             var sb = new StringBuilder();
-            sb.Append($"Value: {nodeValue}\\n");
+            sb.Append($"val: {nodeValue}\\n");
             if (cured.Length > 1) sb.Append($"Cured: {cured}\\n");
             sb.Append($"Stations: {researchStations}\\n");
             sb.Append($"{players}");
@@ -102,11 +102,11 @@ namespace pandemic.console
 
         private static string PlayerText(Player player)
         {
-            var counts = string.Join(", ", player.Hand.CityCards
+            var counts = string.Join(",", player.Hand.CityCards
                 .GroupBy(c => c.City.Colour)
-                .Select(g => $"{g.Key}: {g.Count()}"));
+                .Select(g => $"{g.Key.ToString().First()}:{g.Count()}"));
 
-            return $"{player.Role}:{counts}";
+            return $"p:{counts}";
         }
     }
 
