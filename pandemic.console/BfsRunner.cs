@@ -20,7 +20,7 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
             var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
-            var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
+            var searcher = new GreedyBestFirstSearch(
                 searchProblem, state => -GameEvaluator.Evaluate(state));
 
             Console.WriteLine("Searching...");
@@ -48,7 +48,7 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
             var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
-            var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
+            var searcher = new GreedyBestFirstSearch(
                 searchProblem, state => -GameEvaluator.Evaluate(state));
 
             Console.WriteLine("Searching...");

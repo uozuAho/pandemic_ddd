@@ -1,25 +1,23 @@
 using System;
 using System.Collections.Generic;
+using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs
 {
-    public class GreedyBestFirstSearch<TState, TAction> : BestFirstSearch<TState, TAction>
+    public class GreedyBestFirstSearch : BestFirstSearch<PandemicGame, PlayerCommand>
     {
-        private readonly Func<TState, int> _heuristic;
+        private readonly Func<PandemicGame, int> _heuristic;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="problem"></param>
-        /// <param name="heuristic">An estimate of the cost to reach the goal from the given state</param>
-        public GreedyBestFirstSearch(ISearchProblem<TState, TAction> problem, Func<TState, int> heuristic) : base(problem)
+        public GreedyBestFirstSearch(
+            PandemicSearchProblem problem,
+            Func<PandemicGame, int> heuristic) : base(problem)
         {
             _heuristic = heuristic;
-            var root = new SearchNode<TState, TAction>(problem.InitialState, null, default(TAction), 0);
+            var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
             Frontier.Push(root);
         }
 
-        protected override double PriorityFunc(SearchNode<TState, TAction> node)
+        protected override double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node)
         {
             return _heuristic(node.State);
         }
