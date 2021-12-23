@@ -116,9 +116,9 @@ namespace pandemic.agents.GreedyBfs
             return _explored.ContainsKey(state);
         }
 
-        public void Step()
+        public SearchNode<TState, TAction>? Step()
         {
-            if (IsFinished) return;
+            if (IsFinished) return null;
 
             SearchNode<TState, TAction> node;
 
@@ -127,7 +127,7 @@ namespace pandemic.agents.GreedyBfs
                 if (Frontier.IsEmpty())
                 {
                     IsFinished = true;
-                    return;
+                    return null;
                 }
                 node = Frontier.Pop();
             } while (_explored.ContainsKey(node.State));
@@ -156,6 +156,8 @@ namespace pandemic.agents.GreedyBfs
                     Frontier.Push(child);
                 }
             }
+
+            return node;
         }
 
         public void Solve()
@@ -190,7 +192,7 @@ namespace pandemic.agents.GreedyBfs
         /// <summary>
         /// Previous state
         /// </summary>
-        public SearchNode<TState, TAction> Parent { get; }
+        public SearchNode<TState, TAction>? Parent { get; }
 
         /// Path cost at this node = parent.path_cost + step_cost(parent, action) */
         public readonly double PathCost;

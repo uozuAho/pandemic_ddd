@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
+using pandemic.drawing;
 using pandemic.Values;
 
 namespace pandemic.console
@@ -36,6 +37,52 @@ namespace pandemic.console
                     sw.Restart();
                 }
             }
+        }
+
+        public static void Draw(int numNodes)
+        {
+            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Heroic,
+                Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
+            });
+            var searchProblem = new PandemicSearchProblem(game);
+            var evaluator = new GameEvaluator();
+            var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
+                searchProblem, state => -evaluator.Evaluate(state));
+
+            Console.WriteLine("Searching...");
+            var nodesSearched = new List<SearchNode<PandemicGame, PlayerCommand>>();
+
+            for (var i = 0; i < numNodes && !searcher.IsFinished; i++)
+            {
+                var currentNode = searcher.Step();
+                if (currentNode != null) nodesSearched.Add(currentNode);
+            }
+
+            var graph = ToDrawerGraph(nodesSearched);
+            CsDotDrawer.FromGraph(graph).SaveToFile("bfs.dot");
+        }
+
+        private static DrawerGraph ToDrawerGraph(List<SearchNode<PandemicGame, PlayerCommand>> nodes)
+        {
+            var evaluator = new GameEvaluator();
+            var graph = new DrawerGraph();
+            var visitedNodes = new Dictionary<SearchNode<PandemicGame, PlayerCommand>, DrawerNode>();
+
+            foreach (var node in nodes)
+            {
+                var nodeValue = evaluator.Evaluate(node.State);
+                var drawerNode = graph.CreateNode(label: nodeValue.ToString());
+                visitedNodes[node] = drawerNode;
+                if (node.Parent != null && visitedNodes.ContainsKey(node.Parent))
+                {
+                    var parent = visitedNodes[node.Parent];
+                    graph.CreateEdge(parent, drawerNode, node.Action.ToString());
+                }
+            }
+
+            return graph;
         }
     }
 
