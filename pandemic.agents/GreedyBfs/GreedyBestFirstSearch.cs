@@ -18,7 +18,7 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public abstract class BestFirstSearch : GenericSearch<PandemicGame, PlayerCommand>
+    public abstract class BestFirstSearch : GenericSearch
     {
         protected BestFirstSearch(PandemicSearchProblem problem) : base(problem)
         {
@@ -60,31 +60,31 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public abstract class GenericSearch<TState, TAction>
+    public abstract class GenericSearch
     {
         public bool IsFinished { get; private set; }
         public bool IsSolved { get; private set; }
-        public TState CurrentState { get; private set; }
+        public PandemicGame CurrentState { get; private set; }
 
-        public ISearchFrontier<TState, TAction> Frontier;
+        public ISearchFrontier<PandemicGame, PlayerCommand> Frontier;
 
-        private readonly ISearchProblem<TState, TAction> _problem;
-        private readonly Dictionary<TState, SearchNode<TState, TAction>> _explored;
+        private readonly ISearchProblem<PandemicGame, PlayerCommand> _problem;
+        private readonly Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>> _explored;
 
-        internal GenericSearch(ISearchProblem<TState, TAction> problem)
+        internal GenericSearch(ISearchProblem<PandemicGame, PlayerCommand> problem)
         {
             _problem = problem;
             CurrentState = problem.InitialState;
-            _explored = new Dictionary<TState, SearchNode<TState, TAction>>();
+            _explored = new Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>>();
 
             IsFinished = false;
         }
 
-        public IEnumerable<TAction> GetSolutionTo(TState state)
+        public IEnumerable<PlayerCommand> GetSolutionTo(PandemicGame state)
         {
             if (!_explored.ContainsKey(state)) throw new ArgumentException("cannot get solution to unexplored state");
 
-            var actions = new List<TAction>();
+            var actions = new List<PlayerCommand>();
             var currentNode = _explored[state];
             while (currentNode != null && currentNode.Action != null)
             {
@@ -96,23 +96,23 @@ namespace pandemic.agents.GreedyBfs
             return actions;
         }
 
-        public IEnumerable<TAction> GetSolution()
+        public IEnumerable<PlayerCommand> GetSolution()
         {
             if (!IsSolved) throw new InvalidOperationException("No solution!");
 
             return GetSolutionTo(CurrentState);
         }
 
-        public bool IsExplored(TState state)
+        public bool IsExplored(PandemicGame state)
         {
             return _explored.ContainsKey(state);
         }
 
-        public SearchNode<TState, TAction>? Step()
+        public SearchNode<PandemicGame, PlayerCommand>? Step()
         {
             if (IsFinished) return null;
 
-            SearchNode<TState, TAction> node;
+            SearchNode<PandemicGame, PlayerCommand> node;
 
             do
             {
@@ -131,7 +131,7 @@ namespace pandemic.agents.GreedyBfs
             {
                 var childState = _problem.DoAction(node.State, action);
                 var childCost = node.PathCost + _problem.PathCost(node.State, action);
-                var child = new SearchNode<TState, TAction>(childState, node, action, childCost);
+                var child = new SearchNode<PandemicGame, PlayerCommand>(childState, node, action, childCost);
 
                 if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState)) continue;
 
