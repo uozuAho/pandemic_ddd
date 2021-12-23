@@ -4,45 +4,7 @@ using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs
 {
-    public class GreedyBestFirstSearch : GenericSearch
-    {
-        public GreedyBestFirstSearch(PandemicSearchProblem problem) : base(problem)
-        {
-            var nodeComparer = new SearchNodeComparer(CompareStates);
-            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
-            var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
-            Frontier.Push(root);
-        }
-
-        private int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
-        {
-            var priorityA = (double)-GameEvaluator.Evaluate(a.State);
-            var priorityB = (double)-GameEvaluator.Evaluate(b.State);
-            return priorityA < priorityB ? -1 : priorityA > priorityB ? 1 : 0;
-        }
-
-        private class SearchNodeComparer : IComparer<SearchNode<PandemicGame, PlayerCommand>>
-        {
-            private readonly Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> _compare;
-
-            public SearchNodeComparer(Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> compare)
-            {
-                _compare = compare;
-            }
-
-            public int Compare(
-                SearchNode<PandemicGame, PlayerCommand>? x,
-                SearchNode<PandemicGame, PlayerCommand>? y)
-            {
-                if (x == null) throw new NullReferenceException(nameof(x));
-                if (y == null) throw new NullReferenceException(nameof(y));
-
-                return _compare(x, y);
-            }
-        }
-    }
-
-    public abstract class GenericSearch
+    public class GreedyBestFirstSearch
     {
         public bool IsFinished { get; private set; }
         public bool IsSolved { get; private set; }
@@ -53,13 +15,18 @@ namespace pandemic.agents.GreedyBfs
         private readonly ISearchProblem<PandemicGame, PlayerCommand> _problem;
         private readonly Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>> _explored;
 
-        internal GenericSearch(ISearchProblem<PandemicGame, PlayerCommand> problem)
+        public GreedyBestFirstSearch(ISearchProblem<PandemicGame, PlayerCommand> problem)
         {
             _problem = problem;
             CurrentState = problem.InitialState;
             _explored = new Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>>();
 
             IsFinished = false;
+
+            var nodeComparer = new SearchNodeComparer(CompareStates);
+            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
+            var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
+            Frontier.Push(root);
         }
 
         public IEnumerable<PlayerCommand> GetSolutionTo(PandemicGame state)
@@ -140,6 +107,33 @@ namespace pandemic.agents.GreedyBfs
             {
                 Step();
             }
+        }
+
+        protected class SearchNodeComparer : IComparer<SearchNode<PandemicGame, PlayerCommand>>
+        {
+            private readonly Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> _compare;
+
+            public SearchNodeComparer(Func<SearchNode<PandemicGame, PlayerCommand>, SearchNode<PandemicGame, PlayerCommand>, int> compare)
+            {
+                _compare = compare;
+            }
+
+            public int Compare(
+                SearchNode<PandemicGame, PlayerCommand>? x,
+                SearchNode<PandemicGame, PlayerCommand>? y)
+            {
+                if (x == null) throw new NullReferenceException(nameof(x));
+                if (y == null) throw new NullReferenceException(nameof(y));
+
+                return _compare(x, y);
+            }
+        }
+
+        protected int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
+        {
+            var priorityA = (double)-GameEvaluator.Evaluate(a.State);
+            var priorityB = (double)-GameEvaluator.Evaluate(b.State);
+            return priorityA < priorityB ? -1 : priorityA > priorityB ? 1 : 0;
         }
     }
 
