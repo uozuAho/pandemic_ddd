@@ -19,7 +19,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game);
+            var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
             var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
                 searchProblem, state => -GameEvaluator.Evaluate(state));
 
@@ -47,7 +47,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game);
+            var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
             var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
                 searchProblem, state => -GameEvaluator.Evaluate(state));
 
