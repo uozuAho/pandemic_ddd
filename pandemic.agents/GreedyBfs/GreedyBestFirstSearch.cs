@@ -10,7 +10,7 @@ namespace pandemic.agents.GreedyBfs
         public bool IsSolved { get; private set; }
         public PandemicGame CurrentState { get; private set; }
 
-        public ISearchFrontier<PandemicGame, PlayerCommand> Frontier;
+        public MinPriorityFrontier<PandemicGame, PlayerCommand> Frontier;
 
         private readonly ISearchProblem<PandemicGame, PlayerCommand> _problem;
         private readonly Dictionary<PandemicGame, SearchNode<PandemicGame, PlayerCommand>> _explored;
@@ -137,15 +137,6 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public interface ISearchFrontier<TState, TAction>
-    {
-        void Push(SearchNode<TState, TAction> node);
-        SearchNode<TState, TAction> Pop();
-        bool ContainsState(TState state);
-        bool IsEmpty();
-        int Size { get; }
-    }
-
     public class SearchNode<TState, TAction>
     {
         /// <summary>
@@ -200,7 +191,7 @@ namespace pandemic.agents.GreedyBfs
     /// <summary>
     /// Search nodes are popped in minimum-priority order
     /// </summary>
-    public class MinPriorityFrontier<TState, TAction> : ISearchFrontier<TState, TAction>
+    public class MinPriorityFrontier<TState, TAction>
     {
         private readonly MinPriorityQueue<SearchNode<TState, TAction>> _queue;
         private readonly HashSet<TState> _states;
