@@ -25,7 +25,8 @@ namespace pandemic.agents.GreedyBfs
 
             var nodeComparer = new SearchNodeComparer(CompareStates);
             Frontier = new MinPriorityFrontier(nodeComparer);
-            var root = new SearchNode(problem.InitialState, null, default, 0);
+            var root = new SearchNode(problem.InitialState, null, default, 0,
+                GameEvaluator.Evaluate(problem.InitialState));
             Frontier.Push(root);
         }
 
@@ -52,7 +53,7 @@ namespace pandemic.agents.GreedyBfs
             {
                 var childState = _problem.DoAction(node.State, action);
                 var childCost = node.PathCost + _problem.PathCost(node.State, action);
-                var child = new SearchNode(childState, node, action, childCost);
+                var child = new SearchNode(childState, node, action, childCost, GameEvaluator.Evaluate(childState));
 
                 if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState)) continue;
 
@@ -111,7 +112,8 @@ namespace pandemic.agents.GreedyBfs
         PandemicGame State,
         SearchNode? Parent,
         PlayerCommand? Action,
-        double PathCost);
+        double PathCost,
+        int Score);
 
     /// <summary>
     /// Search nodes are popped in minimum-priority order
