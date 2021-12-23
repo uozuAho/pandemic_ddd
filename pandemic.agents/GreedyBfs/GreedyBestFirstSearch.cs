@@ -13,6 +13,7 @@ namespace pandemic.agents.GreedyBfs
     /// - take more game aspects into account in GameEvaluator, eg.
     ///     - prefer earlier cures
     ///     - count cards, don't explore states that can't win
+    ///     - prefer being near/on research stations
     /// - visualise how this agent is getting stuck. Is it searching where
     ///   it shouldn't be?
     /// </summary>
