@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
 
-namespace pandemic.console;
+namespace pandemic.agents.GreedyBfs;
 
 public class PandemicSearchProblem : ISearchProblem<PandemicGame, PlayerCommand>
 {
