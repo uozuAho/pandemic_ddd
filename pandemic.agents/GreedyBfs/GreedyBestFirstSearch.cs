@@ -101,30 +101,17 @@ namespace pandemic.agents.GreedyBfs
         }
     }
 
-    public class SearchNode
-    {
-        public PandemicGame State { get; }
-        public SearchNode? Parent { get; }
-
-        /// <summary>
-        /// Action that resulted in this state. Arbitrary value if parent is null.
-        /// </summary>
-        public PlayerCommand? Action { get; }
-
-        /// Path cost at this node = parent.path_cost + step_cost(parent, action) */
-        public readonly double PathCost;
-
-        public SearchNode(PandemicGame state,
-            SearchNode? parent,
-            PlayerCommand? action,
-            double pathCost)
-        {
-            State = state;
-            Parent = parent;
-            Action = action;
-            PathCost = pathCost;
-        }
-    }
+    /// <summary>
+    /// </summary>
+    /// <param name="State"></param>
+    /// <param name="Parent"></param>
+    /// <param name="Action">Action that resulted in this state. Arbitrary value if parent is null</param>
+    /// <param name="PathCost">Path cost at this node = parent.path_cost + step_cost(parent, action)</param>
+    public record SearchNode(
+        PandemicGame State,
+        SearchNode? Parent,
+        PlayerCommand? Action,
+        double PathCost);
 
     /// <summary>
     /// Search nodes are popped in minimum-priority order
