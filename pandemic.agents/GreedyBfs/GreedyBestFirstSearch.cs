@@ -270,9 +270,7 @@ namespace pandemic.agents.GreedyBfs
 
         private void Swap(int idxA, int idxB)
         {
-            var temp = _buf[idxA];
-            _buf[idxA] = _buf[idxB];
-            _buf[idxB] = temp;
+            (_buf[idxA], _buf[idxB]) = (_buf[idxB], _buf[idxA]);
         }
     }
 }
