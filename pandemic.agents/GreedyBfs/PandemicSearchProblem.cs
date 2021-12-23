@@ -8,12 +8,14 @@ public class PandemicSearchProblem : ISearchProblem<PandemicGame, PlayerCommand>
 {
     public PandemicGame InitialState { get; }
 
-    private readonly PlayerCommandGenerator _commandGenerator;
+    private readonly PlayerCommandGeneratorFast _commandGenerator;
 
-    public PandemicSearchProblem(PandemicGame initialState)
+    public PandemicSearchProblem(
+        PandemicGame initialState,
+        PlayerCommandGeneratorFast commandGenerator)
     {
         InitialState = initialState;
-        _commandGenerator = new PlayerCommandGenerator();
+        _commandGenerator = commandGenerator;
     }
 
     public IEnumerable<PlayerCommand> GetActions(PandemicGame state)
