@@ -4,33 +4,15 @@ using pandemic.Aggregates;
 
 namespace pandemic.agents.GreedyBfs
 {
-    public class GreedyBestFirstSearch : BestFirstSearch
+    public class GreedyBestFirstSearch : GenericSearch
     {
         public GreedyBestFirstSearch(PandemicSearchProblem problem) : base(problem)
         {
+            var nodeComparer = new SearchNodeComparer(CompareStates);
+            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
             var root = new SearchNode<PandemicGame, PlayerCommand>(problem.InitialState, null, default, 0);
             Frontier.Push(root);
         }
-
-        protected override double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node)
-        {
-            return -GameEvaluator.Evaluate(node.State);
-        }
-    }
-
-    public abstract class BestFirstSearch : GenericSearch
-    {
-        protected BestFirstSearch(PandemicSearchProblem problem) : base(problem)
-        {
-            var nodeComparer = new SearchNodeComparer(CompareStates);
-            Frontier = new MinPriorityFrontier<PandemicGame, PlayerCommand>(nodeComparer);
-        }
-
-        /// <summary>
-        /// The priority function determines in what order search nodes should be expanded.
-        /// In the case of this best first search, nodes are expanded in lowest-value order.
-        /// </summary>
-        protected abstract double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node);
 
         private int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
         {
@@ -57,6 +39,11 @@ namespace pandemic.agents.GreedyBfs
 
                 return _compare(x, y);
             }
+        }
+
+        protected virtual double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node)
+        {
+            return -GameEvaluator.Evaluate(node.State);
         }
     }
 
