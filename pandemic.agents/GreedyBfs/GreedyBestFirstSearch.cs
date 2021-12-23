@@ -16,8 +16,8 @@ namespace pandemic.agents.GreedyBfs
 
         private int CompareStates(SearchNode<PandemicGame, PlayerCommand> a, SearchNode<PandemicGame, PlayerCommand> b)
         {
-            var priorityA = PriorityFunc(a);
-            var priorityB = PriorityFunc(b);
+            var priorityA = (double)-GameEvaluator.Evaluate(a.State);
+            var priorityB = (double)-GameEvaluator.Evaluate(b.State);
             return priorityA < priorityB ? -1 : priorityA > priorityB ? 1 : 0;
         }
 
@@ -39,11 +39,6 @@ namespace pandemic.agents.GreedyBfs
 
                 return _compare(x, y);
             }
-        }
-
-        protected virtual double PriorityFunc(SearchNode<PandemicGame, PlayerCommand> node)
-        {
-            return -GameEvaluator.Evaluate(node.State);
         }
     }
 
