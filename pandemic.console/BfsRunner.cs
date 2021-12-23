@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
 using pandemic.drawing;
@@ -18,9 +20,8 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
             var searchProblem = new PandemicSearchProblem(game);
-            var evaluator = new GameEvaluator();
             var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
-                searchProblem, state => -evaluator.Evaluate(state));
+                searchProblem, state => -GameEvaluator.Evaluate(state));
 
             Console.WriteLine("Searching...");
             var steps = 0;
@@ -47,9 +48,8 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
             var searchProblem = new PandemicSearchProblem(game);
-            var evaluator = new GameEvaluator();
             var searcher = new GreedyBestFirstSearch<PandemicGame, PlayerCommand>(
-                searchProblem, state => -evaluator.Evaluate(state));
+                searchProblem, state => -GameEvaluator.Evaluate(state));
 
             Console.WriteLine("Searching...");
             var nodesSearched = new List<SearchNode<PandemicGame, PlayerCommand>>();
@@ -66,14 +66,12 @@ namespace pandemic.console
 
         private static DrawerGraph ToDrawerGraph(List<SearchNode<PandemicGame, PlayerCommand>> nodes)
         {
-            var evaluator = new GameEvaluator();
             var graph = new DrawerGraph();
             var visitedNodes = new Dictionary<SearchNode<PandemicGame, PlayerCommand>, DrawerNode>();
 
             foreach (var node in nodes)
             {
-                var nodeValue = evaluator.Evaluate(node.State);
-                var drawerNode = graph.CreateNode(label: nodeValue.ToString());
+                var drawerNode = graph.CreateNode(NodeLabel(node.State));
                 visitedNodes[node] = drawerNode;
                 if (node.Parent != null && visitedNodes.ContainsKey(node.Parent))
                 {
@@ -83,6 +81,32 @@ namespace pandemic.console
             }
 
             return graph;
+        }
+
+        private static string NodeLabel(PandemicGame state)
+        {
+            var nodeValue = GameEvaluator.Evaluate(state);
+            var cured = string.Join(",", state.CureDiscovered.Where(c => c.Value).Select(c => c.Key));
+            var players = string.Join("\\n", state.Players.Select(PlayerText));
+            var researchStations = string.Join(",", state.Cities.Where(c => c.HasResearchStation)
+                .Select(c => c.Name));
+
+            var sb = new StringBuilder();
+            sb.Append($"Value: {nodeValue}\\n");
+            if (cured.Length > 1) sb.Append($"Cured: {cured}\\n");
+            sb.Append($"Stations: {researchStations}\\n");
+            sb.Append($"{players}");
+
+            return sb.ToString();
+        }
+
+        private static string PlayerText(Player player)
+        {
+            var counts = string.Join(", ", player.Hand.CityCards
+                .GroupBy(c => c.City.Colour)
+                .Select(g => $"{g.Key}: {g.Count()}"));
+
+            return $"{player.Role}:{counts}";
         }
     }
 
