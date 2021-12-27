@@ -41,6 +41,19 @@ namespace pandemic.console
                     sw.Restart();
                 }
             }
+
+            Console.WriteLine("Solution:");
+            var currentState = game;
+            var asdf = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            var commands = searcher.GetSolution();
+            foreach (var command in commands)
+            {
+                Console.WriteLine(command.ToString());
+                currentState = asdf.DoAction(currentState, command);
+            }
+            Console.WriteLine();
+            Console.WriteLine("Final state:");
+            Console.WriteLine(currentState);
         }
 
         public static void Draw(int numNodes)
