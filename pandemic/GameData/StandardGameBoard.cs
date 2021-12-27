@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Values;
@@ -26,6 +27,28 @@ namespace pandemic.GameData
         }
 
         public readonly Dictionary<string, List<string>> AdjacentCities = CreateAdjacencyLookup();
+
+        public int DriveFerryDistance(string city1, string city2)
+        {
+            // bfs
+            var searched = new HashSet<string>();
+            var queue = new Queue<(string city, int distance)>();
+            queue.Enqueue((city1, 0));
+
+            while (queue.Count > 0)
+            {
+                var (currentCity, distance) = queue.Dequeue();
+                if (currentCity == city2) return distance;
+                searched.Add(currentCity);
+                foreach (var adj in AdjacentCities[currentCity])
+                {
+                    if (!searched.Contains(adj))
+                        queue.Enqueue((adj, distance + 1));
+                }
+            }
+
+            throw new InvalidOperationException("shouldn't get here");
+        }
 
         private static Dictionary<string, List<string>> CreateAdjacencyLookup()
         {
@@ -202,11 +225,6 @@ namespace pandemic.GameData
             }
 
             return lookup;
-        }
-
-        public int DriveFerryDistance(string city1, string city2)
-        {
-            return 1;
         }
     }
 }
