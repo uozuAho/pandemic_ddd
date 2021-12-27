@@ -190,7 +190,7 @@ namespace pandemic.GameData
 
         private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
 
-        private static Dictionary<string, int> _cityIdxLookup = CreateCityIdxLookup();
+        private static readonly Dictionary<string, int> _cityIdxLookup = CreateCityIdxLookup();
 
         private static Dictionary<string, int> CreateCityIdxLookup()
         {
@@ -202,6 +202,11 @@ namespace pandemic.GameData
             }
 
             return lookup;
+        }
+
+        public int DriveFerryDistance(string city1, string city2)
+        {
+            return 1;
         }
     }
 }
