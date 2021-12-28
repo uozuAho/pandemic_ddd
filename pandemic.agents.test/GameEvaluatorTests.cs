@@ -1,6 +1,8 @@
+using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
+using pandemic.Aggregates;
 using pandemic.GameData;
 using pandemic.Values;
 
@@ -20,7 +22,27 @@ namespace pandemic.agents.test
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(board.City("Atlanta")), numCards));
 
-            Assert.AreEqual(expectedScore, GameEvaluator.PlayerHandScore(hand));
+            var score = GameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand);
+            Assert.AreEqual(expectedScore, score);
+        }
+
+        [Test]
+        public void Cards_of_cured_colour_are_worth_zero()
+        {
+            var board = new StandardGameBoard();
+            var game = PandemicGame.CreateUninitialisedGame();
+            game = game with
+            {
+                // blue is cured
+                CureDiscovered = ColourExtensions.AllColours
+                    .ToImmutableDictionary(c => c, c => c == Colour.Blue)
+            };
+            var hand = new PlayerHand(Enumerable
+                .Repeat(new PlayerCityCard(board.City("Atlanta")), 5));
+
+            // assert
+            var score = GameEvaluator.PlayerHandScore(game, hand);
+            Assert.AreEqual(0, score);
         }
     }
 }

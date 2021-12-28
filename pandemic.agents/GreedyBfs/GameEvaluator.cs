@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using pandemic.Aggregates;
 using pandemic.Values;
@@ -30,7 +29,9 @@ namespace pandemic.agents.GreedyBfs
                 .GroupBy(c => game.Board.City(c.Name).Colour)
                 .Sum(_ => 100);
 
-            score += game.Players.Select(p => p.Hand).Sum(PlayerHandScore);
+            score += game.Players
+                .Select(p => p.Hand)
+                .Sum(h => PlayerHandScore(game, h));
 
             // bad stuff -----------------------
             // outbreaks are bad
@@ -45,9 +46,9 @@ namespace pandemic.agents.GreedyBfs
             return score;
         }
 
-        public static int PlayerHandScore(PlayerHand hand)
+        public static int PlayerHandScore(PandemicGame pandemicGame, PlayerHand hand)
         {
-            // more cards of same colour = good
+            // more cards of same colour = good, where colour is not cured
             //
             // each extra card of the same colour gains more points:
             // 1 blue = 0
@@ -55,9 +56,12 @@ namespace pandemic.agents.GreedyBfs
             // 3 blue = 3 (0 + 1 + 2)
             // 4 blue = 6 (0 + 1 + 2 + 3)
             // = n(n-1)/2
-            // todo: colours only desirable while disease is not cured
+
+            var cured = pandemicGame.CureDiscovered.Where(c => c.Value).Select(c => c.Key);
+
             return hand.CityCards
                 .GroupBy(c => c.City.Colour)
+                .Where(g => !cured.Contains(g.Key))
                 .Select(g => g.Count())
                 .Sum(n => n * (n - 1) / 2);
         }
