@@ -6,7 +6,7 @@ namespace pandemic
 {
     public class PandemicGameStringRenderer
     {
-        public static string ToString(PandemicGame game)
+        public static string FullState(PandemicGame game)
         {
             var sb = new StringBuilder();
             if (game.IsWon) sb.AppendLine("Game won!");
@@ -28,6 +28,27 @@ namespace pandemic
                 {
                     sb.AppendLine($"  {city.Name.PadRight(12)}: {string.Join(' ', city.Cubes)}");
                 }
+            }
+
+            return sb.ToString();
+        }
+
+        public static string ShortState(PandemicGame game)
+        {
+            var sb = new StringBuilder();
+            if (game.IsWon) sb.AppendLine("Game won!");
+            else if (game.IsLost) sb.AppendLine("Game lost. " + game.LossReason);
+            sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
+            sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
+            sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
+            sb.AppendLine($"cured: {string.Join(' ', game.CureDiscovered)}");
+            foreach (var player in game.Players)
+            {
+                var colourCounts = string.Join(",", player.Hand.CityCards
+                    .GroupBy(c => c.City.Colour)
+                    .Select(g => $"{g.Key}:{g.Count()}"));
+
+                sb.AppendLine($"{player.Role}:{player.Location}:{colourCounts}");
             }
 
             return sb.ToString();
