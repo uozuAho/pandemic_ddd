@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.test.Utils;
 using pandemic.Values;
@@ -14,26 +15,28 @@ namespace pandemic.test
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void State_built_from_events_is_same_as_final_state(NewGameOptions options)
         {
+            var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             PandemicGame game;
             List<IEvent> events;
             (game, events) = PandemicGame.CreateNewGame(options);
-            var state = new PandemicSpielGameState(game);
 
-            for (var i = 0; i < 1000 && !state.IsTerminal; i++)
+            for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var legalActions = state.LegalActions();
+                var legalActions = commandGenerator.LegalCommands(game).ToList();
                 if (!legalActions.Any())
                 {
-                    Assert.Fail($"No legal actions! State: \n\n{state}\n\n Events:\n{string.Join('\n', events)}");
+                    Assert.Fail($"No legal actions! State: \n\n{game}\n\n Events:\n{string.Join('\n', events)}");
                 }
-                var action = RandomChoice(state.LegalActions(), random);
-                events.AddRange(state.ApplyAction(action));
+                var action = RandomChoice(legalActions, random);
+                var (updatedGame, newEvents) = game.Do(action);
+                game = updatedGame;
+                events.AddRange(newEvents);
             }
 
             var builtFromEvents = PandemicGame.FromEvents(events);
 
-            Assert.IsTrue(state.Game.IsSameStateAs(builtFromEvents));
+            Assert.IsTrue(game.IsSameStateAs(builtFromEvents));
         }
 
         private static T RandomChoice<T>(IEnumerable<T> items, Random random)

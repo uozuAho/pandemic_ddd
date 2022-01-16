@@ -9,7 +9,7 @@ class WinFinder
 {
     public static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
     {
-        var commands = solver.CommandsToWin(new PandemicSpielGameState(game)).ToList();
+        var commands = solver.CommandsToWin(game).ToList();
 
         if (commands.Any())
         {
