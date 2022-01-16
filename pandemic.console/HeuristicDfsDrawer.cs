@@ -12,11 +12,11 @@ namespace pandemic.console
     {
         private const int NodeLimit = 300;
         private static readonly Random _rng = new();
+        private static readonly PlayerCommandGenerator CommandGenerator = new();
 
         public static void DrawSearch(PandemicGame game)
         {
-            var state = new PandemicSpielGameState(game);
-            var root = new SearchNode(state, null, null);
+            var root = new SearchNode(game, null, null);
             var tracker = new NodeTracker();
 
             Dfs(root, tracker);
@@ -31,10 +31,10 @@ namespace pandemic.console
         private static void Dfs(SearchNode node, NodeTracker nodeTracker)
         {
             if (nodeTracker.TotalNumNodes == NodeLimit) return;
-            if (!DfsWithHeuristicsAgent.CanWin(node.State.Game)) return;
+            if (!DfsWithHeuristicsAgent.CanWin(node.State)) return;
 
-            var legalActions = node.State.LegalActions()
-                .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State.Game))
+            var legalActions = CommandGenerator.LegalCommands(node.State)
+                .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .ThenBy(_ => _rng.Next()).ToList();
 
@@ -42,8 +42,7 @@ namespace pandemic.console
             {
                 if (nodeTracker.TotalNumNodes == NodeLimit) return;
 
-                var childState = new PandemicSpielGameState(node.State.Game);
-                childState.ApplyAction(action);
+                var (childState, _) = node.State.Do(action);
                 var child = new SearchNode(childState, action, node);
                 node.Children.Add(child);
                 nodeTracker.TotalNumNodes++;
@@ -53,17 +52,17 @@ namespace pandemic.console
 
         private static void ExpandGraph(DrawerGraph graph, SearchNode node, DrawerNode drawerNode)
         {
-            if (node.State.IsLoss)
+            if (node.State.IsLost)
             {
-                drawerNode.Label = node.State.Game.LossReason;
+                drawerNode.Label = node.State.LossReason;
             }
-            else if (!DfsWithHeuristicsAgent.CanWin(node.State.Game))
+            else if (!DfsWithHeuristicsAgent.CanWin(node.State))
             {
-                drawerNode.Label = DfsWithHeuristicsAgent.ReasonGameCannotBeWon(node.State.Game);
+                drawerNode.Label = DfsWithHeuristicsAgent.ReasonGameCannotBeWon(node.State);
             }
             else
             {
-                var game = node.State.Game;
+                var game = node.State;
                 var cures = string.Join("", game.CureDiscovered.Select(c => c.Value ? $"{c.Key} " : ""));
                 drawerNode.Label = $"deck: {game.PlayerDrawPile.Count}. Cures: {cures}";
             }
@@ -80,7 +79,7 @@ namespace pandemic.console
         /// Action: command that resulted in State
         /// </summary>
         private record SearchNode(
-            PandemicSpielGameState State,
+            PandemicGame State,
             PlayerCommand? Command,
             SearchNode? Parent
         )
