@@ -39,7 +39,7 @@ namespace pandemic
 
         public PandemicSpielGameState Clone()
         {
-            return new PandemicSpielGameState(Game with { });
+            return new PandemicSpielGameState(Game.Copy());
         }
 
         public override string ToString()
