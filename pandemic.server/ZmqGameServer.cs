@@ -161,23 +161,8 @@ namespace pandemic.server
 
         public PandemicGame ApplyAction(PandemicGame game, PlayerCommand action)
         {
-            switch (action)
-            {
-                case DriveFerryCommand command:
-                    (game, _) = game.DriveOrFerryPlayer(command.Role, command.City);
-                    return game;
-                case DiscardPlayerCardCommand command:
-                    (game, _) = game.DiscardPlayerCard(command.Card);
-                    return game;
-                case BuildResearchStationCommand command:
-                    (game, _) = game.BuildResearchStation(command.City);
-                    return game;
-                case DiscoverCureCommand command:
-                    (game, _) = game.DiscoverCure(command.Cards);
-                    return game;
-                default:
-                    throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
-            }
+            (game, _) = game.Do(action);
+            return game;
         }
     }
 }
