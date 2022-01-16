@@ -14,7 +14,7 @@ namespace pandemic.server
     public class ZmqGameServer : IDisposable
     {
         private readonly string _url;
-        private readonly PlayerCommandGeneratorFast _commandGenerator = new();
+        private readonly PlayerCommandGenerator _commandGenerator = new();
         private readonly ResponseSocket _server;
 
         public ZmqGameServer(string url)
@@ -153,7 +153,7 @@ namespace pandemic.server
 
         private PandemicGame DoAction(PandemicGame game, int actionIdx)
         {
-            var gen = new PlayerCommandGeneratorFast();
+            var gen = new PlayerCommandGenerator();
             var action = gen.LegalCommands(game).ToList()[actionIdx];
             return ApplyAction(game, action);
         }

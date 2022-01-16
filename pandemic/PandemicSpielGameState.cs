@@ -29,7 +29,7 @@ namespace pandemic
             ? Enumerable.Repeat(-1.0, Game.Players.Count).ToArray()
             : Enumerable.Repeat(0.0, Game.Players.Count).ToArray();
 
-        private readonly PlayerCommandGeneratorFast _commandGenerator = new ();
+        private readonly PlayerCommandGenerator _commandGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
         {
