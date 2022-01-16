@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using pandemic.Aggregates;
+using pandemic.Commands;
 
 namespace pandemic.agents.GreedyBfs;
 
@@ -8,11 +9,11 @@ public class PandemicSearchProblem
 {
     public PandemicGame InitialState { get; }
 
-    private readonly PlayerCommandGeneratorFast _commandGenerator;
+    private readonly PlayerCommandGenerator _commandGenerator;
 
     public PandemicSearchProblem(
         PandemicGame initialState,
-        PlayerCommandGeneratorFast commandGenerator)
+        PlayerCommandGenerator commandGenerator)
     {
         InitialState = initialState;
         _commandGenerator = commandGenerator;

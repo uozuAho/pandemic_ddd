@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.GameData;
 using pandemic.Values;
 
@@ -16,7 +17,7 @@ namespace pandemic.agents.test
         public void Does_step()
         {
             var game = ANewGame();
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -34,7 +35,7 @@ namespace pandemic.agents.test
                     Hand = new PlayerHand(Enumerable.Repeat(new PlayerCityCard(Board.City("Atlanta")), 5))
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -61,7 +62,7 @@ namespace pandemic.agents.test
                     })
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -100,7 +101,7 @@ namespace pandemic.agents.test
                     ActionsRemaining = 0
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
 
             var bfs = new GreedyBestFirstSearch(problem);
 

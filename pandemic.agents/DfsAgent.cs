@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using pandemic.Aggregates;
+using pandemic.Commands;
 
 namespace pandemic.agents
 {
@@ -11,10 +13,11 @@ namespace pandemic.agents
     public class DfsAgent : IPandemicGameSolver
     {
         private static readonly Random _rng = new();
+        private static readonly PlayerCommandGenerator _commandGenerator = new();
 
-        public IEnumerable<PlayerCommand> CommandsToWin(PandemicSpielGameState state)
+        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame game)
         {
-            var root = new SearchNode(state, null, null);
+            var root = new SearchNode(game, null, null);
 
             var diagnostics = Diagnostics.StartNew();
             var win = Hunt(root, 0, diagnostics);
@@ -37,20 +40,19 @@ namespace pandemic.agents
 
         private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
         {
-            if (node.State.IsWin) return node;
+            if (node.State.IsWon) return node;
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
-            if (node.State.IsLoss)
-                diagnostics.Loss(node.State.Game.LossReason);
+            if (node.State.IsLost)
+                diagnostics.Loss(node.State.LossReason);
 
-            var legalActions = node.State.LegalActions()
+            var legalActions = _commandGenerator.LegalCommands(node.State)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .OrderBy(_ => _rng.Next()).ToList();
 
             foreach (var action in legalActions)
             {
-                var childState = new PandemicSpielGameState(node.State.Game);
-                childState.ApplyAction(action);
+                var (childState, _) = node.State.Do(action);
                 var child = new SearchNode(childState, action, node);
                 var winningNode = Hunt(child, depth + 1, diagnostics);
                 if (winningNode != null)
@@ -64,7 +66,7 @@ namespace pandemic.agents
         /// Action: command that resulted in State
         /// </summary>
         private record SearchNode(
-            PandemicSpielGameState State,
+            PandemicGame State,
             PlayerCommand? Command,
             SearchNode? Parent
         );

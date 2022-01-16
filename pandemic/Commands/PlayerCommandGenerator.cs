@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
 
-namespace pandemic
+namespace pandemic.Commands
 {
-    public class PlayerCommandGeneratorFast
+    public class PlayerCommandGenerator
     {
         private readonly PlayerCommand[] _buffer = new PlayerCommand[100];
         private int _bufIdx = 0;

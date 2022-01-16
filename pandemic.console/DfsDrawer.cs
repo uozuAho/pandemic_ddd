@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.drawing;
 
 namespace pandemic.console
@@ -10,11 +11,11 @@ namespace pandemic.console
     {
         private const int NodeLimit = 300;
         private static readonly Random _rng = new();
+        private static readonly PlayerCommandGenerator CommandGenerator = new();
 
         public static void DrawSearch(PandemicGame game)
         {
-            var state = new PandemicSpielGameState(game);
-            var root = new SearchNode(state, null, null);
+            var root = new SearchNode(game, null, null);
             var tracker = new NodeTracker();
 
             Dfs(root, tracker);
@@ -30,7 +31,7 @@ namespace pandemic.console
         {
             if (nodeTracker.TotalNumNodes == NodeLimit) return;
 
-            var legalActions = node.State.LegalActions()
+            var legalActions = CommandGenerator.LegalCommands(node.State)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .OrderBy(_ => _rng.Next()).ToList();
 
@@ -38,8 +39,7 @@ namespace pandemic.console
             {
                 if (nodeTracker.TotalNumNodes == NodeLimit) return;
 
-                var childState = new PandemicSpielGameState(node.State.Game);
-                childState.ApplyAction(action);
+                var (childState, _) = node.State.Do(action);
                 var child = new SearchNode(childState, action, node);
                 node.Children.Add(child);
                 nodeTracker.TotalNumNodes++;
@@ -52,8 +52,8 @@ namespace pandemic.console
             foreach (var child in node.Children)
             {
                 var drawerChild = graph.CreateNode();
-                if (child.State.IsLoss)
-                    drawerChild.Label = child.State.Game.LossReason;
+                if (child.State.IsLost)
+                    drawerChild.Label = child.State.LossReason;
                 graph.CreateEdge(drawerNode, drawerChild, child.Command!.ToString());
                 ExpandGraph(graph, child, drawerChild);
             }
@@ -63,7 +63,7 @@ namespace pandemic.console
         /// Action: command that resulted in State
         /// </summary>
         private record SearchNode(
-            PandemicSpielGameState State,
+            PandemicGame State,
             PlayerCommand? Command,
             SearchNode? Parent
         )

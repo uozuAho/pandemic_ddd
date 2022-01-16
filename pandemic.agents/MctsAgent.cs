@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using pandemic.Commands;
 using pandemic.Events;
 using utils;
 
@@ -138,7 +139,7 @@ namespace pandemic.agents
     {
         private readonly int _numRollouts;
         private readonly Random _random = new();
-        private readonly PlayerCommandGeneratorFast _commandGenerator = new();
+        private readonly PlayerCommandGenerator _commandGenerator = new();
 
         public RandomRolloutEvaluator(int numRollouts)
         {

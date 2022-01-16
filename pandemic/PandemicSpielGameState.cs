@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -29,7 +30,7 @@ namespace pandemic
             ? Enumerable.Repeat(-1.0, Game.Players.Count).ToArray()
             : Enumerable.Repeat(0.0, Game.Players.Count).ToArray();
 
-        private readonly PlayerCommandGeneratorFast _commandGenerator = new ();
+        private readonly PlayerCommandGenerator _commandGenerator = new ();
 
         public PandemicSpielGameState(PandemicGame game)
         {
@@ -38,7 +39,7 @@ namespace pandemic
 
         public PandemicSpielGameState Clone()
         {
-            return new PandemicSpielGameState(Game with { });
+            return new PandemicSpielGameState(Game.Copy());
         }
 
         public override string ToString()
@@ -77,25 +78,9 @@ namespace pandemic
 
         public IEnumerable<IEvent> ApplyAction(PlayerCommand action)
         {
-            IEnumerable<IEvent> events;
-
-            switch (action)
-            {
-                case DriveFerryCommand command:
-                    (Game, events) = Game.DriveOrFerryPlayer(command.Role, command.City);
-                    return events;
-                case DiscardPlayerCardCommand command:
-                    (Game, events) = Game.DiscardPlayerCard(command.Card);
-                    return events;
-                case BuildResearchStationCommand command:
-                    (Game, events) = Game.BuildResearchStation(command.City);
-                    return events;
-                case DiscoverCureCommand command:
-                    (Game, events) = Game.DiscoverCure(command.Cards);
-                    return events;
-                default:
-                    throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
-            }
+            var (game, events) = Game.Do(action);
+            Game = game;
+            return events;
         }
     }
 }

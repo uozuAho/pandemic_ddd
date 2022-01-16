@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -129,6 +130,11 @@ namespace pandemic.Aggregates
             return (game, events);
         }
 
+        public PandemicGame Copy()
+        {
+            return this with { };
+        }
+
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);
@@ -136,6 +142,18 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
+        public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
+        {
+            return action switch
+            {
+                DriveFerryCommand command => DriveOrFerryPlayer(command.Role, command.City),
+                DiscardPlayerCardCommand command => DiscardPlayerCard(command.Card),
+                BuildResearchStationCommand command => BuildResearchStation(command.City),
+                DiscoverCureCommand command => DiscoverCure(command.Cards),
+                _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
+            };
+        }
+
         public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -14,8 +15,9 @@ namespace pandemic.agents
     public class DfsWithHeuristicsAgent : IPandemicGameSolver
     {
         private static readonly Random _rng = new Random();
+        private static readonly PlayerCommandGenerator CommandGenerator = new();
 
-        public IEnumerable<PlayerCommand> CommandsToWin(PandemicSpielGameState state)
+        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame state)
         {
             var root = new SearchNode(state, null, null);
 
@@ -116,15 +118,15 @@ namespace pandemic.agents
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
 
-            if (node.State.IsWin) return node;
-            if (!CanWin(node.State.Game, cardCounter))
+            if (node.State.IsWon) return node;
+            if (!CanWin(node.State, cardCounter))
             {
-                diagnostics.StoppedExploringBecause(ReasonGameCannotBeWon(node.State.Game, cardCounter));
+                diagnostics.StoppedExploringBecause(ReasonGameCannotBeWon(node.State, cardCounter));
                 return null;
             }
 
-            var comparer = new CommandPriorityComparer(node.State.Game);
-            var legalActions = node.State.LegalActions()
+            var comparer = new CommandPriorityComparer(node.State);
+            var legalActions = CommandGenerator.LegalCommands(node.State)
                 // .OrderBy(a => CommandPriority(a, node.State.Game))
                 .OrderBy(a => a, comparer)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
@@ -132,9 +134,8 @@ namespace pandemic.agents
 
             foreach (var action in legalActions)
             {
-                var childState = new PandemicSpielGameState(node.State.Game);
                 var childCardCounter = cardCounter.Clone();
-                var events = childState.ApplyAction(action);
+                var (childState, events) = node.State.Do(action);
                 foreach (var @event in events.OfType<PlayerCardDiscarded>())
                 {
                     if (@event.Card is PlayerCityCard cityCard)
@@ -167,7 +168,7 @@ namespace pandemic.agents
         /// Action: command that resulted in State
         /// </summary>
         private record SearchNode(
-            PandemicSpielGameState State,
+            PandemicGame State,
             PlayerCommand? Command,
             SearchNode? Parent
         );
