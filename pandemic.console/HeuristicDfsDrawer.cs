@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.agents;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.drawing;
 
 namespace pandemic.console

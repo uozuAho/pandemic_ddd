@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.GameData;
 using pandemic.Values;
 
