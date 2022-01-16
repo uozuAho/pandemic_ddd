@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
 using utils;
@@ -29,24 +30,26 @@ internal class SingleGame
         PrintState(endState);
     }
 
-    public static (PandemicSpielGameState, IEnumerable<IEvent>) PlayRandomGame(PandemicGame game)
+    public static (PandemicGame, IEnumerable<IEvent>) PlayRandomGame(PandemicGame game)
     {
         var numActions = 0;
         var random = new Random();
-        var state = new PandemicSpielGameState(game);
+        var commandGenerator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
-        for (; numActions < 1000 && !state.IsTerminal; numActions++)
+        for (; numActions < 1000 && !game.IsOver; numActions++)
         {
             if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
-            var action = random.Choice(state.LegalActions());
-            events.AddRange(state.ApplyAction(action));
+            var action = random.Choice(commandGenerator.LegalCommands(game));
+            var (updatedGame, newEvents) = game.Do(action);
+            game = updatedGame;
+            events.AddRange(newEvents);
         }
 
-        return (state, events);
+        return (game, events);
     }
 
-    private static void PrintState(PandemicSpielGameState state)
+    private static void PrintState(PandemicGame state)
     {
         Console.WriteLine(state);
     }
