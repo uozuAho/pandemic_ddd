@@ -91,7 +91,7 @@ internal class NumberOfPossibleGamesEstimator
         Console.WriteLine($"avg: {avgLegalActionsPerTurn}");
         Console.WriteLine($"max: {stats.LegalActionCounts.MaxBy(a => a.Key).Key}");
 
-        Console.WriteLine("Num possible games (branch factor ^ avg depth) = " +
+        Console.WriteLine("Num possible games (avg. branch factor ^ avg. depth) = " +
                           $"({avgLegalActionsPerTurn} ^ {avgActionsPerGame}) = " +
                           $"{Math.Pow(avgLegalActionsPerTurn, avgActionsPerGame)}");
     }

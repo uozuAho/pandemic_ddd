@@ -10,7 +10,7 @@ namespace pandemic.agents
     /// <summary>
     /// Depth-first search through the game for a winning sequence of commands
     /// </summary>
-    public class DfsAgent
+    public class DfsAgent : IPandemicGameSolver
     {
         private static readonly Random _rng = new();
         private static readonly PlayerCommandGenerator _commandGenerator = new();
@@ -52,8 +52,7 @@ namespace pandemic.agents
 
             foreach (var action in legalActions)
             {
-                var childState = node.State.Copy();
-                childState.Do(action);
+                var (childState, _) = node.State.Do(action);
                 var child = new SearchNode(childState, action, node);
                 var winningNode = Hunt(child, depth + 1, diagnostics);
                 if (winningNode != null)
