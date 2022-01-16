@@ -10,6 +10,8 @@ namespace pandemic.console
     {
         public static void Run()
         {
+            var agents = new[] { new PandemicAgent() };
+
             foreach (var agent in agents)
             {
                 var stats = RunAgent(agent);
@@ -26,6 +28,8 @@ namespace pandemic.console
                 var result = FindWin(game, agent, TimeSpan.FromSeconds(2));
                 stats.GamesPlayed++;
             }
+
+            return stats;
         }
 
         private static AgentRunResult FindWin(
@@ -37,7 +41,8 @@ namespace pandemic.console
             while (sw.Elapsed < timeLimit)
             {
                 var command = agent.GetCommand(game);
-                game = game.Do(command);
+                // todo: implement game.do(command)
+                // game = game.Do(command);
                 if (game.IsWon)
                     return AgentRunResult.FoundWin;
             }
@@ -55,6 +60,15 @@ namespace pandemic.console
             });
 
             return game;
+        }
+    }
+
+    // todo: implement interface
+    internal class PandemicAgent
+    {
+        public PlayerCommand GetCommand(PandemicGame game)
+        {
+            throw new NotImplementedException();
         }
     }
 
