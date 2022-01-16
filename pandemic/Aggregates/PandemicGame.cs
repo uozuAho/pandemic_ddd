@@ -130,6 +130,11 @@ namespace pandemic.Aggregates
             return (game, events);
         }
 
+        public PandemicGame Copy()
+        {
+            return this with { };
+        }
+
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);

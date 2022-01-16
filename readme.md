@@ -7,7 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- use PandemicGame.Do(PlayerCommand) everywhere
+- use PandemicGame instead of PandemicSpielGameState
 - agent stats
     - win rate (timeout = loss)
     - time per win
