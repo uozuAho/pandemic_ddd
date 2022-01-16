@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using pandemic.agents;
 using pandemic.Aggregates;
 using pandemic.Commands;
 using pandemic.drawing;
@@ -14,21 +13,21 @@ class RandomPlaythroughDrawer
 {
     public static void DoIt()
     {
+        var commandGenerator = new PlayerCommandGenerator();
         var random = new Random();
         var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
         {
             Difficulty = Difficulty.Introductory,
             Roles = new[] {Role.Medic, Role.Scientist}
         });
-        var state = new PandemicSpielGameState(game);
 
         var graph = new DrawerGraph();
-        var prevNode = graph.CreateNode(state.CurrentPlayer.Role.ToString());
+        var prevNode = graph.CreateNode(game.CurrentPlayer.Role.ToString());
         var currentNode = prevNode;
 
-        while (!state.IsTerminal)
+        while (!game.IsOver)
         {
-            var actions = state.LegalActions().ToList();
+            var actions = commandGenerator.LegalCommands(game).ToList();
             var selectedAction = random.Choice(actions);
 
             foreach (var action in actions)
@@ -43,10 +42,11 @@ class RandomPlaythroughDrawer
                 }
             }
 
-            state.ApplyAction(selectedAction);
-            currentNode.Label = state.IsTerminal
-                ? state.Game.LossReason
-                : state.CurrentPlayer.Role.ToString();
+            var (updatedGame, _) = game.Do(selectedAction);
+            game = updatedGame;
+            currentNode.Label = game.IsOver
+                ? game.LossReason
+                : game.CurrentPlayer.Role.ToString();
             prevNode = currentNode;
         }
 
