@@ -9,12 +9,12 @@ namespace pandemic.test
 {
     public class PlayerCommandGeneratorTests
     {
-        private PlayerCommandGenerator _generator;
+        private PlayerCommandGeneratorFast _generator;
 
         [SetUp]
         public void Setup()
         {
-            _generator = new PlayerCommandGenerator();
+            _generator = new PlayerCommandGeneratorFast();
         }
 
         [Test]
