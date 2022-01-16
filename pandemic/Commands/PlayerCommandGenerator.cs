@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates;
-using pandemic.Commands;
 
-namespace pandemic
+namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
