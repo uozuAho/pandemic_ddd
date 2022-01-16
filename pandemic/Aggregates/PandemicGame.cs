@@ -136,6 +136,18 @@ namespace pandemic.Aggregates
 
         // oh god I'm using regions! what have I become...
         #region Commands
+        public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
+        {
+            return action switch
+            {
+                DriveFerryCommand command => DriveOrFerryPlayer(command.Role, command.City),
+                DiscardPlayerCardCommand command => DiscardPlayerCard(command.Card),
+                BuildResearchStationCommand command => BuildResearchStation(command.City),
+                DiscoverCureCommand command => DiscoverCure(command.Cards),
+                _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
+            };
+        }
+
         public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
         {
             ThrowIfGameOver(this);
