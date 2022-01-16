@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
 using pandemic.drawing;
 using pandemic.Values;
+using utils;
 
 namespace pandemic.console
 {
@@ -34,13 +36,47 @@ namespace pandemic.console
                     bestState = state;
                 steps++;
 
-                if (sw.ElapsedMilliseconds > 1000)
+                if (sw.ElapsedMilliseconds > 2000)
                 {
                     Console.WriteLine($"explored: {steps}. queued: {searcher.Frontier.Size}. Best state found:");
-                    Console.WriteLine(NodeLabel(bestState.State));
+                    Console.WriteLine(PandemicGameStringRenderer.ShortState(bestState.State));
                     sw.Restart();
+                    break;
                 }
             }
+
+            if (searcher.IsSolved)
+            {
+                Console.WriteLine("solved!");
+                return;
+            }
+
+            var states = new List<SearchNode>();
+            while (bestState.Parent != null)
+            {
+                states.Add(bestState);
+                bestState = bestState.Parent;
+            }
+
+            Console.WriteLine("path to best state (last 20):");
+            foreach (var state in states.Reversed().TakeLast(20))
+            {
+                Console.WriteLine(state.Action);
+                Console.WriteLine(PandemicGameStringRenderer.ShortState(state.State));
+            }
+
+            // Console.WriteLine("Solution:");
+            // var currentState = game;
+            // var asdf = new PandemicSearchProblem(game, new PlayerCommandGeneratorFast());
+            // var commands = searcher.GetSolution();
+            // foreach (var command in commands)
+            // {
+            //     Console.WriteLine(command.ToString());
+            //     currentState = asdf.DoAction(currentState, command);
+            // }
+            // Console.WriteLine();
+            // Console.WriteLine("Final state:");
+            // Console.WriteLine(currentState);
         }
 
         public static void Draw(int numNodes)

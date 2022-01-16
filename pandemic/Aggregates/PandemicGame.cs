@@ -131,7 +131,7 @@ namespace pandemic.Aggregates
 
         public override string ToString()
         {
-            return PandemicGameStringRenderer.ToString(this);
+            return PandemicGameStringRenderer.FullState(this);
         }
 
         // oh god I'm using regions! what have I become...

@@ -87,6 +87,22 @@ namespace pandemic.agents.GreedyBfs
             return node;
         }
 
+        public IEnumerable<PlayerCommand> GetSolution()
+        {
+            if (!IsSolved) throw new InvalidOperationException("not solved!");
+
+            var actions = new List<PlayerCommand>();
+            var currentNode = _explored[CurrentState];
+            while (currentNode is { Action: { } })
+            {
+                actions.Add(currentNode.Action);
+                currentNode = currentNode.Parent;
+            }
+
+            actions.Reverse();
+            return actions;
+        }
+
         protected class SearchNodeComparer : IComparer<SearchNode>
         {
             private readonly Func<SearchNode, SearchNode, int> _compare;
