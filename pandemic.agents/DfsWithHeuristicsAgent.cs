@@ -12,7 +12,7 @@ namespace pandemic.agents
     /// <summary>
     /// Depth-first search, with hand-crafted command preferences
     /// </summary>
-    public class DfsWithHeuristicsAgent
+    public class DfsWithHeuristicsAgent : IPandemicGameSolver
     {
         private static readonly Random _rng = new Random();
         private static readonly PlayerCommandGenerator CommandGenerator = new();
