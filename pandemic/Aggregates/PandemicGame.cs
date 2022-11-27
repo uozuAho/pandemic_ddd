@@ -202,7 +202,7 @@ namespace pandemic.Aggregates
             if (CityByName(city).HasResearchStation)
                 throw new GameRuleViolatedException($"{city} already has a research station");
 
-            // todo: this sometimes fails due to duplicate cities in hand 
+            // todo: this sometimes fails due to duplicate cities in hand
             var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
             return ApplyAndEndTurnIfNeeded(new List<IEvent>

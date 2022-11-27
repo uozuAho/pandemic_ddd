@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using pandemic.Aggregates;
+using pandemic.Commands;
 using pandemic.Values;
 
 namespace pandemic.console
 {
-    internal class AgentComparer
+    internal static class AgentComparer
     {
         public static void Run()
         {
@@ -15,6 +16,7 @@ namespace pandemic.console
             foreach (var agent in agents)
             {
                 var stats = RunAgent(agent);
+                Console.WriteLine(stats);
             }
         }
 
@@ -22,11 +24,13 @@ namespace pandemic.console
         {
             var sw = Stopwatch.StartNew();
             var stats = new AgentStats();
+
             while (sw.Elapsed < TimeSpan.FromSeconds(60) && stats.GamesPlayed < 20)
             {
                 var game = NewGame();
                 var result = FindWin(game, agent, TimeSpan.FromSeconds(2));
                 stats.GamesPlayed++;
+                Console.Write('.');
             }
 
             return stats;
@@ -38,11 +42,11 @@ namespace pandemic.console
             TimeSpan timeLimit)
         {
             var sw = Stopwatch.StartNew();
+
             while (sw.Elapsed < timeLimit)
             {
                 var command = agent.GetCommand(game);
-                // todo: implement game.do(command)
-                // game = game.Do(command);
+                (game, _) = game.Do(command);
                 if (game.IsWon)
                     return AgentRunResult.FoundWin;
             }
@@ -63,7 +67,6 @@ namespace pandemic.console
         }
     }
 
-    // todo: implement interface
     internal class PandemicAgent
     {
         public PlayerCommand GetCommand(PandemicGame game)
