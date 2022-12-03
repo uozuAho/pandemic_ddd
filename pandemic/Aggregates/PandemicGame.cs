@@ -117,34 +117,7 @@ namespace pandemic.Aggregates
                 .SetupInfectionDeck(events)
                 .ShufflePlayerDrawPileForDealing(events);
 
-            // todo: clean this up
-            for (int i = 0; i < 3; i++)
-            {
-                var infectionCard = game.InfectionDrawPile.Last();
-                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
-                for (int j = 0; j < 3; j++)
-                {
-                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-                }
-            }
-            for (int i = 0; i < 3; i++)
-            {
-                var infectionCard = game.InfectionDrawPile.Last();
-                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
-                for (int j = 0; j < 2; j++)
-                {
-                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-                }
-            }
-            for (int i = 0; i < 3; i++)
-            {
-                var infectionCard = game.InfectionDrawPile.Last();
-                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
-                for (int j = 0; j < 1; j++)
-                {
-                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
-                }
-            }
+            game = DoInitialInfection(game, events);
 
             foreach (var role in options.Roles)
             {
@@ -155,6 +128,41 @@ namespace pandemic.Aggregates
             game = game.SetupPlayerDrawPileWithEpidemicCards(events);
 
             return (game, events);
+        }
+
+        private static PandemicGame DoInitialInfection(PandemicGame game, ICollection<IEvent> events)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 3; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 2; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 1; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            return game;
         }
 
         public PandemicGame Copy()
