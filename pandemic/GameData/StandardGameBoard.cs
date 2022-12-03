@@ -7,6 +7,8 @@ namespace pandemic.GameData
 {
     public class StandardGameBoard
     {
+        public const int NumberOfCities = 48;
+
         public bool IsCity(string city)
         {
             return CityLookup.ContainsKey(city);

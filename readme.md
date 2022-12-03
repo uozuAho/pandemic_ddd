@@ -7,8 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- implement epidemic
-- implement more game rules
+- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - check code todos
 
 # Quick start
