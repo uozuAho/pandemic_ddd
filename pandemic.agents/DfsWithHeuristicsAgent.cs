@@ -17,7 +17,9 @@ namespace pandemic.agents
         private static readonly Random _rng = new Random();
         private static readonly PlayerCommandGenerator CommandGenerator = new();
 
-        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame state)
+        public IEnumerable<PlayerCommand> CommandsToWin(
+            PandemicGame state,
+            TimeSpan timeout)
         {
             var root = new SearchNode(state, null, null);
 

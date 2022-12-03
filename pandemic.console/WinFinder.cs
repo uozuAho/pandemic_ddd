@@ -7,9 +7,12 @@ namespace pandemic.console;
 
 class WinFinder
 {
-    public static void FindWinWithSolver(PandemicGame game, IPandemicGameSolver solver)
+    public static void FindWinWithSolver(
+        PandemicGame game,
+        IPandemicGameSolver solver,
+        TimeSpan timeout)
     {
-        var commands = solver.CommandsToWin(game).ToList();
+        var commands = solver.CommandsToWin(game, timeout).ToList();
 
         if (commands.Any())
         {

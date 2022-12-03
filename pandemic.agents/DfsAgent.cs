@@ -15,12 +15,13 @@ namespace pandemic.agents
         private static readonly Random _rng = new();
         private static readonly PlayerCommandGenerator _commandGenerator = new();
 
-        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame game)
+        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame game, TimeSpan timeout)
         {
             var root = new SearchNode(game, null, null);
 
             var diagnostics = Diagnostics.StartNew();
-            var win = Hunt(root, 0, diagnostics);
+            var stopwatch = Stopwatch.StartNew();
+            var win = Hunt(root, 0, diagnostics, timeout, stopwatch);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -38,8 +39,14 @@ namespace pandemic.agents
             return winningCommands;
         }
 
-        private static SearchNode? Hunt(SearchNode node, int depth, Diagnostics diagnostics)
+        private static SearchNode? Hunt(SearchNode node,
+            int depth,
+            Diagnostics diagnostics,
+            TimeSpan timeout,
+            Stopwatch stopwatch)
         {
+            if (stopwatch.Elapsed > timeout) throw new TimeoutException();
+
             if (node.State.IsWon) return node;
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
@@ -54,7 +61,7 @@ namespace pandemic.agents
             {
                 var (childState, _) = node.State.Do(action);
                 var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child, depth + 1, diagnostics);
+                var winningNode = Hunt(child, depth + 1, diagnostics, timeout, stopwatch);
                 if (winningNode != null)
                     return winningNode;
             }

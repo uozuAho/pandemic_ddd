@@ -1,9 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using pandemic.agents;
+using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
 using pandemic.Commands;
 using pandemic.Values;
+using utils;
 
 namespace pandemic.console
 {
@@ -11,47 +17,112 @@ namespace pandemic.console
     {
         public static void Run()
         {
-            var agents = new[] { new PandemicAgent() };
-
-            foreach (var agent in agents)
-            {
-                var stats = RunAgent(agent);
-                Console.WriteLine(stats);
-            }
+            // RunRandomGames();
+            // RunGreedyBestFirst();
+            RunDfs();
         }
 
-        private static AgentStats RunAgent(PandemicAgent agent)
+        private static void RunRandomGames()
         {
-            var sw = Stopwatch.StartNew();
-            var stats = new AgentStats();
+            var totalRunTime = TimeSpan.FromSeconds(5);
+            var random = new Random();
 
-            while (sw.Elapsed < TimeSpan.FromSeconds(60) && stats.GamesPlayed < 20)
+            var totalTimer = Stopwatch.StartNew();
+            var numGames = 0;
+            var numWins = 0;
+            var statesVisited = 0;
+
+            Console.WriteLine("Running random games...");
+
+            while (totalTimer.Elapsed < totalRunTime)
             {
+                numGames++;
                 var game = NewGame();
-                var result = FindWin(game, agent, TimeSpan.FromSeconds(2));
-                stats.GamesPlayed++;
-                Console.Write('.');
+                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+
+                while (!game.IsOver)
+                {
+                    statesVisited++;
+                    var action = random.Choice(searchProblem.GetActions(game));
+                    game = searchProblem.DoAction(game, action);
+                }
+
+                if (game.IsWon)
+                {
+                    numWins++;
+                }
             }
 
-            return stats;
+            Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
         }
 
-        private static AgentRunResult FindWin(
-            PandemicGame game,
-            PandemicAgent agent,
-            TimeSpan timeLimit)
+        private static void RunGreedyBestFirst()
         {
-            var sw = Stopwatch.StartNew();
+            var totalRunTime = TimeSpan.FromSeconds(20);
+            // seems to find a win in under 1s, or never
+            var maxGameTime = TimeSpan.FromSeconds(1);
 
-            while (sw.Elapsed < timeLimit)
+            // increasing threads reduces single thread performance :(
+            var numThreads = Environment.ProcessorCount / 3;
+            var tasks = Enumerable.Range(0, numThreads)
+                .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
+        private static void RunGreedyBestFirstSingleThread(
+            TimeSpan totalRunTime,
+            TimeSpan maxGameTime)
+        {
+            var totalTimer = Stopwatch.StartNew();
+            var numGames = 0;
+            var numWins = 0;
+            var statesVisited = 0;
+            var winTimes = new List<TimeSpan>();
+
+            Console.WriteLine("Running greedy best first...");
+
+            while (totalTimer.Elapsed < totalRunTime)
             {
-                var command = agent.GetCommand(game);
-                (game, _) = game.Do(command);
-                if (game.IsWon)
-                    return AgentRunResult.FoundWin;
+                numGames++;
+                var game = NewGame();
+                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+                var searcher = new GreedyBestFirstSearch(searchProblem);
+
+                var gameTimer = Stopwatch.StartNew();
+
+                while (!searcher.IsFinished)
+                {
+                    searcher.Step();
+                    statesVisited++;
+
+                    if (gameTimer.Elapsed > maxGameTime)
+                    {
+                        break;
+                    }
+                }
+
+                if (searcher.CurrentState.IsWon)
+                {
+                    numWins++;
+                    winTimes.Add(gameTimer.Elapsed);
+                }
             }
 
-            return AgentRunResult.Timeout;
+            Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
+            Console.WriteLine("Win times:");
+            foreach (var time in winTimes)
+            {
+                Console.WriteLine(time);
+            }
+        }
+
+        private static void RunDfs()
+        {
+            var game = NewGame();
+            var dfs = new DfsAgent();
+
+            dfs.CommandsToWin(game, TimeSpan.FromSeconds(5));
         }
 
         private static PandemicGame NewGame()
@@ -59,35 +130,10 @@ namespace pandemic.console
             var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
-                // todo: try more players
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
 
             return game;
         }
-    }
-
-    internal class PandemicAgent
-    {
-        public PlayerCommand GetCommand(PandemicGame game)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    internal record AgentStats
-    {
-        public int GamesPlayed { get; set; }
-        public int NumWins { get; set; }
-        public int NumTimeouts { get; set; }
-
-        private List<TimeSpan> GameTimes = new();
-        private List<TimeSpan> WinTimes = new();
-    }
-
-    enum AgentRunResult
-    {
-        Timeout,
-        FoundWin
     }
 }
