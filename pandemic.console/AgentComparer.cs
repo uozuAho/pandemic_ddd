@@ -19,8 +19,8 @@ namespace pandemic.console
     {
         public static void Run()
         {
-            // RunRandomGames();
-            RunGreedyBestFirst();
+            RunRandomGames();
+            // RunGreedyBestFirst();
             // RunDfs();
             // RunDfsWithHeuristics();
         }
