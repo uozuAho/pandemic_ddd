@@ -121,7 +121,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
-            Assert.AreEqual(2, game.InfectionDiscardPile.Count);
+            Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
 
             foreach (var infectionCard in game.InfectionDiscardPile.TakeLast(2))
             {
@@ -129,7 +129,7 @@ namespace pandemic.test
                     $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
 
-            Assert.AreEqual(24 * 4 - 2, game.Cubes.Values.Sum(), "2 cubes should have been removed from cube pile");
+            Assert.That(game.Cubes.Values.Sum(), Is.EqualTo(startingState.Cubes.Values.Sum() - 2));
         }
 
         [Test]
@@ -151,7 +151,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
             Assert.IsTrue(game.IsOver);
-            Assert.AreEqual(1, game.InfectionDiscardPile.Count);
+            Assert.AreEqual(10, game.InfectionDiscardPile.Count); // 1 + initial 9 infected cities
         }
 
         [Test]

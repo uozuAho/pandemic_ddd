@@ -1,6 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
 
@@ -9,28 +10,45 @@ namespace pandemic.test
     public class GameSetup
     {
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void Do_all_the_stuff_to_start_a_game(NewGameOptions options)
+        public void Initial_game_state_is_correct(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
-
             var numberOfPlayers = options.Roles.Count;
             var numberOfCardsPerPlayer = PandemicGame.InitialPlayerHandSize(numberOfPlayers);
             var numberOfEpidemicCards = PandemicGame.NumberOfEpidemicCards(options.Difficulty);
 
+            // board
             Assert.AreEqual(options.Difficulty, game.Difficulty);
             Assert.AreEqual(2, game.InfectionRate);
             Assert.AreEqual(0, game.OutbreakCounter);
-            Assert.AreEqual(options.Roles.Count, game.Players.Count);
-            Assert.AreEqual(48, game.InfectionDrawPile.Count);
-            Assert.AreEqual(0, game.InfectionDiscardPile.Count);
             Assert.AreEqual(6, game.ResearchStationPile);
-            Assert.AreEqual(48 + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer, game.PlayerDrawPile.Count);
-            Assert.That(game.PlayerDrawPile.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
-            Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
-            Assert.That(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
-            Assert.That(game.CityByName("Atlanta").HasResearchStation);
             Assert.That(game.CureDiscovered.Values.All(v => v == false));
             Assert.IsFalse(game.IsOver);
+
+            // decks
+            Assert.That(game.PlayerDrawPile.Count, Is.EqualTo(
+                StandardGameBoard.NumberOfCities + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer));
+            Assert.That(game.PlayerDrawPile.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
+
+            // cities
+            Assert.That(game.CityByName("Atlanta").HasResearchStation);
+
+            // initial infection
+            Assert.That(game.InfectionDrawPile.Count, Is.EqualTo(StandardGameBoard.NumberOfCities - 9));
+            Assert.AreEqual(9, game.InfectionDiscardPile.Count);
+            Assert.That(game.Cubes.Values.Sum(), Is.EqualTo(
+                96
+                - 3 * 3
+                - 3 * 2
+                - 3 * 1));
+            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 3)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 2)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 1)), Is.EqualTo(3));
+
+            // players
+            Assert.AreEqual(options.Roles.Count, game.Players.Count);
+            Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
+            Assert.That(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
         }
     }
 }

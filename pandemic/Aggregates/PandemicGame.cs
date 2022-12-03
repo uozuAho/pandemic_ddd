@@ -117,7 +117,7 @@ namespace pandemic.Aggregates
                 .SetupInfectionDeck(events)
                 .ShufflePlayerDrawPileForDealing(events);
 
-            // todo: infect cities
+            game = DoInitialInfection(game, events);
 
             foreach (var role in options.Roles)
             {
@@ -314,6 +314,41 @@ namespace pandemic.Aggregates
                 .ToImmutableList();
 
             return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
+        }
+
+        private static PandemicGame DoInitialInfection(PandemicGame game, ICollection<IEvent> events)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 3; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 2; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                var infectionCard = game.InfectionDrawPile.Last();
+                game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+                for (var j = 0; j < 1; j++)
+                {
+                    game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                }
+            }
+
+            return game;
         }
 
         private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
