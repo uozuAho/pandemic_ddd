@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using pandemic.agents;
 using pandemic.agents.GreedyBfs;
@@ -13,14 +12,17 @@ using utils;
 
 namespace pandemic.console
 {
+    /// <summary>
+    /// Plays games with different agents in a way that allows their performance to be compared
+    /// </summary>
     internal static class AgentComparer
     {
         public static void Run()
         {
             // RunRandomGames();
-            // RunGreedyBestFirst();
+            RunGreedyBestFirst();
             // RunDfs();
-            RunDfsWithHeuristics();
+            // RunDfsWithHeuristics();
         }
 
         private static void RunRandomGames()
@@ -59,7 +61,7 @@ namespace pandemic.console
 
         private static void RunGreedyBestFirst()
         {
-            var totalRunTime = TimeSpan.FromSeconds(20);
+            var totalRunTime = TimeSpan.FromSeconds(5);
             // seems to find a win in under 1s, or never
             var maxGameTime = TimeSpan.FromSeconds(1);
 
