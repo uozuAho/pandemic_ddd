@@ -24,8 +24,9 @@ namespace pandemic.agents
             var root = new SearchNode(state, null, null);
 
             var diagnostics = Diagnostics.StartNew();
+            var stopwatch = Stopwatch.StartNew();
             var cardCounter = new CardCounter();
-            var win = Hunt(root, 0, diagnostics, cardCounter);
+            var win = Hunt(root, 0, diagnostics, cardCounter, stopwatch, timeout);
             if (win == null) return Enumerable.Empty<PlayerCommand>();
 
             var winningCommands = new List<PlayerCommand>();
@@ -115,10 +116,14 @@ namespace pandemic.agents
             SearchNode node,
             int depth,
             Diagnostics diagnostics,
-            CardCounter cardCounter)
+            CardCounter cardCounter,
+            Stopwatch stopwatch,
+            TimeSpan timeout)
         {
             diagnostics.NodeExplored();
             diagnostics.Depth(depth);
+
+            if (stopwatch.Elapsed > timeout) throw new TimeoutException();
 
             if (node.State.IsWon) return node;
             if (!CanWin(node.State, cardCounter))
@@ -144,7 +149,7 @@ namespace pandemic.agents
                         childCardCounter.CardsAvailable[cityCard.City.Colour]--;
                 }
                 var child = new SearchNode(childState, action, node);
-                var winningNode = Hunt(child, depth + 1, diagnostics, childCardCounter);
+                var winningNode = Hunt(child, depth + 1, diagnostics, childCardCounter, stopwatch, timeout);
                 if (winningNode != null)
                     return winningNode;
             }

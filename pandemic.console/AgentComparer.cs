@@ -19,7 +19,8 @@ namespace pandemic.console
         {
             // RunRandomGames();
             // RunGreedyBestFirst();
-            RunDfs();
+            // RunDfs();
+            RunDfsWithHeuristics();
         }
 
         private static void RunRandomGames()
@@ -122,7 +123,27 @@ namespace pandemic.console
             var game = NewGame();
             var dfs = new DfsAgent();
 
-            dfs.CommandsToWin(game, TimeSpan.FromSeconds(5));
+            try
+            {
+                dfs.CommandsToWin(game, TimeSpan.FromSeconds(5));
+            }
+            catch (TimeoutException)
+            {
+            }
+        }
+
+        private static void RunDfsWithHeuristics()
+        {
+            var game = NewGame();
+            var dfs = new DfsWithHeuristicsAgent();
+
+            try
+            {
+                dfs.CommandsToWin(game, TimeSpan.FromSeconds(5));
+            }
+            catch (TimeoutException)
+            {
+            }
         }
 
         private static PandemicGame NewGame()
