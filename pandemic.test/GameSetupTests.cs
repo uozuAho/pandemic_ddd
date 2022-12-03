@@ -25,11 +25,11 @@ namespace pandemic.test
             Assert.AreEqual(0, game.InfectionDiscardPile.Count);
             Assert.AreEqual(6, game.ResearchStationPile);
             Assert.AreEqual(48 + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer, game.PlayerDrawPile.Count);
-            Assert.AreEqual(numberOfEpidemicCards, game.PlayerDrawPile.Count(c => c is EpidemicCard));
-            Assert.IsTrue(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
-            Assert.IsTrue(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
-            Assert.IsTrue(game.CityByName("Atlanta").HasResearchStation);
-            Assert.IsTrue(game.CureDiscovered.All(kv => !kv.Value));
+            Assert.That(game.PlayerDrawPile.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
+            Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
+            Assert.That(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
+            Assert.That(game.CityByName("Atlanta").HasResearchStation);
+            Assert.That(game.CureDiscovered.Values.All(v => v == false));
             Assert.IsFalse(game.IsOver);
         }
     }
