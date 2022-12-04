@@ -32,7 +32,19 @@ namespace pandemic.Aggregates
         public readonly StandardGameBoard Board = new();
 
         public bool IsOver => IsLost || IsWon;
-        public bool IsWon => CureDiscovered.All(c => c.Value);
+
+        public bool IsWon
+        {
+            get
+            {
+                foreach (var c in CureDiscovered)
+                {
+                    if (!c.Value) return false;
+                }
+
+                return true;
+            }
+        }
         public bool IsLost => LossReason != "";
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
