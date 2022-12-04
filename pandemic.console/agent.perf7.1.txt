@@ -1,0 +1,40 @@
+Running random games...
+5822 games played. 0 wins. 628884 states explored.
+Running greedy best first...
+Running greedy best first...
+Running greedy best first...
+Running greedy best first...
+5 games played. 0 wins. 114684 states explored.
+Win times:
+5 games played. 0 wins. 123310 states explored.
+Win times:
+5 games played. 0 wins. 107575 states explored.
+Win times:
+5 games played. 0 wins. 122294 states explored.
+Win times:
+Running DFS games...
+nodes explored: 140975. Max depth 109. Losses: [Ran out of infection cards, 123143]
+nodes explored: 282916. Max depth 109. Losses: [Ran out of infection cards, 247230]
+nodes explored: 425650. Max depth 109. Losses: [Ran out of infection cards, 372008]
+nodes explored: 567834. Max depth 109. Losses: [Ran out of infection cards, 496302]
+Running DFS with heuristics games...
+nodes explored: 217848. Stops: 
+  [Cannot cure Blue, 83527]
+  [Cannot cure Red, 43420]
+  [Cannot cure Black, 62650]
+  [Cannot cure Yellow, 395]
+nodes explored: 457454. Stops: 
+  [Cannot cure Blue, 175438]
+  [Cannot cure Red, 91202]
+  [Cannot cure Black, 131590]
+  [Cannot cure Yellow, 828]
+nodes explored: 697191. Stops: 
+  [Cannot cure Blue, 267396]
+  [Cannot cure Red, 139004]
+  [Cannot cure Black, 200568]
+  [Cannot cure Yellow, 1267]
+nodes explored: 935395. Stops: 
+  [Cannot cure Blue, 358771]
+  [Cannot cure Red, 186506]
+  [Cannot cure Black, 269105]
+  [Cannot cure Yellow, 1697]
