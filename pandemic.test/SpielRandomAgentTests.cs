@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates;
+using pandemic.Aggregates.Game;
 using pandemic.Events;
 using pandemic.test.Utils;
 using pandemic.Values;

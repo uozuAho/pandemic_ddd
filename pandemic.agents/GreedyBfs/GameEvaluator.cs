@@ -1,5 +1,6 @@
 using System.Linq;
 using pandemic.Aggregates;
+using pandemic.Aggregates.Game;
 using pandemic.Values;
 
 namespace pandemic.agents.GreedyBfs
