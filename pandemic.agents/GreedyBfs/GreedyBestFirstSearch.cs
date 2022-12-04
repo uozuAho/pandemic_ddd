@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using pandemic.Aggregates;
+using pandemic.Aggregates.Game;
 using pandemic.Commands;
 
 namespace pandemic.agents.GreedyBfs

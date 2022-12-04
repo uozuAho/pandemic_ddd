@@ -7,7 +7,7 @@ using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
 
-namespace pandemic.Aggregates
+namespace pandemic.Aggregates.Game
 {
     public record PandemicGame
     {

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates;
+using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.drawing;
 using pandemic.Values;
