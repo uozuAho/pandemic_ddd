@@ -7,11 +7,17 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- direct flight
+  - // tood: direct flight discards card
+  - // todo: direct flight without card throws
+    // todo: direct flight to same city throws
+    // todo: direct flight can end turn
+  - command generator
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - check code todos
 
 # Quick start
-- install dotnet core (tested with v6)
+- install dotnet core (tested with v7)
 
 ```sh
 # run tests

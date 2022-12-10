@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
@@ -72,6 +73,28 @@ namespace pandemic.test
             };
 
             AssertEndsTurn(() => game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
+        }
+
+        [Test]
+        public void Direct_flight_goes_to_city_and_discards_card()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Miami"))
+                })
+            };
+
+            game.DirectFlight(game.CurrentPlayer.Role, "Miami");
+
+            Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
+            Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
         }
 
         [Test]
