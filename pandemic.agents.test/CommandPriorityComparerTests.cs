@@ -49,6 +49,30 @@ namespace pandemic.agents.test
                     .Using(comparer));
         }
 
+        [Test]
+        public void Prefers_drive_over_direct_flight_if_next_to_that_city()
+        {
+            var game = ANewGame();
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Chicago"))
+                })
+            };
+
+            var comparer = new CommandPriorityComparer(game);
+
+            // atlanta already has a research station, we don't need another
+            // station on a blue city
+            Assert.That(
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
+                Is.GreaterThan(new DirectFlightCommand(Role.Scientist, "Chicago"))
+                    .Using(comparer));
+        }
+
+        // todo: prefers cure over direct flight
+
         private static PandemicGame ANewGame()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions

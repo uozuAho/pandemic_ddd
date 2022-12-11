@@ -59,6 +59,15 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
     }
     private int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
 
+    // I dunno when direct flight will be better/worse than any other command. Treat them
+    // as same priority for now.
+    private int CompareMulti(DirectFlightCommand a, PlayerCommand b) => Same;
+
+    private int CompareMulti(DirectFlightCommand a, DriveFerryCommand b)
+    {
+        return _game.Board.IsAdjacent(a.City, _game.CurrentPlayer.Location) ? Less : Same;
+    }
+
     public PlayerCommand HighestPriority(IEnumerable<PlayerCommand> commands)
     {
         return commands.OrderByDescending(c => c, this).First();
