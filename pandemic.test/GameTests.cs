@@ -87,7 +87,7 @@ namespace pandemic.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Miami"))
+                    Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Miami"))
                 })
             };
 
