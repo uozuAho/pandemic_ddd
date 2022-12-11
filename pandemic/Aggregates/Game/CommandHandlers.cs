@@ -134,9 +134,9 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string miami)
+    public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
     {
-        throw new NotImplementedException();
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
     }
 
     private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)

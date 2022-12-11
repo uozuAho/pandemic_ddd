@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using pandemic.Events;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.Aggregates.Game;
@@ -49,6 +50,7 @@ public partial record PandemicGame
             CureDiscovered c => ApplyCureDiscovered(game, c),
             GameLost g => game with {LossReason = g.Reason},
             TurnEnded t => ApplyTurnEnded(game),
+            PlayerDirectFlewTo p => ApplyPlayerDirectFlewTo(game, p),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -188,6 +190,22 @@ public partial record PandemicGame
         };
 
         return pandemicGame with {Players = newPlayers.ToImmutableList()};
+    }
+
+    private static PandemicGame ApplyPlayerDirectFlewTo(PandemicGame game, PlayerDirectFlewTo evt)
+    {
+        var newPlayers = game.Players.Select(p => p).ToList();
+        var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == evt.Role);
+        var movedPlayer = newPlayers[movedPlayerIdx];
+
+        newPlayers[movedPlayerIdx] = movedPlayer with
+        {
+            Location = evt.City,
+            ActionsRemaining = movedPlayer.ActionsRemaining - 1,
+            Hand = movedPlayer.Hand.Remove(PlayerCards.CityCard(evt.City))
+        };
+
+        return game with {Players = newPlayers.ToImmutableList()};
     }
 
     private static PandemicGame ApplyTurnEnded(PandemicGame game)

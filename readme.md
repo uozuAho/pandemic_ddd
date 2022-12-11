@@ -8,11 +8,11 @@ implemented.
 
 # todo
 - direct flight
-  - // tood: direct flight discards card
   - // todo: direct flight without card throws
     // todo: direct flight to same city throws
     // todo: direct flight can end turn
   - command generator
+- try mutable game again. event handlers and tests are clunky due to immutable. does mutable game help?
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - check code todos
 

@@ -91,7 +91,7 @@ namespace pandemic.test
                 })
             };
 
-            game.DirectFlight(game.CurrentPlayer.Role, "Miami");
+            (game, _) = game.DirectFlight(game.CurrentPlayer.Role, "Miami");
 
             Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
             Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
