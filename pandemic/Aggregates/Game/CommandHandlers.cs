@@ -143,6 +143,9 @@ public partial record PandemicGame
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
 
+        if (CurrentPlayer.Location == city)
+            throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
+
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
     }
 

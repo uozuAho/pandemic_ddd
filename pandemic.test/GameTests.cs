@@ -119,6 +119,27 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Direct_flight_to_current_city_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Atlanta"))
+                })
+            };
+
+            Assert.That(
+                () => game.DirectFlight(game.CurrentPlayer.Role, "Atlanta"),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();
