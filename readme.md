@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - direct flight
-    // todo: direct flight can end turn
   - command generator
 - try mutable game again. event handlers and tests are clunky due to immutable. does mutable game help?
   - start by writing a test/event handler with desired syntax
