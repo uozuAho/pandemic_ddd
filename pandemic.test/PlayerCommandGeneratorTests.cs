@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;
@@ -118,6 +117,24 @@ namespace pandemic.test
                 (DiscoverCureCommand) _generator.LegalCommands(game).Single(c => c is DiscoverCureCommand);
 
             Assert.AreEqual(5, cureCommand.Cards.Length);
+        }
+
+        [Test]
+        public void Can_direct_fly()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlantaCard = PlayerCards.CityCard("Atlanta");
+
+            game = game with
+            {
+                Players = ImmutableList.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { atlantaCard })
+                })
+            };
+
+            Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is DirectFlightCommand));
         }
     }
 }

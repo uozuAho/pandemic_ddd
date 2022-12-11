@@ -26,6 +26,7 @@ namespace pandemic.Commands
                 SetDriveFerryCommands(game);
                 SetBuildResearchStationCommands(game);
                 SetCureCommands(game);
+                SetDirectFlightCommands(game);
             }
 
             return new ArraySegment<PlayerCommand>(_buffer, 0, _bufIdx);
@@ -47,6 +48,15 @@ namespace pandemic.Commands
             foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
             {
                 _buffer[_bufIdx++] = new DriveFerryCommand(game.CurrentPlayer.Role, city);
+            }
+        }
+
+        private void SetDirectFlightCommands(PandemicGame game)
+        {
+            foreach (var cityCard in game.CurrentPlayer.Hand.CityCards)
+            {
+                if (game.CurrentPlayer.Location != cityCard.City.Name)
+                    _buffer[_bufIdx++] = new DirectFlightCommand(game.CurrentPlayer.Role, cityCard.City.Name);
             }
         }
 

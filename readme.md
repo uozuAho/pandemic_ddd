@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- direct flight
-  - command generator
 - try mutable game again. event handlers and tests are clunky due to immutable. does mutable game help?
   - start by writing a test/event handler with desired syntax
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
