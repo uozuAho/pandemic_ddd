@@ -29,10 +29,17 @@ namespace pandemic.agents.test
 
             var sortedCommands = commands.OrderByDescending(c => c, comparer).ToList();
 
-            Assert.AreEqual(typeof(DiscoverCureCommand), sortedCommands[0].GetType());
-            Assert.AreEqual(typeof(BuildResearchStationCommand), sortedCommands[1].GetType());
-            Assert.AreEqual(typeof(DriveFerryCommand), sortedCommands[2].GetType());
-            Assert.AreEqual(typeof(DiscardPlayerCardCommand), sortedCommands[3].GetType());
+            Assert.That(
+                sortedCommands.Select(c => c.GetType()).ToList(),
+                Is.EqualTo(new[]
+                {
+                    typeof(DiscoverCureCommand),
+                    typeof(BuildResearchStationCommand),
+                    typeof(DriveFerryCommand),
+                    typeof(DiscardPlayerCardCommand),
+                }));
+
+            // todo: add direct flight to this test
         }
 
         [Test]
@@ -70,8 +77,6 @@ namespace pandemic.agents.test
                 Is.GreaterThan(new DirectFlightCommand(Role.Scientist, "Chicago"))
                     .Using(comparer));
         }
-
-        // todo: prefers cure over direct flight
 
         private static PandemicGame ANewGame()
         {
