@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Values;
@@ -9,7 +8,7 @@ using pandemic.Values;
 namespace pandemic.agents;
 
 /// <summary>
-/// Hand-crafter comparer that attempts to rank commands by likelihood
+/// Hand-crafted comparer that attempts to rank commands by likelihood
 /// that they'll lead to a win. Uses multiple dispatch as found here:
 /// https://stackoverflow.com/questions/480443/what-is-single-and-multiple-dispatch-in-relation-to-net/4810826#4810826
 /// </summary>
@@ -58,6 +57,15 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return Greater;
     }
     private int CompareMulti(DriveFerryCommand a, DiscardPlayerCardCommand b) => Greater;
+
+    // I dunno when direct flight will be better/worse than any other command. Treat them
+    // as same priority for now.
+    private int CompareMulti(DirectFlightCommand a, PlayerCommand b) => Same;
+
+    private int CompareMulti(DirectFlightCommand a, DriveFerryCommand b)
+    {
+        return _game.Board.IsAdjacent(a.City, _game.CurrentPlayer.Location) ? Less : Same;
+    }
 
     public PlayerCommand HighestPriority(IEnumerable<PlayerCommand> commands)
     {

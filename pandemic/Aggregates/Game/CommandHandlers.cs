@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using pandemic.Commands;
 using pandemic.Events;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.Aggregates.Game;
@@ -47,6 +48,7 @@ public partial record PandemicGame
             DiscardPlayerCardCommand command => DiscardPlayerCard(command.Card),
             BuildResearchStationCommand command => BuildResearchStation(command.City),
             DiscoverCureCommand command => DiscoverCure(command.Cards),
+            DirectFlightCommand command => DirectFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
     }
@@ -129,9 +131,23 @@ public partial record PandemicGame
         if (cards.Any(c => c.City.Colour != colour))
             throw new GameRuleViolatedException("Cure: All cards must be the same colour");
 
+        // todo: what if player doesn't have given cards in hand?
+
         return ApplyAndEndTurnIfNeeded(cards
             .Select(c => new PlayerCardDiscarded(c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+    }
+
+    // todo: replace string city here with value object?
+    public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
+    {
+        if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
+            throw new GameRuleViolatedException("Current player doesn't have required card");
+
+        if (CurrentPlayer.Location == city)
+            throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
+
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
     }
 
     private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)

@@ -23,16 +23,23 @@ namespace pandemic.agents.test
             {
                 new DiscardPlayerCardCommand(new EpidemicCard()),
                 new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
-                new DriveFerryCommand(Role.Scientist, "Atlanta"),
+                new DirectFlightCommand(Role.Scientist, "Chicago"),
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
                 new BuildResearchStationCommand("Miami"),
             };
 
             var sortedCommands = commands.OrderByDescending(c => c, comparer).ToList();
 
-            Assert.AreEqual(typeof(DiscoverCureCommand), sortedCommands[0].GetType());
-            Assert.AreEqual(typeof(BuildResearchStationCommand), sortedCommands[1].GetType());
-            Assert.AreEqual(typeof(DriveFerryCommand), sortedCommands[2].GetType());
-            Assert.AreEqual(typeof(DiscardPlayerCardCommand), sortedCommands[3].GetType());
+            Assert.That(
+                sortedCommands.Select(c => c.GetType()).ToList(),
+                Is.EqualTo(new[]
+                {
+                    typeof(DiscoverCureCommand),
+                    typeof(BuildResearchStationCommand), // todo: this is wrong, not a valid command at this point
+                    typeof(DriveFerryCommand),
+                    typeof(DiscardPlayerCardCommand), // this only ends up before direct flight due to order before sorting
+                    typeof(DirectFlightCommand),
+                }));
         }
 
         [Test]
@@ -46,6 +53,28 @@ namespace pandemic.agents.test
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Paris"),
                 Is.GreaterThan(new BuildResearchStationCommand("Chicago"))
+                    .Using(comparer));
+        }
+
+        [Test]
+        public void Prefers_drive_over_direct_flight_if_next_to_that_city()
+        {
+            var game = ANewGame();
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Chicago"))
+                })
+            };
+
+            var comparer = new CommandPriorityComparer(game);
+
+            // atlanta already has a research station, we don't need another
+            // station on a blue city
+            Assert.That(
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
+                Is.GreaterThan(new DirectFlightCommand(Role.Scientist, "Chicago"))
                     .Using(comparer));
         }
 

@@ -25,6 +25,7 @@ public class PandemicSearchProblem
         return _commandGenerator.LegalCommands(state);
     }
 
+    // todo: replace with game.do?
     public PandemicGame DoAction(PandemicGame state, PlayerCommand action)
     {
         PandemicGame newState;
@@ -42,6 +43,9 @@ public class PandemicSearchProblem
                 return newState;
             case DiscoverCureCommand command:
                 (newState, _) = state.DiscoverCure(command.Cards);
+                return newState;
+            case DirectFlightCommand command:
+                (newState, _) = state.DirectFlight(command.Role, command.City);
                 return newState;
             default:
                 throw new ArgumentOutOfRangeException($"Unsupported action: {action}");

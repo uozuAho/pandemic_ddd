@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
@@ -72,6 +71,90 @@ namespace pandemic.test
             };
 
             AssertEndsTurn(() => game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
+        }
+
+        [Test]
+        public void Direct_flight_goes_to_city_and_discards_card()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Miami"))
+                })
+            };
+
+            (game, _) = game.DirectFlight(game.CurrentPlayer.Role, "Miami");
+
+            Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
+            Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
+        }
+
+        [Test]
+        public void Direct_flight_without_card_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = PlayerHand.Empty
+                })
+            };
+
+            Assert.That(
+                () => game.DirectFlight(game.CurrentPlayer.Role, "Miami"),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Direct_flight_to_current_city_throws()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Atlanta"))
+                })
+            };
+
+            Assert.That(
+                () => game.DirectFlight(game.CurrentPlayer.Role, "Atlanta"),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Direct_flight_can_end_turn()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1,
+                    Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Miami"))
+                })
+            };
+
+            AssertEndsTurn(() => game.DirectFlight(Role.Medic, "Miami"));
         }
 
         [Test]
