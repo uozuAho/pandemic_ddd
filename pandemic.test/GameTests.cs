@@ -9,6 +9,7 @@ using pandemic.Events;
 using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
+using Shouldly;
 
 namespace pandemic.test
 {
@@ -230,10 +231,10 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
 
-            Assert.AreEqual(4, game.PlayerByRole(Role.Medic).ActionsRemaining,
+            game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(4,
                 "player whose turn ended should get their 'remaining actions' counter reset");
-            Assert.AreEqual(Role.Scientist, game.CurrentPlayer.Role);
-            Assert.AreEqual(4, game.CurrentPlayer.ActionsRemaining);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
         }
 
         [Test]
