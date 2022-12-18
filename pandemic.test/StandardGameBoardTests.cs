@@ -5,7 +5,7 @@ namespace pandemic.test
 {
     internal class StandardGameBoardTests
     {
-        private readonly StandardGameBoard _board = new();
+        private readonly StandardGameBoard _board = StandardGameBoard.Instance();
 
         [TestCase("Atlanta", "Washington", 1)]
         [TestCase("Washington", "Atlanta", 1)]
@@ -14,7 +14,7 @@ namespace pandemic.test
         [TestCase("Santiago", "Paris", 5)]
         public void Drive_ferry_distance_between(string city1, string city2, int expectedDistance)
         {
-            Assert.That(_board.DriveFerryDistance(city1, city2), Is.EqualTo(expectedDistance));
+            Assert.That(StandardGameBoard.DriveFerryDistance(city1, city2), Is.EqualTo(expectedDistance));
         }
     }
 }

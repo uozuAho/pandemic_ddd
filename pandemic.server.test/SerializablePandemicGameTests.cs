@@ -21,7 +21,7 @@ namespace pandemic.server.test
             var serialisable = SerializablePandemicGame.From(game);
             var ser = serialisable.Serialise();
             var deser = SerializablePandemicGame.Deserialise(ser);
-            var deserGame = deser.ToPandemicGame(new StandardGameBoard());
+            var deserGame = deser.ToPandemicGame(StandardGameBoard.Instance());
 
             Assert.IsTrue(deserGame.IsSameStateAs(game));
         }

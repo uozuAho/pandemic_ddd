@@ -11,7 +11,7 @@ namespace pandemic.agents.test
 {
     internal class GreedyBfsTests
     {
-        private static readonly StandardGameBoard Board = new();
+        private static readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
         [Test]
         public void Does_step()

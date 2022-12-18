@@ -123,7 +123,7 @@ namespace pandemic.server
 
             var state = SerializablePandemicGame
                 .Deserialise(applyActionRequest.state_str)
-                .ToPandemicGame(new StandardGameBoard());
+                .ToPandemicGame(StandardGameBoard.Instance());
 
             var newState = DoAction(state, applyActionRequest.action);
 

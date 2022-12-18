@@ -28,7 +28,7 @@ namespace pandemic.Aggregates.Game
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
 
-        public readonly StandardGameBoard Board = new();
+        public readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
         public bool IsOver => IsLost || IsWon;
 
