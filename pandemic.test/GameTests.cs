@@ -17,9 +17,8 @@ namespace pandemic.test
         [TestCase("Washington")]
         public void Drive_or_ferry_player_moves_them_to_city(string toCity)
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = NewGame(new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
@@ -31,9 +30,8 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_garbage_city_throws()
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = NewGame(new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
@@ -44,9 +42,8 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = NewGame(new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
@@ -402,6 +399,7 @@ namespace pandemic.test
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Location = "Chicago",
+                    // todo: this breaks if chicago already in player's hand
                     Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard),
                     ActionsRemaining = 1
                 })
@@ -765,6 +763,13 @@ namespace pandemic.test
             (_, events) = action();
 
             Assert.IsTrue(events.Any(e => e is TurnEnded));
+        }
+
+        private static PandemicGame NewGame(NewGameOptions options)
+        {
+            var (game, _) = PandemicGame.CreateNewGame(options);
+
+            return game;
         }
     }
 }

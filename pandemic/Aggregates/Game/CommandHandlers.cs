@@ -197,7 +197,7 @@ public partial record PandemicGame
         var rng = new Random();
         var drawPile = PlayerDrawPile
             .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
-            // todo: distribute epidemic cards as per game rules
+            // todo: game rules: distribute epidemic cards as per game rules
             .OrderBy(_ => rng.Next())
             .ToImmutableList();
 

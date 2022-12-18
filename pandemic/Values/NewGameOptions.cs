@@ -4,7 +4,7 @@ namespace pandemic.Values
 {
     public record NewGameOptions
     {
-        public Difficulty Difficulty { get; init; }
+        public Difficulty Difficulty { get; init; } = Difficulty.Normal;
         public ICollection<Role> Roles { get; init; } = new List<Role>();
     }
 }
