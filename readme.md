@@ -8,9 +8,6 @@ implemented.
 
 # todo
 - cleaning
-  - make tests read nicer
-    - create method PlayerHand.Of("miami"...)
-      - replace usages of PlayerHand.Add and PlayerHand.Empty.Add
   - create a 'deck' type. Replace deck.TakeLast usage with deck.Draw
 - inline todos
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

@@ -73,11 +73,7 @@ namespace pandemic.test
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
-            {
-                Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Miami"))
-            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Miami") });
 
             (game, _) = game.DirectFlight(game.CurrentPlayer.Role, "Miami");
 
@@ -93,10 +89,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
-            {
-                Hand = PlayerHand.Empty
-            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.That(
                 () => game.DirectFlight(game.CurrentPlayer.Role, "Miami"),
@@ -110,11 +103,7 @@ namespace pandemic.test
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
-            {
-                Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Atlanta"))
-            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
             Assert.That(
                 () => game.DirectFlight(game.CurrentPlayer.Role, "Atlanta"),
@@ -132,7 +121,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Miami"))
+                Hand = PlayerHand.Of("Miami")
             });
 
             AssertEndsTurn(() => game.DirectFlight(Role.Medic, "Miami"));
@@ -333,7 +322,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 Location = "Chicago",
-                Hand = new PlayerHand(new[] { chicagoPlayerCard })
+                Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
             // act
@@ -355,7 +344,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 Location = "Chicago",
-                Hand = PlayerHand.Empty.Add(chicagoPlayerCard),
+                Hand = PlayerHand.Of(chicagoPlayerCard),
                 ActionsRemaining = 1
             });
 
@@ -371,7 +360,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
-                Hand = game.CurrentPlayer.Hand.Add(PlayerCards.CityCard("Chicago"))
+                Hand = PlayerHand.Of("Chicago")
             });
 
             Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
@@ -406,7 +395,7 @@ namespace pandemic.test
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
-                Hand = game.CurrentPlayer.Hand.Add(atlantaPlayerCard)
+                Hand = PlayerHand.Of(atlantaPlayerCard)
             });
 
             // atlanta starts with a research station
@@ -429,7 +418,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 Location = "Chicago",
-                Hand = game.CurrentPlayer.Hand.Add(chicagoPlayerCard)
+                Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
             Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
