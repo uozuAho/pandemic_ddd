@@ -25,31 +25,11 @@ public class PandemicSearchProblem
         return _commandGenerator.LegalCommands(state);
     }
 
-    // todo: replace with game.do?
     public PandemicGame DoAction(PandemicGame state, PlayerCommand action)
     {
-        PandemicGame newState;
+        var (nextState, _) = state.Do(action);
 
-        switch (action)
-        {
-            case DriveFerryCommand command:
-                (newState, _) = state.DriveOrFerryPlayer(command.Role, command.City);
-                return newState;
-            case DiscardPlayerCardCommand command:
-                (newState, _) = state.DiscardPlayerCard(command.Card);
-                return newState;
-            case BuildResearchStationCommand command:
-                (newState, _) = state.BuildResearchStation(command.City);
-                return newState;
-            case DiscoverCureCommand command:
-                (newState, _) = state.DiscoverCure(command.Cards);
-                return newState;
-            case DirectFlightCommand command:
-                (newState, _) = state.DirectFlight(command.Role, command.City);
-                return newState;
-            default:
-                throw new ArgumentOutOfRangeException($"Unsupported action: {action}");
-        }
+        return nextState;
     }
 
     public bool IsGoal(PandemicGame state)

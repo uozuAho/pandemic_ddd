@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- cleaning
-  - create a 'deck' type. Replace deck.TakeLast usage with deck.Draw
 - inline todos
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
