@@ -7,6 +7,7 @@ using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -54,18 +55,12 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_can_end_turn()
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = NewGame(new NewGameOptions
             {
-                Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    ActionsRemaining = 1
-                })
-            };
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             AssertEndsTurn(() => game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
         }
