@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Values;
@@ -9,7 +8,7 @@ using pandemic.Values;
 namespace pandemic.agents;
 
 /// <summary>
-/// Hand-crafter comparer that attempts to rank commands by likelihood
+/// Hand-crafted comparer that attempts to rank commands by likelihood
 /// that they'll lead to a win. Uses multiple dispatch as found here:
 /// https://stackoverflow.com/questions/480443/what-is-single-and-multiple-dispatch-in-relation-to-net/4810826#4810826
 /// </summary>

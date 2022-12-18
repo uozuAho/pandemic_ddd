@@ -23,7 +23,8 @@ namespace pandemic.agents.test
             {
                 new DiscardPlayerCardCommand(new EpidemicCard()),
                 new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
-                new DriveFerryCommand(Role.Scientist, "Atlanta"),
+                new DirectFlightCommand(Role.Scientist, "Chicago"),
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
                 new BuildResearchStationCommand("Miami"),
             };
 
@@ -34,12 +35,11 @@ namespace pandemic.agents.test
                 Is.EqualTo(new[]
                 {
                     typeof(DiscoverCureCommand),
-                    typeof(BuildResearchStationCommand),
+                    typeof(BuildResearchStationCommand), // todo: this is wrong, not a valid command at this point
                     typeof(DriveFerryCommand),
-                    typeof(DiscardPlayerCardCommand),
+                    typeof(DiscardPlayerCardCommand), // this only ends up before direct flight due to order before sorting
+                    typeof(DirectFlightCommand),
                 }));
-
-            // todo: add direct flight to this test
         }
 
         [Test]
