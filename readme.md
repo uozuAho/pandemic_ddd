@@ -7,11 +7,11 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- try mutable game again. event handlers and tests are clunky due to immutable. does mutable game help?
-  - start by writing a test/event handler with desired syntax
-    - use SetCurrentPlayerAs everywhere
+- cleaning
+  - make tests read nicer
     - create method PlayerHand.Of("miami"...)
       - replace usages of PlayerHand.Add and PlayerHand.Empty.Add
+  - create a 'deck' type. Replace deck.TakeLast usage with deck.Draw
 - inline todos
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
