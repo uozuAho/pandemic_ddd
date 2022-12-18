@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
 using pandemic.Values;

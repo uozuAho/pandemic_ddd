@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 
 namespace pandemic.Commands

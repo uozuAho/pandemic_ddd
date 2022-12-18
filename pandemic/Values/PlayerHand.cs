@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using pandemic.GameData;
 
 namespace pandemic.Values
 {
@@ -18,7 +19,17 @@ namespace pandemic.Values
             Cards = cards.ToImmutableList();
         }
 
-        public static PlayerHand Empty = new ();
+        public static readonly PlayerHand Empty = new ();
+
+        public static PlayerHand Of(string cardName)
+        {
+            return new PlayerHand(new [] {PlayerCards.CityCard(cardName)});
+        }
+
+        public static PlayerHand Of(params PlayerCityCard[] cards)
+        {
+            return new PlayerHand(cards);
+        }
 
         public IEnumerator<PlayerCard> GetEnumerator() => Cards.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

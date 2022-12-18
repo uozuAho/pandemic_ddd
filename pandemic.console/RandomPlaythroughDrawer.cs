@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.drawing;

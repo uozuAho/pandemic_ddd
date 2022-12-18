@@ -8,8 +8,6 @@ implemented.
 
 # todo
 - inline todos
-- try mutable game again. event handlers and tests are clunky due to immutable. does mutable game help?
-  - start by writing a test/event handler with desired syntax
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg

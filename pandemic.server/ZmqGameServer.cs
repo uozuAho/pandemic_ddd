@@ -4,7 +4,6 @@ using System.Linq;
 using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;

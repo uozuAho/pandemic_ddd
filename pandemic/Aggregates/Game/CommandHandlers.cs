@@ -101,7 +101,6 @@ public partial record PandemicGame
         if (CityByName(city).HasResearchStation)
             throw new GameRuleViolatedException($"{city} already has a research station");
 
-        // todo: this sometimes fails due to duplicate cities in hand
         var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
         return ApplyAndEndTurnIfNeeded(new List<IEvent>
@@ -131,7 +130,8 @@ public partial record PandemicGame
         if (cards.Any(c => c.City.Colour != colour))
             throw new GameRuleViolatedException("Cure: All cards must be the same colour");
 
-        // todo: what if player doesn't have given cards in hand?
+        if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
+            throw new ArgumentException($"given cards contain a card not in player's hand");
 
         return ApplyAndEndTurnIfNeeded(cards
             .Select(c => new PlayerCardDiscarded(c))
@@ -197,7 +197,7 @@ public partial record PandemicGame
         var rng = new Random();
         var drawPile = PlayerDrawPile
             .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
-            // todo: distribute epidemic cards as per game rules
+            // todo: game rules: distribute epidemic cards as per game rules
             .OrderBy(_ => rng.Next())
             .ToImmutableList();
 
@@ -304,7 +304,7 @@ public partial record PandemicGame
     {
         return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
 
-        // todo: handle epidemic
+        // todo: game rules: handle epidemic
     }
 
     private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
