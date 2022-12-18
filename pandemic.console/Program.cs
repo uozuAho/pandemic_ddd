@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using pandemic.agents;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Events;
 using pandemic.Values;

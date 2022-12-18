@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
-using pandemic.Aggregates;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;
