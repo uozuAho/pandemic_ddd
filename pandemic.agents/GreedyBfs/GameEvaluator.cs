@@ -1,5 +1,6 @@
 using System.Linq;
 using pandemic.Aggregates.Game;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.agents.GreedyBfs
@@ -40,7 +41,7 @@ namespace pandemic.agents.GreedyBfs
             // further away from research stations is bad
             // (at least with currently implemented rules)
             score -= game.Players
-                .Sum(p => game.Board.DriveFerryDistance(
+                .Sum(p => StandardGameBoard.DriveFerryDistance(
                     p.Location, ClosestResearchStationTo(game, p.Location)));
 
             return score;
@@ -75,7 +76,7 @@ namespace pandemic.agents.GreedyBfs
                          .Where(c => c.HasResearchStation)
                          .Select(c => c.Name))
             {
-                var distance = game.Board.DriveFerryDistance(researchCity, city);
+                var distance = StandardGameBoard.DriveFerryDistance(researchCity, city);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
