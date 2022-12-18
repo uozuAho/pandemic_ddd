@@ -11,6 +11,6 @@ namespace pandemic.GameData
         public static PlayerCityCard CityCard(string name) => _allCards.Single(c => c.City.Name == name);
 
         private static IEnumerable<PlayerCityCard> _allCards =>
-            new StandardGameBoard().Cities.Select(c => new PlayerCityCard(c)).ToList();
+            StandardGameBoard.Instance().Cities.Select(c => new PlayerCityCard(c)).ToList();
     }
 }

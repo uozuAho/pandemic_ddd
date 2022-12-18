@@ -10,7 +10,7 @@ namespace pandemic.agents.test
 {
     internal class CommandPriorityComparerTests
     {
-        private static readonly StandardGameBoard Board = new();
+        private static readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
         [Test]
         public void Gets_basics_right()

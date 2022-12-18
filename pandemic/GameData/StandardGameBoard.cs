@@ -7,6 +7,13 @@ namespace pandemic.GameData
 {
     public class StandardGameBoard
     {
+        private StandardGameBoard() {}
+
+        public static StandardGameBoard Instance()
+        {
+            return _instance;
+        }
+
         public const int NumberOfCities = 48;
 
         public bool IsCity(string city)
@@ -228,5 +235,7 @@ namespace pandemic.GameData
 
             return lookup;
         }
+
+        private static readonly StandardGameBoard _instance = new();
     }
 }
