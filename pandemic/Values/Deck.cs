@@ -13,6 +13,7 @@ public class Deck<T>
     public int Count => _cards.Count;
     public IEnumerable<T> Cards => _cards.Select(c => c);
     public T TopCard => _cards.Last();
+    public static Deck<T> Empty => new();
 
     public Deck()
     {
@@ -54,5 +55,10 @@ public class Deck<T>
     public Deck<T> PlaceOnTop(IEnumerable<T> cards)
     {
         return new Deck<T>(_cards.Concat(cards));
+    }
+
+    public Deck<T> PlaceOnTop(T card)
+    {
+        return new Deck<T>(_cards.Concat(new[] { card }));
     }
 }

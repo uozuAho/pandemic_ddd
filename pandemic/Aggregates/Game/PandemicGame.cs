@@ -19,8 +19,8 @@ namespace pandemic.Aggregates.Game
         public int ResearchStationPile { get; init; } = 6;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
-        public Deck<PlayerCard> PlayerDrawPile { get; init; }
-        public ImmutableList<PlayerCard> PlayerDiscardPile { get; init; } = ImmutableList<PlayerCard>.Empty;
+        public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
+        public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =

@@ -66,7 +66,7 @@ public partial record PandemicGame
             {
                 Hand = e.Player.Hand.Remove(discardedCard)
             }),
-            PlayerDiscardPile = game.PlayerDiscardPile.Add(discardedCard)
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discardedCard)
         };
     }
 
@@ -166,7 +166,7 @@ public partial record PandemicGame
             {
                 Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
             }),
-            PlayerDiscardPile = game.PlayerDiscardPile.Add(discarded.Card)
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discarded.Card)
         };
     }
 

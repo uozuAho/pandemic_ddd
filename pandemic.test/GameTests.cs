@@ -266,7 +266,7 @@ namespace pandemic.test
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
-            game.PlayerDiscardPile.ShouldContain(cardToDiscard);
+            game.PlayerDiscardPile.Cards.ShouldContain(cardToDiscard);
         }
 
         [Test]
@@ -328,10 +328,10 @@ namespace pandemic.test
             // act
             (game, _) = game.BuildResearchStation("Chicago");
 
-            Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
-            Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
-            Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
-            Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
+            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
+            game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
+            game.PlayerDiscardPile.Cards.ShouldContain(chicagoPlayerCard);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 
         [Test]
@@ -635,7 +635,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
-            Assert.AreEqual(1, game.PlayerDiscardPile.Count(c => c is EpidemicCard));
+            Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

@@ -8,6 +8,7 @@ implemented.
 
 # todo
 - replace all card lists with Deck<t>
+- hands/decks etc: don't implement enumerable??
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg
