@@ -176,7 +176,7 @@ namespace pandemic.test
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
 
-            foreach (var infectionCard in game.InfectionDiscardPile.TakeLast(2))
+            foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
                 var city = game.CityByName(infectionCard.City.Name);
                 Assert.That(city.Cubes[infectionCard.City.Colour], Is.EqualTo(1),

@@ -133,7 +133,7 @@ public partial record PandemicGame
         return game with
         {
             InfectionDrawPile = newDrawPile,
-            InfectionDiscardPile = game.InfectionDiscardPile.Add(drawnCard),
+            InfectionDiscardPile = game.InfectionDiscardPile.PlaceOnTop(drawnCard),
         };
     }
 
