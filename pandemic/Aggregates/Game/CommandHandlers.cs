@@ -73,6 +73,11 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
     }
 
+    public (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role currentPlayerRole, string city)
+    {
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(currentPlayerRole, city)});
+    }
+
     public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
     {
         ThrowIfGameOver(this);

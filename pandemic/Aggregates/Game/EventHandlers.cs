@@ -51,6 +51,7 @@ public partial record PandemicGame
             GameLost g => game with {LossReason = g.Reason},
             TurnEnded t => ApplyTurnEnded(game),
             PlayerDirectFlewTo p => ApplyPlayerDirectFlewTo(game, p),
+            PlayerCharterFlewTo p => ApplyPlayerCharterFlewTo(game, p),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -213,6 +214,18 @@ public partial record PandemicGame
         };
 
         return game with {Players = newPlayers.ToImmutableList()};
+    }
+
+    private static PandemicGame ApplyPlayerCharterFlewTo(PandemicGame game, PlayerCharterFlewTo evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+
+        return game.SetPlayer(evt.Role, player with
+        {
+            Location = evt.City,
+            ActionsRemaining = player.ActionsRemaining - 1,
+            Hand = player.Hand.Remove(PlayerCards.CityCard(player.Location))
+        });
     }
 
     private static PandemicGame ApplyTurnEnded(PandemicGame game)
