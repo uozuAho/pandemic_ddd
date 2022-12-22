@@ -28,7 +28,7 @@ namespace pandemic.test
             // decks
             Assert.That(game.PlayerDrawPile.Count, Is.EqualTo(
                 StandardGameBoard.NumberOfCities + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer));
-            Assert.That(game.PlayerDrawPile.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
+            Assert.That(game.PlayerDrawPile.Cards.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
 
             // cities
             Assert.That(game.CityByName("Atlanta").HasResearchStation);

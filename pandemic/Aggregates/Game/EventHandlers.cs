@@ -43,7 +43,7 @@ public partial record PandemicGame
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
             PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
             PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile},
+            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile)},
             PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
             PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
             CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
@@ -103,18 +103,18 @@ public partial record PandemicGame
     {
         return game with
         {
-            PlayerDrawPile = @event.Pile
+            PlayerDrawPile = new Deck<PlayerCard>(@event.Pile)
         };
     }
 
     private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
     {
-        var cards = game.PlayerDrawPile.TakeLast(dealt.Cards.Length).ToList();
+        var (newDrawPile, cards) = game.PlayerDrawPile.Draw(dealt.Cards.Length);
         var player = game.PlayerByRole(dealt.Role);
 
         return game with
         {
-            PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
+            PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(player, player with
             {
                 Hand = new PlayerHand(cards)
@@ -146,13 +146,14 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game)
     {
-        var pickedCard = game.PlayerDrawPile.Last();
+        var (newDrawPile, drawnCard) = game.PlayerDrawPile.Draw();
+
         return game with
         {
-            PlayerDrawPile = game.PlayerDrawPile.Remove(pickedCard),
+            PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
-                Hand = game.CurrentPlayer.Hand.Add(pickedCard)
+                Hand = game.CurrentPlayer.Hand.Add(drawnCard)
             })
         };
     }

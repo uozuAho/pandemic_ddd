@@ -37,7 +37,7 @@ namespace pandemic.server.Dto
                 ResearchStationPile = game.ResearchStationPile,
                 Players = game.Players.Select(SerializablePlayer.From).ToImmutableList(),
                 Cities = game.Cities,
-                PlayerDrawPile = game.PlayerDrawPile
+                PlayerDrawPile = game.PlayerDrawPile.Cards
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
                 PlayerDiscardPile = game.PlayerDiscardPile
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
@@ -60,8 +60,8 @@ namespace pandemic.server.Dto
                 ResearchStationPile = ResearchStationPile,
                 Players = Players.Select(p => p.ToPlayer(board)).ToImmutableList(),
                 Cities = Cities,
-                PlayerDrawPile = PlayerDrawPile
-                    .Select(c => c.ToPlayerCard(board)).ToImmutableList(),
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerDrawPile
+                    .Select(c => c.ToPlayerCard(board))),
                 PlayerDiscardPile = PlayerDiscardPile
                     .Select(c => c.ToPlayerCard(board)).ToImmutableList(),
                 InfectionDrawPile = InfectionDrawPile,

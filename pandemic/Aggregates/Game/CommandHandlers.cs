@@ -138,7 +138,6 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
-    // todo: replace string city here with value object?
     public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
     {
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
@@ -187,7 +186,7 @@ public partial record PandemicGame
 
     private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
     {
-        var cards = PlayerDrawPile.TakeLast(numCards).ToArray();
+        var cards = PlayerDrawPile.Top(numCards).ToArray();
 
         return ApplyEvent(new PlayerCardsDealt(role, cards), events);
     }
@@ -195,7 +194,7 @@ public partial record PandemicGame
     private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
     {
         var rng = new Random();
-        var drawPile = PlayerDrawPile
+        var drawPile = PlayerDrawPile.Cards
             .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
             // todo: game rules: distribute epidemic cards as per game rules
             .OrderBy(_ => rng.Next())
@@ -268,12 +267,12 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(game);
 
-        if (!game.PlayerDrawPile.Any())
+        if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
         game = PickUpCard(game, events);
 
-        if (!game.PlayerDrawPile.Any())
+        if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
         game = PickUpCard(game, events);
@@ -290,7 +289,7 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(game);
 
-        var card = game.PlayerDrawPile.Last();
+        var card = game.PlayerDrawPile.TopCard;
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
