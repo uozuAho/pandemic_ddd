@@ -7,7 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- inline todos
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg

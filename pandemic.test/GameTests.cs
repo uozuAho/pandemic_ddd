@@ -176,7 +176,7 @@ namespace pandemic.test
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
 
-            foreach (var infectionCard in game.InfectionDiscardPile.TakeLast(2))
+            foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
                 var city = game.CityByName(infectionCard.City.Name);
                 Assert.That(city.Cubes[infectionCard.City.Colour], Is.EqualTo(1),
@@ -234,7 +234,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(7))
             });
 
             // act
@@ -256,7 +256,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = new PlayerHand(game.PlayerDrawPile.Take(7))
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(7))
             });
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
 
@@ -266,7 +266,7 @@ namespace pandemic.test
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
-            game.PlayerDiscardPile.ShouldContain(cardToDiscard);
+            game.PlayerDiscardPile.Cards.ShouldContain(cardToDiscard);
         }
 
         [Test]
@@ -279,7 +279,7 @@ namespace pandemic.test
             var game = initialGame.SetCurrentPlayerAs(initialGame.CurrentPlayer with
             {
                 ActionsRemaining = 0,
-                Hand = new PlayerHand(initialGame.PlayerDrawPile.TakeLast(6))
+                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(6))
             });
 
             (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
@@ -298,7 +298,7 @@ namespace pandemic.test
             });
             var game = initialGame.SetCurrentPlayerAs(initialGame.CurrentPlayer with
             {
-                Hand = new PlayerHand(initialGame.PlayerDrawPile.TakeLast(9)),
+                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(9)),
                 ActionsRemaining = 0
             });
 
@@ -328,10 +328,10 @@ namespace pandemic.test
             // act
             (game, _) = game.BuildResearchStation("Chicago");
 
-            Assert.IsTrue(game.CityByName("Chicago").HasResearchStation);
-            Assert.IsFalse(game.CurrentPlayer.Hand.Contains(chicagoPlayerCard));
-            Assert.Contains(chicagoPlayerCard, game.PlayerDiscardPile);
-            Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
+            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
+            game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
+            game.PlayerDiscardPile.Cards.ShouldContain(chicagoPlayerCard);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 
         [Test]
@@ -621,7 +621,7 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.AddRange(new List<PlayerCard>
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new List<PlayerCard>
                 {
                     new EpidemicCard(),
                     new PlayerCityCard(new CityData("asdf", Colour.Black))
@@ -635,7 +635,7 @@ namespace pandemic.test
             (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
-            Assert.AreEqual(1, game.PlayerDiscardPile.Count(c => c is EpidemicCard));
+            Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
@@ -668,7 +668,7 @@ namespace pandemic.test
 
             return game with
             {
-                PlayerDrawPile = PlayerCards.CityCards.Cast<PlayerCard>().ToImmutableList()
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
             };
         }
     }

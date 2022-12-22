@@ -37,12 +37,12 @@ namespace pandemic.server.Dto
                 ResearchStationPile = game.ResearchStationPile,
                 Players = game.Players.Select(SerializablePlayer.From).ToImmutableList(),
                 Cities = game.Cities,
-                PlayerDrawPile = game.PlayerDrawPile
+                PlayerDrawPile = game.PlayerDrawPile.Cards
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
-                PlayerDiscardPile = game.PlayerDiscardPile
+                PlayerDiscardPile = game.PlayerDiscardPile.Cards
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
-                InfectionDrawPile = game.InfectionDrawPile,
-                InfectionDiscardPile = game.InfectionDiscardPile,
+                InfectionDrawPile = game.InfectionDrawPile.Cards.ToImmutableList(),
+                InfectionDiscardPile = game.InfectionDiscardPile.Cards.ToImmutableList(),
                 Cubes = game.Cubes,
                 CureDiscovered = game.CureDiscovered
             };
@@ -60,12 +60,12 @@ namespace pandemic.server.Dto
                 ResearchStationPile = ResearchStationPile,
                 Players = Players.Select(p => p.ToPlayer(board)).ToImmutableList(),
                 Cities = Cities,
-                PlayerDrawPile = PlayerDrawPile
-                    .Select(c => c.ToPlayerCard(board)).ToImmutableList(),
-                PlayerDiscardPile = PlayerDiscardPile
-                    .Select(c => c.ToPlayerCard(board)).ToImmutableList(),
-                InfectionDrawPile = InfectionDrawPile,
-                InfectionDiscardPile = InfectionDiscardPile,
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerDrawPile
+                    .Select(c => c.ToPlayerCard(board))),
+                PlayerDiscardPile = new Deck<PlayerCard>(PlayerDiscardPile
+                    .Select(c => c.ToPlayerCard(board))),
+                InfectionDrawPile = new Deck<InfectionCard>(InfectionDrawPile),
+                InfectionDiscardPile = new Deck<InfectionCard>(InfectionDiscardPile),
                 Cubes = Cubes,
                 CureDiscovered = CureDiscovered
             };

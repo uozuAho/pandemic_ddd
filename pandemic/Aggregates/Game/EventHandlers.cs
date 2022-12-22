@@ -35,7 +35,7 @@ public partial record PandemicGame
             DifficultySet d => game with {Difficulty = d.Difficulty},
             EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
-            InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
+            InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
             InfectionRateSet i => game with {InfectionRate = i.Rate},
             OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
             PlayerAdded p => ApplyPlayerAdded(game, p),
@@ -43,7 +43,7 @@ public partial record PandemicGame
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
             PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
             PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = p.DrawPile},
+            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile)},
             PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
             PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
             CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
@@ -66,7 +66,7 @@ public partial record PandemicGame
             {
                 Hand = e.Player.Hand.Remove(discardedCard)
             }),
-            PlayerDiscardPile = game.PlayerDiscardPile.Add(discardedCard)
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discardedCard)
         };
     }
 
@@ -103,18 +103,18 @@ public partial record PandemicGame
     {
         return game with
         {
-            PlayerDrawPile = @event.Pile
+            PlayerDrawPile = new Deck<PlayerCard>(@event.Pile)
         };
     }
 
     private static PandemicGame ApplyPlayerCardsDealt(PandemicGame game, PlayerCardsDealt dealt)
     {
-        var cards = game.PlayerDrawPile.TakeLast(dealt.Cards.Length).ToList();
+        var (newDrawPile, cards) = game.PlayerDrawPile.Draw(dealt.Cards.Length);
         var player = game.PlayerByRole(dealt.Role);
 
         return game with
         {
-            PlayerDrawPile = game.PlayerDrawPile.RemoveRange(cards),
+            PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(player, player with
             {
                 Hand = new PlayerHand(cards)
@@ -124,10 +124,16 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn drawn)
     {
+        var (newDrawPile, drawnCard) = game.InfectionDrawPile.Draw();
+
+        if (drawnCard != drawn.Card)
+            throw new InvalidOperationException(
+                "Card at top of draw pile should be the same as the drawn card in the event");
+
         return game with
         {
-            InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-            InfectionDiscardPile = game.InfectionDiscardPile.Add(drawn.Card),
+            InfectionDrawPile = newDrawPile,
+            InfectionDiscardPile = game.InfectionDiscardPile.PlaceOnTop(drawnCard),
         };
     }
 
@@ -146,13 +152,14 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyPlayerCardPickedUp(PandemicGame game)
     {
-        var pickedCard = game.PlayerDrawPile.Last();
+        var (newDrawPile, drawnCard) = game.PlayerDrawPile.Draw();
+
         return game with
         {
-            PlayerDrawPile = game.PlayerDrawPile.Remove(pickedCard),
+            PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
-                Hand = game.CurrentPlayer.Hand.Add(pickedCard)
+                Hand = game.CurrentPlayer.Hand.Add(drawnCard)
             })
         };
     }
@@ -165,7 +172,7 @@ public partial record PandemicGame
             {
                 Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
             }),
-            PlayerDiscardPile = game.PlayerDiscardPile.Add(discarded.Card)
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discarded.Card)
         };
     }
 

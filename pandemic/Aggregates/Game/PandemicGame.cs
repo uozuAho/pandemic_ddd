@@ -19,10 +19,10 @@ namespace pandemic.Aggregates.Game
         public int ResearchStationPile { get; init; } = 6;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
-        public ImmutableList<PlayerCard> PlayerDrawPile { get; init; }
-        public ImmutableList<PlayerCard> PlayerDiscardPile { get; init; } = ImmutableList<PlayerCard>.Empty;
-        public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
-        public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
+        public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
+        public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
+        public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
+        public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24);
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
@@ -65,9 +65,9 @@ namespace pandemic.Aggregates.Game
             // order is expected to be the same and significant (different order means not equal)
             if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer)) return false;
             if (!Cities.SequenceEqual(other.Cities, City.DefaultEqualityComparer)) return false;
-            if (!InfectionDrawPile.SequenceEqual(other.InfectionDrawPile)) return false;
-            if (!InfectionDiscardPile.SequenceEqual(other.InfectionDiscardPile)) return false;
-            if (!PlayerDrawPile.SequenceEqual(other.PlayerDrawPile)) return false;
+            if (!InfectionDrawPile.IsSameAs(other.InfectionDrawPile)) return false;
+            if (!InfectionDiscardPile.IsSameAs(other.InfectionDiscardPile)) return false;
+            if (!PlayerDrawPile.IsSameAs(other.PlayerDrawPile)) return false;
             if (!Cubes.SequenceEqual(other.Cubes)) return false;
             if (!CureDiscovered.SequenceEqual(other.CureDiscovered)) return false;
 
@@ -103,8 +103,8 @@ namespace pandemic.Aggregates.Game
             var atlanta = CityByName("Atlanta");
             Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
 
-            PlayerDrawPile = Board.Cities
-                .Select(c => new PlayerCityCard(c) as PlayerCard).ToImmutableList();
+            PlayerDrawPile = new Deck<PlayerCard>(Board.Cities
+                .Select(c => new PlayerCityCard(c) as PlayerCard));
         }
 
         public static PandemicGame CreateUninitialisedGame() => new ();

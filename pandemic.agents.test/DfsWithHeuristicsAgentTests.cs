@@ -28,7 +28,7 @@ namespace pandemic.agents.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Scientist, Role.Medic }
             });
-            game = game with { PlayerDrawPile = ImmutableList<PlayerCard>.Empty };
+            game = game with { PlayerDrawPile = Deck<PlayerCard>.Empty };
 
             Assert.IsFalse(DfsWithHeuristicsAgent.CanWin(game));
         }
@@ -45,11 +45,9 @@ namespace pandemic.agents.test
             var cardsInPlayerDrawPile = 19 - cardsInPlayersHands;
             game = game with
             {
-                PlayerDrawPile = Enumerable
+                PlayerDrawPile = new Deck<PlayerCard>(Enumerable
                     .Range(0, cardsInPlayerDrawPile)
-                    .Select(_ => new EpidemicCard())
-                    .Cast<PlayerCard>()
-                    .ToImmutableList()
+                    .Select(_ => new EpidemicCard()))
             };
 
             Assert.IsFalse(DfsWithHeuristicsAgent.CanWin(game));
@@ -67,11 +65,9 @@ namespace pandemic.agents.test
             var cardsInPlayerDrawPile = 20 - cardsInPlayersHands;
             game = game with
             {
-                PlayerDrawPile = Enumerable
+                PlayerDrawPile = new Deck<PlayerCard>(Enumerable
                     .Range(0, cardsInPlayerDrawPile)
-                    .Select(_ => new EpidemicCard())
-                    .Cast<PlayerCard>()
-                    .ToImmutableList()
+                    .Select(_ => new EpidemicCard()))
             };
 
             Assert.IsTrue(DfsWithHeuristicsAgent.CanWin(game));
@@ -98,7 +94,7 @@ namespace pandemic.agents.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Scientist, Role.Medic }
             });
-            game = game with { PlayerDrawPile = ImmutableList<PlayerCard>.Empty };
+            game = game with { PlayerDrawPile = Deck<PlayerCard>.Empty };
             var cardCounter = new CardCounter();
 
             Assert.IsTrue(DfsWithHeuristicsAgent.CanWin(game, cardCounter));
