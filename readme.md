@@ -8,11 +8,9 @@ implemented.
 
 # todo
 - charter flight
-    - command generator
-    - goto garbage city throws
-    - without card throws
-    - not on city throws
+    - not that player's turn
     - can end turn
+    - command generator
     - use SetPlayer in other event handlers
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
