@@ -35,7 +35,7 @@ public partial record PandemicGame
             DifficultySet d => game with {Difficulty = d.Difficulty},
             EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
-            InfectionDeckSetUp s => game with {InfectionDrawPile = s.Deck.ToImmutableList()},
+            InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
             InfectionRateSet i => game with {InfectionRate = i.Rate},
             OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
             PlayerAdded p => ApplyPlayerAdded(game, p),
@@ -124,10 +124,16 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyInfectionCardDrawn(PandemicGame game, InfectionCardDrawn drawn)
     {
+        var (newDrawPile, drawnCard) = game.InfectionDrawPile.Draw();
+
+        if (drawnCard != drawn.Card)
+            throw new InvalidOperationException(
+                "Card at top of draw pile should be the same as the drawn card in the event");
+
         return game with
         {
-            InfectionDrawPile = game.InfectionDrawPile.RemoveAt(game.InfectionDrawPile.Count - 1),
-            InfectionDiscardPile = game.InfectionDiscardPile.Add(drawn.Card),
+            InfectionDrawPile = newDrawPile,
+            InfectionDiscardPile = game.InfectionDiscardPile.Add(drawnCard),
         };
     }
 

@@ -15,7 +15,7 @@ public class Deck<T>
     public T TopCard => _cards.Last();
     public static Deck<T> Empty => new();
 
-    public Deck()
+    private Deck()
     {
         _cards = new List<T>();
     }

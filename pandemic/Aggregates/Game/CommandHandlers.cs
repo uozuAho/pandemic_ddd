@@ -232,7 +232,7 @@ public partial record PandemicGame
     {
         for (var i = 0; i < 3; i++)
         {
-            var infectionCard = game.InfectionDrawPile.Last();
+            var infectionCard = game.InfectionDrawPile.TopCard;
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 3; j++)
             {
@@ -242,7 +242,7 @@ public partial record PandemicGame
 
         for (var i = 0; i < 3; i++)
         {
-            var infectionCard = game.InfectionDrawPile.Last();
+            var infectionCard = game.InfectionDrawPile.TopCard;
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 2; j++)
             {
@@ -252,7 +252,7 @@ public partial record PandemicGame
 
         for (var i = 0; i < 3; i++)
         {
-            var infectionCard = game.InfectionDrawPile.Last();
+            var infectionCard = game.InfectionDrawPile.TopCard;
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 1; j++)
             {
@@ -313,7 +313,7 @@ public partial record PandemicGame
         if (game.InfectionDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
 
-        var infectionCard = game.InfectionDrawPile.Last();
+        var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
         return game.Cubes[infectionCard.City.Colour] == 0

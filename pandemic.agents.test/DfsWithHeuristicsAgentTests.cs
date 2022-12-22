@@ -28,7 +28,7 @@ namespace pandemic.agents.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Scientist, Role.Medic }
             });
-            game = game with { PlayerDrawPile = new Deck<PlayerCard>() };
+            game = game with { PlayerDrawPile = Deck<PlayerCard>.Empty };
 
             Assert.IsFalse(DfsWithHeuristicsAgent.CanWin(game));
         }
@@ -94,7 +94,7 @@ namespace pandemic.agents.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Scientist, Role.Medic }
             });
-            game = game with { PlayerDrawPile = new Deck<PlayerCard>() };
+            game = game with { PlayerDrawPile = Deck<PlayerCard>.Empty };
             var cardCounter = new CardCounter();
 
             Assert.IsTrue(DfsWithHeuristicsAgent.CanWin(game, cardCounter));
