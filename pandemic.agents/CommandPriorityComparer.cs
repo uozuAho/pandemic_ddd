@@ -67,6 +67,13 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return _game.Board.IsAdjacent(a.City, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
+    private int CompareMulti(CharterFlightCommand a, PlayerCommand b) => Same;
+
+    private int CompareMulti(CharterFlightCommand a, DriveFerryCommand b)
+    {
+        return _game.Board.IsAdjacent(a.City, _game.CurrentPlayer.Location) ? Less : Same;
+    }
+
     public PlayerCommand HighestPriority(IEnumerable<PlayerCommand> commands)
     {
         return commands.OrderByDescending(c => c, this).First();
