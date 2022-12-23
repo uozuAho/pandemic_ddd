@@ -59,7 +59,7 @@ public partial record PandemicGame
     private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicCardDiscarded e)
     {
         var player = game.PlayerByRole(e.Player.Role);
-        var discardedCard = game.PlayerByRole(e.Player.Role).Hand.First(c => c is EpidemicCard);
+        var discardedCard = player.Hand.First(c => c is EpidemicCard);
 
         return game with
         {
@@ -219,13 +219,18 @@ public partial record PandemicGame
     private static PandemicGame ApplyPlayerCharterFlewTo(PandemicGame game, PlayerCharterFlewTo evt)
     {
         var player = game.PlayerByRole(evt.Role);
+        var card = PlayerCards.CityCard(player.Location);
 
-        return game.SetPlayer(evt.Role, player with
+        return game with
         {
-            Location = evt.City,
-            ActionsRemaining = player.ActionsRemaining - 1,
-            Hand = player.Hand.Remove(PlayerCards.CityCard(player.Location))
-        });
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card),
+            Players = game.Players.Replace(player, player with
+            {
+                Location = evt.City,
+                ActionsRemaining = player.ActionsRemaining - 1,
+                Hand = player.Hand.Remove(card)
+            })
+        };
     }
 
     private static PandemicGame ApplyTurnEnded(PandemicGame game)

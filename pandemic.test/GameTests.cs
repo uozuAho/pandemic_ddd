@@ -140,6 +140,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
+            game.PlayerDiscardPile.TopCard.ShouldBe(PlayerCards.CityCard("Atlanta"));
         }
 
         [Test]

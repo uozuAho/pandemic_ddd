@@ -121,10 +121,5 @@ namespace pandemic.Aggregates.Game
         {
             return PandemicGameStringRenderer.FullState(this);
         }
-
-        private PandemicGame SetPlayer(Role role, Player player)
-        {
-            return this with { Players = Players.Replace(PlayerByRole(role), player) };
-        }
     }
 }
