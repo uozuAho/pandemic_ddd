@@ -168,6 +168,22 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Charter_flight_when_not_turn_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.CharterFlight(Role.Scientist, "Bogota"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();
