@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;
+using pandemic.test.Utils;
 using pandemic.Values;
+using Shouldly;
 
 namespace pandemic.test
 {
@@ -135,6 +138,38 @@ namespace pandemic.test
             };
 
             Assert.IsTrue(_generator.LegalCommands(game).Any(c => c is DirectFlightCommand));
+        }
+
+        [Test]
+        public void Can_charter_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            var expectedCharterFlightCommands = game.Cities
+                .Select(c => c.Name)
+                .Except(new[] { "Atlanta" })
+                .Select(cityName => new CharterFlightCommand(game.CurrentPlayer.Role, cityName))
+                .OrderBy(c => c.City);
+
+            // act
+            var generatedCharterFlightCommands = _generator.LegalCommands(game)
+                .Where(c => c is CharterFlightCommand)
+                .Cast<CharterFlightCommand>()
+                .OrderBy(c => c.City);
+
+            CollectionAssert.AreEqual(expectedCharterFlightCommands, generatedCharterFlightCommands);
+        }
+
+        private static PandemicGame CreateNewGame(NewGameOptions options)
+        {
+            var (game, _) = PandemicGame.CreateNewGame(options);
+
+            return game;
         }
     }
 }
