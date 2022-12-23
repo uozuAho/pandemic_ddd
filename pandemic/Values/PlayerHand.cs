@@ -21,9 +21,9 @@ namespace pandemic.Values
 
         public static readonly PlayerHand Empty = new ();
 
-        public static PlayerHand Of(string cardName)
+        public static PlayerHand Of(params string[] cardNames)
         {
-            return new PlayerHand(new [] {PlayerCards.CityCard(cardName)});
+            return new PlayerHand(cardNames.Select(PlayerCards.CityCard));
         }
 
         public static PlayerHand Of(params PlayerCityCard[] cards)

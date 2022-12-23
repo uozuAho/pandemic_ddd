@@ -49,6 +49,7 @@ public partial record PandemicGame
             BuildResearchStationCommand command => BuildResearchStation(command.City),
             DiscoverCureCommand command => DiscoverCure(command.Cards),
             DirectFlightCommand command => DirectFlight(command.Role, command.City),
+            CharterFlightCommand command => CharterFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
     }
@@ -71,6 +72,19 @@ public partial record PandemicGame
         }
 
         return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
+    }
+
+    public (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
+    {
+        if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
+        if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
+
+        var player = PlayerByRole(role);
+
+        if (!PlayerByRole(role).Hand.Contains(PlayerCards.CityCard(player.Location)))
+            throw new GameRuleViolatedException("Current player doesn't have required card");
+
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, city)});
     }
 
     public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)

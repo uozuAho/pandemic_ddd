@@ -128,6 +128,78 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Charter_flight_goes_to_city_and_discards_card()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            (game, _) = game.CharterFlight(game.CurrentPlayer.Role, "Bogota");
+
+            game.CurrentPlayer.Location.ShouldBe("Bogota");
+            game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
+        }
+
+        [Test]
+        public void Charter_flight_to_garbage_city_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            Assert.Throws<InvalidActionException>(() =>
+                game.CharterFlight(Role.Medic, "fasdfasdf"));
+        }
+
+        [Test]
+        public void Charter_flight_without_card_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.CharterFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
+        public void Charter_flight_when_not_turn_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.CharterFlight(Role.Scientist, "Bogota"));
+        }
+
+        [Test]
+        public void Charter_flight_can_end_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            AssertEndsTurn(() => game.CharterFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();

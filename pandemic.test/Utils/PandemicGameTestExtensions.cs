@@ -12,4 +12,9 @@ public static class PandemicGameTestExtensions
             Players = game.Players.Replace(game.CurrentPlayer, player)
         };
     }
+
+    public static PandemicGame SetPlayer(this PandemicGame game, Role role, Player player)
+    {
+        return game with { Players = game.Players.Replace(game.PlayerByRole(role), player) };
+    }
 }

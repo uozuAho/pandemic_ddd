@@ -4,6 +4,7 @@ using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.agents.test
@@ -74,6 +75,23 @@ namespace pandemic.agents.test
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
                 Is.GreaterThan(new DirectFlightCommand(Role.Scientist, "Chicago"))
+                    .Using(comparer));
+        }
+
+        [Test]
+        public void Prefers_drive_over_charter_flight_if_next_to_that_city()
+        {
+            var game = ANewGame();
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            var comparer = new CommandPriorityComparer(game);
+
+            Assert.That(
+                new DriveFerryCommand(Role.Scientist, "Chicago"),
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Chicago"))
                     .Using(comparer));
         }
 
