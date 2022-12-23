@@ -8,8 +8,6 @@ implemented.
 
 # todo
 - charter flight
-    - not that player's turn
-    - can end turn
     - command generator
     - use SetPlayer in other event handlers
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

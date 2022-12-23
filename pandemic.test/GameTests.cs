@@ -184,6 +184,22 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Charter_flight_can_end_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            AssertEndsTurn(() => game.CharterFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();
