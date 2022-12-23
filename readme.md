@@ -8,7 +8,7 @@ implemented.
 
 # todo
 - charter flight
-    - command generator
+    - handle generated command
     - use SetPlayer in other event handlers
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later

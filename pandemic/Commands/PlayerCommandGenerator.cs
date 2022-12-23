@@ -26,6 +26,7 @@ namespace pandemic.Commands
                 SetBuildResearchStationCommands(game);
                 SetCureCommands(game);
                 SetDirectFlightCommands(game);
+                SetCharterFlightCommands(game);
             }
 
             return new ArraySegment<PlayerCommand>(_buffer, 0, _bufIdx);
@@ -80,6 +81,19 @@ namespace pandemic.Commands
 
             if (CurrentPlayerCanBuildResearchStation(game))
                 _buffer[_bufIdx++] = new BuildResearchStationCommand(game.CurrentPlayer.Location);
+        }
+
+        private void SetCharterFlightCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Hand.CityCards.All(c => c.City.Name != game.CurrentPlayer.Location)) return;
+
+            foreach (var city in game
+                         .Cities
+                         .Select(c => c.Name)
+                         .Except(new []{game.CurrentPlayer.Location}))
+            {
+                _buffer[_bufIdx++] = new CharterFlightCommand(game.CurrentPlayer.Role, city);
+            }
         }
 
         private static bool CurrentPlayerCanBuildResearchStation(PandemicGame game)
