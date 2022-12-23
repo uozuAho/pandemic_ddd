@@ -76,6 +76,7 @@ public partial record PandemicGame
     public (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
     {
         if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
+        if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
 
         var player = PlayerByRole(role);
 
