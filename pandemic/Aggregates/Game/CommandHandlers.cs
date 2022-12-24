@@ -165,7 +165,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
     }
 
-    public (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
+    private (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
     {
         ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);

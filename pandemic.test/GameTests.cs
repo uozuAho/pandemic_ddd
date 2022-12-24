@@ -219,7 +219,7 @@ namespace pandemic.test
             };
 
             // act
-            (game, _) = game.ShuttleFlight(game.CurrentPlayer.Role, "Bogota");
+            (game, _) = game.Do(new ShuttleFlightCommand(game.CurrentPlayer.Role, "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
@@ -234,7 +234,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -246,7 +246,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Atlanta"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Atlanta")));
         }
 
         [Test]
@@ -272,7 +272,7 @@ namespace pandemic.test
             };
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -297,7 +297,7 @@ namespace pandemic.test
                 })
             };
 
-            AssertEndsTurn(() => game.ShuttleFlight(Role.Medic, "Bogota"));
+            AssertEndsTurn(() => game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -319,7 +319,7 @@ namespace pandemic.test
             };
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Scientist, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Scientist, "Bogota")));
         }
 
         [Test]
