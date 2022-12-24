@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - shuttle
-  - to same city throws
   - command generator
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - correctness: check invariants each game turn?
