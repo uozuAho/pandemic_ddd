@@ -136,7 +136,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
-            (game, _) = game.CharterFlight(game.CurrentPlayer.Role, "Bogota");
+            (game, _) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
@@ -152,7 +152,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.CharterFlight(Role.Medic, "fasdfasdf"));
+                game.Do(new CharterFlightCommand(Role.Medic, "fasdfasdf")));
         }
 
         [Test]
@@ -165,7 +165,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.CharterFlight(Role.Medic, "Bogota"));
+                game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -181,7 +181,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.CharterFlight(Role.Scientist, "Bogota"));
+                game.Do(new CharterFlightCommand(Role.Scientist, "Bogota")));
         }
 
         [Test]
@@ -197,7 +197,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta")
             });
 
-            AssertEndsTurn(() => game.CharterFlight(Role.Medic, "Bogota"));
+            AssertEndsTurn(() => game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -457,7 +457,7 @@ namespace pandemic.test
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            (game, _) = game.DiscardPlayerCard(cardToDiscard);
+            (game, _) = game.Do(new DiscardPlayerCardCommand(cardToDiscard));
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
@@ -477,7 +477,7 @@ namespace pandemic.test
                 Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(6))
             });
 
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
 
             game.InfectionDrawPile.Count.ShouldBe(initialGame.InfectionDrawPile.Count - 2);
             game.InfectionDiscardPile.Count.ShouldBe(initialGame.InfectionDiscardPile.Count + 2);
@@ -497,7 +497,7 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);

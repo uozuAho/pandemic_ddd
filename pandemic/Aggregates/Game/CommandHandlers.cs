@@ -76,7 +76,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
     }
 
-    public (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
+    private (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
     {
         if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
@@ -89,7 +89,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, city)});
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
+    private (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
     {
         ThrowIfGameOver(this);
 
