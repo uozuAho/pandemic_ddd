@@ -201,6 +201,128 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Shuttle_flight_goes_to_city()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            // act
+            (game, _) = game.ShuttleFlight(game.CurrentPlayer.Role, "Bogota");
+
+            game.CurrentPlayer.Location.ShouldBe("Bogota");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Shuttle_flight_throws_if_destination_has_no_research_station()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
+        public void Shuttle_flight_throws_if_destination_is_current_location()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Medic, "Atlanta"));
+        }
+
+        [Test]
+        public void Shuttle_flight_throws_if_location_has_no_research_station()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    HasResearchStation = false
+                }).Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
+        public void Shuttle_flight_can_end_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1
+                }),
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            AssertEndsTurn(() => game.ShuttleFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
+        public void Shuttle_flight_throws_if_not_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Scientist, "Bogota"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();

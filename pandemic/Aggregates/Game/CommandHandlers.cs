@@ -51,6 +51,7 @@ public partial record PandemicGame
             DiscoverCureCommand command => DiscoverCure(command.Cards),
             DirectFlightCommand command => DirectFlight(command.Role, command.City),
             CharterFlightCommand command => CharterFlight(command.Role, command.City),
+            ShuttleFlightCommand command => ShuttleFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
     }
@@ -162,6 +163,25 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
 
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
+    }
+
+    public (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
+    {
+        ThrowIfGameOver(this);
+        ThrowIfNotRolesTurn(role);
+        ThrowIfNoActionsRemaining(CurrentPlayer);
+        ThrowIfPlayerMustDiscard(CurrentPlayer);
+
+        if (city == CurrentPlayer.Location)
+            throw new GameRuleViolatedException("Destination can't be current location");
+
+        if (!CityByName(city).HasResearchStation)
+            throw new GameRuleViolatedException($"{city} doesn't have a research station");
+
+        if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+            throw new GameRuleViolatedException($"{city} doesn't have a research station");
+
+        return ApplyAndEndTurnIfNeeded(new[] { new PlayerShuttleFlewTo(role, city) });
     }
 
     private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)

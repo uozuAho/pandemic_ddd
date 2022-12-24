@@ -74,10 +74,10 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         return _game.Board.IsAdjacent(a.City, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
-    public PlayerCommand HighestPriority(IEnumerable<PlayerCommand> commands)
-    {
-        return commands.OrderByDescending(c => c, this).First();
-    }
+    private int CompareMulti(ShuttleFlightCommand a, PlayerCommand b) => Same;
+
+    private int CompareMulti(ShuttleFlightCommand a, CharterFlightCommand b) => Greater;
+    private int CompareMulti(ShuttleFlightCommand a, DirectFlightCommand b) => Greater;
 }
 
 internal static class PandemicGameExtensions

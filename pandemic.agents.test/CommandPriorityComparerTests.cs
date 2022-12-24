@@ -95,6 +95,33 @@ namespace pandemic.agents.test
                     .Using(comparer));
         }
 
+        [Test]
+        public void Prefers_shuttle_flight_over_charter()
+        {
+            var game = ANewGame();
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            var comparer = new CommandPriorityComparer(game);
+
+            Assert.That(
+                new ShuttleFlightCommand(Role.Scientist, "Bogota"),
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Bogota"))
+                    .Using(comparer));
+        }
+
         private static PandemicGame ANewGame()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
