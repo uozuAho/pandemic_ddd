@@ -174,6 +174,9 @@ public partial record PandemicGame
         if (!CityByName(city).HasResearchStation)
             throw new GameRuleViolatedException($"{city} doesn't have a research station");
 
+        if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+            throw new GameRuleViolatedException($"{city} doesn't have a research station");
+
         return ApplyAndEndTurnIfNeeded(new[] { new PlayerShuttleFlewTo(role, city) });
     }
 

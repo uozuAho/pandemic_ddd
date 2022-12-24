@@ -238,6 +238,32 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Shuttle_flight_throws_if_location_has_no_research_station()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    HasResearchStation = false
+                }).Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Medic, "Bogota"));
+        }
+
+        [Test]
         public void Shuttle_flight_can_end_turn()
         {
             var game = NewGame(new NewGameOptions
