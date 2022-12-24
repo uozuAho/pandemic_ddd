@@ -15,4 +15,9 @@ public static class EnumerableExtensions
         temp.Reverse();
         return temp;
     }
+
+    public static IEnumerable<IEnumerable<T>> SplitEvenlyInto<T>(this IEnumerable<T> items, int numChunks)
+    {
+        return items.Chunk(1);
+    }
 }
