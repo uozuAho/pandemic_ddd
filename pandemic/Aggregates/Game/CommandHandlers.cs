@@ -208,6 +208,7 @@ public partial record PandemicGame
     private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
     {
         var rng = new Random();
+
         var drawPile = PlayerDrawPile.Cards
             .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
             // todo: game rules: distribute epidemic cards as per game rules
