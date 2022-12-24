@@ -6,4 +6,8 @@
     <WarningsAsErrors>nullable</WarningsAsErrors>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\utils\utils.csproj" />
+  </ItemGroup>
+
 </Project>

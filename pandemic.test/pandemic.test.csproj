@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\pandemic\pandemic.csproj" />
+    <ProjectReference Include="..\utils\utils.csproj" />
   </ItemGroup>
 
 </Project>

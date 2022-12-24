@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
@@ -6,6 +5,7 @@ using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
 using Shouldly;
+using utils;
 
 namespace pandemic.test
 {
@@ -56,17 +56,7 @@ namespace pandemic.test
 
         private static void AssertEpidemicCardsAreDistributed(Deck<PlayerCard> drawPile, Difficulty difficulty)
         {
-            var numberOfEpidemicCards = PandemicGame.NumberOfEpidemicCards(difficulty);
-
-            var chunkSize = numberOfEpidemicCards switch
-            {
-                4 => 12,
-                5 => 10,
-                6 => 8,
-                _ => throw new InvalidOperationException()
-            };
-
-            foreach (var chunk in drawPile.Cards.Chunk(chunkSize))
+            foreach (var chunk in drawPile.Cards.SplitEvenlyInto(PandemicGame.NumberOfEpidemicCards(difficulty)))
             {
                 chunk.Count(c => c is EpidemicCard).ShouldBe(1);
             }

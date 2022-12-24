@@ -6,6 +6,7 @@ using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
+using utils;
 
 namespace pandemic.Aggregates.Game;
 
@@ -210,9 +211,12 @@ public partial record PandemicGame
         var rng = new Random();
 
         var drawPile = PlayerDrawPile.Cards
-            .Concat(Enumerable.Repeat(new EpidemicCard(), NumberOfEpidemicCards(Difficulty)))
-            // todo: game rules: distribute epidemic cards as per game rules
             .OrderBy(_ => rng.Next())
+            .SplitEvenlyInto(NumberOfEpidemicCards(Difficulty))
+            .Select(pile => pile
+                .Append(new EpidemicCard())
+                .OrderBy(_ => rng.Next()))
+            .SelectMany(c => c)
             .ToImmutableList();
 
         return ApplyEvent(new PlayerDrawPileSetupWithEpidemicCards(drawPile), events);
