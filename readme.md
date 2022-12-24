@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - invariants
-  - make command methods private, all go through `Do`
   - do invariant check at start of `Do`
 - correctness: check invariants each game turn?
   - eg. total number of cards, cubes

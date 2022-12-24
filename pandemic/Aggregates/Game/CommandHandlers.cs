@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using pandemic.Commands;
 using pandemic.Events;
@@ -43,6 +44,13 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
     {
+        if (SelfConsistencyChecksEnabled)
+        {
+            Debug.Assert(Cubes.Values.Sum() + Cities.Select(c => c.Cubes.Values.Sum()).Sum() == 96);
+        }
+
+        ThrowIfGameOver(this);
+
         return action switch
         {
             DriveFerryCommand command => DriveOrFerryPlayer(command.Role, command.City),
@@ -58,7 +66,6 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
     {
-        ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);
         ThrowIfNoActionsRemaining(CurrentPlayer);
         ThrowIfPlayerMustDiscard(CurrentPlayer);

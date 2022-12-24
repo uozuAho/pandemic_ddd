@@ -390,6 +390,7 @@ namespace pandemic.test
             });
             game = game with
             {
+                SelfConsistencyChecksEnabled = false,
                 Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
