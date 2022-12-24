@@ -75,7 +75,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Miami") });
 
-            (game, _) = game.DirectFlight(game.CurrentPlayer.Role, "Miami");
+            (game, _) = game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami"));
 
             Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
             Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
@@ -92,7 +92,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.That(
-                () => game.DirectFlight(game.CurrentPlayer.Role, "Miami"),
+                () => game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami")),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
@@ -106,7 +106,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
             Assert.That(
-                () => game.DirectFlight(game.CurrentPlayer.Role, "Atlanta"),
+                () => game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Atlanta")),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
@@ -124,7 +124,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Miami")
             });
 
-            AssertEndsTurn(() => game.DirectFlight(Role.Medic, "Miami"));
+            AssertEndsTurn(() => game.Do(new DirectFlightCommand(Role.Medic, "Miami")));
         }
 
         [Test]

@@ -154,7 +154,7 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
+    private (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
     {
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
