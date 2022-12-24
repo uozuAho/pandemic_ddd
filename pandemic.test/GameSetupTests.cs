@@ -4,6 +4,8 @@ using pandemic.Aggregates.Game;
 using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
+using Shouldly;
+using utils;
 
 namespace pandemic.test
 {
@@ -29,6 +31,7 @@ namespace pandemic.test
             Assert.That(game.PlayerDrawPile.Count, Is.EqualTo(
                 StandardGameBoard.NumberOfCities + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer));
             Assert.That(game.PlayerDrawPile.Cards.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
+            AssertEpidemicCardsAreDistributed(game.PlayerDrawPile, game.Difficulty);
 
             // cities
             Assert.That(game.CityByName("Atlanta").HasResearchStation);
@@ -49,6 +52,14 @@ namespace pandemic.test
             Assert.AreEqual(options.Roles.Count, game.Players.Count);
             Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
             Assert.That(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
+        }
+
+        private static void AssertEpidemicCardsAreDistributed(Deck<PlayerCard> drawPile, Difficulty difficulty)
+        {
+            foreach (var chunk in drawPile.Cards.SplitEvenlyInto(PandemicGame.NumberOfEpidemicCards(difficulty)))
+            {
+                chunk.Count(c => c is EpidemicCard).ShouldBe(1);
+            }
         }
     }
 }

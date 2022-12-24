@@ -15,4 +15,21 @@ public static class EnumerableExtensions
         temp.Reverse();
         return temp;
     }
+
+    public static IEnumerable<IEnumerable<T>> SplitEvenlyInto<T>(this IEnumerable<T> items, int numChunks)
+    {
+        var itemList = items.ToList();
+
+        var (quotient, remainder) = Math.DivRem(itemList.Count, numChunks);
+
+        var smallChunkSize = quotient;
+        var largeChunkSize = smallChunkSize + 1;
+
+        return itemList
+            .Take(largeChunkSize * remainder)
+            .Chunk(largeChunkSize)
+            .Concat(itemList
+                .Skip(largeChunkSize * remainder)
+                .Chunk(smallChunkSize));
+    }
 }
