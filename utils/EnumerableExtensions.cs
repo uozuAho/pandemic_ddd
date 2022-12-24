@@ -19,10 +19,17 @@ public static class EnumerableExtensions
     public static IEnumerable<IEnumerable<T>> SplitEvenlyInto<T>(this IEnumerable<T> items, int numChunks)
     {
         var itemList = items.ToList();
-        var chunkSize = itemList.Count % 2 == 0
-            ? itemList.Count / numChunks
-            : (itemList.Count + 1) / numChunks;
 
-        return itemList.Chunk(chunkSize);
+        var (quotient, remainder) = Math.DivRem(itemList.Count, numChunks);
+
+        var smallChunkSize = quotient;
+        var largeChunkSize = smallChunkSize + 1;
+
+        return itemList
+            .Take(largeChunkSize * remainder)
+            .Chunk(largeChunkSize)
+            .Concat(itemList
+                .Skip(largeChunkSize * remainder)
+                .Chunk(smallChunkSize));
     }
 }

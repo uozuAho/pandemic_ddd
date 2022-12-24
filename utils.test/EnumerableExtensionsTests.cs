@@ -1,46 +1,66 @@
-using Shouldly;
+using System.Collections;
 
 namespace utils.test;
 
 public class EnumerableExtensionsTests
 {
-    [Test]
-    public void SplitEvenlyInto()
+    [TestCaseSource(typeof(TestData), nameof(TestData.TestCases))]
+    public IEnumerable<IEnumerable<int>> SplitEvenlyInto(IEnumerable<int> items, int numGroups)
     {
-        new[] { 1, 2, 3 }.SplitEvenlyInto(3).ShouldBe(new[]
-        {
-            new[] { 1 },
-            new[] { 2 },
-            new[] { 3 }
-        });
+        return items.SplitEvenlyInto(numGroups);
     }
+}
 
-    [Test]
-    public void SplitEvenlyInto2()
+public class TestData
+{
+    public static IEnumerable TestCases
     {
-        new[] { 1, 2, 3, 4 }.SplitEvenlyInto(2).ShouldBe(new[]
+        get
         {
-            new[] { 1, 2 },
-            new[] { 3, 4 },
-        });
-    }
-
-    [Test]
-    public void SplitEvenlyInto3()
-    {
-        new[] { 1, 2, 3 }.SplitEvenlyInto(2).ShouldBe(new[]
-        {
-            new[] { 1, 2 },
-            new[] { 3 },
-        });
-    }
-
-    [Test]
-    public void SplitEvenlyInto4()
-    {
-        new[] { 1, 2, 3 }.SplitEvenlyInto(1).ShouldBe(new[]
-        {
-            new[] { 1, 2, 3 },
-        });
+            yield return new TestCaseData(new[] { 1, 2, 3 }, 3).Returns(new[]
+            {
+                new[] { 1 },
+                new[] { 2 },
+                new[] { 3 }
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3 }, 2).Returns(new[]
+            {
+                new[] { 1, 2 },
+                new[] { 3 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3 }, 1).Returns(new[]
+            {
+                new[] { 1, 2, 3 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3, 4 }, 2).Returns(new[]
+            {
+                new[] { 1, 2 },
+                new[] { 3, 4 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3, 4 }, 3).Returns(new[]
+            {
+                new[] { 1, 2 },
+                new[] { 3 },
+                new[] { 4 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3, 4, 5 }, 2).Returns(new[]
+            {
+                new[] { 1, 2, 3 },
+                new[] { 4, 5 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3, 4, 5 }, 3).Returns(new[]
+            {
+                new[] { 1, 2 },
+                new[] { 3, 4 },
+                new[] { 5 },
+            });
+            yield return new TestCaseData(new[] { 1, 2, 3, 4, 5 }, 4).Returns(new[]
+            {
+                new[] { 1, 2 },
+                new[] { 3 },
+                new[] { 4 },
+                new[] { 5 },
+            });
+        }
     }
 }
