@@ -51,6 +51,7 @@ public partial record PandemicGame
             DiscoverCureCommand command => DiscoverCure(command.Cards),
             DirectFlightCommand command => DirectFlight(command.Role, command.City),
             CharterFlightCommand command => CharterFlight(command.Role, command.City),
+            ShuttleFlightCommand command => ShuttleFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
     }
