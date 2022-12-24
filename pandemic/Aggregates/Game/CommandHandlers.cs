@@ -126,7 +126,7 @@ public partial record PandemicGame
         });
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
+    private (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
     {
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);
