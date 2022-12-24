@@ -56,7 +56,7 @@ public partial record PandemicGame
         };
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
+    private (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
     {
         ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);
