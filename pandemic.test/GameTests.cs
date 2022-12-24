@@ -251,6 +251,28 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Shuttle_flight_throws_if_not_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Scientist, "Bogota"));
+        }
+
+        [Test]
         public void Player_draws_two_cards_after_last_action()
         {
             var startingState = NewGameWithNoEpidemicCards();
