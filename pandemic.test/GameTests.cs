@@ -238,6 +238,18 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Shuttle_flight_throws_if_destination_is_current_location()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.ShuttleFlight(Role.Medic, "Atlanta"));
+        }
+
+        [Test]
         public void Shuttle_flight_throws_if_location_has_no_research_station()
         {
             var game = NewGame(new NewGameOptions

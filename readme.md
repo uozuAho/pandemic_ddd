@@ -8,8 +8,6 @@ implemented.
 
 # todo
 - shuttle
-  - not on research throws
-  - not to research throws
   - to same city throws
   - command generator
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

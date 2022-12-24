@@ -171,6 +171,9 @@ public partial record PandemicGame
         ThrowIfNoActionsRemaining(CurrentPlayer);
         ThrowIfPlayerMustDiscard(CurrentPlayer);
 
+        if (city == CurrentPlayer.Location)
+            throw new GameRuleViolatedException("Destination can't be current location");
+
         if (!CityByName(city).HasResearchStation)
             throw new GameRuleViolatedException($"{city} doesn't have a research station");
 
