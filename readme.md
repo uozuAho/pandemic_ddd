@@ -8,10 +8,10 @@ implemented.
 
 # todo
 - shuttle
-  - can end turn
   - not turn throws
   - not on research throws
   - not to research throws
+  - command generator
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - correctness: check invariants each game turn?
   - eg. total number of cards, cubes
