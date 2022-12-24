@@ -8,9 +8,9 @@ implemented.
 
 # todo
 - shuttle
-  - not turn throws
   - not on research throws
   - not to research throws
+  - to same city throws
   - command generator
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - correctness: check invariants each game turn?
