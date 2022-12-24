@@ -101,7 +101,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
+    private (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
     {
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);

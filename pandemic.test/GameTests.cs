@@ -521,7 +521,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.BuildResearchStation("Chicago");
+            (game, _) = game.Do(new BuildResearchStationCommand("Chicago"));
 
             game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
             game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
@@ -543,7 +543,7 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.BuildResearchStation("Chicago"));
+            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
@@ -558,7 +558,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Chicago")
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
@@ -575,7 +575,7 @@ namespace pandemic.test
             });
 
             Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
         }
 
         [Test]
@@ -594,7 +594,7 @@ namespace pandemic.test
             });
 
             // atlanta starts with a research station
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
         }
 
         [Test]
@@ -616,7 +616,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
