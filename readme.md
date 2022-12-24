@@ -7,7 +7,14 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- shuttle
+  - can end turn
+  - not turn throws
+  - not on research throws
+  - not to research throws
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
+- correctness: check invariants each game turn?
+  - eg. total number of cards, cubes
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg
     - check if player needs to discard first
