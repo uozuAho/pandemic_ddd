@@ -840,21 +840,23 @@ namespace pandemic.test
         {
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
-            var (game, _) = PandemicGame.CreateNewGame(options);
+            var (game, events) = PandemicGame.CreateNewGame(options);
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var totalCubes = game.Cubes.Values.Sum()
-                                 + game.Cities.Select(c => c.Cubes.Values.Sum()).Sum();
+                // do random action
+                var action = random.Choice(commandGenerator.LegalCommands(game));
+                (game, var tempEvents) = game.Do(action);
+                events.AddRange(tempEvents);
+
+                // check invariants
+                var totalCubes = game.Cubes.Values.Sum() + TotalNumCubesOnCities(game);
                 totalCubes.ShouldBe(96);
 
                 var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()
-                    + game.PlayerDrawPile.Count
-                    + game.PlayerDiscardPile.Count;
+                                       + game.PlayerDrawPile.Count
+                                       + game.PlayerDiscardPile.Count;
                 totalPlayerCards.ShouldBe(48 + PandemicGame.NumberOfEpidemicCards(game.Difficulty));
-
-                var action = random.Choice(commandGenerator.LegalCommands(game));
-                (game, _) = game.Do(action);
             }
         }
 
