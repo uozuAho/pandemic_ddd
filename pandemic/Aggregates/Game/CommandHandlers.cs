@@ -95,9 +95,8 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(this);
         if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
-        // todo: this
-        // if (CurrentPlayer.Hand.Count <= 7)
-        //     throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
+        if (CurrentPlayer.Hand.Count <= 7)
+            throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 

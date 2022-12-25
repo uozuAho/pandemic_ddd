@@ -513,7 +513,7 @@ namespace pandemic.test
             var game = initialGame.SetCurrentPlayerAs(initialGame.CurrentPlayer with
             {
                 ActionsRemaining = 0,
-                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(6))
+                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(8))
             });
 
             (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
