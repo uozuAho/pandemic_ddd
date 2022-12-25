@@ -94,6 +94,7 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
     {
         ThrowIfGameOver(this);
+        if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 

@@ -509,6 +509,23 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Discard_player_card_throws_when_not_in_hand()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty
+            });
+
+            Assert.That(
+                () => game.Do(new DiscardPlayerCardCommand(PlayerCards.CityCard("Bogota"))),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
         public void Build_research_station_works()
         {
             var game = NewGame(new NewGameOptions
