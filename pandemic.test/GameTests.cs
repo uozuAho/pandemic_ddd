@@ -24,7 +24,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, toCity);
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, toCity));
 
             Assert.AreEqual(toCity, game.PlayerByRole(Role.Medic).Location);
         }
@@ -38,7 +38,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.DriveOrFerryPlayer(Role.Medic, "fasdfasdf"));
+                game.Do(new DriveFerryCommand(Role.Medic, "fasdfasdf")));
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.DriveOrFerryPlayer(Role.Medic, "Beijing"));
+                game.Do(new DriveFerryCommand(Role.Medic, "Beijing")));
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace pandemic.test
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            AssertEndsTurn(() => game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
+            AssertEndsTurn(() => game.Do(new DriveFerryCommand(Role.Medic, "Chicago")));
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Miami") });
 
-            (game, _) = game.DirectFlight(game.CurrentPlayer.Role, "Miami");
+            (game, _) = game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami"));
 
             Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
             Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
@@ -92,7 +92,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.That(
-                () => game.DirectFlight(game.CurrentPlayer.Role, "Miami"),
+                () => game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami")),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
@@ -106,7 +106,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
             Assert.That(
-                () => game.DirectFlight(game.CurrentPlayer.Role, "Atlanta"),
+                () => game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Atlanta")),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
@@ -124,7 +124,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Miami")
             });
 
-            AssertEndsTurn(() => game.DirectFlight(Role.Medic, "Miami"));
+            AssertEndsTurn(() => game.Do(new DirectFlightCommand(Role.Medic, "Miami")));
         }
 
         [Test]
@@ -136,7 +136,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
-            (game, _) = game.CharterFlight(game.CurrentPlayer.Role, "Bogota");
+            (game, _) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
@@ -152,7 +152,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.CharterFlight(Role.Medic, "fasdfasdf"));
+                game.Do(new CharterFlightCommand(Role.Medic, "fasdfasdf")));
         }
 
         [Test]
@@ -165,7 +165,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.CharterFlight(Role.Medic, "Bogota"));
+                game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -181,7 +181,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.CharterFlight(Role.Scientist, "Bogota"));
+                game.Do(new CharterFlightCommand(Role.Scientist, "Bogota")));
         }
 
         [Test]
@@ -197,7 +197,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta")
             });
 
-            AssertEndsTurn(() => game.CharterFlight(Role.Medic, "Bogota"));
+            AssertEndsTurn(() => game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace pandemic.test
             };
 
             // act
-            (game, _) = game.ShuttleFlight(game.CurrentPlayer.Role, "Bogota");
+            (game, _) = game.Do(new ShuttleFlightCommand(game.CurrentPlayer.Role, "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
@@ -234,7 +234,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -246,7 +246,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Atlanta"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Atlanta")));
         }
 
         [Test]
@@ -272,7 +272,7 @@ namespace pandemic.test
             };
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Medic, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -297,7 +297,7 @@ namespace pandemic.test
                 })
             };
 
-            AssertEndsTurn(() => game.ShuttleFlight(Role.Medic, "Bogota"));
+            AssertEndsTurn(() => game.Do(new ShuttleFlightCommand(Role.Medic, "Bogota")));
         }
 
         [Test]
@@ -319,7 +319,7 @@ namespace pandemic.test
             };
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.ShuttleFlight(Role.Scientist, "Bogota"));
+                game.Do(new ShuttleFlightCommand(Role.Scientist, "Bogota")));
         }
 
         [Test]
@@ -330,7 +330,7 @@ namespace pandemic.test
             var game = startingState.SetCurrentPlayerAs(
                 startingState.CurrentPlayer with { ActionsRemaining = 1 });
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             Assert.AreEqual(
                 startingState.PlayerByRole(Role.Medic).Hand.Count + 2,
@@ -345,13 +345,13 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DriveOrFerryPlayer(Role.Medic, "Chicago"));
+                game.Do(new DriveFerryCommand(Role.Medic, "Chicago")));
         }
 
         [Test]
@@ -363,10 +363,10 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            var (game, _) = startingState.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            var (game, _) = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
 
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
@@ -390,13 +390,14 @@ namespace pandemic.test
             });
             game = game with
             {
+                SelfConsistencyChecksEnabled = false,
                 Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
 
             Assert.IsTrue(game.IsOver);
             Assert.IsTrue(game.IsLost);
@@ -410,10 +411,10 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Atlanta");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
 
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(4,
                 "player whose turn ended should get their 'remaining actions' counter reset");
@@ -433,7 +434,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
@@ -453,11 +454,11 @@ namespace pandemic.test
                 ActionsRemaining = 1,
                 Hand = new PlayerHand(game.PlayerDrawPile.Top(7))
             });
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            (game, _) = game.DiscardPlayerCard(cardToDiscard);
+            (game, _) = game.Do(new DiscardPlayerCardCommand(cardToDiscard));
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
@@ -477,7 +478,7 @@ namespace pandemic.test
                 Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(6))
             });
 
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
 
             game.InfectionDrawPile.Count.ShouldBe(initialGame.InfectionDrawPile.Count - 2);
             game.InfectionDiscardPile.Count.ShouldBe(initialGame.InfectionDiscardPile.Count + 2);
@@ -497,7 +498,7 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, _) = game.DiscardPlayerCard(game.CurrentPlayer.Hand.First());
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
@@ -521,7 +522,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.BuildResearchStation("Chicago");
+            (game, _) = game.Do(new BuildResearchStationCommand("Chicago"));
 
             game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
             game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
@@ -543,7 +544,7 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.BuildResearchStation("Chicago"));
+            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
@@ -558,7 +559,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Chicago")
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
@@ -575,7 +576,7 @@ namespace pandemic.test
             });
 
             Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
         }
 
         [Test]
@@ -594,7 +595,7 @@ namespace pandemic.test
             });
 
             // atlanta starts with a research station
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Atlanta"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
         }
 
         [Test]
@@ -616,7 +617,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.BuildResearchStation("Chicago"));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
         }
 
         [Test]
@@ -633,7 +634,7 @@ namespace pandemic.test
                 Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
             });
 
-            (game, _) = game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray());
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.CureDiscovered[Colour.Black]);
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
@@ -656,7 +657,7 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -683,7 +684,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray());
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -713,7 +714,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray());
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -733,7 +734,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -751,7 +752,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -776,7 +777,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -803,7 +804,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.DiscoverCure(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -827,7 +828,7 @@ namespace pandemic.test
                 })
             };
 
-            (game, _) = game.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));

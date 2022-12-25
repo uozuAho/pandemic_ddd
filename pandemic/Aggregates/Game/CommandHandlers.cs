@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using pandemic.Commands;
 using pandemic.Events;
@@ -43,6 +44,13 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
     {
+        if (SelfConsistencyChecksEnabled)
+        {
+            Debug.Assert(Cubes.Values.Sum() + Cities.Select(c => c.Cubes.Values.Sum()).Sum() == 96);
+        }
+
+        ThrowIfGameOver(this);
+
         return action switch
         {
             DriveFerryCommand command => DriveOrFerryPlayer(command.Role, command.City),
@@ -56,9 +64,8 @@ public partial record PandemicGame
         };
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
+    private (PandemicGame, IEnumerable<IEvent>) DriveOrFerryPlayer(Role role, string city)
     {
-        ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);
         ThrowIfNoActionsRemaining(CurrentPlayer);
         ThrowIfPlayerMustDiscard(CurrentPlayer);
@@ -76,7 +83,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
     }
 
-    public (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
+    private (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
     {
         if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
@@ -89,7 +96,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, city)});
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
+    private (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)
     {
         ThrowIfGameOver(this);
 
@@ -101,7 +108,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
+    private (PandemicGame Game, IEnumerable<IEvent> events) BuildResearchStation(string city)
     {
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);
@@ -126,7 +133,7 @@ public partial record PandemicGame
         });
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
+    private (PandemicGame, IEnumerable<IEvent>) DiscoverCure(PlayerCityCard[] cards)
     {
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);
@@ -154,7 +161,7 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
+    private (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
     {
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
@@ -165,7 +172,7 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
     }
 
-    public (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
+    private (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
     {
         ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);

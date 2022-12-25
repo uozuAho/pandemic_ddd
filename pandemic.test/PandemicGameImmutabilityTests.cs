@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
+using pandemic.Commands;
 using pandemic.Values;
 
 namespace pandemic.test
@@ -14,7 +15,7 @@ namespace pandemic.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] {Role.Medic, Role.Scientist}
             });
-            var (game2, _) = game1.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            var (game2, _) = game1.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             Assert.AreNotSame(game1, game2);
             Assert.AreNotEqual(game1, game2);
@@ -28,7 +29,7 @@ namespace pandemic.test
                 Difficulty = Difficulty.Normal,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-            var (game2, _) = game1.DriveOrFerryPlayer(Role.Medic, "Chicago");
+            var (game2, _) = game1.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
             Assert.AreNotSame(game1.Players, game2.Players);
             Assert.AreNotEqual(game1.Players, game2.Players);

@@ -7,7 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
+- invariants
+  - do invariant check at start of `Do`
 - correctness: check invariants each game turn?
   - eg. total number of cards, cubes
   - how to check repeating rules like it's the given player's turn, they have actions remaining etc.
@@ -16,6 +17,7 @@ implemented.
     - ThrowIfGameOver(this);
       ThrowIfNoActionsRemaining(CurrentPlayer);
       ThrowIfPlayerMustDiscard(CurrentPlayer);
+- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg
     - check if player needs to discard first
