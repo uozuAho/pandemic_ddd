@@ -53,7 +53,7 @@ public partial record PandemicGame
             BuildResearchStationCommand command => BuildResearchStation(command.City),
             DiscoverCureCommand command => DiscoverCure(command.Cards),
             DirectFlightCommand command => DirectFlight(command.Role, command.Destination),
-            CharterFlightCommand command => CharterFlight(command.Role, command.Destination),
+            CharterFlightCommand command => CharterFlight(command),
             ShuttleFlightCommand command => ShuttleFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
@@ -78,19 +78,22 @@ public partial record PandemicGame
         return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, city)});
     }
 
-    private (PandemicGame game, IEnumerable<IEvent>) CharterFlight(Role role, string city)
+    private (PandemicGame game, IEnumerable<IEvent>) CharterFlight(CharterFlightCommand cmd)
     {
-        if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
+        var (role, discardCard, destination) = cmd;
+
+        if (!Board.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
-        if (CurrentPlayer.Location == city)
+        if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException($"You can't charter fly to your current location");
 
-        var player = PlayerByRole(role);
-
-        if (!PlayerByRole(role).Hand.Contains(PlayerCards.CityCard(player.Location)))
+        if (!PlayerByRole(role).Hand.Contains(discardCard))
             throw new GameRuleViolatedException("Current player doesn't have required card");
 
-        return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, city)});
+        if (discardCard.City.Name != PlayerByRole(role).Location)
+            throw new GameRuleViolatedException("Discarded card must match current location");
+
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, destination)});
     }
 
     private (PandemicGame, IEnumerable<IEvent>) DiscardPlayerCard(PlayerCard card)

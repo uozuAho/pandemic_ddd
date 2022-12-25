@@ -910,7 +910,7 @@ namespace pandemic.test
                         game.Do(illegalCommand);
                         Assert.Fail($"Expected {illegalCommand} to throw");
                     }
-                    catch (GameRuleViolatedException e)
+                    catch (GameRuleViolatedException)
                     {
                         // do nothing: we want an exception thrown!
                     }
