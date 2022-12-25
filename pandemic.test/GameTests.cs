@@ -79,8 +79,10 @@ namespace pandemic.test
 
             (game, _) = game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami"));
 
-            Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
-            Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
+            game.CurrentPlayer.Location.ShouldBe("Miami");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Miami"));
+            game.PlayerDiscardPile.TopCard.ShouldBe(PlayerCards.CityCard("Miami"));
         }
 
         [Test]
