@@ -527,10 +527,11 @@ namespace pandemic.test
             // act
             (game, _) = game.Do(new BuildResearchStationCommand("Chicago"));
 
-            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
             game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
-            game.PlayerDiscardPile.Cards.ShouldContain(chicagoPlayerCard);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
+            game.PlayerDiscardPile.TopCard.ShouldBe(chicagoPlayerCard);
+            game.ResearchStationPile.ShouldBe(4);
         }
 
         [Test]

@@ -97,7 +97,8 @@ public partial record PandemicGame
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
                 ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
-            })
+            }),
+            ResearchStationPile = game.ResearchStationPile - 1
         };
     }
 
