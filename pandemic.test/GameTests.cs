@@ -51,7 +51,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            Assert.Throws<InvalidActionException>(() =>
+            Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DriveFerryCommand(Role.Medic, "Beijing")));
         }
 
