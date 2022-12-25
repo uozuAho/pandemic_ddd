@@ -862,6 +862,8 @@ namespace pandemic.test
                                        + game.PlayerDiscardPile.Count;
                 totalPlayerCards.ShouldBe(48 + PandemicGame.NumberOfEpidemicCards(game.Difficulty));
 
+                (game.InfectionDrawPile.Count + game.InfectionDiscardPile.Count).ShouldBe(48);
+
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
             }
         }
