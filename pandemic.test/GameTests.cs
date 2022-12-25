@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
@@ -10,6 +11,7 @@ using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
 using Shouldly;
+using utils;
 
 namespace pandemic.test
 {
@@ -390,7 +392,6 @@ namespace pandemic.test
             });
             game = game with
             {
-                SelfConsistencyChecksEnabled = false,
                 Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
@@ -832,6 +833,29 @@ namespace pandemic.test
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
+        }
+
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
+        public void Fuzz_for_invalid_states(NewGameOptions options)
+        {
+            var commandGenerator = new PlayerCommandGenerator();
+            var random = new Random();
+            var (game, _) = PandemicGame.CreateNewGame(options);
+
+            for (var i = 0; i < 1000 && !game.IsOver; i++)
+            {
+                var totalCubes = game.Cubes.Values.Sum()
+                                 + game.Cities.Select(c => c.Cubes.Values.Sum()).Sum();
+                totalCubes.ShouldBe(96);
+
+                var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()
+                    + game.PlayerDrawPile.Count
+                    + game.PlayerDiscardPile.Count;
+                totalPlayerCards.ShouldBe(48 + PandemicGame.NumberOfEpidemicCards(game.Difficulty));
+
+                var action = random.Choice(commandGenerator.LegalCommands(game));
+                (game, _) = game.Do(action);
+            }
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

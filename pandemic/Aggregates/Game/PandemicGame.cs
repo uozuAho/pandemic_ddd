@@ -10,10 +10,6 @@ namespace pandemic.Aggregates.Game
 {
     public partial record PandemicGame
     {
-        /// <summary>
-        /// Skip internal consistency checking. For testing purposes only!
-        /// </summary>
-        public bool SelfConsistencyChecksEnabled { get; init; } = true;
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }

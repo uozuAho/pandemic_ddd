@@ -7,8 +7,9 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- invariants
-  - do invariant check at start of `Do`
+- invariants/fuzzing
+  - check more invariants in fuzz test
+  - maybe try invalid commands too?
 - correctness: check invariants each game turn?
   - eg. total number of cards, cubes
   - how to check repeating rules like it's the given player's turn, they have actions remaining etc.

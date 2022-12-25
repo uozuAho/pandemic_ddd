@@ -44,11 +44,6 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
     {
-        if (SelfConsistencyChecksEnabled)
-        {
-            Debug.Assert(Cubes.Values.Sum() + Cities.Select(c => c.Cubes.Values.Sum()).Sum() == 96);
-        }
-
         ThrowIfGameOver(this);
 
         return action switch
