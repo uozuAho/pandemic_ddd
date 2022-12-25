@@ -91,7 +91,7 @@ namespace pandemic.agents.test
 
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
-                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Chicago"))
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Chicago"))
                     .Using(comparer));
         }
 
@@ -118,7 +118,7 @@ namespace pandemic.agents.test
 
             Assert.That(
                 new ShuttleFlightCommand(Role.Scientist, "Bogota"),
-                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Bogota"))
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Bogota"))
                     .Using(comparer));
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
+using pandemic.GameData;
 
 namespace pandemic.Commands
 {
@@ -93,7 +94,10 @@ namespace pandemic.Commands
                          .Select(c => c.Name)
                          .Except(new []{game.CurrentPlayer.Location}))
             {
-                _buffer[_bufIdx++] = new CharterFlightCommand(game.CurrentPlayer.Role, city);
+                _buffer[_bufIdx++] = new CharterFlightCommand(
+                    game.CurrentPlayer.Role,
+                    PlayerCards.CityCard(game.CurrentPlayer.Location),
+                    city);
             }
         }
 

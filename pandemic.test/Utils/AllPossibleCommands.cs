@@ -17,7 +17,7 @@ public class AllPossibleCommands
             {
                 yield return new DriveFerryCommand(player.Role, city.Name);
                 yield return new DirectFlightCommand(player.Role, city.Name);
-                yield return new CharterFlightCommand(player.Role, city.Name);
+                yield return new CharterFlightCommand(player.Role, PlayerCards.CityCard(player.Location), city.Name);
                 yield return new ShuttleFlightCommand(player.Role, city.Name);
             }
         }

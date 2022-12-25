@@ -155,7 +155,10 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
-            (game, _) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, "Bogota"));
+            (game, _) = game.Do(new CharterFlightCommand(
+                game.CurrentPlayer.Role,
+                PlayerCards.CityCard("Atlanta"),
+                "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
@@ -171,7 +174,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.Do(new CharterFlightCommand(Role.Medic, "fasdfasdf")));
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "fasdfasdf")));
         }
 
         [Test]
@@ -184,8 +187,22 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Bogota")));
         }
+
+        // todo: this
+        // [Test]
+        // public void Charter_flight_to_current_location_throws()
+        // {
+        //     var game = NewGame(new NewGameOptions
+        //     {
+        //         Roles = new[] { Role.Medic, Role.Scientist }
+        //     });
+        //     game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+        //
+        //     Assert.Throws<GameRuleViolatedException>(() =>
+        //         game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Atlanta")));
+        // }
 
         [Test]
         public void Charter_flight_when_not_turn_throws()
@@ -200,7 +217,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new CharterFlightCommand(Role.Scientist, "Bogota")));
+                game.Do(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Bogota")));
         }
 
         [Test]
@@ -216,7 +233,10 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta")
             });
 
-            AssertEndsTurn(() => game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
+            AssertEndsTurn(() => game.Do(new CharterFlightCommand(
+                Role.Medic,
+                PlayerCards.CityCard("Atlanta"),
+                "Bogota")));
         }
 
         [Test]
@@ -884,12 +904,12 @@ namespace pandemic.test
                 var legalCommands = commandGenerator.LegalCommands(game);
 
                 var illegalCommands = allPossibleCommands.Except(legalCommands).OrderBy(_ => random.Next());
-                foreach (var invalidAction in illegalCommands.Take(100))
+                foreach (var illegalCommand in illegalCommands.Take(100))
                 {
                     try
                     {
-                        game.Do(invalidAction);
-                        Assert.Fail($"Expected {invalidAction} to throw");
+                        game.Do(illegalCommand);
+                        Assert.Fail($"Expected {illegalCommand} to throw");
                     }
                     catch (GameRuleViolatedException e)
                     {

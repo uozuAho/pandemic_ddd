@@ -53,7 +53,7 @@ public partial record PandemicGame
             BuildResearchStationCommand command => BuildResearchStation(command.City),
             DiscoverCureCommand command => DiscoverCure(command.Cards),
             DirectFlightCommand command => DirectFlight(command.Role, command.Destination),
-            CharterFlightCommand command => CharterFlight(command.Role, command.City),
+            CharterFlightCommand command => CharterFlight(command.Role, command.Destination),
             ShuttleFlightCommand command => ShuttleFlight(command.Role, command.City),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {action}")
         };
@@ -95,8 +95,9 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(this);
         if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
-        if (CurrentPlayer.Hand.Count <= 7)
-            throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
+        // todo: this
+        // if (CurrentPlayer.Hand.Count <= 7)
+        //     throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
