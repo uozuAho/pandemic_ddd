@@ -16,7 +16,7 @@ namespace pandemic.Aggregates.Game
         public int OutbreakCounter { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
-        public int ResearchStationPile { get; init; } = 6;
+        public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;

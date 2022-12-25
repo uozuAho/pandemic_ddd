@@ -837,6 +837,7 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
+        [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
         {
@@ -859,6 +860,8 @@ namespace pandemic.test
                                        + game.PlayerDrawPile.Count
                                        + game.PlayerDiscardPile.Count;
                 totalPlayerCards.ShouldBe(48 + PandemicGame.NumberOfEpidemicCards(game.Difficulty));
+
+                (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
             }
         }
 

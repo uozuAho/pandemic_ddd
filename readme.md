@@ -8,6 +8,7 @@ implemented.
 
 # todo
 - invariants/fuzzing
+  - can sometimes end up with 7 research stations
   - check more invariants in fuzz test
   - maybe try invalid commands too?
 - correctness: check invariants each game turn?

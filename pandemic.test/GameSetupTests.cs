@@ -23,7 +23,7 @@ namespace pandemic.test
             Assert.AreEqual(options.Difficulty, game.Difficulty);
             Assert.AreEqual(2, game.InfectionRate);
             Assert.AreEqual(0, game.OutbreakCounter);
-            Assert.AreEqual(6, game.ResearchStationPile);
+            Assert.AreEqual(5, game.ResearchStationPile);
             Assert.That(game.CureDiscovered.Values.All(v => v == false));
             Assert.IsFalse(game.IsOver);
 
