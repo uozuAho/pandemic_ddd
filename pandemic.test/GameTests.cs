@@ -190,19 +190,18 @@ namespace pandemic.test
                 game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Bogota")));
         }
 
-        // todo: this
-        // [Test]
-        // public void Charter_flight_to_current_location_throws()
-        // {
-        //     var game = NewGame(new NewGameOptions
-        //     {
-        //         Roles = new[] { Role.Medic, Role.Scientist }
-        //     });
-        //     game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
-        //
-        //     Assert.Throws<GameRuleViolatedException>(() =>
-        //         game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Atlanta")));
-        // }
+        [Test]
+        public void Charter_flight_to_current_location_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Atlanta")));
+        }
 
         [Test]
         public void Charter_flight_when_not_turn_throws()

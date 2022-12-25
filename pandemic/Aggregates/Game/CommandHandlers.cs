@@ -82,6 +82,8 @@ public partial record PandemicGame
     {
         if (!Board.IsCity(city)) throw new InvalidActionException($"Invalid city '{city}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
+        if (CurrentPlayer.Location == city)
+            throw new GameRuleViolatedException($"You can't charter fly to your current location");
 
         var player = PlayerByRole(role);
 
