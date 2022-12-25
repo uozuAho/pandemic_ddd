@@ -871,10 +871,15 @@ namespace pandemic.test
                 var illegalCommands = allPossibleCommands.Except(legalCommands).OrderBy(_ => random.Next());
                 foreach (var invalidAction in illegalCommands.Take(100))
                 {
-                    var gameRef = game;
-                    Assert.That(
-                        () => gameRef.Do(invalidAction),
-                        Throws.InstanceOf<GameRuleViolatedException>());
+                    try
+                    {
+                        game.Do(invalidAction);
+                        Assert.Fail($"Expected {invalidAction} to throw");
+                    }
+                    catch (GameRuleViolatedException e)
+                    {
+                        // do nothing: we want an exception thrown!
+                    }
                 }
 
                 // do random action
