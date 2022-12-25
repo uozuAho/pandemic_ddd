@@ -8,17 +8,8 @@ implemented.
 
 # todo
 - invariants/fuzzing
-  - can sometimes end up with 7 research stations
-  - check more invariants in fuzz test
-  - maybe try invalid commands too?
-- correctness: check invariants each game turn?
-  - eg. total number of cards, cubes
-  - how to check repeating rules like it's the given player's turn, they have actions remaining etc.
-  - how to test & implement in a non-tedious way
-  - eg. not all commands are following:
-    - ThrowIfGameOver(this);
-      ThrowIfNoActionsRemaining(CurrentPlayer);
-      ThrowIfPlayerMustDiscard(CurrentPlayer);
+  - discard card not in hand doesn't throw?
+  - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg

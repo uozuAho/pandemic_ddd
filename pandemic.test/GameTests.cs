@@ -845,9 +845,21 @@ namespace pandemic.test
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
+            var allPossibleCommands = AllPossibleCommands.GenerateAllPossibleCommands(game).ToList();
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
+                var legalCommands = commandGenerator.LegalCommands(game);
+
+                var illegalCommands = allPossibleCommands.Except(legalCommands).OrderBy(_ => random.Next());
+                foreach (var invalidAction in illegalCommands.Take(100))
+                {
+                    var gameRef = game;
+                    Assert.That(
+                        () => gameRef.Do(invalidAction),
+                        Throws.InstanceOf<GameRuleViolatedException>());
+                }
+
                 // do random action
                 var action = random.Choice(commandGenerator.LegalCommands(game));
                 (game, var tempEvents) = game.Do(action);
