@@ -9,6 +9,6 @@ public record DirectFlightCommand(Role Role, string Destination) : PlayerCommand
 {
     public override string ToString()
     {
-        return $"direct fly to {Destination}";
+        return $"{Role} direct fly to {Destination}";
     }
 }

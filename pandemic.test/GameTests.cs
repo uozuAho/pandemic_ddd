@@ -101,6 +101,21 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Direct_flight_throws_when_not_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Miami") });
+
+            Assert.That(
+                () => game.Do(new DirectFlightCommand(Role.Scientist, "Miami")),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
         public void Direct_flight_to_current_city_throws()
         {
             var game = NewGame(new NewGameOptions

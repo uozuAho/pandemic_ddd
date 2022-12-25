@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - invariants/fuzzing
-  - discard card not in hand doesn't throw?
   - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later

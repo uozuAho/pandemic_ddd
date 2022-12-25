@@ -157,15 +157,17 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role currentPlayerRole, string city)
+    private (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role role, string city)
     {
+        ThrowIfNotRolesTurn(role);
+
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
 
         if (CurrentPlayer.Location == city)
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
 
-        return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(currentPlayerRole, city)});
+        return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(role, city)});
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) ShuttleFlight(Role role, string city)
