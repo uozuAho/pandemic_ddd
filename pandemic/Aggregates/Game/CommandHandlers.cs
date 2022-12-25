@@ -71,7 +71,7 @@ public partial record PandemicGame
 
         if (!Board.IsAdjacent(player.Location, city))
         {
-            throw new InvalidActionException(
+            throw new GameRuleViolatedException(
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {city}");
         }
 
