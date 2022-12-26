@@ -481,7 +481,7 @@ namespace pandemic.test
             {
                 Assert.That(
                     () => game.Do(command),
-                    Throws.InstanceOf<GameRuleViolatedException>());
+                    Throws.InstanceOf<GameRuleViolatedException>(), $"{command}");
             }
         }
 

@@ -8,8 +8,9 @@ implemented.
 
 # todo
 - invariants/fuzzing
-  - add 'consumesAction' interface to commands, use for discard test
-  - diff with main before merging
+    - command handlers -> do
+    - add role to playercommand
+    - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later
   - need a generic command handler base function? do things required by all commands, eg

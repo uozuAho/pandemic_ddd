@@ -45,6 +45,8 @@ public partial record PandemicGame
     public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand action)
     {
         ThrowIfGameOver(this);
+        // todo: this
+        // if (action is IConsumesAction) ThrowIfPlayerMustDiscard();
 
         return action switch
         {
