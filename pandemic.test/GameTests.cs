@@ -501,7 +501,7 @@ namespace pandemic.test
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            (game, _) = game.Do(new DiscardPlayerCardCommand(cardToDiscard));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, cardToDiscard));
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
@@ -521,7 +521,7 @@ namespace pandemic.test
                 Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(8))
             });
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
 
             game.InfectionDrawPile.Count.ShouldBe(initialGame.InfectionDrawPile.Count - 2);
             game.InfectionDiscardPile.Count.ShouldBe(initialGame.InfectionDiscardPile.Count + 2);
@@ -541,7 +541,7 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
@@ -561,7 +561,7 @@ namespace pandemic.test
             });
 
             Assert.That(
-                () => game.Do(new DiscardPlayerCardCommand(PlayerCards.CityCard("Bogota"))),
+                () => game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, PlayerCards.CityCard("Bogota"))),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 

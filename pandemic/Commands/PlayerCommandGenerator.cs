@@ -40,7 +40,7 @@ namespace pandemic.Commands
             {
                 foreach (var card in game.CurrentPlayer.Hand)
                 {
-                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(card);
+                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(game.CurrentPlayer.Role, card);
                 }
             }
         }

@@ -11,9 +11,9 @@ public class AllPossibleCommands
     {
         foreach (var city in game.Cities)
         {
-            yield return new DiscardPlayerCardCommand(PlayerCards.CityCard(city.Name));
             foreach (var player in game.Players)
             {
+                yield return new DiscardPlayerCardCommand(player.Role, PlayerCards.CityCard(city.Name));
                 yield return new BuildResearchStationCommand(player.Role, city.Name);
                 yield return new DriveFerryCommand(player.Role, city.Name);
                 yield return new DirectFlightCommand(player.Role, city.Name);
