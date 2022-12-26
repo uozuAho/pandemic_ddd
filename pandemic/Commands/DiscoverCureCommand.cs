@@ -3,7 +3,7 @@ using pandemic.Values;
 
 namespace pandemic.Commands;
 
-public record DiscoverCureCommand(PlayerCityCard[] Cards) : PlayerCommand, IConsumesAction
+public record DiscoverCureCommand(Role Role, PlayerCityCard[] Cards) : PlayerCommand, IConsumesAction
 {
     public override string ToString()
     {

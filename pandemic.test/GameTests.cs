@@ -699,7 +699,8 @@ namespace pandemic.test
                 Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
             });
 
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.CureDiscovered[Colour.Black]);
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
@@ -722,7 +723,8 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+            AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -749,7 +751,8 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -779,7 +782,8 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -799,7 +803,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -817,7 +822,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -842,7 +848,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -869,7 +876,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]

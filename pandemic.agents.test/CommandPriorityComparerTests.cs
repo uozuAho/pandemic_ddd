@@ -22,7 +22,7 @@ namespace pandemic.agents.test
             var commands = new List<PlayerCommand>
             {
                 new DiscardPlayerCardCommand(Role.Scientist, new EpidemicCard()),
-                new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
+                new DiscoverCureCommand(Role.Scientist, new[] { new PlayerCityCard(Board.City("Atlanta")) }),
                 new DirectFlightCommand(Role.Scientist, "Chicago"),
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
                 new BuildResearchStationCommand(Role.Scientist, "Miami"),

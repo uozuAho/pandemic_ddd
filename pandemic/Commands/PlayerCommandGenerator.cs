@@ -73,7 +73,7 @@ namespace pandemic.Commands
             {
                 if (!game.CureDiscovered[cureCards.Key])
                     // todo: yield all combinations if > 5 cards
-                    _buffer[_bufIdx++] = new DiscoverCureCommand(cureCards.Take(5).ToArray());
+                    _buffer[_bufIdx++] = new DiscoverCureCommand(game.CurrentPlayer.Role, cureCards.Take(5).ToArray());
             }
         }
 
