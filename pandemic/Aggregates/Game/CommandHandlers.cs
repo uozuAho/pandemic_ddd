@@ -48,7 +48,6 @@ public partial record PandemicGame
         {
             ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
             ThrowIfNotRolesTurn(command.Role);
-            // todo: get rid of other usages of this, add other checks here
             if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
         }
 

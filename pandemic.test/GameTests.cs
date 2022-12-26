@@ -477,7 +477,7 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
-            foreach (var command in AllPossibleCommands.GenerateAllPossibleCommands(game).Where(c => c is IConsumesAction))
+            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c is IConsumesAction))
             {
                 Assert.That(
                     () => game.Do(command),
@@ -916,7 +916,7 @@ namespace pandemic.test
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
-            var allPossibleCommands = AllPossibleCommands.GenerateAllPossibleCommands(game).ToList();
+            var allPossibleCommands = PlayerCommandGenerator.AllPossibleCommands(game).ToList();
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {

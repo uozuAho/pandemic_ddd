@@ -34,6 +34,22 @@ namespace pandemic.Commands
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
         }
 
+        public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)
+        {
+            foreach (var city in game.Cities)
+            {
+                foreach (var player in game.Players)
+                {
+                    yield return new DiscardPlayerCardCommand(player.Role, PlayerCards.CityCard(city.Name));
+                    yield return new BuildResearchStationCommand(player.Role, city.Name);
+                    yield return new DriveFerryCommand(player.Role, city.Name);
+                    yield return new DirectFlightCommand(player.Role, city.Name);
+                    yield return new CharterFlightCommand(player.Role, PlayerCards.CityCard(player.Location), city.Name);
+                    yield return new ShuttleFlightCommand(player.Role, city.Name);
+                }
+            }
+        }
+
         private void SetDiscardCommands(PandemicGame game)
         {
             if (game.CurrentPlayer.Hand.Count > 7)
