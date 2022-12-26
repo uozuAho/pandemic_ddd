@@ -88,11 +88,11 @@ namespace pandemic.agents.GreedyBfs
             return node;
         }
 
-        public IEnumerable<PlayerCommand> GetSolution()
+        public IEnumerable<IPlayerCommand> GetSolution()
         {
             if (!IsSolved) throw new InvalidOperationException("not solved!");
 
-            var actions = new List<PlayerCommand>();
+            var actions = new List<IPlayerCommand>();
             var currentNode = _explored[CurrentState];
             while (currentNode is { Action: { } })
             {
@@ -141,7 +141,7 @@ namespace pandemic.agents.GreedyBfs
     public record SearchNode(
         PandemicGame State,
         SearchNode? Parent,
-        PlayerCommand? Action,
+        IPlayerCommand? Action,
         double PathCost,
         int Score);
 

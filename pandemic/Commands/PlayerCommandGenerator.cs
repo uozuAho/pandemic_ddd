@@ -8,18 +8,18 @@ namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
-        private readonly PlayerCommand[] _buffer = new PlayerCommand[100];
+        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[100];
         private int _bufIdx = 0;
 
-        public IEnumerable<PlayerCommand> LegalCommands(PandemicGame game)
+        public IEnumerable<IPlayerCommand> LegalCommands(PandemicGame game)
         {
-            if (game.IsOver) return Enumerable.Empty<PlayerCommand>();
+            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
 
             _bufIdx = 0;
 
             SetDiscardCommands(game);
             if (_bufIdx > 0)
-                return new ArraySegment<PlayerCommand>(_buffer, 0, _bufIdx);
+                return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
@@ -31,7 +31,7 @@ namespace pandemic.Commands
                 SetShuttleFlightCommands(game);
             }
 
-            return new ArraySegment<PlayerCommand>(_buffer, 0, _bufIdx);
+            return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
         }
 
         private void SetDiscardCommands(PandemicGame game)

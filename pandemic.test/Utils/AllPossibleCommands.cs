@@ -7,7 +7,7 @@ namespace pandemic.test.Utils;
 
 public class AllPossibleCommands
 {
-    public static IEnumerable<PlayerCommand> GenerateAllPossibleCommands(PandemicGame game)
+    public static IEnumerable<IPlayerCommand> GenerateAllPossibleCommands(PandemicGame game)
     {
         foreach (var city in game.Cities)
         {

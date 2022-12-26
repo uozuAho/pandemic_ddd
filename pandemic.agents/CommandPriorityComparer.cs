@@ -12,7 +12,7 @@ namespace pandemic.agents;
 /// that they'll lead to a win. Uses multiple dispatch as found here:
 /// https://stackoverflow.com/questions/480443/what-is-single-and-multiple-dispatch-in-relation-to-net/4810826#4810826
 /// </summary>
-public class CommandPriorityComparer : IComparer<PlayerCommand>
+public class CommandPriorityComparer : IComparer<IPlayerCommand>
 {
     private const int Less = -1;
     private const int Same = 0;
@@ -26,7 +26,7 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         _game = game;
     }
 
-    public int Compare(PlayerCommand? a, PlayerCommand? b)
+    public int Compare(IPlayerCommand? a, IPlayerCommand? b)
     {
         if (a == null || b == null) throw new ArgumentException();
 
@@ -35,7 +35,7 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
 
     // int parameter is just to distinguish from other overloads. This
     // allows multiple dispatch by casting the given commands as dynamic
-    private int CompareMulti(PlayerCommand a, PlayerCommand b, int _)
+    private int CompareMulti(IPlayerCommand a, IPlayerCommand b, int _)
     {
         var result = CompareMulti((dynamic)a, (dynamic)b);
         if (result != Unmatched) return result;
@@ -45,11 +45,11 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
         throw new ArgumentException("Undefined comparison");
     }
 
-    private int CompareMulti(PlayerCommand a, PlayerCommand b) => Unmatched;
-    private int CompareMulti<T>(T a, T b) where T : PlayerCommand => Same;
-    private int CompareMulti(DiscoverCureCommand a, PlayerCommand b) => Greater;
+    private int CompareMulti(IPlayerCommand a, IPlayerCommand b) => Unmatched;
+    private int CompareMulti<T>(T a, T b) where T : IPlayerCommand => Same;
+    private int CompareMulti(DiscoverCureCommand a, IPlayerCommand b) => Greater;
     private int CompareMulti(BuildResearchStationCommand a, DiscoverCureCommand b) => Less;
-    private int CompareMulti(BuildResearchStationCommand a, PlayerCommand b)
+    private int CompareMulti(BuildResearchStationCommand a, IPlayerCommand b)
     {
         if (_game.HasResearchStationOnColour(_game.Board.City(a.City).Colour))
             return Less;
@@ -60,21 +60,21 @@ public class CommandPriorityComparer : IComparer<PlayerCommand>
 
     // I dunno when direct flight will be better/worse than any other command. Treat them
     // as same priority for now.
-    private int CompareMulti(DirectFlightCommand a, PlayerCommand b) => Same;
+    private int CompareMulti(DirectFlightCommand a, IPlayerCommand b) => Same;
 
     private int CompareMulti(DirectFlightCommand a, DriveFerryCommand b)
     {
         return _game.Board.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
-    private int CompareMulti(CharterFlightCommand a, PlayerCommand b) => Same;
+    private int CompareMulti(CharterFlightCommand a, IPlayerCommand b) => Same;
 
     private int CompareMulti(CharterFlightCommand a, DriveFerryCommand b)
     {
         return _game.Board.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
-    private int CompareMulti(ShuttleFlightCommand a, PlayerCommand b) => Same;
+    private int CompareMulti(ShuttleFlightCommand a, IPlayerCommand b) => Same;
 
     private int CompareMulti(ShuttleFlightCommand a, CharterFlightCommand b) => Greater;
     private int CompareMulti(ShuttleFlightCommand a, DirectFlightCommand b) => Greater;

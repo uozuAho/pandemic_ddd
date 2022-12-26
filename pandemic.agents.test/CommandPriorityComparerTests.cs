@@ -19,7 +19,7 @@ namespace pandemic.agents.test
             var game = ANewGame();
             var comparer = new CommandPriorityComparer(game);
 
-            var commands = new List<PlayerCommand>
+            var commands = new List<IPlayerCommand>
             {
                 new DiscardPlayerCardCommand(Role.Scientist, new EpidemicCard()),
                 new DiscoverCureCommand(Role.Scientist, new[] { new PlayerCityCard(Board.City("Atlanta")) }),

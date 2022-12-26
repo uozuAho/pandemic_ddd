@@ -42,7 +42,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) Do(PlayerCommand command)
+    public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
         // todo: this

@@ -55,7 +55,7 @@ namespace pandemic
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PlayerCommand> LegalActions()
+        public IEnumerable<IPlayerCommand> LegalActions()
         {
             return _commandGenerator.LegalCommands(Game);
         }
@@ -76,7 +76,7 @@ namespace pandemic
             return ApplyAction(legalActions[action]);
         }
 
-        public IEnumerable<IEvent> ApplyAction(PlayerCommand action)
+        public IEnumerable<IEvent> ApplyAction(IPlayerCommand action)
         {
             var (game, events) = Game.Do(action);
             Game = game;

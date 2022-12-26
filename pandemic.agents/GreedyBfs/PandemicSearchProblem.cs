@@ -18,12 +18,12 @@ public class PandemicSearchProblem
         _commandGenerator = commandGenerator;
     }
 
-    public IEnumerable<PlayerCommand> GetActions(PandemicGame state)
+    public IEnumerable<IPlayerCommand> GetActions(PandemicGame state)
     {
         return _commandGenerator.LegalCommands(state);
     }
 
-    public PandemicGame DoAction(PandemicGame state, PlayerCommand action)
+    public PandemicGame DoAction(PandemicGame state, IPlayerCommand action)
     {
         var (nextState, _) = state.Do(action);
 
@@ -35,7 +35,7 @@ public class PandemicSearchProblem
         return state.IsWon;
     }
 
-    public double PathCost(PandemicGame state, PlayerCommand action)
+    public double PathCost(PandemicGame state, IPlayerCommand action)
     {
         return 0.0;
     }

@@ -2,7 +2,7 @@ using pandemic.Values;
 
 namespace pandemic.Commands;
 
-public record DriveFerryCommand(Role Role, string City) : PlayerCommand, IConsumesAction
+public record DriveFerryCommand(Role Role, string City) : IPlayerCommand, IConsumesAction
 {
     public override string ToString()
     {

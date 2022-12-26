@@ -80,7 +80,7 @@ namespace pandemic.console
         /// </summary>
         private record SearchNode(
             PandemicGame State,
-            PlayerCommand? Command,
+            IPlayerCommand? Command,
             SearchNode? Parent
         )
         {

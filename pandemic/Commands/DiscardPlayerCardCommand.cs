@@ -3,7 +3,7 @@ using pandemic.Values;
 
 namespace pandemic.Commands;
 
-public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : PlayerCommand
+public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerCommand
 {
     public override string ToString()
     {

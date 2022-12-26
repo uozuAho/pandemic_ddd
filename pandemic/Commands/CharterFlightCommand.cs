@@ -6,7 +6,7 @@ namespace pandemic.Commands;
 /// Discard the card matching the city you're in to fly to any city
 /// </summary>
 public record CharterFlightCommand(Role Role, PlayerCityCard DiscardCard, string Destination) :
-    PlayerCommand,
+    IPlayerCommand,
     IConsumesAction
 {
     public override string ToString()
