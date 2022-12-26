@@ -1,6 +1,6 @@
 namespace pandemic.Commands;
 
-public record BuildResearchStationCommand(string City) : PlayerCommand
+public record BuildResearchStationCommand(string City) : PlayerCommand, IConsumesAction
 {
     public override string ToString()
     {

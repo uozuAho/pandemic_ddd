@@ -477,9 +477,12 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
-            Assert.That(
-                () => game.Do(new DirectFlightCommand(Role.Medic, game.CurrentPlayer.Hand.CityCards.First().City.Name)),
-                Throws.InstanceOf<GameRuleViolatedException>());
+            foreach (var command in AllPossibleCommands.GenerateAllPossibleCommands(game).Where(c => c is IConsumesAction))
+            {
+                Assert.That(
+                    () => game.Do(command),
+                    Throws.InstanceOf<GameRuleViolatedException>());
+            }
         }
 
         [Test]
