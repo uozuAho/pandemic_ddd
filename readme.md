@@ -8,15 +8,9 @@ implemented.
 
 # todo
 - invariants/fuzzing
-    - add role to playercommand
-    - throw if not role's turn in `Do`
     - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
-- maybe later
-  - need a generic command handler base function? do things required by all commands, eg
-    - check if player needs to discard first
-    - check if game is over
-    - check that player has actions remaining
+- cleanup: replace 'apply and end turn if needed' with single 'end turn' command in top level `Do`
 
 # Quick start
 - install dotnet core (tested with v7)

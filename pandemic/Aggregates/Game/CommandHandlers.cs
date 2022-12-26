@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using pandemic.Commands;
 using pandemic.Events;
@@ -48,6 +47,7 @@ public partial record PandemicGame
         if (command is IConsumesAction)
         {
             ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
+            ThrowIfNotRolesTurn(command.Role);
             // todo: get rid of other usages of this, add other checks here
             if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
         }
@@ -68,8 +68,6 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)
     {
         var (role, destination) = command;
-
-        ThrowIfNotRolesTurn(role);
 
         var player = PlayerByRole(role);
 
@@ -106,7 +104,6 @@ public partial record PandemicGame
     {
         var card = command.Card;
 
-        ThrowIfGameOver(this);
         if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
         if (CurrentPlayer.Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
@@ -122,9 +119,6 @@ public partial record PandemicGame
     private (PandemicGame Game, IEnumerable<IEvent> events) Do(BuildResearchStationCommand command)
     {
         var city = command.City;
-
-        ThrowIfGameOver(this);
-        ThrowIfNoActionsRemaining(CurrentPlayer);
 
         if (ResearchStationPile == 0)
             throw new GameRuleViolatedException("No research stations left");
@@ -148,9 +142,6 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscoverCureCommand command)
     {
         var cards = command.Cards;
-
-        ThrowIfGameOver(this);
-        ThrowIfNoActionsRemaining(CurrentPlayer);
 
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
             throw new GameRuleViolatedException("Can only cure at a city with a research station");
@@ -178,8 +169,6 @@ public partial record PandemicGame
     {
         var (role, destination) = command;
 
-        ThrowIfNotRolesTurn(role);
-
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(destination)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
 
@@ -192,8 +181,6 @@ public partial record PandemicGame
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShuttleFlightCommand command)
     {
         var (role, destination) = command;
-
-        ThrowIfNotRolesTurn(role);
 
         if (destination == CurrentPlayer.Location)
             throw new GameRuleViolatedException("Destination can't be current location");
