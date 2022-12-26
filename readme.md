@@ -8,6 +8,7 @@ implemented.
 
 # todo
 - invariants/fuzzing
+  - add 'consumesAction' interface to commands, use for discard test
   - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later

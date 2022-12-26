@@ -167,6 +167,7 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) DirectFlight(Role role, string city)
     {
         ThrowIfNotRolesTurn(role);
+        ThrowIfPlayerMustDiscard(PlayerByRole(role));
 
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(city)))
             throw new GameRuleViolatedException("Current player doesn't have required card");

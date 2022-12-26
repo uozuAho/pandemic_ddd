@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
@@ -477,6 +476,10 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+
+            Assert.That(
+                () => game.Do(new DirectFlightCommand(Role.Medic, game.CurrentPlayer.Hand.CityCards.First().City.Name)),
+                Throws.InstanceOf<GameRuleViolatedException>());
         }
 
         [Test]
@@ -893,6 +896,8 @@ namespace pandemic.test
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
         {
+            // bigger numbers here slow down the test, but check for more improper behaviour
+            const int illegalCommandsToTryPerTurn = 10;
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
@@ -902,12 +907,15 @@ namespace pandemic.test
             {
                 var legalCommands = commandGenerator.LegalCommands(game);
 
-                var illegalCommands = allPossibleCommands.Except(legalCommands).OrderBy(_ => random.Next());
-                foreach (var illegalCommand in illegalCommands.Take(100))
+                foreach (var illegalCommand in allPossibleCommands
+                             .Except(legalCommands)
+                             .OrderBy(_ => random.Next())
+                             .Take(illegalCommandsToTryPerTurn))
                 {
                     try
                     {
                         game.Do(illegalCommand);
+                        Console.WriteLine(game);
                         Assert.Fail($"Expected {illegalCommand} to throw");
                     }
                     catch (GameRuleViolatedException)
