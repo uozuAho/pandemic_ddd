@@ -51,7 +51,7 @@ public partial record PandemicGame
             if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
         }
 
-        return command switch
+        var (game, events) = command switch
         {
             DriveFerryCommand cmd => Do(cmd),
             DiscardPlayerCardCommand cmd => Do(cmd),
@@ -62,6 +62,11 @@ public partial record PandemicGame
             ShuttleFlightCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+
+        if (game.CurrentPlayer.ActionsRemaining != 0 || game.IsOver) return (game, events);
+
+        var eventList = events.ToList();
+        return (DoStuffAfterActions(game, eventList), eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)
@@ -78,7 +83,7 @@ public partial record PandemicGame
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
         }
 
-        return ApplyAndEndTurnIfNeeded(new[] {new PlayerMoved(role, destination)});
+        return ApplyEvents(new PlayerMoved(role, destination));
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(CharterFlightCommand cmd)
@@ -96,7 +101,7 @@ public partial record PandemicGame
         if (discardCard.City.Name != PlayerByRole(role).Location)
             throw new GameRuleViolatedException("Discarded card must match current location");
 
-        return ApplyAndEndTurnIfNeeded(new [] {new PlayerCharterFlewTo(role, destination)});
+        return ApplyEvents(new PlayerCharterFlewTo(role, destination));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscardPlayerCardCommand command)
@@ -131,11 +136,10 @@ public partial record PandemicGame
 
         var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
-        return ApplyAndEndTurnIfNeeded(new List<IEvent>
-        {
+        return ApplyEvents(
             new ResearchStationBuilt(city),
             new PlayerCardDiscarded(playerCard)
-        });
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscoverCureCommand command)
@@ -159,7 +163,7 @@ public partial record PandemicGame
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
             throw new ArgumentException($"given cards contain a card not in player's hand");
 
-        return ApplyAndEndTurnIfNeeded(cards
+        return ApplyEvents(cards
             .Select(c => new PlayerCardDiscarded(c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
@@ -174,7 +178,7 @@ public partial record PandemicGame
         if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
 
-        return ApplyAndEndTurnIfNeeded(new [] {new PlayerDirectFlewTo(role, destination)});
+        return ApplyEvents(new PlayerDirectFlewTo(role, destination));
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShuttleFlightCommand command)
@@ -190,17 +194,7 @@ public partial record PandemicGame
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
 
-        return ApplyAndEndTurnIfNeeded(new[] { new PlayerShuttleFlewTo(role, destination) });
-    }
-
-    private (PandemicGame, IEnumerable<IEvent>) ApplyAndEndTurnIfNeeded(IEnumerable<IEvent> events)
-    {
-        var (game, eventList) = ApplyEvents(events);
-
-        if (game.CurrentPlayer.ActionsRemaining == 0 && !game.IsOver)
-            game = DoStuffAfterActions(game, eventList);
-
-        return (game, eventList);
+        return ApplyEvents(new PlayerShuttleFlewTo(role, destination));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
