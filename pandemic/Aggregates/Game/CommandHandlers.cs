@@ -44,10 +44,10 @@ public partial record PandemicGame
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
+        ThrowIfNotRolesTurn(command.Role);
         if (command is IConsumesAction)
         {
             ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
-            ThrowIfNotRolesTurn(command.Role);
             if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
         }
 

@@ -9,8 +9,8 @@ public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerComm
     {
         return Card switch
         {
-            EpidemicCard => "discard epidemic card",
-            PlayerCityCard cityCard => $"discard {cityCard.City.Name}",
+            EpidemicCard => $"{Role} discard epidemic card",
+            PlayerCityCard cityCard => $"{Role} discard {cityCard.City.Name}",
             _ => throw new ArgumentOutOfRangeException()
         };
     }

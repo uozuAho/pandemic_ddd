@@ -7,7 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- add role to discard command string
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - cleanup: replace 'apply and end turn if needed' with single 'end turn' command in top level `Do`
 
