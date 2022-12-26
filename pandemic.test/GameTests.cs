@@ -10,6 +10,7 @@ using pandemic.GameData;
 using pandemic.test.Utils;
 using pandemic.Values;
 using Shouldly;
+using utils;
 
 namespace pandemic.test
 {
@@ -49,7 +50,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            Assert.Throws<InvalidActionException>(() =>
+            Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DriveFerryCommand(Role.Medic, "Beijing")));
         }
 
@@ -77,8 +78,10 @@ namespace pandemic.test
 
             (game, _) = game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami"));
 
-            Assert.That(game.CurrentPlayer.Location, Is.EqualTo("Miami"));
-            Assert.That(game.CurrentPlayer.Hand, Has.No.Member(PlayerCards.CityCard("Miami")));
+            game.CurrentPlayer.Location.ShouldBe("Miami");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Miami"));
+            game.PlayerDiscardPile.TopCard.ShouldBe(PlayerCards.CityCard("Miami"));
         }
 
         [Test]
@@ -93,6 +96,21 @@ namespace pandemic.test
 
             Assert.That(
                 () => game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Miami")),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Direct_flight_throws_when_not_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Miami") });
+
+            Assert.That(
+                () => game.Do(new DirectFlightCommand(Role.Scientist, "Miami")),
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
@@ -136,7 +154,10 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
-            (game, _) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, "Bogota"));
+            (game, _) = game.Do(new CharterFlightCommand(
+                game.CurrentPlayer.Role,
+                PlayerCards.CityCard("Atlanta"),
+                "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
             game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
@@ -152,7 +173,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<InvalidActionException>(() =>
-                game.Do(new CharterFlightCommand(Role.Medic, "fasdfasdf")));
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "fasdfasdf")));
         }
 
         [Test]
@@ -165,7 +186,20 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Bogota")));
+        }
+
+        [Test]
+        public void Charter_flight_to_current_location_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            Assert.Throws<GameRuleViolatedException>(() =>
+                game.Do(new CharterFlightCommand(Role.Medic, PlayerCards.CityCard("Atlanta"), "Atlanta")));
         }
 
         [Test]
@@ -181,7 +215,7 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new CharterFlightCommand(Role.Scientist, "Bogota")));
+                game.Do(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Bogota")));
         }
 
         [Test]
@@ -197,7 +231,10 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta")
             });
 
-            AssertEndsTurn(() => game.Do(new CharterFlightCommand(Role.Medic, "Bogota")));
+            AssertEndsTurn(() => game.Do(new CharterFlightCommand(
+                Role.Medic,
+                PlayerCards.CityCard("Atlanta"),
+                "Bogota")));
         }
 
         [Test]
@@ -390,7 +427,6 @@ namespace pandemic.test
             });
             game = game with
             {
-                SelfConsistencyChecksEnabled = false,
                 Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
             };
 
@@ -440,6 +476,13 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+
+            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c is IConsumesAction))
+            {
+                Assert.That(
+                    () => game.Do(command),
+                    Throws.InstanceOf<GameRuleViolatedException>(), $"{command}");
+            }
         }
 
         [Test]
@@ -458,7 +501,7 @@ namespace pandemic.test
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            (game, _) = game.Do(new DiscardPlayerCardCommand(cardToDiscard));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, cardToDiscard));
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
@@ -475,10 +518,10 @@ namespace pandemic.test
             var game = initialGame.SetCurrentPlayerAs(initialGame.CurrentPlayer with
             {
                 ActionsRemaining = 0,
-                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(6))
+                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(8))
             });
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
 
             game.InfectionDrawPile.Count.ShouldBe(initialGame.InfectionDrawPile.Count - 2);
             game.InfectionDiscardPile.Count.ShouldBe(initialGame.InfectionDiscardPile.Count + 2);
@@ -498,11 +541,28 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void Discard_player_card_throws_when_not_in_hand()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty
+            });
+
+            Assert.That(
+                () => game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, PlayerCards.CityCard("Bogota"))),
+                Throws.InstanceOf<GameRuleViolatedException>());
         }
 
         [Test]
@@ -522,12 +582,13 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new BuildResearchStationCommand("Chicago"));
+            (game, _) = game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago"));
 
-            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
             game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
-            game.PlayerDiscardPile.Cards.ShouldContain(chicagoPlayerCard);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
+            game.PlayerDiscardPile.TopCard.ShouldBe(chicagoPlayerCard);
+            game.ResearchStationPile.ShouldBe(4);
         }
 
         [Test]
@@ -544,7 +605,7 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
@@ -559,7 +620,8 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Chicago")
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
@@ -576,7 +638,8 @@ namespace pandemic.test
             });
 
             Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Atlanta")));
         }
 
         [Test]
@@ -595,7 +658,8 @@ namespace pandemic.test
             });
 
             // atlanta starts with a research station
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Atlanta")));
         }
 
         [Test]
@@ -617,7 +681,8 @@ namespace pandemic.test
                 Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
@@ -634,7 +699,8 @@ namespace pandemic.test
                 Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
             });
 
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.CureDiscovered[Colour.Black]);
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
@@ -657,7 +723,8 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+            AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -684,7 +751,8 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -714,7 +782,8 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -734,7 +803,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -752,7 +822,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -777,7 +848,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -804,7 +876,8 @@ namespace pandemic.test
             });
 
             Assert.Throws<GameRuleViolatedException>(() =>
-                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -832,6 +905,58 @@ namespace pandemic.test
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
+        }
+
+        [Repeat(10)]
+        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
+        public void Fuzz_for_invalid_states(NewGameOptions options)
+        {
+            // bigger numbers here slow down the test, but check for more improper behaviour
+            const int illegalCommandsToTryPerTurn = 10;
+            var commandGenerator = new PlayerCommandGenerator();
+            var random = new Random();
+            var (game, events) = PandemicGame.CreateNewGame(options);
+            var allPossibleCommands = PlayerCommandGenerator.AllPossibleCommands(game).ToList();
+
+            for (var i = 0; i < 1000 && !game.IsOver; i++)
+            {
+                var legalCommands = commandGenerator.LegalCommands(game);
+
+                foreach (var illegalCommand in allPossibleCommands
+                             .Except(legalCommands)
+                             .OrderBy(_ => random.Next())
+                             .Take(illegalCommandsToTryPerTurn))
+                {
+                    try
+                    {
+                        game.Do(illegalCommand);
+                        Console.WriteLine(game);
+                        Assert.Fail($"Expected {illegalCommand} to throw");
+                    }
+                    catch (GameRuleViolatedException)
+                    {
+                        // do nothing: we want an exception thrown!
+                    }
+                }
+
+                // do random action
+                var action = random.Choice(commandGenerator.LegalCommands(game));
+                (game, var tempEvents) = game.Do(action);
+                events.AddRange(tempEvents);
+
+                // check invariants
+                var totalCubes = game.Cubes.Values.Sum() + TotalNumCubesOnCities(game);
+                totalCubes.ShouldBe(96);
+
+                var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()
+                                       + game.PlayerDrawPile.Count
+                                       + game.PlayerDiscardPile.Count;
+                totalPlayerCards.ShouldBe(48 + PandemicGame.NumberOfEpidemicCards(game.Difficulty));
+
+                (game.InfectionDrawPile.Count + game.InfectionDiscardPile.Count).ShouldBe(48);
+
+                (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
+            }
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

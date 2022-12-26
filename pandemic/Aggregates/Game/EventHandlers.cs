@@ -97,7 +97,8 @@ public partial record PandemicGame
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
                 ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1
-            })
+            }),
+            ResearchStationPile = game.ResearchStationPile - 1
         };
     }
 
@@ -203,18 +204,19 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyPlayerDirectFlewTo(PandemicGame game, PlayerDirectFlewTo evt)
     {
-        var newPlayers = game.Players.Select(p => p).ToList();
-        var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == evt.Role);
-        var movedPlayer = newPlayers[movedPlayerIdx];
+        var player = game.PlayerByRole(evt.Role);
+        var playedCityCard = PlayerCards.CityCard(evt.Destination);
 
-        newPlayers[movedPlayerIdx] = movedPlayer with
+        return game with
         {
-            Location = evt.City,
-            ActionsRemaining = movedPlayer.ActionsRemaining - 1,
-            Hand = movedPlayer.Hand.Remove(PlayerCards.CityCard(evt.City))
+            Players = game.Players.Replace(player, player with
+            {
+                Location = evt.Destination,
+                ActionsRemaining = player.ActionsRemaining - 1,
+                Hand = player.Hand.Remove(playedCityCard)
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(playedCityCard)
         };
-
-        return game with {Players = newPlayers.ToImmutableList()};
     }
 
     private static PandemicGame ApplyPlayerCharterFlewTo(PandemicGame game, PlayerCharterFlewTo evt)

@@ -10,6 +10,6 @@ namespace pandemic.agents
         /// <summary>
         /// Given a game, return the commands to win the game, or empty if no win is possible.
         /// </summary>
-        IEnumerable<PlayerCommand> CommandsToWin(PandemicGame state, TimeSpan timeout);
+        IEnumerable<IPlayerCommand> CommandsToWin(PandemicGame state, TimeSpan timeout);
     }
 }

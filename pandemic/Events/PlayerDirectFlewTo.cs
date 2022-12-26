@@ -2,4 +2,5 @@
 
 namespace pandemic.Events;
 
-public record PlayerDirectFlewTo(Role Role, string City) : IEvent;
+// see DirectFlightCommand
+public record PlayerDirectFlewTo(Role Role, string Destination) : IEvent;

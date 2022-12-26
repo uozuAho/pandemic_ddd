@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record ShuttleFlightCommand(Role Role, string City) : PlayerCommand;
+public record ShuttleFlightCommand(Role Role, string City) : IPlayerCommand, IConsumesAction;

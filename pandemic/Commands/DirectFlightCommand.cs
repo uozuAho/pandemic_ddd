@@ -2,10 +2,13 @@
 
 namespace pandemic.Commands;
 
-public record DirectFlightCommand(Role Role, string City) : PlayerCommand
+/// <summary>
+/// Discard a city card to flight directly to that city
+/// </summary>
+public record DirectFlightCommand(Role Role, string Destination) : IPlayerCommand, IConsumesAction
 {
     public override string ToString()
     {
-        return $"direct fly to {City}";
+        return $"{Role} direct fly to {Destination}";
     }
 }

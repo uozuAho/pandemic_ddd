@@ -147,7 +147,7 @@ namespace pandemic.server
             );
         }
 
-        private static int[] ToIntArray(IEnumerable<PlayerCommand> commands)
+        private static int[] ToIntArray(IEnumerable<IPlayerCommand> commands)
         {
             return Enumerable.Range(0, commands.Count()).ToArray();
         }
@@ -159,7 +159,7 @@ namespace pandemic.server
             return ApplyAction(game, action);
         }
 
-        public PandemicGame ApplyAction(PandemicGame game, PlayerCommand action)
+        public PandemicGame ApplyAction(PandemicGame game, IPlayerCommand action)
         {
             (game, _) = game.Do(action);
             return game;

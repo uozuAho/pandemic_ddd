@@ -15,16 +15,16 @@ namespace pandemic.agents
         private static readonly Random _rng = new();
         private static readonly PlayerCommandGenerator _commandGenerator = new();
 
-        public IEnumerable<PlayerCommand> CommandsToWin(PandemicGame game, TimeSpan timeout)
+        public IEnumerable<IPlayerCommand> CommandsToWin(PandemicGame game, TimeSpan timeout)
         {
             var root = new SearchNode(game, null, null);
 
             var diagnostics = Diagnostics.StartNew();
             var stopwatch = Stopwatch.StartNew();
             var win = Hunt(root, 0, diagnostics, timeout, stopwatch);
-            if (win == null) return Enumerable.Empty<PlayerCommand>();
+            if (win == null) return Enumerable.Empty<IPlayerCommand>();
 
-            var winningCommands = new List<PlayerCommand>();
+            var winningCommands = new List<IPlayerCommand>();
             while (win.Parent != null)
             {
                 if (win.Command == null) throw new InvalidOperationException("no!");
@@ -74,7 +74,7 @@ namespace pandemic.agents
         /// </summary>
         private record SearchNode(
             PandemicGame State,
-            PlayerCommand? Command,
+            IPlayerCommand? Command,
             SearchNode? Parent
         );
 

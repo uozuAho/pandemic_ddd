@@ -19,13 +19,13 @@ namespace pandemic.agents.test
             var game = ANewGame();
             var comparer = new CommandPriorityComparer(game);
 
-            var commands = new List<PlayerCommand>
+            var commands = new List<IPlayerCommand>
             {
-                new DiscardPlayerCardCommand(new EpidemicCard()),
-                new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
+                new DiscardPlayerCardCommand(Role.Scientist, new EpidemicCard()),
+                new DiscoverCureCommand(Role.Scientist, new[] { new PlayerCityCard(Board.City("Atlanta")) }),
                 new DirectFlightCommand(Role.Scientist, "Chicago"),
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
-                new BuildResearchStationCommand("Miami"),
+                new BuildResearchStationCommand(Role.Scientist, "Miami"),
             };
 
             var sortedCommands = commands.OrderByDescending(c => c, comparer).ToList();
@@ -52,7 +52,7 @@ namespace pandemic.agents.test
             // station on a blue city
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Paris"),
-                Is.GreaterThan(new BuildResearchStationCommand("Chicago"))
+                Is.GreaterThan(new BuildResearchStationCommand(Role.Scientist, "Chicago"))
                     .Using(comparer));
         }
 
@@ -91,7 +91,7 @@ namespace pandemic.agents.test
 
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
-                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Chicago"))
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Chicago"))
                     .Using(comparer));
         }
 
@@ -118,7 +118,7 @@ namespace pandemic.agents.test
 
             Assert.That(
                 new ShuttleFlightCommand(Role.Scientist, "Bogota"),
-                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, "Bogota"))
+                Is.GreaterThan(new CharterFlightCommand(Role.Scientist, PlayerCards.CityCard("Atlanta"), "Bogota"))
                     .Using(comparer));
         }
 

@@ -10,17 +10,13 @@ namespace pandemic.Aggregates.Game
 {
     public partial record PandemicGame
     {
-        /// <summary>
-        /// Skip internal consistency checking. For testing purposes only!
-        /// </summary>
-        public bool SelfConsistencyChecksEnabled { get; init; } = true;
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; } = 0;
-        public int ResearchStationPile { get; init; } = 6;
+        public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;

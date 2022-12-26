@@ -9,8 +9,11 @@ namespace pandemic
         public static string FullState(PandemicGame game)
         {
             var sb = new StringBuilder();
-            if (game.IsWon) sb.AppendLine("Game won!");
-            else sb.AppendLine("Game lost. " + game.LossReason);
+            if (game.IsOver)
+            {
+                if (game.IsWon) sb.AppendLine("Game won!");
+                else sb.AppendLine("Game lost. " + game.LossReason);
+            }
             sb.AppendLine($"infection rate: {game.InfectionRate}");
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");

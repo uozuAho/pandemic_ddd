@@ -153,14 +153,14 @@ namespace pandemic.test
             var expectedCharterFlightCommands = game.Cities
                 .Select(c => c.Name)
                 .Except(new[] { "Atlanta" })
-                .Select(cityName => new CharterFlightCommand(game.CurrentPlayer.Role, cityName))
-                .OrderBy(c => c.City);
+                .Select(cityName => new CharterFlightCommand(game.CurrentPlayer.Role, PlayerCards.CityCard("Atlanta"), cityName))
+                .OrderBy(c => c.Destination);
 
             // act
             var generatedCharterFlightCommands = _generator.LegalCommands(game)
                 .Where(c => c is CharterFlightCommand)
                 .Cast<CharterFlightCommand>()
-                .OrderBy(c => c.City);
+                .OrderBy(c => c.Destination);
 
             CollectionAssert.AreEqual(expectedCharterFlightCommands, generatedCharterFlightCommands);
         }

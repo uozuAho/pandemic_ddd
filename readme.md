@@ -7,22 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- invariants
-  - do invariant check at start of `Do`
-- correctness: check invariants each game turn?
-  - eg. total number of cards, cubes
-  - how to check repeating rules like it's the given player's turn, they have actions remaining etc.
-  - how to test & implement in a non-tedious way
-  - eg. not all commands are following:
-    - ThrowIfGameOver(this);
-      ThrowIfNoActionsRemaining(CurrentPlayer);
-      ThrowIfPlayerMustDiscard(CurrentPlayer);
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
-- maybe later
-  - need a generic command handler base function? do things required by all commands, eg
-    - check if player needs to discard first
-    - check if game is over
-    - check that player has actions remaining
+- cleanup: replace 'apply and end turn if needed' with single 'end turn' command in top level `Do`
 
 # Quick start
 - install dotnet core (tested with v7)

@@ -53,7 +53,7 @@ class RandomPlaythroughDrawer
         CsDotDrawer.FromGraph(graph).SaveToFile("asdf.dot");
     }
 
-    private static DrawerNode AddSelectedAction(DrawerGraph graph, DrawerNode prevState, PlayerCommand selectedAction)
+    private static DrawerNode AddSelectedAction(DrawerGraph graph, DrawerNode prevState, IPlayerCommand selectedAction)
     {
         var currentState = graph.CreateNode();
         currentState.Colour = Colour.Red;
@@ -62,7 +62,7 @@ class RandomPlaythroughDrawer
         return currentState;
     }
 
-    private static void AddUnselectedAction(DrawerGraph graph, DrawerNode prevState, PlayerCommand action)
+    private static void AddUnselectedAction(DrawerGraph graph, DrawerNode prevState, IPlayerCommand action)
     {
         var currentState = graph.CreateNode();
         graph.CreateEdge(prevState, currentState, action.ToString());
