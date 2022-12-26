@@ -45,8 +45,12 @@ public partial record PandemicGame
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
-        // todo: this
-        // if (action is IConsumesAction) ThrowIfPlayerMustDiscard();
+        if (command is IConsumesAction)
+        {
+            ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
+            // todo: get rid of other usages of this, add other checks here
+            if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
+        }
 
         return command switch
         {
@@ -66,8 +70,6 @@ public partial record PandemicGame
         var (role, destination) = command;
 
         ThrowIfNotRolesTurn(role);
-        ThrowIfNoActionsRemaining(CurrentPlayer);
-        ThrowIfPlayerMustDiscard(CurrentPlayer);
 
         var player = PlayerByRole(role);
 
@@ -123,7 +125,6 @@ public partial record PandemicGame
 
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);
-        ThrowIfPlayerMustDiscard(CurrentPlayer);
 
         if (ResearchStationPile == 0)
             throw new GameRuleViolatedException("No research stations left");
@@ -150,7 +151,6 @@ public partial record PandemicGame
 
         ThrowIfGameOver(this);
         ThrowIfNoActionsRemaining(CurrentPlayer);
-        ThrowIfPlayerMustDiscard(CurrentPlayer);
 
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
             throw new GameRuleViolatedException("Can only cure at a city with a research station");
@@ -179,7 +179,6 @@ public partial record PandemicGame
         var (role, destination) = command;
 
         ThrowIfNotRolesTurn(role);
-        ThrowIfPlayerMustDiscard(PlayerByRole(role));
 
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(destination)))
             throw new GameRuleViolatedException("Current player doesn't have required card");
@@ -194,10 +193,7 @@ public partial record PandemicGame
     {
         var (role, destination) = command;
 
-        ThrowIfGameOver(this);
         ThrowIfNotRolesTurn(role);
-        ThrowIfNoActionsRemaining(CurrentPlayer);
-        ThrowIfPlayerMustDiscard(CurrentPlayer);
 
         if (destination == CurrentPlayer.Location)
             throw new GameRuleViolatedException("Destination can't be current location");
