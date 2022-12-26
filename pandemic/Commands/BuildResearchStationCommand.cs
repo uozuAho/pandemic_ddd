@@ -1,9 +1,11 @@
+using pandemic.Values;
+
 namespace pandemic.Commands;
 
-public record BuildResearchStationCommand(string City) : PlayerCommand, IConsumesAction
+public record BuildResearchStationCommand(Role Role, string City) : PlayerCommand, IConsumesAction
 {
     public override string ToString()
     {
-        return $"build research station at {City}";
+        return $"{Role} build research station at {City}";
     }
 }

@@ -12,9 +12,9 @@ public class AllPossibleCommands
         foreach (var city in game.Cities)
         {
             yield return new DiscardPlayerCardCommand(PlayerCards.CityCard(city.Name));
-            yield return new BuildResearchStationCommand(city.Name);
             foreach (var player in game.Players)
             {
+                yield return new BuildResearchStationCommand(player.Role, city.Name);
                 yield return new DriveFerryCommand(player.Role, city.Name);
                 yield return new DirectFlightCommand(player.Role, city.Name);
                 yield return new CharterFlightCommand(player.Role, PlayerCards.CityCard(player.Location), city.Name);

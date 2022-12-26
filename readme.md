@@ -8,8 +8,8 @@ implemented.
 
 # todo
 - invariants/fuzzing
-    - command handlers -> do
     - add role to playercommand
+    - throw if not role's turn in `Do`
     - diff with main before merging
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - maybe later

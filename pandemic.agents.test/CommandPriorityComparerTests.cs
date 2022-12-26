@@ -25,7 +25,7 @@ namespace pandemic.agents.test
                 new DiscoverCureCommand(new[] { new PlayerCityCard(Board.City("Atlanta")) }),
                 new DirectFlightCommand(Role.Scientist, "Chicago"),
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
-                new BuildResearchStationCommand("Miami"),
+                new BuildResearchStationCommand(Role.Scientist, "Miami"),
             };
 
             var sortedCommands = commands.OrderByDescending(c => c, comparer).ToList();
@@ -52,7 +52,7 @@ namespace pandemic.agents.test
             // station on a blue city
             Assert.That(
                 new DriveFerryCommand(Role.Scientist, "Paris"),
-                Is.GreaterThan(new BuildResearchStationCommand("Chicago"))
+                Is.GreaterThan(new BuildResearchStationCommand(Role.Scientist, "Chicago"))
                     .Using(comparer));
         }
 

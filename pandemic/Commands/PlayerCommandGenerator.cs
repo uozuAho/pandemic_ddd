@@ -82,7 +82,7 @@ namespace pandemic.Commands
             if (game.ResearchStationPile == 0) return;
 
             if (CurrentPlayerCanBuildResearchStation(game))
-                _buffer[_bufIdx++] = new BuildResearchStationCommand(game.CurrentPlayer.Location);
+                _buffer[_bufIdx++] = new BuildResearchStationCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Location);
         }
 
         private void SetCharterFlightCommands(PandemicGame game)

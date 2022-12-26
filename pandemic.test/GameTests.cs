@@ -582,7 +582,7 @@ namespace pandemic.test
             });
 
             // act
-            (game, _) = game.Do(new BuildResearchStationCommand("Chicago"));
+            (game, _) = game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago"));
 
             game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
@@ -605,7 +605,7 @@ namespace pandemic.test
                 ActionsRemaining = 1
             });
 
-            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            AssertEndsTurn(() => game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
@@ -620,7 +620,8 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Chicago")
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
@@ -637,7 +638,8 @@ namespace pandemic.test
             });
 
             Assert.AreEqual("Atlanta", game.CurrentPlayer.Location);
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Atlanta")));
         }
 
         [Test]
@@ -656,7 +658,8 @@ namespace pandemic.test
             });
 
             // atlanta starts with a research station
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Atlanta")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Atlanta")));
         }
 
         [Test]
@@ -678,7 +681,8 @@ namespace pandemic.test
                 Hand = PlayerHand.Of(chicagoPlayerCard)
             });
 
-            Assert.Throws<GameRuleViolatedException>(() => game.Do(new BuildResearchStationCommand("Chicago")));
+            Assert.Throws<GameRuleViolatedException>(() => game.Do(
+                new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago")));
         }
 
         [Test]
