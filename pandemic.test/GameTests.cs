@@ -549,6 +549,27 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Discard_player_card_does_not_cause_card_pickup()
+        {
+            var initialGame = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var game = initialGame.SetCurrentPlayerAs(initialGame.CurrentPlayer with
+            {
+                Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(9)),
+                ActionsRemaining = 0
+            });
+
+            (game, var events) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+        }
+
+        [Test]
         public void Discard_player_card_throws_when_not_in_hand()
         {
             var game = NewGame(new NewGameOptions
