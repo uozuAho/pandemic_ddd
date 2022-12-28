@@ -928,7 +928,6 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
-        [Ignore("finish after city.addCube")]
         [Test]
         public void Treat_disease_works()
         {
@@ -937,28 +936,19 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
             var atlanta = game.CityByName("Atlanta");
-            // todo: add cube to atlanta
-            // game = game with
-            // {
-            //     Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = atlanta.Cubes[Colour.Blue] = 1 })
-            // };
-
-            var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
-
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            game = game with
             {
-                Location = "Chicago",
-                Hand = PlayerHand.Of(chicagoPlayerCard)
-            });
+                Cities = game.Cities.Replace(atlanta, atlanta.AddCube(Colour.Blue))
+            };
 
             // act
-            (game, _) = game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago"));
+            (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
 
-            game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
-            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
-            game.PlayerDiscardPile.TopCard.ShouldBe(chicagoPlayerCard);
-            game.ResearchStationPile.ShouldBe(4);
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            // cube added to board
+            // one fewer action
+            // must be current location
+            // throw if 0 cubes
         }
 
         [Repeat(10)]

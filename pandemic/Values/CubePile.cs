@@ -36,6 +36,11 @@ public record CubePile
         return new CubePile(_cubes.SetItem(colour, _cubes[colour] + 1));
     }
 
+    public CubePile RemoveCube(Colour colour)
+    {
+        return new CubePile(_cubes.SetItem(colour, _cubes[colour] - 1));
+    }
+
     public bool Any()
     {
         return _cubes.Values.Any(v => v > 0);

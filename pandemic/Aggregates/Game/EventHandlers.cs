@@ -53,7 +53,18 @@ public partial record PandemicGame
             PlayerDirectFlewTo p => ApplyPlayerDirectFlewTo(game, p),
             PlayerCharterFlewTo p => ApplyPlayerCharterFlewTo(game, p),
             PlayerShuttleFlewTo p => ApplyPlayerShuttleFlewTo(game, p),
+            TreatedDisease d => ApplyTreatedDisease(game, d),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame ApplyTreatedDisease(PandemicGame game, TreatedDisease evt)
+    {
+        var city = game.CityByName(evt.City);
+
+        return game with
+        {
+            Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour))
         };
     }
 

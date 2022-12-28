@@ -21,6 +21,11 @@ namespace pandemic.Values
             return this with { Cubes = Cubes.AddCube(colour) };
         }
 
+        public City RemoveCube(Colour colour)
+        {
+            return this with { Cubes = Cubes.RemoveCube(colour) };
+        }
+
         public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
     }
 

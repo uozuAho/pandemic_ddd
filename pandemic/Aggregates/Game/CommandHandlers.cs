@@ -60,6 +60,7 @@ public partial record PandemicGame
             DirectFlightCommand cmd => Do(cmd),
             CharterFlightCommand cmd => Do(cmd),
             ShuttleFlightCommand cmd => Do(cmd),
+            TreatDiseaseCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
@@ -198,6 +199,13 @@ public partial record PandemicGame
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
 
         return ApplyEvents(new PlayerShuttleFlewTo(role, destination));
+    }
+
+    private (PandemicGame game, IEnumerable<IEvent>) Do(TreatDiseaseCommand command)
+    {
+        var (role, city, colour) = command;
+
+        return ApplyEvents(new TreatedDisease(role, city, colour));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)

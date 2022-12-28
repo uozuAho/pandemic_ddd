@@ -8,8 +8,6 @@ implemented.
 
 # todo
 - treat disease
-  - city.addCube
-    - try CubePile type
   - finish test: Treat_disease_works
   - do
   - command generator
