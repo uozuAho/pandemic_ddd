@@ -68,7 +68,8 @@ public partial record PandemicGame
             || game.IsOver) return (game, events);
 
         var eventList = events.ToList();
-        return (DoStuffAfterActions(game, eventList), eventList);
+        game = DoStuffAfterActions(game, eventList);
+        return (game, eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)
@@ -116,7 +117,7 @@ public partial record PandemicGame
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
 
-        if (game.CurrentPlayer.ActionsRemaining == 0 && game.CurrentPlayer.Hand.Count <= 7)
+        if (game.CurrentPlayer is { ActionsRemaining: 0, Hand.Count: <= 7 })
             game = InfectCities(game, events);
 
         return (game, events);
