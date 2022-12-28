@@ -7,8 +7,9 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 - cleanup: replace 'apply and end turn if needed' with single 'end turn' command in top level `Do`
+  - rename and clean up DoStuffAfterActions signature
+- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start
 - install dotnet core (tested with v7)

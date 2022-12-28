@@ -63,7 +63,9 @@ public partial record PandemicGame
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
-        if (game.CurrentPlayer.ActionsRemaining != 0 || game.IsOver) return (game, events);
+        if (game.CurrentPlayer.ActionsRemaining != 0
+            || command is not IConsumesAction
+            || game.IsOver) return (game, events);
 
         var eventList = events.ToList();
         return (DoStuffAfterActions(game, eventList), eventList);
