@@ -928,6 +928,39 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
+        [Ignore("finish after city.addCube")]
+        [Test]
+        public void Treat_disease_works()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            // todo: add cube to atlanta
+            // game = game with
+            // {
+            //     Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = atlanta.Cubes[Colour.Blue] = 1 })
+            // };
+
+            var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Chicago",
+                Hand = PlayerHand.Of(chicagoPlayerCard)
+            });
+
+            // act
+            (game, _) = game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
+            game.PlayerDiscardPile.TopCard.ShouldBe(chicagoPlayerCard);
+            game.ResearchStationPile.ShouldBe(4);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

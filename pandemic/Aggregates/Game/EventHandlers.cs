@@ -144,11 +144,12 @@ public partial record PandemicGame
     {
         var city = game.CityByName(cubeAddedToCity.City.Name);
         var colour = cubeAddedToCity.City.Colour;
-        var newCity = city with { Cubes = city.Cubes.SetItem(colour, city.Cubes[colour] + 1) };
+        var newCity = city.AddCube(colour);
 
         return game with
         {
             Cities = game.Cities.Replace(city, newCity),
+            // todo: make CubePile a type instead? make cities and board use that?
             Cubes = game.Cubes.SetItem(colour, game.Cubes[colour] - 1)
         };
     }

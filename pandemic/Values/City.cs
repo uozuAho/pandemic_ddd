@@ -19,6 +19,11 @@ namespace pandemic.Values
                    && HasResearchStation == other.HasResearchStation;
         }
 
+        public City AddCube(Colour colour)
+        {
+            return this with { Cubes = Cubes.SetItem(colour, Cubes[colour] + 1) };
+        }
+
         public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
     }
 

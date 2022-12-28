@@ -7,6 +7,13 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- treat disease
+  - city.addCube
+    - try CubePile type
+  - finish test: Treat_disease_works
+  - do
+  - command generator
+  - all possible commands
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start
