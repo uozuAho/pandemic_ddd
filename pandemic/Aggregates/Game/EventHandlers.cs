@@ -160,8 +160,7 @@ public partial record PandemicGame
         return game with
         {
             Cities = game.Cities.Replace(city, newCity),
-            // todo: make CubePile a type instead? make cities and board use that?
-            Cubes = game.Cubes.SetItem(colour, game.Cubes[colour] - 1)
+            Cubes = game.Cubes.RemoveCube(colour)
         };
     }
 

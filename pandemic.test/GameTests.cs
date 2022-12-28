@@ -415,7 +415,7 @@ namespace pandemic.test
                     $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
 
-            Assert.That(game.Cubes.Values.Sum(), Is.EqualTo(startingState.Cubes.Values.Sum() - 2));
+            Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
         }
 
         [Test]
@@ -427,7 +427,7 @@ namespace pandemic.test
             });
             game = game with
             {
-                Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
+                Cubes = CubePile.Empty
             };
 
             (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
@@ -945,6 +945,7 @@ namespace pandemic.test
             (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
 
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            // game.Cubes.NumberOf(Colour.Blue).ShouldBe()
             // cube added to board
             // one fewer action
             // must be current location
@@ -989,7 +990,7 @@ namespace pandemic.test
                 events.AddRange(tempEvents);
 
                 // check invariants
-                var totalCubes = game.Cubes.Values.Sum() + TotalNumCubesOnCities(game);
+                var totalCubes = game.Cubes.Counts().Values.Sum() + TotalNumCubesOnCities(game);
                 totalCubes.ShouldBe(96);
 
                 var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()

@@ -39,7 +39,7 @@ namespace pandemic.test
             // initial infection
             Assert.That(game.InfectionDrawPile.Count, Is.EqualTo(StandardGameBoard.NumberOfCities - 9));
             Assert.AreEqual(9, game.InfectionDiscardPile.Count);
-            Assert.That(game.Cubes.Values.Sum(), Is.EqualTo(
+            Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(
                 96
                 - 3 * 3
                 - 3 * 2
