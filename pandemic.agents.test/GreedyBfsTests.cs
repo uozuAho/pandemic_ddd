@@ -114,7 +114,7 @@ namespace pandemic.agents.test
             nextNode = bfs.Step();
             Assert.That(nextNode?.Action, Is.TypeOf<DiscardPlayerCardCommand>());
             discardedCard = (nextNode?.Action as DiscardPlayerCardCommand)?.Card as PlayerCityCard;
-            Assert.That(discardedCard?.City.Name, Is.AnyOf("Jakarta", "Cairo"));
+            Assert.That(discardedCard?.City.Name, Is.AnyOf("Jakarta", "Cairo"), $"{nextNode?.State}");
         }
 
         private static PandemicGame ANewGame()

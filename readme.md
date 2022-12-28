@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
-- cleanup: replace 'apply and end turn if needed' with single 'end turn' command in top level `Do`
 
 # Quick start
 - install dotnet core (tested with v7)
