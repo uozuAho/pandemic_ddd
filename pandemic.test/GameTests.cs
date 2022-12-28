@@ -411,7 +411,7 @@ namespace pandemic.test
             foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
                 var city = game.CityByName(infectionCard.City.Name);
-                Assert.That(city.Cubes[infectionCard.City.Colour], Is.EqualTo(1),
+                Assert.That(city.Cubes.NumberOf(infectionCard.City.Colour), Is.EqualTo(1),
                     $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
 
@@ -1015,7 +1015,7 @@ namespace pandemic.test
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
-            return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
+            return game.Cities.Sum(c => c.Cubes.Counts().Sum(cc => cc.Value));
         }
 
         private static void AssertEndsTurn(Func<(PandemicGame, IEnumerable<IEvent>)> action)

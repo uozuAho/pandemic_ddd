@@ -27,7 +27,7 @@ namespace pandemic
             sb.AppendLine("cities with cubes:");
             foreach (var city in game.Cities)
             {
-                if (city.Cubes.Any(c => c.Value > 0))
+                if (city.Cubes.Any())
                 {
                     sb.AppendLine($"  {city.Name.PadRight(12)}: {string.Join(' ', city.Cubes)}");
                 }

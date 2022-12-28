@@ -44,9 +44,9 @@ namespace pandemic.test
                 - 3 * 3
                 - 3 * 2
                 - 3 * 1));
-            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 3)), Is.EqualTo(3));
-            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 2)), Is.EqualTo(3));
-            Assert.That(game.Cities.Count(c => c.Cubes.Any(cc => cc.Value == 1)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.Cubes.Counts().Any(cc => cc.Value == 3)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.Cubes.Counts().Any(cc => cc.Value == 2)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.Cubes.Counts().Any(cc => cc.Value == 1)), Is.EqualTo(3));
 
             // players
             Assert.AreEqual(options.Roles.Count, game.Players.Count);
