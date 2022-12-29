@@ -186,6 +186,24 @@ namespace pandemic.test
             _generator.LegalCommands(game).ShouldContain(new ShuttleFlightCommand(Role.Medic, "Bogota"));
         }
 
+        [Test]
+        public void Can_treat_disease()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+            };
+
+            _generator.LegalCommands(game).ShouldContain(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

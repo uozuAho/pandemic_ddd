@@ -411,11 +411,11 @@ namespace pandemic.test
             foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
                 var city = game.CityByName(infectionCard.City.Name);
-                Assert.That(city.Cubes[infectionCard.City.Colour], Is.EqualTo(1),
+                Assert.That(city.Cubes.NumberOf(infectionCard.City.Colour), Is.EqualTo(1),
                     $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
             }
 
-            Assert.That(game.Cubes.Values.Sum(), Is.EqualTo(startingState.Cubes.Values.Sum() - 2));
+            Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
         }
 
         [Test]
@@ -427,7 +427,7 @@ namespace pandemic.test
             });
             game = game with
             {
-                Cubes = ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 0)
+                Cubes = CubePile.Empty
             };
 
             (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
@@ -928,6 +928,69 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
+        [Test]
+        public void Treat_disease_works()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            // act
+            (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Treat_disease_throws_if_wrong_city()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            var chicago = game.CityByName("Chicago");
+            game = game with
+            {
+                Cities = game.Cities
+                    .Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+                    .Replace(chicago, chicago with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+            };
+
+            // act
+            Assert.That(
+                () => game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Chicago", Colour.Blue)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Treat_disease_throws_if_no_cubes()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty })
+            };
+
+            // act
+            Assert.That(
+                () => game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
@@ -966,7 +1029,7 @@ namespace pandemic.test
                 events.AddRange(tempEvents);
 
                 // check invariants
-                var totalCubes = game.Cubes.Values.Sum() + TotalNumCubesOnCities(game);
+                var totalCubes = game.Cubes.Counts().Values.Sum() + TotalNumCubesOnCities(game);
                 totalCubes.ShouldBe(96);
 
                 var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()
@@ -982,7 +1045,7 @@ namespace pandemic.test
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
-            return game.Cities.Sum(c => c.Cubes.Sum(cc => cc.Value));
+            return game.Cities.Sum(c => c.Cubes.Counts().Sum(cc => cc.Value));
         }
 
         private static void AssertEndsTurn(Func<(PandemicGame, IEnumerable<IEvent>)> action)

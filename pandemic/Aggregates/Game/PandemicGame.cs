@@ -23,8 +23,8 @@ namespace pandemic.Aggregates.Game
         public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
         public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
-        public ImmutableDictionary<Colour, int> Cubes { get; init; } =
-            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24);
+        public CubePile Cubes { get; init; } =
+            new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
 
@@ -68,7 +68,7 @@ namespace pandemic.Aggregates.Game
             if (!InfectionDrawPile.IsSameAs(other.InfectionDrawPile)) return false;
             if (!InfectionDiscardPile.IsSameAs(other.InfectionDiscardPile)) return false;
             if (!PlayerDrawPile.IsSameAs(other.PlayerDrawPile)) return false;
-            if (!Cubes.SequenceEqual(other.Cubes)) return false;
+            if (!Cubes.HasSameCubesAs(other.Cubes)) return false;
             if (!CureDiscovered.SequenceEqual(other.CureDiscovered)) return false;
 
             return true;

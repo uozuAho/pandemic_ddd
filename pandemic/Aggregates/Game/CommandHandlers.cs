@@ -60,6 +60,7 @@ public partial record PandemicGame
             DirectFlightCommand cmd => Do(cmd),
             CharterFlightCommand cmd => Do(cmd),
             ShuttleFlightCommand cmd => Do(cmd),
+            TreatDiseaseCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
@@ -198,6 +199,20 @@ public partial record PandemicGame
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
 
         return ApplyEvents(new PlayerShuttleFlewTo(role, destination));
+    }
+
+    private (PandemicGame game, IEnumerable<IEvent>) Do(TreatDiseaseCommand command)
+    {
+        var (role, city, colour) = command;
+        var player = PlayerByRole(role);
+
+        if (player.Location != city)
+            throw new GameRuleViolatedException("Can only treat disease in current location");
+
+        if (CityByName(city).Cubes.NumberOf(colour) == 0)
+            throw new GameRuleViolatedException("No disease cubes to remove");
+
+        return ApplyEvents(new TreatedDisease(role, city, colour));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -361,7 +376,7 @@ public partial record PandemicGame
         var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
-        return game.Cubes[infectionCard.City.Colour] == 0
+        return game.Cubes.NumberOf(infectionCard.City.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
     }

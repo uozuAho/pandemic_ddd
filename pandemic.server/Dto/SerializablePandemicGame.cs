@@ -17,7 +17,7 @@ namespace pandemic.server.Dto
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; }
         public ImmutableList<SerializablePlayer> Players { get; init; } = ImmutableList<SerializablePlayer>.Empty;
-        public ImmutableList<City> Cities { get; init; } = ImmutableList<City>.Empty;
+        public ImmutableList<SerializableCity> Cities { get; init; } = ImmutableList<SerializableCity>.Empty;
         public ImmutableList<SerializablePlayerCard> PlayerDrawPile { get; init; } = ImmutableList<SerializablePlayerCard>.Empty;
         public ImmutableList<SerializablePlayerCard> PlayerDiscardPile { get; init; } = ImmutableList<SerializablePlayerCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
@@ -36,14 +36,14 @@ namespace pandemic.server.Dto
                 CurrentPlayerIdx = game.CurrentPlayerIdx,
                 ResearchStationPile = game.ResearchStationPile,
                 Players = game.Players.Select(SerializablePlayer.From).ToImmutableList(),
-                Cities = game.Cities,
+                Cities = game.Cities.Select(SerializableCity.From).ToImmutableList(),
                 PlayerDrawPile = game.PlayerDrawPile.Cards
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
                 PlayerDiscardPile = game.PlayerDiscardPile.Cards
                     .Select(SerializablePlayerCard.From).ToImmutableList(),
                 InfectionDrawPile = game.InfectionDrawPile.Cards.ToImmutableList(),
                 InfectionDiscardPile = game.InfectionDiscardPile.Cards.ToImmutableList(),
-                Cubes = game.Cubes,
+                Cubes = game.Cubes.Counts().ToImmutableDictionary(),
                 CureDiscovered = game.CureDiscovered
             };
         }
@@ -59,14 +59,14 @@ namespace pandemic.server.Dto
                 CurrentPlayerIdx = CurrentPlayerIdx,
                 ResearchStationPile = ResearchStationPile,
                 Players = Players.Select(p => p.ToPlayer(board)).ToImmutableList(),
-                Cities = Cities,
+                Cities = Cities.Select(c => c.ToCity()).ToImmutableList(),
                 PlayerDrawPile = new Deck<PlayerCard>(PlayerDrawPile
                     .Select(c => c.ToPlayerCard(board))),
                 PlayerDiscardPile = new Deck<PlayerCard>(PlayerDiscardPile
                     .Select(c => c.ToPlayerCard(board))),
                 InfectionDrawPile = new Deck<InfectionCard>(InfectionDrawPile),
                 InfectionDiscardPile = new Deck<InfectionCard>(InfectionDiscardPile),
-                Cubes = Cubes,
+                Cubes = new CubePile(Cubes),
                 CureDiscovered = CureDiscovered
             };
         }

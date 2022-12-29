@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
+using pandemic.Values;
 
 namespace pandemic.Commands
 {
@@ -29,6 +30,7 @@ namespace pandemic.Commands
                 SetDirectFlightCommands(game);
                 SetCharterFlightCommands(game);
                 SetShuttleFlightCommands(game);
+                SetTreatDiseaseCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
@@ -46,6 +48,10 @@ namespace pandemic.Commands
                     yield return new DirectFlightCommand(player.Role, city.Name);
                     yield return new CharterFlightCommand(player.Role, PlayerCards.CityCard(player.Location), city.Name);
                     yield return new ShuttleFlightCommand(player.Role, city.Name);
+                    foreach (var colour in ColourExtensions.AllColours)
+                    {
+                        yield return new TreatDiseaseCommand(player.Role, city.Name, colour);
+                    }
                 }
             }
         }
@@ -128,6 +134,20 @@ namespace pandemic.Commands
                          .Except(new []{game.CurrentPlayer.Location}))
             {
                 _buffer[_bufIdx++] = new ShuttleFlightCommand(game.CurrentPlayer.Role, city);
+            }
+        }
+
+        private void SetTreatDiseaseCommands(PandemicGame game)
+        {
+            var currentLocation = game.CurrentPlayer.Location;
+            var nonZeroCubeColours = game
+                .CityByName(currentLocation).Cubes.Counts()
+                .Where(kv => kv.Value > 0)
+                .Select(kv => kv.Key);
+
+            foreach (var colour in nonZeroCubeColours)
+            {
+                _buffer[_bufIdx++] = new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, colour);
             }
         }
 
