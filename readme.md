@@ -7,9 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- treat disease
-  - command generator
-  - all possible commands
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start

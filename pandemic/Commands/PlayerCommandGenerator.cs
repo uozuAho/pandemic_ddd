@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
+using pandemic.Values;
 
 namespace pandemic.Commands
 {
@@ -47,6 +48,10 @@ namespace pandemic.Commands
                     yield return new DirectFlightCommand(player.Role, city.Name);
                     yield return new CharterFlightCommand(player.Role, PlayerCards.CityCard(player.Location), city.Name);
                     yield return new ShuttleFlightCommand(player.Role, city.Name);
+                    foreach (var colour in ColourExtensions.AllColours)
+                    {
+                        yield return new TreatDiseaseCommand(player.Role, city.Name, colour);
+                    }
                 }
             }
         }
