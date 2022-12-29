@@ -938,16 +938,16 @@ namespace pandemic.test
             var atlanta = game.CityByName("Atlanta");
             game = game with
             {
-                Cities = game.Cities.Replace(atlanta, atlanta.AddCube(Colour.Blue))
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
             };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
 
             // act
             (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
 
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
-            // game.Cubes.NumberOf(Colour.Blue).ShouldBe()
-            // cube added to board
-            // one fewer action
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             // must be current location
             // throw if 0 cubes
         }

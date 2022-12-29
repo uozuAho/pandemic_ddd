@@ -60,11 +60,14 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyTreatedDisease(PandemicGame game, TreatedDisease evt)
     {
+        var player = game.PlayerByRole(evt.Role);
         var city = game.CityByName(evt.City);
 
         return game with
         {
-            Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour))
+            Players = game.Players.Replace(player, player with{ActionsRemaining = player.ActionsRemaining - 1}),
+            Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour)),
+            Cubes = game.Cubes.AddCube(evt.Colour)
         };
     }
 
