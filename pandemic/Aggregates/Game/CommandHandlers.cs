@@ -204,6 +204,13 @@ public partial record PandemicGame
     private (PandemicGame game, IEnumerable<IEvent>) Do(TreatDiseaseCommand command)
     {
         var (role, city, colour) = command;
+        var player = PlayerByRole(role);
+
+        if (player.Location != city)
+            throw new GameRuleViolatedException("Can only treat disease in current location");
+
+        if (CityByName(city).Cubes.NumberOf(colour) == 0)
+            throw new GameRuleViolatedException("No disease cubes to remove");
 
         return ApplyEvents(new TreatedDisease(role, city, colour));
     }

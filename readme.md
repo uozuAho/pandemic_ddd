@@ -8,8 +8,6 @@ implemented.
 
 # todo
 - treat disease
-  - finish test: Treat_disease_works
-  - do
   - command generator
   - all possible commands
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

@@ -948,8 +948,47 @@ namespace pandemic.test
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
             game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-            // must be current location
-            // throw if 0 cubes
+        }
+
+        [Test]
+        public void Treat_disease_throws_if_wrong_city()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            var chicago = game.CityByName("Chicago");
+            game = game with
+            {
+                Cities = game.Cities
+                    .Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+                    .Replace(chicago, chicago with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+            };
+
+            // act
+            Assert.That(
+                () => game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Chicago", Colour.Blue)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Treat_disease_throws_if_no_cubes()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty })
+            };
+
+            // act
+            Assert.That(
+                () => game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue)),
+                Throws.InstanceOf<GameRuleViolatedException>());
         }
 
         [Repeat(10)]
