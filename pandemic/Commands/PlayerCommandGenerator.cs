@@ -69,11 +69,13 @@ namespace pandemic.Commands
 
         private void SetDiscardCommands(PandemicGame game)
         {
-            if (game.CurrentPlayer.Hand.Count > 7)
+            foreach (var player in game.Players)
             {
-                foreach (var card in game.CurrentPlayer.Hand)
+                if (player.Hand.Count <= 7) continue;
+
+                foreach (var card in player.Hand)
                 {
-                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(game.CurrentPlayer.Role, card);
+                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(player.Role, card);
                 }
             }
         }
