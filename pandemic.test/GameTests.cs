@@ -1017,6 +1017,77 @@ namespace pandemic.test
             game.PlayerByRole(Role.Scientist).Hand.ShouldContain(atlanta);
         }
 
+        [Test]
+        public void Share_knowledge_give_throws_when_receiver_not_in_same_city()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = PlayerCards.CityCard("Atlanta");
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty.Add(atlanta)
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Empty,
+                Location = "Chicago"
+            });
+
+            // act
+            Assert.That(
+                () => game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Share_knowledge_give_throws_when_not_in_matching_location()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var chicago = PlayerCards.CityCard("Chicago");
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty.Add(chicago)
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Empty,
+            });
+
+            // act
+            Assert.That(
+                () => game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Chicago", Role.Scientist)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
+        [Test]
+        public void Share_knowledge_give_throws_when_player_doesnt_have_card()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Empty,
+            });
+
+            // act
+            Assert.That(
+                () => game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

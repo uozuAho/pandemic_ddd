@@ -218,10 +218,20 @@ public partial record PandemicGame
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShareKnowledgeGiveCommand command)
     {
-        var (role, city, colour) = command;
-        var player = PlayerByRole(role);
+        var (role, city, receivingRole) = command;
+        var giver = PlayerByRole(role);
+        var receiver = PlayerByRole(receivingRole);
 
-        return ApplyEvents(new ShareKnowledgeGiven(role, city, colour));
+        if (!giver.Hand.CityCards.Any(c => c.City.Name == command.City))
+            throw new GameRuleViolatedException("Player must have the card to share");
+
+        if (giver.Location != command.City)
+            throw new GameRuleViolatedException("Player must be in the city of the given card");
+
+        if (receiver.Location != giver.Location)
+            throw new GameRuleViolatedException("Both players must be in the same city");
+
+        return ApplyEvents(new ShareKnowledgeGiven(role, city, receivingRole));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)

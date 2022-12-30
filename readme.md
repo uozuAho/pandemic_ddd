@@ -9,11 +9,9 @@ implemented.
 # todo
 - share knowledge
   - give
+    - consumes action (cmd generator)
+    - must discard immediately if more than 7 cards
   - take
-  - consumes action
-  - player not in same city throws
-  - player doesn't have card throws
-  - must discard immediately if more than 7 cards
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start
