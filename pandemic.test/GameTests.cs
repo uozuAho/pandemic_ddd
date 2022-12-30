@@ -604,6 +604,7 @@ namespace pandemic.test
             var commandGenerator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
+            var gameStateBeforeShare = game;
             game = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist), events);
 
             commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
@@ -612,8 +613,9 @@ namespace pandemic.test
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-
-            // todo: no infection or card pickup should have happened
+            game.PlayerByRole(Role.Scientist).Hand.Count.ShouldBe(7);
+            game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(4);
+            game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count);
         }
 
         [Test]
