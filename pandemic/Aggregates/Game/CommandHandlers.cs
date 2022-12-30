@@ -41,14 +41,30 @@ public partial record PandemicGame
         return (game, events);
     }
 
+    public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
+    {
+        var (game, newEvents) = Do(command);
+
+        events.AddRange(newEvents);
+
+        return game;
+    }
+
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
-        ThrowIfNotRolesTurn(command.Role);
+
+        var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
+        if (playerWhoMustDiscard != null)
+        {
+            if (command is not DiscardPlayerCardCommand)
+                ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
+        }
+
         if (command is IConsumesAction)
         {
-            ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
-            if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfNotRolesTurn(command.Role);
+            ThrowIfNoActionsRemaining(PlayerByRole(command.Role));
         }
 
         var (game, events) = command switch
@@ -113,8 +129,9 @@ public partial record PandemicGame
     {
         var card = command.Card;
 
-        if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
-        if (CurrentPlayer.Hand.Count <= 7)
+        if (!PlayerByRole(command.Role).Hand.Contains(card))
+            throw new GameRuleViolatedException("Player doesn't have that card");
+        if (PlayerByRole(command.Role).Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));

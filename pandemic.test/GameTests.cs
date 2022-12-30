@@ -587,6 +587,36 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Scenario_share_knowledge_then_other_player_must_discard()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Miami", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow")
+            });
+
+            var commandGenerator = new PlayerCommandGenerator();
+            var events = new List<IEvent>();
+
+            game = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist), events);
+
+            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+
+            game = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")), events);
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+
+            // todo: no infection or card pickup should have happened
+        }
+
+        [Test]
         public void Build_research_station_works()
         {
             var game = NewGame(new NewGameOptions

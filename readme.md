@@ -8,9 +8,7 @@ implemented.
 
 # todo
 - share knowledge
-  - give
-    - must discard immediately if more than 7 cards
-      - ensure non-current players can discard
+  - ensure non-current players can discard
   - fuzz: ensure no player has more than 7 cards
   - take
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
