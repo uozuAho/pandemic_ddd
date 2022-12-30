@@ -31,6 +31,7 @@ namespace pandemic.Commands
                 SetCharterFlightCommands(game);
                 SetShuttleFlightCommands(game);
                 SetTreatDiseaseCommands(game);
+                SetShareKnowledgeGiveCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
@@ -54,15 +55,27 @@ namespace pandemic.Commands
                     }
                 }
             }
+            foreach (var player in game.Players)
+            {
+                foreach (var card in player.Hand.CityCards)
+                {
+                    foreach (var otherPlayer in game.Players)
+                    {
+                        yield return new ShareKnowledgeGiveCommand(player.Role, card.City.Name, otherPlayer.Role);
+                    }
+                }
+            }
         }
 
         private void SetDiscardCommands(PandemicGame game)
         {
-            if (game.CurrentPlayer.Hand.Count > 7)
+            foreach (var player in game.Players)
             {
-                foreach (var card in game.CurrentPlayer.Hand)
+                if (player.Hand.Count <= 7) continue;
+
+                foreach (var card in player.Hand)
                 {
-                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(game.CurrentPlayer.Role, card);
+                    _buffer[_bufIdx++] = new DiscardPlayerCardCommand(player.Role, card);
                 }
             }
         }
@@ -148,6 +161,21 @@ namespace pandemic.Commands
             foreach (var colour in nonZeroCubeColours)
             {
                 _buffer[_bufIdx++] = new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, colour);
+            }
+        }
+
+        private void SetShareKnowledgeGiveCommands(PandemicGame game)
+        {
+            foreach (var otherPlayer in game.Players.Where(p =>
+                         p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
+            {
+                foreach (var _ in game.CurrentPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                {
+                    _buffer[_bufIdx++] = new ShareKnowledgeGiveCommand(
+                        game.CurrentPlayer.Role,
+                        game.CurrentPlayer.Location,
+                        otherPlayer.Role);
+                }
             }
         }
 

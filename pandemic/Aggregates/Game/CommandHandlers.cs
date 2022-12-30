@@ -41,14 +41,30 @@ public partial record PandemicGame
         return (game, events);
     }
 
+    public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
+    {
+        var (game, newEvents) = Do(command);
+
+        events.AddRange(newEvents);
+
+        return game;
+    }
+
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
-        ThrowIfNotRolesTurn(command.Role);
+
+        var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
+        if (playerWhoMustDiscard != null)
+        {
+            if (command is not DiscardPlayerCardCommand)
+                ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
+        }
+
         if (command is IConsumesAction)
         {
-            ThrowIfPlayerMustDiscard(PlayerByRole(command.Role));
-            if (command is not DiscardPlayerCardCommand) ThrowIfNoActionsRemaining(CurrentPlayer);
+            ThrowIfNotRolesTurn(command.Role);
+            ThrowIfNoActionsRemaining(PlayerByRole(command.Role));
         }
 
         var (game, events) = command switch
@@ -61,6 +77,7 @@ public partial record PandemicGame
             CharterFlightCommand cmd => Do(cmd),
             ShuttleFlightCommand cmd => Do(cmd),
             TreatDiseaseCommand cmd => Do(cmd),
+            ShareKnowledgeGiveCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
@@ -112,11 +129,12 @@ public partial record PandemicGame
     {
         var card = command.Card;
 
-        if (!CurrentPlayer.Hand.Contains(card)) throw new GameRuleViolatedException("Player doesn't have that card");
-        if (CurrentPlayer.Hand.Count <= 7)
+        if (!PlayerByRole(command.Role).Hand.Contains(card))
+            throw new GameRuleViolatedException("Player doesn't have that card");
+        if (PlayerByRole(command.Role).Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
-        var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
+        var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
         if (game.CurrentPlayer is { ActionsRemaining: 0, Hand.Count: <= 7 })
             game = InfectCities(game, events);
@@ -142,7 +160,7 @@ public partial record PandemicGame
 
         return ApplyEvents(
             new ResearchStationBuilt(city),
-            new PlayerCardDiscarded(playerCard)
+            new PlayerCardDiscarded(command.Role, playerCard)
         );
     }
 
@@ -168,7 +186,7 @@ public partial record PandemicGame
             throw new ArgumentException($"given cards contain a card not in player's hand");
 
         return ApplyEvents(cards
-            .Select(c => new PlayerCardDiscarded(c))
+            .Select(c => new PlayerCardDiscarded(command.Role, c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 
@@ -213,6 +231,26 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("No disease cubes to remove");
 
         return ApplyEvents(new TreatedDisease(role, city, colour));
+    }
+
+    private (PandemicGame game, IEnumerable<IEvent>) Do(ShareKnowledgeGiveCommand command)
+    {
+        var (role, city, receivingRole) = command;
+        var giver = PlayerByRole(role);
+        var receiver = PlayerByRole(receivingRole);
+
+        if (giver == receiver) throw new GameRuleViolatedException("Cannot share with self!");
+
+        if (!giver.Hand.CityCards.Any(c => c.City.Name == command.City))
+            throw new GameRuleViolatedException("Player must have the card to share");
+
+        if (giver.Location != command.City)
+            throw new GameRuleViolatedException("Player must be in the city of the given card");
+
+        if (receiver.Location != giver.Location)
+            throw new GameRuleViolatedException("Both players must be in the same city");
+
+        return ApplyEvents(new ShareKnowledgeGiven(role, city, receivingRole));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)

@@ -7,6 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- share knowledge
+  - take
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start

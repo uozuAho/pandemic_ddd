@@ -32,7 +32,7 @@ namespace pandemic.agents.test
             {
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
-                    Hand = new PlayerHand(Enumerable.Repeat(new PlayerCityCard(Board.City("Atlanta")), 5))
+                    Hand = PlayerHand.Of("Atlanta", "Chicago", "New York", "Montreal", "Paris")
                 })
             };
             var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
