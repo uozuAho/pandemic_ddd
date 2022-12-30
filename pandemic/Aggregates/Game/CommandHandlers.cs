@@ -61,6 +61,7 @@ public partial record PandemicGame
             CharterFlightCommand cmd => Do(cmd),
             ShuttleFlightCommand cmd => Do(cmd),
             TreatDiseaseCommand cmd => Do(cmd),
+            ShareKnowledgeGiveCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
@@ -213,6 +214,14 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("No disease cubes to remove");
 
         return ApplyEvents(new TreatedDisease(role, city, colour));
+    }
+
+    private (PandemicGame game, IEnumerable<IEvent>) Do(ShareKnowledgeGiveCommand command)
+    {
+        var (role, city, colour) = command;
+        var player = PlayerByRole(role);
+
+        return ApplyEvents(new ShareKnowledgeGiven(role, city, colour));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)

@@ -54,6 +54,7 @@ public partial record PandemicGame
             PlayerCharterFlewTo p => ApplyPlayerCharterFlewTo(game, p),
             PlayerShuttleFlewTo p => ApplyPlayerShuttleFlewTo(game, p),
             TreatedDisease d => ApplyTreatedDisease(game, d),
+            ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -261,6 +262,27 @@ public partial record PandemicGame
                 Location = evt.City,
                 ActionsRemaining = player.ActionsRemaining - 1
             })
+        };
+    }
+
+    private static PandemicGame ApplyShareKnowledgeGiven(PandemicGame game, ShareKnowledgeGiven evt)
+    {
+        var giver = game.PlayerByRole(evt.Role);
+        var card = giver.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var receiver = game.PlayerByRole(evt.ReceivingRole);
+
+        return game with
+        {
+            Players = game.Players
+                .Replace(giver, giver with
+                {
+                    Hand = giver.Hand.Remove(card),
+                    ActionsRemaining = giver.ActionsRemaining - 1
+                })
+                .Replace(receiver, receiver with
+                {
+                    Hand = receiver.Hand.Add(card)
+                })
         };
     }
 

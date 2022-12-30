@@ -998,7 +998,9 @@ namespace pandemic.test
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
+
             var atlanta = PlayerCards.CityCard("Atlanta");
+
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 Hand = PlayerHand.Empty.Add(atlanta)
@@ -1007,6 +1009,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Empty
             });
 
+            // act
             (game, _) = game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
 
             game.PlayerByRole(Role.Medic).Hand.ShouldNotContain(atlanta);
