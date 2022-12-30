@@ -31,6 +31,7 @@ namespace pandemic.Commands
                 SetCharterFlightCommands(game);
                 SetShuttleFlightCommands(game);
                 SetTreatDiseaseCommands(game);
+                SetShareKnowledgeGiveCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
@@ -148,6 +149,21 @@ namespace pandemic.Commands
             foreach (var colour in nonZeroCubeColours)
             {
                 _buffer[_bufIdx++] = new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, colour);
+            }
+        }
+
+        private void SetShareKnowledgeGiveCommands(PandemicGame game)
+        {
+            foreach (var otherPlayer in game.Players.Where(p =>
+                         p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
+            {
+                foreach (var _ in game.CurrentPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                {
+                    _buffer[_bufIdx++] = new ShareKnowledgeGiveCommand(
+                        game.CurrentPlayer.Role,
+                        game.CurrentPlayer.Location,
+                        otherPlayer.Role);
+                }
             }
         }
 
