@@ -9,7 +9,7 @@ implemented.
 # todo
 - share knowledge
   - give
-    - consumes action (cmd generator)
+    - cannot share to self
     - must discard immediately if more than 7 cards
   - take
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

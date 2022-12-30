@@ -55,6 +55,16 @@ namespace pandemic.Commands
                     }
                 }
             }
+            foreach (var player in game.Players)
+            {
+                foreach (var card in player.Hand.CityCards)
+                {
+                    foreach (var otherPlayer in game.Players)
+                    {
+                        yield return new ShareKnowledgeGiveCommand(player.Role, card.City.Name, otherPlayer.Role);
+                    }
+                }
+            }
         }
 
         private void SetDiscardCommands(PandemicGame game)
