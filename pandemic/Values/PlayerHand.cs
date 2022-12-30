@@ -31,6 +31,11 @@ namespace pandemic.Values
             return new PlayerHand(cards);
         }
 
+        public static PlayerHand Of(IEnumerable<PlayerCityCard> cards)
+        {
+            return new PlayerHand(cards);
+        }
+
         public IEnumerator<PlayerCard> GetEnumerator() => Cards.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public int Count => Cards.Count;
