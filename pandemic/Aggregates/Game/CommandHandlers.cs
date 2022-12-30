@@ -134,7 +134,7 @@ public partial record PandemicGame
         if (PlayerByRole(command.Role).Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
-        var (game, events) = ApplyEvents(new PlayerCardDiscarded(card));
+        var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
         if (game.CurrentPlayer is { ActionsRemaining: 0, Hand.Count: <= 7 })
             game = InfectCities(game, events);
@@ -160,7 +160,7 @@ public partial record PandemicGame
 
         return ApplyEvents(
             new ResearchStationBuilt(city),
-            new PlayerCardDiscarded(playerCard)
+            new PlayerCardDiscarded(command.Role, playerCard)
         );
     }
 
@@ -186,7 +186,7 @@ public partial record PandemicGame
             throw new ArgumentException($"given cards contain a card not in player's hand");
 
         return ApplyEvents(cards
-            .Select(c => new PlayerCardDiscarded(c))
+            .Select(c => new PlayerCardDiscarded(command.Role, c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
     }
 

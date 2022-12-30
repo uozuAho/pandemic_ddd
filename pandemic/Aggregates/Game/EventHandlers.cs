@@ -182,15 +182,17 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded discarded)
+    private static PandemicGame ApplyPlayerCardDiscarded(PandemicGame game, PlayerCardDiscarded evt)
     {
+        var player = game.PlayerByRole(evt.Role);
+
         return game with
         {
-            Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+            Players = game.Players.Replace(player, player with
             {
-                Hand = game.CurrentPlayer.Hand.Remove(discarded.Card)
+                Hand = player.Hand.Remove(evt.Card)
             }),
-            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discarded.Card)
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(evt.Card)
         };
     }
 
