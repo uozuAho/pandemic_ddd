@@ -1173,7 +1173,10 @@ namespace pandemic.test
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var legalCommands = commandGenerator.LegalCommands(game);
+                var legalCommands = commandGenerator.LegalCommands(game).ToList();
+
+                if (game.Players.Any(p => p.Hand.Count > 7))
+                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand);
 
                 foreach (var illegalCommand in allPossibleCommands
                              .Except(legalCommands)

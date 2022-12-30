@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - share knowledge
-  - fuzz: ensure no player has more than 7 cards
   - take
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
