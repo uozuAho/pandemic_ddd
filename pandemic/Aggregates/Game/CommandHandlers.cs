@@ -222,6 +222,8 @@ public partial record PandemicGame
         var giver = PlayerByRole(role);
         var receiver = PlayerByRole(receivingRole);
 
+        if (giver == receiver) throw new GameRuleViolatedException("Cannot share with self!");
+
         if (!giver.Hand.CityCards.Any(c => c.City.Name == command.City))
             throw new GameRuleViolatedException("Player must have the card to share");
 

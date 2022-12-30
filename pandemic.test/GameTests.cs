@@ -1088,6 +1088,24 @@ namespace pandemic.test
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
+        [Test]
+        public void Share_knowledge_to_self_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            // act
+            Assert.That(
+                () => game.Do(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Medic)),
+                Throws.InstanceOf<GameRuleViolatedException>());
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
