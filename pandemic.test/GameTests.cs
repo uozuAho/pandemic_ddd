@@ -991,6 +991,29 @@ namespace pandemic.test
                 Throws.InstanceOf<GameRuleViolatedException>());
         }
 
+        [Test]
+        public void Share_knowledge_give_works()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty.Add(atlanta)
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Empty
+            });
+
+            (game, _) = game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
+
+            game.PlayerByRole(Role.Medic).Hand.ShouldNotContain(atlanta);
+            game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Scientist).Hand.ShouldContain(atlanta);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

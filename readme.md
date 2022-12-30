@@ -7,6 +7,13 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- share knowledge
+  - give
+  - take
+  - consumes action
+  - player not in same city throws
+  - player doesn't have card throws
+  - must discard immediately if more than 7 cards
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start
