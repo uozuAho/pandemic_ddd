@@ -428,7 +428,7 @@ public partial record PandemicGame
         game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
 
         game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicCityCard), events);
-        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle();
+        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle().ToList();
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 
         return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);

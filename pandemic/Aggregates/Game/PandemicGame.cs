@@ -109,8 +109,21 @@ namespace pandemic.Aggregates.Game
 
         public static PandemicGame CreateUninitialisedGame() => new ();
 
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
-            events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
+        public static PandemicGame FromEvents(IEnumerable<IEvent> events)
+        {
+            // this code is easier to debug than events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
+
+            var game = CreateUninitialisedGame();
+            var eventNumber = 0;
+
+            foreach (var evt in events)
+            {
+                eventNumber++;
+                game = ApplyEvent(game, evt);
+            }
+
+            return game;
+        }
 
         public PandemicGame Copy()
         {

@@ -8,8 +8,7 @@ implemented.
 
 # todo
 - epidemic
-  - finish scenario test
-    - shuffle
+  - scenario: double epidemic
   - game end if cubes run out
   - test infection rate from 2 -> 3
   - fuzz: all cities have 0 <= x <= 3 cubes of any colour
