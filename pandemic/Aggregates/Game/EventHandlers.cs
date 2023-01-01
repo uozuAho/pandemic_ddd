@@ -56,6 +56,7 @@ public partial record PandemicGame
             TreatedDisease d => ApplyTreatedDisease(game, d),
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
+            EpidemicInfectionCardDiscarded e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -307,6 +308,18 @@ public partial record PandemicGame
                 {
                     Hand = takenFromPlayer.Hand.Remove(card),
                 })
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicInfectionCardDiscarded evt)
+    {
+        var (newDrawPile, bottomCard) = game.InfectionDrawPile.DrawFromBottom();
+        if (bottomCard != evt.Card) throw new InvalidOperationException("doh");
+
+        return game with
+        {
+            InfectionDrawPile = newDrawPile,
+            InfectionDiscardPile = game.InfectionDiscardPile.PlaceOnTop(evt.Card),
         };
     }
 

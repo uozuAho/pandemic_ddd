@@ -420,9 +420,17 @@ public partial record PandemicGame
 
     private static PandemicGame Epidemic(PandemicGame game, EpidemicCard card, ICollection<IEvent> events)
     {
-        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
+        var epidemicCityCard = game.InfectionDrawPile.BottomCard;
 
-        // todo: game rules: handle epidemic
+        // infect city
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
+
+        // place card into discard pile
+        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicCityCard), events);
+
+        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
     }
 
     private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)

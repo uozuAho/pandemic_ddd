@@ -8,10 +8,14 @@ implemented.
 
 # todo
 - epidemic
+  - finish scenario test
+    - shuffle
   - game end if cubes run out
   - test infection rate from 2 -> 3
+  - fuzz: all cities have 0 <= x <= 3 cubes of any colour
   - leave outbreak for later
     - epidemic can trigger outbreak
+- convert end of turn to a process manager(s)? see how complex each command handler gets..
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start

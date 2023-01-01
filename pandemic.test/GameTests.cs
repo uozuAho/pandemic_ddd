@@ -1242,6 +1242,8 @@ namespace pandemic.test
             game.InfectionRate.ShouldBe(2);
             game.InfectionDiscardPile.Count.ShouldBe(2);
             game.InfectionDrawPile.Count.ShouldBe(46);
+            game.PlayerDiscardPile.Count.ShouldBe(1);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<EpidemicCard>();
         }
 
         [Repeat(10)]

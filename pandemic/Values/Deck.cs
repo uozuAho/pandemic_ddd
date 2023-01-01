@@ -48,6 +48,11 @@ public class Deck<T>
         return (new Deck<T>(_cards.Take(_cards.Count - 1)), TopCard);
     }
 
+    public (Deck<T>, T) DrawFromBottom()
+    {
+        return (new Deck<T>(_cards.Skip(1)), BottomCard);
+    }
+
     public (Deck<T> newDrawPile, IEnumerable<T> cards) Draw(int numCards)
     {
         return (new Deck<T>(_cards.Take(_cards.Count - numCards)), Top(numCards));
