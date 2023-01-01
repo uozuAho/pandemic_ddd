@@ -205,7 +205,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_share_knowledge()
+        public void Can_share_give_knowledge()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -215,6 +215,22 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
             _generator.LegalCommands(game).ShouldContain(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist));
+        }
+
+        [Test]
+        public void Can_share_take_knowledge()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            _generator.LegalCommands(game).ShouldContain(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist));
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)

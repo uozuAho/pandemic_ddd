@@ -32,6 +32,7 @@ namespace pandemic.Commands
                 SetShuttleFlightCommands(game);
                 SetTreatDiseaseCommands(game);
                 SetShareKnowledgeGiveCommands(game);
+                SetShareKnowledgeTakeCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
@@ -62,6 +63,7 @@ namespace pandemic.Commands
                     foreach (var otherPlayer in game.Players)
                     {
                         yield return new ShareKnowledgeGiveCommand(player.Role, card.City.Name, otherPlayer.Role);
+                        yield return new ShareKnowledgeTakeCommand(player.Role, card.City.Name, otherPlayer.Role);
                     }
                 }
             }
@@ -172,6 +174,21 @@ namespace pandemic.Commands
                 foreach (var _ in game.CurrentPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
                 {
                     _buffer[_bufIdx++] = new ShareKnowledgeGiveCommand(
+                        game.CurrentPlayer.Role,
+                        game.CurrentPlayer.Location,
+                        otherPlayer.Role);
+                }
+            }
+        }
+
+        private void SetShareKnowledgeTakeCommands(PandemicGame game)
+        {
+            foreach (var otherPlayer in game.Players.Where(p =>
+                         p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
+            {
+                foreach (var _ in otherPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                {
+                    _buffer[_bufIdx++] = new ShareKnowledgeTakeCommand(
                         game.CurrentPlayer.Role,
                         game.CurrentPlayer.Location,
                         otherPlayer.Role);
