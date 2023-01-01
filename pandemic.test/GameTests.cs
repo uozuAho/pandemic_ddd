@@ -399,11 +399,17 @@ namespace pandemic.test
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
+            startingState = startingState with
+            {
+                // epidemics mess with this test, remove them
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
+            };
 
-            var (game, _) = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            var events = new List<IEvent>();
+            var game = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
 
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
