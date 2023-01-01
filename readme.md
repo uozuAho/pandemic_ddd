@@ -7,6 +7,11 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- epidemic
+  - game end if cubes run out
+  - test infection rate from 2 -> 3
+  - leave outbreak for later
+    - epidemic can trigger outbreak
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start

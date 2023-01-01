@@ -1219,6 +1219,31 @@ namespace pandemic.test
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
         }
 
+        [Test]
+        public void Scenario_epidemic()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard())
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            var initialGame = game;
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            var epidemicCity = initialGame.InfectionDrawPile.BottomCard.City;
+            game.CityByName(epidemicCity.Name).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
+            game.InfectionRate.ShouldBe(2);
+            game.InfectionDiscardPile.Count.ShouldBe(2);
+            game.InfectionDrawPile.Count.ShouldBe(46);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
