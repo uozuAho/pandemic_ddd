@@ -1220,7 +1220,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Scenario_epidemic()
+        public void Epidemic()
         {
             var game = NewGame(new NewGameOptions
             {
@@ -1244,6 +1244,28 @@ namespace pandemic.test
             game.InfectionDrawPile.Count.ShouldBe(46);
             game.PlayerDiscardPile.Count.ShouldBe(1);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<EpidemicCard>();
+        }
+
+        [Test]
+        public void Epidemic_can_end_game()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cubes = CubePile.Empty
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.IsLost.ShouldBeTrue();
+            events.ShouldNotContain(e => e is CubeAddedToCity);
         }
 
         [Repeat(10)]

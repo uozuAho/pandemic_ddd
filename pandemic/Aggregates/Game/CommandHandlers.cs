@@ -391,10 +391,14 @@ public partial record PandemicGame
 
         game = PickUpCard(game, events);
 
+        if (game.IsOver) return game;
+
         if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
         game = PickUpCard(game, events);
+
+        if (game.IsOver) return game;
 
         if (game.CurrentPlayer.Hand.Count > 7)
             return game;
@@ -420,14 +424,17 @@ public partial record PandemicGame
 
     private static PandemicGame Epidemic(PandemicGame game, EpidemicCard card, ICollection<IEvent> events)
     {
-        var epidemicCityCard = game.InfectionDrawPile.BottomCard;
+        var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
         // infect city
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicCityCard.City), events);
+        if (game.Cubes.NumberOf(epidemicInfectionCard.City.Colour) < 3)
+            return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.City.Colour} cubes"), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
 
-        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicCityCard), events);
+        // shuffle infection cards
+        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle().ToList();
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 
