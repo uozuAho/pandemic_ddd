@@ -43,6 +43,11 @@ public class Deck<T>
         return _cards.TakeLast(numCards);
     }
 
+    public IEnumerable<T> Bottom(int numCards)
+    {
+        return _cards.Take(numCards);
+    }
+
     public (Deck<T>, T) Draw()
     {
         return (new Deck<T>(_cards.Take(_cards.Count - 1)), TopCard);
