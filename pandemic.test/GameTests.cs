@@ -587,7 +587,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Scenario_share_knowledge_then_other_player_must_discard()
+        public void Scenario_share_knowledge_give_then_other_player_must_discard()
         {
             var game = NewGame(new NewGameOptions
             {
@@ -614,6 +614,39 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.PlayerByRole(Role.Scientist).Hand.Count.ShouldBe(7);
+            game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(4);
+            game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count);
+        }
+
+        [Test]
+        public void Scenario_share_knowledge_take_then_other_player_must_discard()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Miami", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow")
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            var commandGenerator = new PlayerCommandGenerator();
+            var events = new List<IEvent>();
+
+            var gameStateBeforeShare = game;
+            game = game.Do(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist), events);
+
+            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
+
+            game = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Miami")), events);
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Scientist).Hand.Count.ShouldBe(0);
             game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(4);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count);
         }
@@ -1158,6 +1191,32 @@ namespace pandemic.test
 
             var generator = new PlayerCommandGenerator();
             generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+        }
+
+        [Test]
+        public void Share_knowledge_take_works()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = PlayerCards.CityCard("Atlanta");
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Empty
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Empty.Add(atlanta)
+            });
+
+            // act
+            (game, _) = game.Do(new ShareKnowledgeTakeCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
+
+            game.PlayerByRole(Role.Medic).Hand.ShouldContain(atlanta);
+            game.PlayerByRole(Role.Scientist).Hand.ShouldNotContain(atlanta);
+            game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
         }
 
         [Repeat(10)]

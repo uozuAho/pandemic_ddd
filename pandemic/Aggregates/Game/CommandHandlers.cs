@@ -78,6 +78,7 @@ public partial record PandemicGame
             ShuttleFlightCommand cmd => Do(cmd),
             TreatDiseaseCommand cmd => Do(cmd),
             ShareKnowledgeGiveCommand cmd => Do(cmd),
+            ShareKnowledgeTakeCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
@@ -251,6 +252,26 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("Both players must be in the same city");
 
         return ApplyEvents(new ShareKnowledgeGiven(role, city, receivingRole));
+    }
+
+    private (PandemicGame game, IEnumerable<IEvent>) Do(ShareKnowledgeTakeCommand command)
+    {
+        var (role, city, takeFromRole) = command;
+        var taker = PlayerByRole(role);
+        var takeFromPlayer = PlayerByRole(takeFromRole);
+
+        if (taker == takeFromPlayer) throw new GameRuleViolatedException("Cannot share with self!");
+
+        if (!takeFromPlayer.Hand.CityCards.Any(c => c.City.Name == command.City))
+            throw new GameRuleViolatedException("Player must have the card to share");
+
+        if (taker.Location != command.City)
+            throw new GameRuleViolatedException("Player must be in the city of the given card");
+
+        if (takeFromPlayer.Location != taker.Location)
+            throw new GameRuleViolatedException("Both players must be in the same city");
+
+        return ApplyEvents(new ShareKnowledgeTaken(role, city, takeFromRole));
     }
 
     private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
