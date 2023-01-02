@@ -14,8 +14,9 @@ namespace pandemic.Aggregates.Game
         public Difficulty Difficulty { get; init; }
         public int InfectionRate { get; init; }
         public int OutbreakCounter { get; init; }
+        public int InfectionRateMarkerPosition { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
-        public int CurrentPlayerIdx { get; init; } = 0;
+        public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }

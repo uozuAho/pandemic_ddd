@@ -438,6 +438,7 @@ public partial record PandemicGame
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle().ToList();
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 
+        game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
         return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
     }
 

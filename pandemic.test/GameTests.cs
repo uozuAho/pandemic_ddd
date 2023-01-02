@@ -1261,6 +1261,28 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_increases_infection_rate()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                InfectionRateMarkerPosition = 2,
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.InfectionRateMarkerPosition.ShouldBe(3);
+            game.InfectionRate.ShouldBe(3);
+        }
+
+        [Test]
         public void Epidemic_can_end_game()
         {
             var game = NewGame(new NewGameOptions

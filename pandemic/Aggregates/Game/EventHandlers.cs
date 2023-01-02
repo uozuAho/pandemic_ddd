@@ -58,6 +58,7 @@ public partial record PandemicGame
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
             EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
+            InfectionRateMarkerProgressed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -330,6 +331,14 @@ public partial record PandemicGame
         {
             InfectionDiscardPile = Deck<InfectionCard>.Empty,
             InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(evt.ShuffledDiscardPile)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, InfectionRateMarkerProgressed _)
+    {
+        return game with
+        {
+            InfectionRateMarkerPosition = game.InfectionRateMarkerPosition + 1
         };
     }
 
