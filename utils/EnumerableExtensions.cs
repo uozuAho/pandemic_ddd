@@ -2,9 +2,9 @@ namespace utils;
 
 public static class EnumerableExtensions
 {
-    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> items)
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> items, Random? random = null)
     {
-        var rng = new Random();
+        var rng = random ?? new Random();
         return items.OrderBy(_ => rng.Next());
     }
 

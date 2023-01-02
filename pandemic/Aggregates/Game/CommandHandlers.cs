@@ -14,10 +14,10 @@ public partial record PandemicGame
 {
     public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
     {
-        var game = CreateUninitialisedGame();
+        var game = CreateUninitialisedGame(options.Rng);
         var events = new List<IEvent>();
 
-        if (options.Roles.Count < 2 || options.Roles.Count > 4)
+        if (options.Roles.Count is < 2 or > 4)
             throw new GameRuleViolatedException(
                 $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
@@ -296,14 +296,12 @@ public partial record PandemicGame
 
     private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
     {
-        var rng = new Random();
-
         var drawPile = PlayerDrawPile.Cards
-            .OrderBy(_ => rng.Next())
+            .OrderBy(_ => Rng.Next())
             .SplitEvenlyInto(NumberOfEpidemicCards(Difficulty))
             .Select(pile => pile
                 .Append(new EpidemicCard())
-                .OrderBy(_ => rng.Next()))
+                .OrderBy(_ => Rng.Next()))
             .SelectMany(c => c)
             .ToImmutableList();
 
@@ -423,7 +421,7 @@ public partial record PandemicGame
 
         // shuffle infection cards
         game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
-        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle().ToList();
+        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 
         game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);

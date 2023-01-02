@@ -29,6 +29,8 @@ namespace pandemic.Aggregates.Game
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
 
+        private Random Rng { get; } = new();
+
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
         public bool IsOver => IsLost || IsWon;
@@ -97,7 +99,7 @@ namespace pandemic.Aggregates.Game
             };
         }
 
-        private PandemicGame()
+        private PandemicGame(Random rng)
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
 
@@ -106,9 +108,11 @@ namespace pandemic.Aggregates.Game
 
             PlayerDrawPile = new Deck<PlayerCard>(Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard));
+
+            Rng = rng;
         }
 
-        public static PandemicGame CreateUninitialisedGame() => new ();
+        public static PandemicGame CreateUninitialisedGame(Random? rng = null) => new (rng ?? new Random());
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events)
         {

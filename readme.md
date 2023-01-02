@@ -8,6 +8,8 @@ implemented.
 
 # todo
 - epidemic
+  - fix random so u can set seed in tests
+    - do epidemic first
   - leave outbreak for later
     - epidemic can trigger outbreak
     - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
