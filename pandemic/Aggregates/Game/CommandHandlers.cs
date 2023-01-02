@@ -310,8 +310,7 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var rng = new Random();
-        var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => rng.Next());
+        var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => Rng.Next());
 
         return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
     }
@@ -323,11 +322,9 @@ public partial record PandemicGame
 
     private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
     {
-        var rng = new Random();
-
         var playerCards = Board.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
-            .OrderBy(_ => rng.Next())
+            .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 
         return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
