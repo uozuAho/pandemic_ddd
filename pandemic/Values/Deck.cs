@@ -85,4 +85,14 @@ public class Deck<T>
     {
         return new Deck<T>(_cards.Concat(new[] { card }));
     }
+
+    public Deck<T> PlaceAtBottom(T card)
+    {
+        return new Deck<T>(new[] { card }.Concat(_cards));
+    }
+
+    public Deck<T> Remove(T card)
+    {
+        return new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
+    }
 }

@@ -1232,11 +1232,19 @@ namespace pandemic.test
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
+
+            // ensure that the city that has an epidemic is not already infected (prevents outbreak)
+            var notInfectedCity = game.Cities.First(c => !c.Cubes.Any());
+            var infectionCard = game.InfectionDrawPile.Cards.Single(c => c.City.Name == notInfectedCity.Name);
+
             game = game with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
                     PlayerCards.CityCard("Atlanta"),
-                    new EpidemicCard())
+                    new EpidemicCard()),
+                InfectionDrawPile = game.InfectionDrawPile
+                    .Remove(infectionCard)
+                    .PlaceAtBottom(infectionCard)
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
             var initialGame = game;

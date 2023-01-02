@@ -9,9 +9,9 @@ implemented.
 # todo
 - epidemic
   - test infection rate from 2 -> 3
-  - fuzz: all cities have 0 <= x <= 3 cubes of any colour
   - leave outbreak for later
     - epidemic can trigger outbreak
+    - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
   - options
     - command initiating the process oversees process completion, issuing more commands
