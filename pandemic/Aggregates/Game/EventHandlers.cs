@@ -36,8 +36,6 @@ public partial record PandemicGame
             EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
             InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
-            InfectionRateSet i => game with {InfectionRate = i.Rate},
-            OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
             PlayerAdded p => ApplyPlayerAdded(game, p),
             PlayerMoved p => ApplyPlayerMoved(game, p),
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),

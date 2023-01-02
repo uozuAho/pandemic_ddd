@@ -164,6 +164,8 @@ namespace pandemic.GameData
 
         public const int NumberOfCities = 48;
 
+        public readonly int[] InfectionRates = { 2, 2, 2, 3, 3, 4, 4 };
+
         public bool IsCity(string city)
         {
             return CityLookup.ContainsKey(city);

@@ -23,8 +23,6 @@ public partial record PandemicGame
 
         game = game
             .SetDifficulty(options.Difficulty, events)
-            .SetInfectionRate(2, events)
-            .SetOutbreakCounter(0, events)
             .SetupInfectionDeck(events)
             .ShufflePlayerDrawPileForDealing(events);
 
@@ -287,16 +285,6 @@ public partial record PandemicGame
     private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
     {
         return ApplyEvent(new DifficultySet(difficulty), events);
-    }
-
-    private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
-    {
-        return ApplyEvent(new InfectionRateSet(rate), events);
-    }
-
-    private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
-    {
-        return ApplyEvent(new OutbreakCounterSet(value), events);
     }
 
     private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)

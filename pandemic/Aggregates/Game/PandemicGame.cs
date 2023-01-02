@@ -12,7 +12,7 @@ namespace pandemic.Aggregates.Game
     {
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
-        public int InfectionRate { get; init; }
+        public int InfectionRate => Board.InfectionRates[InfectionRateMarkerPosition];
         public int OutbreakCounter { get; init; }
         public int InfectionRateMarkerPosition { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];

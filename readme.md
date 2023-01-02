@@ -8,9 +8,6 @@ implemented.
 
 # todo
 - epidemic
-  - test infection rate from 2 -> 3
-    - fix tests
-    - add track
   - leave outbreak for later
     - epidemic can trigger outbreak
     - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
