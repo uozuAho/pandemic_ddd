@@ -7,8 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- epidemic
-  - leave outbreak for later
+- outbreak:
+  - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
     - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
