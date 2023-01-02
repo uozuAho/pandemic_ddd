@@ -12,7 +12,7 @@ namespace pandemic.server.Dto
     {
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
-        public int InfectionRate { get; init; }
+        public int InfectionRateMarkerPosition { get; init; }
         public int OutbreakCounter { get; init; }
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; }
@@ -31,7 +31,7 @@ namespace pandemic.server.Dto
             {
                 LossReason = game.LossReason,
                 Difficulty = game.Difficulty,
-                InfectionRate = game.InfectionRate,
+                InfectionRateMarkerPosition = game.InfectionRateMarkerPosition,
                 OutbreakCounter = game.OutbreakCounter,
                 CurrentPlayerIdx = game.CurrentPlayerIdx,
                 ResearchStationPile = game.ResearchStationPile,
@@ -54,7 +54,7 @@ namespace pandemic.server.Dto
             {
                 LossReason = LossReason,
                 Difficulty = Difficulty,
-                InfectionRate = InfectionRate,
+                InfectionRateMarkerPosition = InfectionRateMarkerPosition,
                 OutbreakCounter = OutbreakCounter,
                 CurrentPlayerIdx = CurrentPlayerIdx,
                 ResearchStationPile = ResearchStationPile,

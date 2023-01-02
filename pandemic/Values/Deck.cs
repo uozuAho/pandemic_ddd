@@ -14,6 +14,7 @@ public class Deck<T>
     public IEnumerable<T> Cards => _cards.Select(c => c);
     public T TopCard => _cards.Last();
     public static Deck<T> Empty => new();
+    public T BottomCard => _cards.First();
 
     private Deck()
     {
@@ -42,9 +43,19 @@ public class Deck<T>
         return _cards.TakeLast(numCards);
     }
 
+    public IEnumerable<T> Bottom(int numCards)
+    {
+        return _cards.Take(numCards);
+    }
+
     public (Deck<T>, T) Draw()
     {
         return (new Deck<T>(_cards.Take(_cards.Count - 1)), TopCard);
+    }
+
+    public (Deck<T>, T) DrawFromBottom()
+    {
+        return (new Deck<T>(_cards.Skip(1)), BottomCard);
     }
 
     public (Deck<T> newDrawPile, IEnumerable<T> cards) Draw(int numCards)
@@ -52,7 +63,20 @@ public class Deck<T>
         return (new Deck<T>(_cards.Take(_cards.Count - numCards)), Top(numCards));
     }
 
+    /// <summary>
+    /// Place the given cards onto the top of the deck, in 'left to right' order,
+    /// ie. the last card given is at the top of the deck afterwards.
+    /// </summary>
     public Deck<T> PlaceOnTop(IEnumerable<T> cards)
+    {
+        return new Deck<T>(_cards.Concat(cards));
+    }
+
+    /// <summary>
+    /// Place the given cards onto the top of the deck, in 'left to right' order,
+    /// ie. the last card given is at the top of the deck afterwards.
+    /// </summary>
+    public Deck<T> PlaceOnTop(params T[] cards)
     {
         return new Deck<T>(_cards.Concat(cards));
     }
@@ -60,5 +84,15 @@ public class Deck<T>
     public Deck<T> PlaceOnTop(T card)
     {
         return new Deck<T>(_cards.Concat(new[] { card }));
+    }
+
+    public Deck<T> PlaceAtBottom(T card)
+    {
+        return new Deck<T>(new[] { card }.Concat(_cards));
+    }
+
+    public Deck<T> Remove(T card)
+    {
+        return new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
     }
 }

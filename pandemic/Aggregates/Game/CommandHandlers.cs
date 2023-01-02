@@ -14,17 +14,15 @@ public partial record PandemicGame
 {
     public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
     {
-        var game = CreateUninitialisedGame();
+        var game = CreateUninitialisedGame(options.Rng);
         var events = new List<IEvent>();
 
-        if (options.Roles.Count < 2 || options.Roles.Count > 4)
+        if (options.Roles.Count is < 2 or > 4)
             throw new GameRuleViolatedException(
                 $"number of players must be between 2-4. Was given {options.Roles.Count}");
 
         game = game
             .SetDifficulty(options.Difficulty, events)
-            .SetInfectionRate(2, events)
-            .SetOutbreakCounter(0, events)
             .SetupInfectionDeck(events)
             .ShufflePlayerDrawPileForDealing(events);
 
@@ -289,16 +287,6 @@ public partial record PandemicGame
         return ApplyEvent(new DifficultySet(difficulty), events);
     }
 
-    private PandemicGame SetInfectionRate(int rate, ICollection<IEvent> events)
-    {
-        return ApplyEvent(new InfectionRateSet(rate), events);
-    }
-
-    private PandemicGame SetOutbreakCounter(int value, ICollection<IEvent> events)
-    {
-        return ApplyEvent(new OutbreakCounterSet(value), events);
-    }
-
     private PandemicGame DealPlayerCards(Role role, int numCards, ICollection<IEvent> events)
     {
         var cards = PlayerDrawPile.Top(numCards).ToArray();
@@ -308,14 +296,12 @@ public partial record PandemicGame
 
     private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
     {
-        var rng = new Random();
-
         var drawPile = PlayerDrawPile.Cards
-            .OrderBy(_ => rng.Next())
+            .OrderBy(_ => Rng.Next())
             .SplitEvenlyInto(NumberOfEpidemicCards(Difficulty))
             .Select(pile => pile
                 .Append(new EpidemicCard())
-                .OrderBy(_ => rng.Next()))
+                .OrderBy(_ => Rng.Next()))
             .SelectMany(c => c)
             .ToImmutableList();
 
@@ -324,8 +310,7 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var rng = new Random();
-        var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => rng.Next());
+        var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => Rng.Next());
 
         return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
     }
@@ -337,11 +322,9 @@ public partial record PandemicGame
 
     private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
     {
-        var rng = new Random();
-
         var playerCards = Board.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
-            .OrderBy(_ => rng.Next())
+            .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 
         return ApplyEvent(new PlayerDrawPileShuffledForDealing(playerCards), events);
@@ -391,10 +374,14 @@ public partial record PandemicGame
 
         game = PickUpCard(game, events);
 
+        if (game.IsOver) return game;
+
         if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
         game = PickUpCard(game, events);
+
+        if (game.IsOver) return game;
 
         if (game.CurrentPlayer.Hand.Count > 7)
             return game;
@@ -420,9 +407,22 @@ public partial record PandemicGame
 
     private static PandemicGame Epidemic(PandemicGame game, EpidemicCard card, ICollection<IEvent> events)
     {
-        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
+        var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
-        // todo: game rules: handle epidemic
+        // infect city
+        if (game.Cubes.NumberOf(epidemicInfectionCard.City.Colour) < 3)
+            return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.City.Colour} cubes"), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+
+        // shuffle infection cards
+        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
+        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
+        game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
+
+        game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
+        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
     }
 
     private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)

@@ -7,6 +7,18 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- outbreak:
+  - some leftover epidemic scenarios:
+    - epidemic can trigger outbreak
+    - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
+- convert end of turn to a process manager(s)? see how complex each command handler gets..
+  - options
+    - command initiating the process oversees process completion, issuing more commands
+      and responding to events if necessary
+    - use an aggregate to manage each process
+      - overkill for this project, no eventual consistency needed
+    - store process state in event
+      - undesirable: events should only include game-relevant information
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
 
 # Quick start

@@ -36,8 +36,6 @@ public partial record PandemicGame
             EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
             InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
-            InfectionRateSet i => game with {InfectionRate = i.Rate},
-            OutbreakCounterSet o => game with {OutbreakCounter = o.Value},
             PlayerAdded p => ApplyPlayerAdded(game, p),
             PlayerMoved p => ApplyPlayerMoved(game, p),
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
@@ -56,6 +54,9 @@ public partial record PandemicGame
             TreatedDisease d => ApplyTreatedDisease(game, d),
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
+            EpidemicInfectionCardDiscarded e => Apply(game, e),
+            EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
+            InfectionRateMarkerProgressed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -307,6 +308,35 @@ public partial record PandemicGame
                 {
                     Hand = takenFromPlayer.Hand.Remove(card),
                 })
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicInfectionCardDiscarded evt)
+    {
+        var (newDrawPile, bottomCard) = game.InfectionDrawPile.DrawFromBottom();
+        if (bottomCard != evt.Card) throw new InvalidOperationException("doh");
+
+        return game with
+        {
+            InfectionDrawPile = newDrawPile,
+            InfectionDiscardPile = game.InfectionDiscardPile.PlaceOnTop(evt.Card),
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicInfectionDiscardPileShuffledAndReplaced evt)
+    {
+        return game with
+        {
+            InfectionDiscardPile = Deck<InfectionCard>.Empty,
+            InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(evt.ShuffledDiscardPile)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, InfectionRateMarkerProgressed _)
+    {
+        return game with
+        {
+            InfectionRateMarkerPosition = game.InfectionRateMarkerPosition + 1
         };
     }
 

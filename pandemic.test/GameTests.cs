@@ -399,11 +399,17 @@ namespace pandemic.test
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
+            startingState = startingState with
+            {
+                // epidemics mess with this test, remove them
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
+            };
 
-            var (game, _) = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"));
+            var events = new List<IEvent>();
+            var game = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
 
             Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
             Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
@@ -1217,6 +1223,80 @@ namespace pandemic.test
             game.PlayerByRole(Role.Medic).Hand.ShouldContain(atlanta);
             game.PlayerByRole(Role.Scientist).Hand.ShouldNotContain(atlanta);
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Epidemic()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                Rng = new Random(1237)
+                // just in case: a seed of 1238 causes failure
+            });
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            var initialGame = game;
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            var epidemicCity = initialGame.InfectionDrawPile.BottomCard.City;
+            game.CityByName(epidemicCity.Name).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
+            game.InfectionRate.ShouldBe(2);
+            game.InfectionDiscardPile.Count.ShouldBe(2);
+            game.InfectionDrawPile.Count.ShouldBe(46);
+            game.PlayerDiscardPile.Count.ShouldBe(1);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<EpidemicCard>();
+        }
+
+        [Test]
+        public void Epidemic_increases_infection_rate()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                InfectionRateMarkerPosition = 2,
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.InfectionRateMarkerPosition.ShouldBe(3);
+            game.InfectionRate.ShouldBe(3);
+        }
+
+        [Test]
+        public void Epidemic_can_end_game()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cubes = CubePile.Empty
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.IsLost.ShouldBeTrue();
+            events.ShouldNotContain(e => e is CubeAddedToCity);
         }
 
         [Repeat(10)]

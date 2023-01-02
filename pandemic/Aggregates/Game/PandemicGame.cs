@@ -12,10 +12,11 @@ namespace pandemic.Aggregates.Game
     {
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
-        public int InfectionRate { get; init; }
+        public int InfectionRate => Board.InfectionRates[InfectionRateMarkerPosition];
         public int OutbreakCounter { get; init; }
+        public int InfectionRateMarkerPosition { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
-        public int CurrentPlayerIdx { get; init; } = 0;
+        public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
         public ImmutableList<City> Cities { get; init; }
@@ -27,6 +28,8 @@ namespace pandemic.Aggregates.Game
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
+
+        private Random Rng { get; } = new();
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
@@ -96,7 +99,7 @@ namespace pandemic.Aggregates.Game
             };
         }
 
-        private PandemicGame()
+        private PandemicGame(Random rng)
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
 
@@ -105,12 +108,27 @@ namespace pandemic.Aggregates.Game
 
             PlayerDrawPile = new Deck<PlayerCard>(Board.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard));
+
+            Rng = rng;
         }
 
-        public static PandemicGame CreateUninitialisedGame() => new ();
+        public static PandemicGame CreateUninitialisedGame(Random? rng = null) => new (rng ?? new Random());
 
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events) =>
-            events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
+        public static PandemicGame FromEvents(IEnumerable<IEvent> events)
+        {
+            // this code is easier to debug than events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
+
+            var game = CreateUninitialisedGame();
+            var eventNumber = 0;
+
+            foreach (var evt in events)
+            {
+                eventNumber++;
+                game = ApplyEvent(game, evt);
+            }
+
+            return game;
+        }
 
         public PandemicGame Copy()
         {
