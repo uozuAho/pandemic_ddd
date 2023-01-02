@@ -42,9 +42,16 @@ public class CommandPriorityComparer : IComparer<IPlayerCommand>
         result = CompareMulti((dynamic)b, (dynamic)a);
         if (result != Unmatched) return -result;
 
-        throw new ArgumentException("Undefined comparison");
+        // No explicit comparison has been defined for the given commands.
+        // I'm tired of having to define these, so I'm just going to give
+        // them the same priority instead of throwing an exception here.
+        return Same;
     }
 
+    /// <summary>
+    /// This method is called when the commands cannot be resolved to more specific methods, ie.
+    /// no comparison method has been defined for the two types.
+    /// </summary>
     private int CompareMulti(IPlayerCommand a, IPlayerCommand b) => Unmatched;
     private int CompareMulti<T>(T a, T b) where T : IPlayerCommand => Same;
     private int CompareMulti(DiscoverCureCommand a, IPlayerCommand b) => Greater;
