@@ -658,6 +658,51 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Scenario_share_knowledge_at_end_of_turn_when_both_players_hands_are_full()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = PlayerHand.Of("Atlanta", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow")
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Miami", "Taipei", "Sydney", "Delhi", "Jakarta", "Beijing", "Seoul")
+            });
+
+            var cardToShare = PlayerCards.CityCard("Atlanta");
+            var commandGenerator = new PlayerCommandGenerator();
+
+            var gameStateBeforeShare = game;
+            (game, _) = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, cardToShare.City.Name, Role.Scientist));
+
+            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+
+            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")));
+
+            // medic should now have picked up 2 cards, and needs to discard
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
+            game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count,
+                "infection step should not have occurred yet");
+
+            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Paris")));
+            (game, var lastEvents) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Moscow")));
+
+            lastEvents.ShouldContain(e => e is TurnEnded);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            game.CurrentPlayer.Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            game.PlayerByRole(Role.Medic).Hand.CityCards.ShouldNotContain(cardToShare);
+            game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count - 2);
+        }
+
+        [Test]
         public void Build_research_station_works()
         {
             var game = NewGame(new NewGameOptions

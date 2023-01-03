@@ -7,6 +7,11 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- bug
+  - both players have 7 cards
+  - on final action, player A shares knowledge to player B
+  - expect: player B must discard, then player A's end of turn events occur
+  - actual: player A end of turn events happen before player B gets to discard
 - outbreak:
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
