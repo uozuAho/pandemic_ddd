@@ -8,10 +8,17 @@ implemented.
 
 # todo
 - bug
-  - both players have 7 cards
-  - on final action, player A shares knowledge to player B
-  - expect: player B must discard, then player A's end of turn events occur
-  - actual: player A end of turn events happen before player B gets to discard
+  - scenario
+    - both players have 7 cards
+    - on final action, player A shares knowledge to player B
+    - expect: player B must discard, then player A's end of turn events occur
+    - actual: player A end of turn events happen before player B gets to discard
+  - todo
+    - get scenario test to pass
+    - run other tests
+    - throw on non-discard action if any player must discard
+    - convert end-of-turn stuff to a process manager. existing problem: infect cities command
+      is issued by 'do stuff after actions' and 'discard card'
 - outbreak:
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
@@ -25,6 +32,8 @@ implemented.
     - store process state in event
       - undesirable: events should only include game-relevant information
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
+- later
+  - make pandemic game correct by construction? make all properties get-only
 
 # Quick start
 - install dotnet core (tested with v7)

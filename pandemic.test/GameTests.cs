@@ -679,6 +679,9 @@ namespace pandemic.test
             var gameStateBeforeShare = game;
             (game, _) = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, cardToShare.City.Name, Role.Scientist));
 
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.Count.ShouldBe(6);
+
             commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
             (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")));

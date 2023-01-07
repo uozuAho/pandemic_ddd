@@ -82,7 +82,8 @@ public partial record PandemicGame
 
         if (game.CurrentPlayer.ActionsRemaining != 0
             || command is not IConsumesAction
-            || game.IsOver) return (game, events);
+            || game.IsOver
+            || game.APlayerMustDiscard) return (game, events);
 
         var eventList = events.ToList();
         game = DoStuffAfterActions(game, eventList);
@@ -135,8 +136,8 @@ public partial record PandemicGame
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
-        if (game.CurrentPlayer is { ActionsRemaining: 0, Hand.Count: <= 7 })
-            game = InfectCities(game, events);
+        // if (game.CurrentPlayer.ActionsRemaining == 0 && !game.APlayerMustDiscard)
+        //     game = InfectCities(game, events);
 
         return (game, events);
     }

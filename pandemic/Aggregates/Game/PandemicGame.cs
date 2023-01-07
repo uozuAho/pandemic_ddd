@@ -48,6 +48,7 @@ namespace pandemic.Aggregates.Game
             }
         }
         public bool IsLost => LossReason != "";
+        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
