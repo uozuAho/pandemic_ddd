@@ -688,12 +688,14 @@ namespace pandemic.test
 
             // medic should now have picked up 2 cards, and needs to discard
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.Count.ShouldBe(8);
             commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count,
                 "infection step should not have occurred yet");
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Paris")));
-            (game, var lastEvents) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Moscow")));
+            // discard 2 (?)
+            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Paris")));
+            (game, var lastEvents) = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Moscow")));
 
             lastEvents.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);

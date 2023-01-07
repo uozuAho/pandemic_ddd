@@ -81,9 +81,8 @@ public partial record PandemicGame
         };
 
         if (game.CurrentPlayer.ActionsRemaining != 0
-            || command is not IConsumesAction
-            || game.IsOver
-            || game.APlayerMustDiscard) return (game, events);
+            || game.APlayerMustDiscard
+            || game.IsOver) return (game, events);
 
         var eventList = events.ToList();
         game = DoStuffAfterActions(game, eventList);

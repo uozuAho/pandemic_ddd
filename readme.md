@@ -7,16 +7,12 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- bug
-  - scenario
-    - both players have 7 cards
-    - on final action, player A shares knowledge to player B
-    - expect: player B must discard, then player A's end of turn events occur
-    - actual: player A end of turn events happen before player B gets to discard
+- bug: share knowledge with last action when both players have 7 cards
   - todo
     - get scenario test to pass
     - run other tests
     - throw on non-discard action if any player must discard
+    - get rid of IConsumesAction type?
     - convert end-of-turn stuff to a process manager. existing problem: infect cities command
       is issued by 'do stuff after actions' and 'discard card'
 - outbreak:
