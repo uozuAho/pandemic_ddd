@@ -20,13 +20,17 @@ public partial record PandemicGame
 
         if (game.CurrentPlayer.Hand.Count > 7) return game;
 
-        if (game.PhaseOfTurn == TurnPhase.InfectCities)
-        {
-            game = InfectCity(game, events);
-            if (!game.IsOver) game = InfectCity(game, events);
-            if (!game.IsOver)
-                game = game.ApplyEvent(new TurnEnded(), events);
-        }
+        if (game.PhaseOfTurn == TurnPhase.InfectCities) game = InfectCities(game, events);
+
+        return game;
+    }
+
+    private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
+    {
+        game = InfectCity(game, events);
+        if (!game.IsOver) game = InfectCity(game, events);
+        if (!game.IsOver)
+            game = game.ApplyEvent(new TurnEnded(), events);
 
         return game;
     }
