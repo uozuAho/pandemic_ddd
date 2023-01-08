@@ -7,7 +7,7 @@ namespace pandemic.Aggregates.Game;
 
 public partial record PandemicGame
 {
-    static class PostCommandProcessor
+    private static class PostCommandProcessor
     {
         public static PandemicGame RunGameUntilPlayerCommandIsAvailable(PandemicGame game, List<IEvent> eventList)
         {

@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- convert end of turn to a process manager(s)? see how complex each command handler gets..
-  - flatten all commands into DoStuff... process method
 - outbreak:
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
