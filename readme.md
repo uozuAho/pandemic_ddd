@@ -9,10 +9,6 @@ implemented.
 # todo
 - bug: share knowledge with last action when both players have 7 cards
   - todo
-    - run other tests
-    - add tests for turn phase
-    - throw on non-discard action if any player must discard
-    - get rid of IConsumesAction type?
     - reorder public/privates in game (and more?)
     - diff with master before merging
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
