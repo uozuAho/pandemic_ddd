@@ -139,9 +139,6 @@ public partial record PandemicGame
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
-        // if (game.CurrentPlayer.ActionsRemaining == 0 && !game.APlayerMustDiscard)
-        //     game = InfectCities(game, events);
-
         return (game, events);
     }
 
