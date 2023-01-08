@@ -7,14 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- convert end of turn to a process manager(s)? see how complex each command handler gets..
-  - options
-    - command initiating the process oversees process completion, issuing more commands
-      and responding to events if necessary
-    - use an aggregate to manage each process
-      - overkill for this project, no eventual consistency needed
-    - store process state in event
-      - undesirable: events should only include game-relevant information
 - outbreak:
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
@@ -23,6 +15,8 @@ implemented.
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
 - later
   - make pandemic game correct by construction? make all properties get-only
+    - hide command and event handlers if not hidden already. pandemic public api should make sense
+      in terms of game rules, no internal details
 
 # Quick start
 - install dotnet core (tested with v7)

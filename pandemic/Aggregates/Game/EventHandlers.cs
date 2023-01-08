@@ -58,6 +58,7 @@ public partial record PandemicGame
             EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
             InfectionRateMarkerProgressed e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
+            EpidemicTriggered => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
