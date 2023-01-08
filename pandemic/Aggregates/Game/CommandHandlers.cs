@@ -50,6 +50,25 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
+        PreCommandChecks(command);
+
+        var (game, events) = ExecuteCommand(command);
+
+        var eventList = events.ToList();
+
+        if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
+            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
+
+        if (game.PhaseOfTurn == TurnPhase.DoActions
+            || game.APlayerMustDiscard
+            || game.IsOver) return (game, eventList);
+
+        game = DoStuffAfterActions(game, eventList);
+        return (game, eventList);
+    }
+
+    private void PreCommandChecks(IPlayerCommand command)
+    {
         ThrowIfGameOver(this);
 
         var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
@@ -64,8 +83,11 @@ public partial record PandemicGame
             ThrowIfNotRolesTurn(command.Role);
             ThrowIfNoActionsRemaining(PlayerByRole(command.Role));
         }
+    }
 
-        var (game, events) = command switch
+    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(IPlayerCommand command)
+    {
+        return command switch
         {
             DriveFerryCommand cmd => Do(cmd),
             DiscardPlayerCardCommand cmd => Do(cmd),
@@ -79,18 +101,6 @@ public partial record PandemicGame
             ShareKnowledgeTakeCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
-
-        var eventList = events.ToList();
-
-        if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
-            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
-
-        if (game.CurrentPlayer.ActionsRemaining != 0
-            || game.APlayerMustDiscard
-            || game.IsOver) return (game, eventList);
-
-        game = DoStuffAfterActions(game, eventList);
-        return (game, eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)
@@ -360,42 +370,6 @@ public partial record PandemicGame
             {
                 game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
             }
-        }
-
-        return game;
-    }
-
-    private static PandemicGame DoStuffAfterActions(PandemicGame game, ICollection<IEvent> events)
-    {
-        ThrowIfGameOver(game);
-
-        if (game.PlayerDrawPile.Count == 0)
-            return game.ApplyEvent(new GameLost("No more player cards"), events);
-
-        if (game.PhaseOfTurn == TurnPhase.DrawCards)
-        {
-            game = PickUpCard(game, events);
-
-            if (game.IsOver) return game;
-
-            if (game.PlayerDrawPile.Count == 0)
-                return game.ApplyEvent(new GameLost("No more player cards"), events);
-
-            game = PickUpCard(game, events);
-
-            game = game.ApplyEvent(new TurnPhaseEnded(), events);
-        }
-
-        if (game.IsOver) return game;
-
-        if (game.CurrentPlayer.Hand.Count > 7)
-            return game;
-
-        if (game.PhaseOfTurn == TurnPhase.InfectCities)
-        {
-            game = InfectCities(game, events);
-            if (!game.IsOver)
-                game = game.ApplyEvent(new TurnEnded(), events);
         }
 
         return game;

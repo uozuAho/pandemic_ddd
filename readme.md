@@ -23,6 +23,8 @@ implemented.
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
 - later
   - make pandemic game correct by construction? make all properties get-only
+    - hide command and event handlers if not hidden already. pandemic public api should make sense
+      in terms of game rules, no internal details
 
 # Quick start
 - install dotnet core (tested with v7)
