@@ -693,8 +693,6 @@ namespace pandemic.test
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count,
                 "infection step should not have occurred yet");
 
-            // discard 2 (?)
-            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Paris")));
             (game, var lastEvents) = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Moscow")));
 
             lastEvents.ShouldContain(e => e is TurnEnded);

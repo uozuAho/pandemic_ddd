@@ -80,11 +80,15 @@ public partial record PandemicGame
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
+        var eventList = events.ToList();
+
+        if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
+            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
+
         if (game.CurrentPlayer.ActionsRemaining != 0
             || game.APlayerMustDiscard
-            || game.IsOver) return (game, events);
+            || game.IsOver) return (game, eventList);
 
-        var eventList = events.ToList();
         game = DoStuffAfterActions(game, eventList);
         return (game, eventList);
     }
@@ -372,21 +376,30 @@ public partial record PandemicGame
         if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
-        game = PickUpCard(game, events);
+        if (game.PhaseOfTurn == TurnPhase.DrawCards)
+        {
+            game = PickUpCard(game, events);
 
-        if (game.IsOver) return game;
+            if (game.IsOver) return game;
 
-        if (game.PlayerDrawPile.Count == 0)
-            return game.ApplyEvent(new GameLost("No more player cards"), events);
+            if (game.PlayerDrawPile.Count == 0)
+                return game.ApplyEvent(new GameLost("No more player cards"), events);
 
-        game = PickUpCard(game, events);
+            game = PickUpCard(game, events);
+
+            game = game.ApplyEvent(new TurnPhaseEnded(), events);
+        }
 
         if (game.IsOver) return game;
 
         if (game.CurrentPlayer.Hand.Count > 7)
             return game;
 
-        game = InfectCities(game, events);
+        if (game.PhaseOfTurn == TurnPhase.InfectCities)
+        {
+            game = InfectCities(game, events);
+            // todo: move turn ended event here, make it change phase
+        }
 
         return game;
     }
