@@ -9,7 +9,6 @@ implemented.
 # todo
 - bug: share knowledge with last action when both players have 7 cards
   - todo
-    - reorder public/privates in game (and more?)
     - diff with master before merging
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
   - options
