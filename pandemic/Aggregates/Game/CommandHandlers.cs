@@ -383,9 +383,6 @@ public partial record PandemicGame
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-        if (card is EpidemicCard epidemicCard)
-            game = Epidemic(game, epidemicCard, events);
-
         return game;
     }
 

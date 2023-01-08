@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -17,12 +18,18 @@ public partial record PandemicGame
         {
             game = PickUpCard(game, events);
 
+            if (((PlayerCardPickedUp)events.Last()).Card is EpidemicCard epidemicCard)
+                game = Epidemic(game, epidemicCard, events);
+
             if (game.IsOver) return game;
 
             if (game.PlayerDrawPile.Count == 0)
                 return game.ApplyEvent(new GameLost("No more player cards"), events);
 
             game = PickUpCard(game, events);
+
+            if (((PlayerCardPickedUp)events.Last()).Card is EpidemicCard epidemicCard2)
+                game = Epidemic(game, epidemicCard2, events);
 
             game = game.ApplyEvent(new TurnPhaseEnded(), events);
         }

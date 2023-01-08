@@ -8,13 +8,7 @@ implemented.
 
 # todo
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
-  - options
-    - command initiating the process oversees process completion, issuing more commands
-      and responding to events if necessary
-    - use an aggregate to manage each process
-      - overkill for this project, no eventual consistency needed
-    - store process state in event
-      - undesirable: events should only include game-relevant information
+  - flatten all commands into DoStuff... process method
 - outbreak:
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
