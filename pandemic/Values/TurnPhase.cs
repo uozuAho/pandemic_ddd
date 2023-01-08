@@ -1,6 +1,6 @@
 ﻿namespace pandemic.Values;
 
-internal enum TurnPhase
+public enum TurnPhase
 {
     DoActions,
     DrawCards,

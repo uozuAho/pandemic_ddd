@@ -526,6 +526,7 @@ namespace pandemic.test
                 ActionsRemaining = 0,
                 Hand = new PlayerHand(initialGame.PlayerDrawPile.Top(8))
             });
+            game = game with { PhaseOfTurn = TurnPhase.InfectCities };
 
             (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
 

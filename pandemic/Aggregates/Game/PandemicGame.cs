@@ -49,7 +49,7 @@ namespace pandemic.Aggregates.Game
         }
         public bool IsLost => LossReason != "";
         private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
-        private TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
+        public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
 
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
 
