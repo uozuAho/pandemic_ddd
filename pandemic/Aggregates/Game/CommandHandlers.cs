@@ -283,15 +283,6 @@ public partial record PandemicGame
         return ApplyEvents(new ShareKnowledgeTaken(role, city, takeFromRole));
     }
 
-    private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
-    {
-        ThrowIfGameOver(game);
-
-        game = InfectCity(game, events);
-        if (!game.IsOver) game = InfectCity(game, events);
-        return game;
-    }
-
     private PandemicGame SetDifficulty(Difficulty difficulty, ICollection<IEvent> events)
     {
         return ApplyEvent(new DifficultySet(difficulty), events);

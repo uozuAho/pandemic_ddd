@@ -41,7 +41,8 @@ public partial record PandemicGame
 
         if (game.PhaseOfTurn == TurnPhase.InfectCities)
         {
-            game = InfectCities(game, events);
+            game = InfectCity(game, events);
+            if (!game.IsOver) game = InfectCity(game, events);
             if (!game.IsOver)
                 game = game.ApplyEvent(new TurnEnded(), events);
         }
