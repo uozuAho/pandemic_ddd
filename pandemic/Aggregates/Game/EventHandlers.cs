@@ -57,8 +57,22 @@ public partial record PandemicGame
             EpidemicInfectionCardDiscarded e => Apply(game, e),
             EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
             InfectionRateMarkerProgressed e => Apply(game, e),
+            TurnPhaseEnded e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, TurnPhaseEnded evt)
+    {
+        var nextPhase = game.PhaseOfTurn switch
+        {
+            TurnPhase.DoActions => TurnPhase.DrawCards,
+            TurnPhase.DrawCards => TurnPhase.InfectCities,
+            TurnPhase.InfectCities => TurnPhase.DoActions,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        return game with { PhaseOfTurn = nextPhase };
     }
 
     private static PandemicGame ApplyTreatedDisease(PandemicGame game, TreatedDisease evt)
@@ -345,7 +359,8 @@ public partial record PandemicGame
         return game with
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
-            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count
+            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
+            PhaseOfTurn = TurnPhase.DoActions
         };
     }
 }

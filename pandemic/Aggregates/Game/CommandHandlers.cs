@@ -80,11 +80,15 @@ public partial record PandemicGame
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
 
-        if (game.CurrentPlayer.ActionsRemaining != 0
-            || command is not IConsumesAction
-            || game.IsOver) return (game, events);
-
         var eventList = events.ToList();
+
+        if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
+            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
+
+        if (game.CurrentPlayer.ActionsRemaining != 0
+            || game.APlayerMustDiscard
+            || game.IsOver) return (game, eventList);
+
         game = DoStuffAfterActions(game, eventList);
         return (game, eventList);
     }
@@ -134,9 +138,6 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
-
-        if (game.CurrentPlayer is { ActionsRemaining: 0, Hand.Count: <= 7 })
-            game = InfectCities(game, events);
 
         return (game, events);
     }
@@ -278,7 +279,6 @@ public partial record PandemicGame
 
         game = InfectCity(game, events);
         if (!game.IsOver) game = InfectCity(game, events);
-        if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
         return game;
     }
 
@@ -372,21 +372,31 @@ public partial record PandemicGame
         if (game.PlayerDrawPile.Count == 0)
             return game.ApplyEvent(new GameLost("No more player cards"), events);
 
-        game = PickUpCard(game, events);
+        if (game.PhaseOfTurn == TurnPhase.DrawCards)
+        {
+            game = PickUpCard(game, events);
 
-        if (game.IsOver) return game;
+            if (game.IsOver) return game;
 
-        if (game.PlayerDrawPile.Count == 0)
-            return game.ApplyEvent(new GameLost("No more player cards"), events);
+            if (game.PlayerDrawPile.Count == 0)
+                return game.ApplyEvent(new GameLost("No more player cards"), events);
 
-        game = PickUpCard(game, events);
+            game = PickUpCard(game, events);
+
+            game = game.ApplyEvent(new TurnPhaseEnded(), events);
+        }
 
         if (game.IsOver) return game;
 
         if (game.CurrentPlayer.Hand.Count > 7)
             return game;
 
-        game = InfectCities(game, events);
+        if (game.PhaseOfTurn == TurnPhase.InfectCities)
+        {
+            game = InfectCities(game, events);
+            if (!game.IsOver)
+                game = game.ApplyEvent(new TurnEnded(), events);
+        }
 
         return game;
     }

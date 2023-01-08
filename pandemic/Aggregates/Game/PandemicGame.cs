@@ -26,35 +26,19 @@ namespace pandemic.Aggregates.Game
         public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
         public CubePile Cubes { get; init; } =
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
-        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
-            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
-
-        private Random Rng { get; } = new();
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
+        private Random Rng { get; } = new();
+
+        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
+            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
         public bool IsOver => IsLost || IsWon;
-
-        public bool IsWon
-        {
-            get
-            {
-                foreach (var c in CureDiscovered)
-                {
-                    if (!c.Value) return false;
-                }
-
-                return true;
-            }
-        }
+        public bool IsWon => CureDiscovered.All(c => c.Value);
         public bool IsLost => LossReason != "";
-
+        public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
-
-        public City CityByName(string city)
-        {
-            return Cities[Board.CityIdx(city)];
-        }
+        public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -76,6 +60,8 @@ namespace pandemic.Aggregates.Game
 
             return true;
         }
+
+        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public static int NumberOfEpidemicCards(Difficulty difficulty)
         {

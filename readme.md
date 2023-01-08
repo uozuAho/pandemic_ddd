@@ -7,10 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- outbreak:
-  - some leftover epidemic scenarios:
-    - epidemic can trigger outbreak
-    - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
   - options
     - command initiating the process oversees process completion, issuing more commands
@@ -19,7 +15,14 @@ implemented.
       - overkill for this project, no eventual consistency needed
     - store process state in event
       - undesirable: events should only include game-relevant information
+- outbreak:
+  - some leftover epidemic scenarios:
+    - epidemic can trigger outbreak
+    - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
+  - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
+- later
+  - make pandemic game correct by construction? make all properties get-only
 
 # Quick start
 - install dotnet core (tested with v7)
