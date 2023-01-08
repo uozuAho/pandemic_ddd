@@ -55,15 +55,11 @@ public partial record PandemicGame
         var (game, events) = ExecuteCommand(command);
 
         var eventList = events.ToList();
-
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
             game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
 
-        if (game.PhaseOfTurn == TurnPhase.DoActions
-            || game.APlayerMustDiscard
-            || game.IsOver) return (game, eventList);
+        game = PostCommandProcessor.RunGameUntilPlayerCommandIsAvailable(game, eventList);
 
-        game = DoStuffAfterActions(game, eventList);
         return (game, eventList);
     }
 
