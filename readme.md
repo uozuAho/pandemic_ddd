@@ -7,9 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- bug: share knowledge with last action when both players have 7 cards
-  - todo
-    - diff with master before merging
 - convert end of turn to a process manager(s)? see how complex each command handler gets..
   - options
     - command initiating the process oversees process completion, issuing more commands
