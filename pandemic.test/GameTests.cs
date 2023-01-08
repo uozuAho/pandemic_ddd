@@ -672,6 +672,11 @@ namespace pandemic.test
             {
                 Hand = PlayerHand.Of("Miami", "Taipei", "Sydney", "Delhi", "Jakarta", "Beijing", "Seoul")
             });
+            // ensure no epidemics
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard))
+            };
 
             var cardToShare = PlayerCards.CityCard("Atlanta");
             var commandGenerator = new PlayerCommandGenerator();

@@ -359,7 +359,8 @@ public partial record PandemicGame
         return game with
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
-            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count
+            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
+            PhaseOfTurn = TurnPhase.DoActions
         };
     }
 }

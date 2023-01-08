@@ -282,7 +282,6 @@ public partial record PandemicGame
 
         game = InfectCity(game, events);
         if (!game.IsOver) game = InfectCity(game, events);
-        if (!game.IsOver) game = game.ApplyEvent(new TurnEnded(), events);
         return game;
     }
 
@@ -398,7 +397,8 @@ public partial record PandemicGame
         if (game.PhaseOfTurn == TurnPhase.InfectCities)
         {
             game = InfectCities(game, events);
-            // todo: move turn ended event here, make it change phase
+            if (!game.IsOver)
+                game = game.ApplyEvent(new TurnEnded(), events);
         }
 
         return game;
