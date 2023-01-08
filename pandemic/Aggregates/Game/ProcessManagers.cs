@@ -38,19 +38,17 @@ public partial record PandemicGame
 
         private static PandemicGame DrawCards(PandemicGame game, ICollection<IEvent> events)
         {
-            if (game.PlayerDrawPile.Count == 0)
-                return game.ApplyEvent(new GameLost("No more player cards"), events);
-
             game = PickUpCard(game, events);
+
+            if (game.IsOver) return game;
 
             if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
 
             if (game.IsOver) return game;
 
-            if (game.PlayerDrawPile.Count == 0)
-                return game.ApplyEvent(new GameLost("No more player cards"), events);
-
             game = PickUpCard(game, events);
+
+            if (game.IsOver) return game;
 
             if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
 

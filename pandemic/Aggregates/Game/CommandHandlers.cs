@@ -366,9 +366,13 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(game);
 
+        if (game.PlayerDrawPile.Count == 0)
+            return game.ApplyEvent(new GameLost("No more player cards"), events);
+
         var card = game.PlayerDrawPile.TopCard;
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
+
         if (card is EpidemicCard) game = game.ApplyEvent(new EpidemicTriggered(), events);
 
         return game;
