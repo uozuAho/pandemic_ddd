@@ -18,8 +18,7 @@ public partial record PandemicGame
         {
             game = PickUpCard(game, events);
 
-            if (((PlayerCardPickedUp)events.Last()).Card is EpidemicCard epidemicCard)
-                game = Epidemic(game, epidemicCard, events);
+            if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
 
             if (game.IsOver) return game;
 
@@ -28,8 +27,7 @@ public partial record PandemicGame
 
             game = PickUpCard(game, events);
 
-            if (((PlayerCardPickedUp)events.Last()).Card is EpidemicCard epidemicCard2)
-                game = Epidemic(game, epidemicCard2, events);
+            if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
 
             game = game.ApplyEvent(new TurnPhaseEnded(), events);
         }

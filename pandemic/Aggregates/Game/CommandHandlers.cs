@@ -373,11 +373,12 @@ public partial record PandemicGame
         var card = game.PlayerDrawPile.TopCard;
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
+        if (card is EpidemicCard) game = game.ApplyEvent(new EpidemicTriggered(), events);
 
         return game;
     }
 
-    private static PandemicGame Epidemic(PandemicGame game, EpidemicCard card, ICollection<IEvent> events)
+    private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
     {
         var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
@@ -394,7 +395,8 @@ public partial record PandemicGame
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 
         game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
-        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, card), events);
+        var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
+        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
     }
 
     private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
