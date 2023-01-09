@@ -63,10 +63,13 @@ namespace pandemic.Commands
                     {
                         yield return new TreatDiseaseCommand(player.Role, city.Name, colour);
                     }
+
                 }
             }
             foreach (var player in game.Players)
             {
+                yield return new PassCommand(player.Role);
+
                 foreach (var cardsToCure in player.Hand.CityCards
                              .GroupBy(c => c.City.Colour)
                              .Where(g => g.Count() >= 5))

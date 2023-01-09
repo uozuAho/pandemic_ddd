@@ -501,7 +501,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = new PlayerHand(game.PlayerDrawPile.Top(7))
+                Hand = new PlayerHand(PlayerCards.CityCards.Take(7))
             });
             (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
