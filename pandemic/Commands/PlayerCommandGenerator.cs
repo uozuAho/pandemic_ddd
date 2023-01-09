@@ -67,6 +67,13 @@ namespace pandemic.Commands
             }
             foreach (var player in game.Players)
             {
+                foreach (var cardsToCure in player.Hand.CityCards
+                             .GroupBy(c => c.City.Colour)
+                             .Where(g => g.Count() >= 5))
+                {
+                    yield return new DiscoverCureCommand(player.Role, cardsToCure.Select(g => g).ToArray());
+                }
+
                 foreach (var card in player.Hand.CityCards)
                 {
                     foreach (var otherPlayer in game.Players)
