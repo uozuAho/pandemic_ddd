@@ -7,7 +7,10 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- outbreak:
+- player action: pass
+  - can end turn
+- eradicate disease
+- outbreak
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
     - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
@@ -68,6 +71,9 @@ Players could also take into account which cards have been discarded, in order
 to not discard too many of any one colour. This may increase the odds of
 winning, but makes analysing 'winnability' too tedious for my attention span to
 handle.
+
+## Alternate implementations
+- https://github.com/alexzherdev/pandemic
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)

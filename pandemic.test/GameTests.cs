@@ -1353,6 +1353,19 @@ namespace pandemic.test
             events.ShouldNotContain(e => e is CubeAddedToCity);
         }
 
+        [Test]
+        public void Pass_reduces_num_actions()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
