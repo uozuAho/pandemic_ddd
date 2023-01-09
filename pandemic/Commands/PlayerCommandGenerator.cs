@@ -33,9 +33,18 @@ namespace pandemic.Commands
                 SetTreatDiseaseCommands(game);
                 SetShareKnowledgeGiveCommands(game);
                 SetShareKnowledgeTakeCommands(game);
+                SetPassCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetPassCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.ActionsRemaining > 0)
+            {
+                _buffer[_bufIdx++] = new PassCommand(game.CurrentPlayer.Role);
+            }
         }
 
         public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)

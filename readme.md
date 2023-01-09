@@ -9,7 +9,6 @@ implemented.
 # todo
 - player action: pass
   - command generator
-    - legal
     - all
 - eradicate disease
 - outbreak
