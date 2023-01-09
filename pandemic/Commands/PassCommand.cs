@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record PassCommand(Role Role) : IPlayerCommand;
+public record PassCommand(Role Role) : IPlayerCommand, IConsumesAction;

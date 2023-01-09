@@ -8,7 +8,9 @@ implemented.
 
 # todo
 - player action: pass
-  - can end turn
+  - command generator
+    - legal
+    - all
 - eradicate disease
 - outbreak
   - some leftover epidemic scenarios:

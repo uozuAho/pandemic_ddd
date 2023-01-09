@@ -1366,6 +1366,21 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 
+        [Test]
+        public void Pass_can_end_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            events.ShouldContain(e => e is TurnEnded);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
