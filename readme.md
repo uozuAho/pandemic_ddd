@@ -7,9 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- player action: pass
-  - command generator
-    - all
 - eradicate disease
 - outbreak
   - some leftover epidemic scenarios:
