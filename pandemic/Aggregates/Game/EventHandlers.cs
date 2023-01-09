@@ -59,7 +59,18 @@ public partial record PandemicGame
             InfectionRateMarkerProgressed e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
             EpidemicTriggered => game,
+            PlayerPassed p => Apply(game, p),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, PlayerPassed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+
+        return game with
+        {
+            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 })
         };
     }
 

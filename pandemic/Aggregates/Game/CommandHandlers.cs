@@ -95,8 +95,14 @@ public partial record PandemicGame
             TreatDiseaseCommand cmd => Do(cmd),
             ShareKnowledgeGiveCommand cmd => Do(cmd),
             ShareKnowledgeTakeCommand cmd => Do(cmd),
+            PassCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(PassCommand command)
+    {
+        return ApplyEvents(new PlayerPassed(command.Role));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)

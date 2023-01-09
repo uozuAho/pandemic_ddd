@@ -33,9 +33,18 @@ namespace pandemic.Commands
                 SetTreatDiseaseCommands(game);
                 SetShareKnowledgeGiveCommands(game);
                 SetShareKnowledgeTakeCommands(game);
+                SetPassCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetPassCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.ActionsRemaining > 0)
+            {
+                _buffer[_bufIdx++] = new PassCommand(game.CurrentPlayer.Role);
+            }
         }
 
         public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)
@@ -54,10 +63,20 @@ namespace pandemic.Commands
                     {
                         yield return new TreatDiseaseCommand(player.Role, city.Name, colour);
                     }
+
                 }
             }
             foreach (var player in game.Players)
             {
+                yield return new PassCommand(player.Role);
+
+                foreach (var cardsToCure in player.Hand.CityCards
+                             .GroupBy(c => c.City.Colour)
+                             .Where(g => g.Count() >= 5))
+                {
+                    yield return new DiscoverCureCommand(player.Role, cardsToCure.Select(g => g).ToArray());
+                }
+
                 foreach (var card in player.Hand.CityCards)
                 {
                     foreach (var otherPlayer in game.Players)

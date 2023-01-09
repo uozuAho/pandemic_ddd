@@ -501,7 +501,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = new PlayerHand(game.PlayerDrawPile.Top(7))
+                Hand = new PlayerHand(PlayerCards.CityCards.Take(7))
             });
             (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
@@ -1351,6 +1351,34 @@ namespace pandemic.test
 
             game.IsLost.ShouldBeTrue();
             events.ShouldNotContain(e => e is CubeAddedToCity);
+        }
+
+        [Test]
+        public void Pass_reduces_num_actions()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Pass_can_end_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            events.ShouldContain(e => e is TurnEnded);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 
         [Repeat(10)]

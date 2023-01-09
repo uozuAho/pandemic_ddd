@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
@@ -231,6 +230,17 @@ namespace pandemic.test
             });
 
             _generator.LegalCommands(game).ShouldContain(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist));
+        }
+
+        [Test]
+        public void Can_pass()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            _generator.LegalCommands(game).ShouldContain(new PassCommand(Role.Medic));
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)
