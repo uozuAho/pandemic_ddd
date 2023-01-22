@@ -188,7 +188,7 @@ public partial record PandemicGame
 
         var colour = cards.First().City.Colour;
 
-        if (CureDiscovered[colour])
+        if (IsCured(colour))
             throw new GameRuleViolatedException($"{colour} is already cured");
 
         if (cards.Any(c => c.City.Colour != colour))

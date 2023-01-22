@@ -23,7 +23,8 @@ namespace pandemic.server.Dto
         public ImmutableList<InfectionCard> InfectionDrawPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableList<InfectionCard> InfectionDiscardPile { get; init; } = ImmutableList<InfectionCard>.Empty;
         public ImmutableDictionary<Colour, int> Cubes { get; init; } = ImmutableDictionary<Colour, int>.Empty;
-        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } = ImmutableDictionary<Colour, bool>.Empty;
+
+        public ImmutableList<CureMarker> CuresDiscovered { get; init; } = ImmutableList<CureMarker>.Empty;
 
         public static SerializablePandemicGame From(PandemicGame game)
         {
@@ -44,7 +45,7 @@ namespace pandemic.server.Dto
                 InfectionDrawPile = game.InfectionDrawPile.Cards.ToImmutableList(),
                 InfectionDiscardPile = game.InfectionDiscardPile.Cards.ToImmutableList(),
                 Cubes = game.Cubes.Counts().ToImmutableDictionary(),
-                CureDiscovered = game.CureDiscovered
+                CuresDiscovered = game.CuresDiscovered
             };
         }
 
@@ -67,7 +68,7 @@ namespace pandemic.server.Dto
                 InfectionDrawPile = new Deck<InfectionCard>(InfectionDrawPile),
                 InfectionDiscardPile = new Deck<InfectionCard>(InfectionDiscardPile),
                 Cubes = new CubePile(Cubes),
-                CureDiscovered = CureDiscovered
+                CuresDiscovered = CuresDiscovered
             };
         }
 

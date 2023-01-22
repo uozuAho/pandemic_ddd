@@ -33,9 +33,7 @@ namespace pandemic.agents.test
             var game = PandemicGame.CreateUninitialisedGame();
             game = game with
             {
-                // blue is cured
-                CureDiscovered = ColourExtensions.AllColours
-                    .ToImmutableDictionary(c => c, c => c == Colour.Blue)
+                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
             };
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(board.City("Atlanta")), 5));

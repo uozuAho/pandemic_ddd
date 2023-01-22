@@ -130,7 +130,6 @@ public partial record PandemicGame
     {
         return game with
         {
-            CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true),
             CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(c.Colour, CureMarkerSide.Vial)),
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {

@@ -21,7 +21,7 @@ namespace pandemic.agents.GreedyBfs
             var score = 0;
 
             // diseases cured is great
-            score += game.CureDiscovered.Sum(c => c.Value ? 1000 : 0);
+            score += game.CuresDiscovered.Count * 1000;
 
             // each research station on a unique color is good
             // todo: not really, research stations don't need to be on different colours
@@ -58,7 +58,7 @@ namespace pandemic.agents.GreedyBfs
             // 4 blue = 6 (0 + 1 + 2 + 3)
             // = n(n-1)/2
 
-            var cured = pandemicGame.CureDiscovered.Where(c => c.Value).Select(c => c.Key);
+            var cured = pandemicGame.CuresDiscovered.Select(c => c.Colour);
 
             return hand.CityCards
                 .GroupBy(c => c.City.Colour)
