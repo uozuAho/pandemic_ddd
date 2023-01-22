@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - outbreak
-  - test: chain reaction: outbreaked city doesn't outbreak again
   - epidemic scenarios:
     - epidemic can trigger outbreak
   - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour

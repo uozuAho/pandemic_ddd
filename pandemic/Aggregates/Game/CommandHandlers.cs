@@ -451,8 +451,8 @@ public partial record PandemicGame
             {
                 if (!alreadyOutbroken.Contains(adj.Name))
                 {
-                    game = Outbreak(game, adj.Name, colour, events, alreadyOutbroken);
                     alreadyOutbroken.Add(adj.Name);
+                    game = Outbreak(game, adj.Name, colour, events, alreadyOutbroken);
                 }
             }
             else
