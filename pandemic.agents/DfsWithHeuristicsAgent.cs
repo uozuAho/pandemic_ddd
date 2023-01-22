@@ -72,7 +72,7 @@ namespace pandemic.agents
             foreach (var colour in ColourExtensions.AllColours)
             {
                 // 5 cards needed to cure. Ignores role special abilities
-                if (!game.CureDiscovered[colour] && cardCounter.CardsAvailable[colour] < 5)
+                if (!game.IsCured(colour) && cardCounter.CardsAvailable[colour] < 5)
                 {
                     reason = $"Cannot cure {colour}";
                     return false;
@@ -88,7 +88,7 @@ namespace pandemic.agents
         /// </summary>
         private static bool EnoughCardsLeftToCureAll(PandemicGame game)
         {
-            var cardsNeededForAllCures = game.CureDiscovered.Sum(c => c.Value ? 0 : 5); // ignores special abilities
+            var cardsNeededForAllCures = (4 - game.CuresDiscovered.Count) * 5; // ignores special abilities
             var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
 
             return cardsAvailable >= cardsNeededForAllCures;

@@ -63,7 +63,7 @@ namespace pandemic.console
             else
             {
                 var game = node.State;
-                var cures = string.Join("", game.CureDiscovered.Select(c => c.Value ? $"{c.Key} " : ""));
+                var cures = string.Join("", game.CuresDiscovered.Select(c => c.Colour));
                 drawerNode.Label = $"deck: {game.PlayerDrawPile.Count}. Cures: {cures}";
             }
 

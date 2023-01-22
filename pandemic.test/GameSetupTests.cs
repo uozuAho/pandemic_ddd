@@ -24,7 +24,7 @@ namespace pandemic.test
             Assert.AreEqual(2, game.InfectionRate);
             Assert.AreEqual(0, game.OutbreakCounter);
             Assert.AreEqual(5, game.ResearchStationPile);
-            Assert.That(game.CureDiscovered.Values.All(v => v == false));
+            game.CuresDiscovered.ShouldBeEmpty();
             Assert.IsFalse(game.IsOver);
 
             // decks

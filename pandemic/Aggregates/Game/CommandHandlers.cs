@@ -188,7 +188,7 @@ public partial record PandemicGame
 
         var colour = cards.First().City.Colour;
 
-        if (CureDiscovered[colour])
+        if (IsCured(colour))
             throw new GameRuleViolatedException($"{colour} is already cured");
 
         if (cards.Any(c => c.City.Colour != colour))
@@ -242,7 +242,13 @@ public partial record PandemicGame
         if (CityByName(city).Cubes.NumberOf(colour) == 0)
             throw new GameRuleViolatedException("No disease cubes to remove");
 
-        return ApplyEvents(new TreatedDisease(role, city, colour));
+        var events = new List<IEvent>();
+        var game = ApplyEvent(new TreatedDisease(role, city, colour), events);
+
+        if (game.IsCured(command.Colour) && game.Cities.Sum(c => c.Cubes.NumberOf(command.Colour)) == 0)
+            game = game.ApplyEvent(new DiseaseEradicated(command.Colour), events);
+
+        return (game, events);
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShareKnowledgeGiveCommand command)
@@ -414,6 +420,9 @@ public partial record PandemicGame
 
         var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
+
+        if (game.IsEradicated(infectionCard.City.Colour))
+            return game;
 
         return game.Cubes.NumberOf(infectionCard.City.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)

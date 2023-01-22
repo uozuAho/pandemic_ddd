@@ -60,7 +60,18 @@ public partial record PandemicGame
             TurnPhaseEnded e => Apply(game, e),
             EpidemicTriggered => game,
             PlayerPassed p => Apply(game, p),
+            DiseaseEradicated e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, DiseaseEradicated evt)
+    {
+        var cureMarker = game.CuresDiscovered.Single(m => m.Colour == evt.Colour);
+
+        return game with
+        {
+            CuresDiscovered = game.CuresDiscovered.Replace(cureMarker, cureMarker.Flip())
         };
     }
 
@@ -96,7 +107,7 @@ public partial record PandemicGame
         {
             Players = game.Players.Replace(player, player with{ActionsRemaining = player.ActionsRemaining - 1}),
             Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour)),
-            Cubes = game.Cubes.AddCube(evt.Colour)
+            Cubes = game.Cubes.AddCube(evt.Colour),
         };
     }
 
@@ -119,7 +130,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            CureDiscovered = game.CureDiscovered.SetItem(c.Colour, true),
+            CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(c.Colour, CureMarkerSide.Vial)),
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
                 ActionsRemaining = game.CurrentPlayer.ActionsRemaining - 1

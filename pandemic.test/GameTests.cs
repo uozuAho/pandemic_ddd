@@ -848,7 +848,7 @@ namespace pandemic.test
             (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
                 game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
 
-            Assert.IsTrue(game.CureDiscovered[Colour.Black]);
+            Assert.IsTrue(game.IsCured(Colour.Black));
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
             Assert.AreEqual(5, game.PlayerDiscardPile.Count);
             Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
@@ -881,13 +881,12 @@ namespace pandemic.test
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
                 {
-                    CureDiscovered = new Dictionary<Colour, bool>
+                    CuresDiscovered = new List<CureMarker>
                     {
-                        { Colour.Black, false },
-                        { Colour.Blue, true },
-                        { Colour.Red, true },
-                        { Colour.Yellow, true }
-                    }.ToImmutableDictionary()
+                        new CureMarker(Colour.Blue, CureMarkerSide.Vial),
+                        new CureMarker(Colour.Red, CureMarkerSide.Vial),
+                        new CureMarker(Colour.Yellow, CureMarkerSide.Vial),
+                    }.ToImmutableList()
                 };
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
@@ -911,13 +910,12 @@ namespace pandemic.test
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
                 {
-                    CureDiscovered = new Dictionary<Colour, bool>
+                    CuresDiscovered = new List<CureMarker>
                     {
-                        { Colour.Black, false },
-                        { Colour.Blue, true },
-                        { Colour.Red, true },
-                        { Colour.Yellow, true }
-                    }.ToImmutableDictionary()
+                        new CureMarker(Colour.Blue, CureMarkerSide.Vial),
+                        new CureMarker(Colour.Red, CureMarkerSide.Vial),
+                        new CureMarker(Colour.Yellow, CureMarkerSide.Vial),
+                    }.ToImmutableList()
                 };
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
@@ -1006,13 +1004,10 @@ namespace pandemic.test
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
                 {
-                    CureDiscovered = new Dictionary<Colour, bool>
+                    CuresDiscovered = new List<CureMarker>
                     {
-                        { Colour.Black, true },
-                        { Colour.Blue, false },
-                        { Colour.Red, false },
-                        { Colour.Yellow, false }
-                    }.ToImmutableDictionary()
+                        new CureMarker(Colour.Black, CureMarkerSide.Vial)
+                    }.ToImmutableList()
                 };
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
@@ -1379,6 +1374,44 @@ namespace pandemic.test
 
             events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Eradicate_causes_infection_cards_to_have_no_effect()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                // 1 blue cube on Atlanta, no other cubes
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Atlanta" => c with { Cubes = CubePile.Empty.AddCube(Colour.Blue) },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList(),
+
+                // only blue cards in infection pile
+                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.City.Colour == Colour.Blue)),
+
+                // blue cure discovered
+                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act: this eradicates blue
+            (game, var events) = game.Do(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
+
+            // assert
+            var eventList = events.ToList();
+            eventList.ShouldContain(e => e is DiseaseEradicated);
+            game.IsEradicated(Colour.Blue).ShouldBe(true);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            eventList.ShouldContain(e => e is InfectionCardDrawn);
+            game.InfectionDiscardPile.Cards.ShouldContain(c => c.City.Colour == Colour.Blue);
+            game.Cities.ShouldNotContain(c => c.Cubes.NumberOf(Colour.Blue) > 0,
+                "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
         }
 
         [Repeat(10)]

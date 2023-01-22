@@ -19,7 +19,7 @@ namespace pandemic
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
             sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
-            sb.AppendLine($"cured: {string.Join(' ', game.CureDiscovered)}");
+            sb.AppendLine($"cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
             sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
             sb.AppendLine($"  remaining actions: {game.CurrentPlayer.ActionsRemaining}");
@@ -44,7 +44,7 @@ namespace pandemic
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
-            sb.AppendLine($"cured: {string.Join(' ', game.CureDiscovered)}");
+            sb.AppendLine($"cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
             foreach (var player in game.Players)
             {
                 var colourCounts = string.Join(",", player.Hand.CityCards

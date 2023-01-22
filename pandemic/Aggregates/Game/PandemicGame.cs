@@ -31,14 +31,22 @@ namespace pandemic.Aggregates.Game
 
         private Random Rng { get; } = new();
 
-        public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
-            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
+        public ImmutableList<CureMarker> CuresDiscovered { get; init; } = ImmutableList<CureMarker>.Empty;
+
         public bool IsOver => IsLost || IsWon;
-        public bool IsWon => CureDiscovered.All(c => c.Value);
+        public bool IsWon => CuresDiscovered.Count == 4;
         public bool IsLost => LossReason != "";
         public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
+
+        public bool IsCured(Colour colour) =>
+            CuresDiscovered.SingleOrDefault(c => c.Colour == colour) is not null;
+
+        public bool IsEradicated(Colour colour) =>
+            CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
+
+        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -56,12 +64,10 @@ namespace pandemic.Aggregates.Game
             if (!InfectionDiscardPile.IsSameAs(other.InfectionDiscardPile)) return false;
             if (!PlayerDrawPile.IsSameAs(other.PlayerDrawPile)) return false;
             if (!Cubes.HasSameCubesAs(other.Cubes)) return false;
-            if (!CureDiscovered.SequenceEqual(other.CureDiscovered)) return false;
+            if (!CuresDiscovered.SequenceEqual(other.CuresDiscovered)) return false;
 
             return true;
         }
-
-        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public static int NumberOfEpidemicCards(Difficulty difficulty)
         {

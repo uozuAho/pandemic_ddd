@@ -127,7 +127,7 @@ namespace pandemic.Commands
                 .GroupBy(c => c.City.Colour)
                 .Where(g => g.Count() >= 5))
             {
-                if (!game.CureDiscovered[cureCards.Key])
+                if (!game.IsCured(cureCards.Key))
                     // todo: yield all combinations if > 5 cards
                     _buffer[_bufIdx++] = new DiscoverCureCommand(game.CurrentPlayer.Role, cureCards.Take(5).ToArray());
             }
