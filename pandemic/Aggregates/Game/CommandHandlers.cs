@@ -411,7 +411,7 @@ public partial record PandemicGame
         return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
     }
 
-    private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
+    private static PandemicGame InfectCityFromPile(PandemicGame game, ICollection<IEvent> events)
     {
         ThrowIfGameOver(game);
 
@@ -424,9 +424,31 @@ public partial record PandemicGame
         if (game.IsEradicated(infectionCard.City.Colour))
             return game;
 
+        if (game.CityByName(infectionCard.City.Name).Cubes.NumberOf(infectionCard.City.Colour) == 3)
+        {
+            return Outbreak(game, infectionCard.City.Name, infectionCard.City.Colour, events);
+        }
+
         return game.Cubes.NumberOf(infectionCard.City.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+    }
+
+    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
+    {
+        var adjacent = game.Board.AdjacentCities[city].Select(game.Board.City).ToList();
+
+        if (game.Cubes.NumberOf(colour) < adjacent.Count)
+            return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
+
+        foreach (var city2 in adjacent)
+        {
+            if (city2.Colour != colour) throw new NotImplementedException("todo: handle different city colours");
+
+            game = game.ApplyEvent(new CubeAddedToCity(city2), events);
+        }
+
+        return game;
     }
 
     private static void ThrowIfGameOver(PandemicGame game)
