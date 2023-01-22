@@ -415,6 +415,9 @@ public partial record PandemicGame
         var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
+        if (game.IsEradicated(infectionCard.City.Colour))
+            return game;
+
         return game.Cubes.NumberOf(infectionCard.City.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
