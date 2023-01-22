@@ -1392,6 +1392,9 @@ namespace pandemic.test
                     _ => c with { Cubes = CubePile.Empty }
                 }).ToImmutableList(),
 
+                // prevent epidemics
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+
                 // only blue cards in infection pile
                 InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.Colour == Colour.Blue)),
 
