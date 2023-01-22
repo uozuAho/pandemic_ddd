@@ -1381,6 +1381,41 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 
+        [Test]
+        public void Eradicate_causes_infection_cards_to_have_no_effect()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                // 1 blue cube on Atlanta, no other cubes
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Atlanta" => c with { Cubes = CubePile.Empty.AddCube(Colour.Blue) },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList(),
+
+                // only blue cards in infection pile
+                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.City.Colour == Colour.Blue)),
+
+                // blue cure discovered
+                CureDiscovered = game.CureDiscovered.SetItem(Colour.Blue, true),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act: this eradicates blue
+            (game, var events) = game.Do(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
+
+            // assert
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is InfectionCardDrawn);
+            game.InfectionDiscardPile.Cards.ShouldContain(c => c.City.Colour == Colour.Blue);
+            game.Cities.ShouldNotContain(c => c.Cubes.NumberOf(Colour.Blue) > 0,
+                "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
