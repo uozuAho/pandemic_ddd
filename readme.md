@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- eradicate disease
-  - diff with master before merge
 - outbreak
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
