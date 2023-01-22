@@ -1515,25 +1515,24 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
 
-            var atlanta = game.CityByName("Atlanta");
-            var chicago = game.CityByName("Chicago");
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
-                Cities = game.Cities.Replace(atlanta, atlanta with
+                InfectionDrawPile =
+                game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Select(c => c.Name switch
                 {
-                    Cubes = CubePile.Empty
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                }).Replace(chicago, chicago with
-                {
-                    Cubes = CubePile.Empty
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                }),
+                    "Atlanta" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    "Chicago" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    // ensure no cubes on other cities so that there are no more chain reactions
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
