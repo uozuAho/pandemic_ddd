@@ -60,7 +60,16 @@ public partial record PandemicGame
             TurnPhaseEnded e => Apply(game, e),
             EpidemicTriggered => game,
             PlayerPassed p => Apply(game, p),
+            DiseaseEradicated e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, DiseaseEradicated evt)
+    {
+        return game with
+        {
+            Eradicated = game.Eradicated.SetItem(evt.Colour, true)
         };
     }
 
@@ -92,18 +101,11 @@ public partial record PandemicGame
         var player = game.PlayerByRole(evt.Role);
         var city = game.CityByName(evt.City);
 
-        if (game.IsCured(evt.Colour))
-        {
-            var numRemainingCubes = game.Cities.Select(c => c.Cubes.NumberOf(evt.Colour)).Sum();
-        }
-
         return game with
         {
             Players = game.Players.Replace(player, player with{ActionsRemaining = player.ActionsRemaining - 1}),
             Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour)),
             Cubes = game.Cubes.AddCube(evt.Colour),
-            // todo: make sure this breaks some existing tests
-            Eradicated = game.Eradicated.SetItem(Colour.Blue, true)
         };
     }
 

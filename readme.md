@@ -8,9 +8,6 @@ implemented.
 
 # todo
 - eradicate disease
-  - // todo: assert for eradicated event in test
-    // todo: remove game logic from treat event handler
-  - pass this test
   - make all tests pass
     - ensure some tests fail for blanket eradicate
   - domain: cure markers have 2 sides: vial side and sunset side. sunset = eradicated
