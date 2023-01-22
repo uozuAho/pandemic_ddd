@@ -46,7 +46,8 @@ namespace pandemic.Aggregates.Game
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
-        private bool IsCured(Colour colour) => CureDiscovered[colour];
+        private bool IsCured(Colour colour) =>
+            CuresDiscovered.SingleOrDefault(c => c.Colour == colour) is not null;
 
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
