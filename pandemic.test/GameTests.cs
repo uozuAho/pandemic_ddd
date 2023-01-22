@@ -1414,6 +1414,38 @@ namespace pandemic.test
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
         }
 
+        [Test]
+        public void Outbreak_infects_adjacent_cities()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(new InfectionCard(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    Cubes = CubePile.Empty
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                })
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            var initialGame = game;
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
+            var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
+            adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 1);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
