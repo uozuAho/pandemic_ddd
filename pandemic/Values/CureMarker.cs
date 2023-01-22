@@ -2,13 +2,13 @@
 
 namespace pandemic.Values;
 
-internal enum CureMarkerSide
+public enum CureMarkerSide
 {
     Vial,
     Sunset
 };
 
-internal record CureMarker(Colour Colour, CureMarkerSide ShowingSide)
+public record CureMarker(Colour Colour, CureMarkerSide ShowingSide)
 {
     public CureMarker Flip()
     {

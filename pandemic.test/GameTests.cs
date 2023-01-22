@@ -1402,6 +1402,7 @@ namespace pandemic.test
 
                 // blue cure discovered
                 CureDiscovered = game.CureDiscovered.SetItem(Colour.Blue, true),
+                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
