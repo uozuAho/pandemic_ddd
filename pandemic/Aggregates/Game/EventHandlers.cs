@@ -61,8 +61,14 @@ public partial record PandemicGame
             EpidemicTriggered => game,
             PlayerPassed p => Apply(game, p),
             DiseaseEradicated e => Apply(game, e),
+            OutbreakCounterIncremented e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OutbreakCounterIncremented evt)
+    {
+        return game with { OutbreakCounter = game.OutbreakCounter + 1 };
     }
 
     private static PandemicGame Apply(PandemicGame game, DiseaseEradicated evt)
@@ -196,8 +202,8 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
     {
-        var city = game.CityByName(cubeAddedToCity.City.Name);
-        var colour = cubeAddedToCity.City.Colour;
+        var city = game.CityByName(cubeAddedToCity.City);
+        var colour = cubeAddedToCity.Colour;
         var newCity = city.AddCube(colour);
 
         return game with

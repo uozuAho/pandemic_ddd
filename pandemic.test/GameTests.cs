@@ -416,9 +416,9 @@ namespace pandemic.test
 
             foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
-                var city = game.CityByName(infectionCard.City.Name);
-                Assert.That(city.Cubes.NumberOf(infectionCard.City.Colour), Is.EqualTo(1),
-                    $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
+                var city = game.CityByName(infectionCard.City);
+                Assert.That(city.Cubes.NumberOf(infectionCard.Colour), Is.EqualTo(1),
+                    $"{infectionCard.City} should have had 1 {infectionCard.Colour} cube added");
             }
 
             Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
@@ -1295,8 +1295,8 @@ namespace pandemic.test
 
             (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
-            var epidemicCity = initialGame.InfectionDrawPile.BottomCard.City;
-            game.CityByName(epidemicCity.Name).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
+            var epidemicCity = initialGame.InfectionDrawPile.BottomCard;
+            game.CityByName(epidemicCity.City).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
             game.InfectionRate.ShouldBe(2);
             game.InfectionDiscardPile.Count.ShouldBe(2);
             game.InfectionDrawPile.Count.ShouldBe(46);
@@ -1349,6 +1349,33 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_causes_outbreak_scenario()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                InfectionDiscardPile = Deck<InfectionCard>.Empty,
+                InfectionRateMarkerPosition = 5, // ensure that epidemic city is infected immediately
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList() // make sure no additional outbreaks occur
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            // assert
+            game.OutbreakCounter.ShouldBe(1);
+        }
+
+        [Test]
         public void Pass_reduces_num_actions()
         {
             var game = NewGame(new NewGameOptions
@@ -1392,8 +1419,11 @@ namespace pandemic.test
                     _ => c with { Cubes = CubePile.Empty }
                 }).ToImmutableList(),
 
+                // prevent epidemics
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+
                 // only blue cards in infection pile
-                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.City.Colour == Colour.Blue)),
+                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.Colour == Colour.Blue)),
 
                 // blue cure discovered
                 CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
@@ -1409,9 +1439,139 @@ namespace pandemic.test
             game.IsEradicated(Colour.Blue).ShouldBe(true);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             eventList.ShouldContain(e => e is InfectionCardDrawn);
-            game.InfectionDiscardPile.Cards.ShouldContain(c => c.City.Colour == Colour.Blue);
+            game.InfectionDiscardPile.Cards.ShouldContain(c => c.Colour == Colour.Blue);
             game.Cities.ShouldNotContain(c => c.Cubes.NumberOf(Colour.Blue) > 0,
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
+        }
+
+        [Test]
+        public void Outbreak_infects_adjacent_cities()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    Cubes = CubePile.Empty
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                })
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            var initialGame = game;
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
+            var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
+            adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
+        }
+
+        [Test]
+        public void Outbreak_x8_causes_loss()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                OutbreakCounter = 7,
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    Cubes = CubePile.Empty
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                })
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.IsLost.ShouldBeTrue();
+        }
+
+        [Test]
+        public void Outbreak_causes_game_lost_when_cubes_run_out()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    Cubes = CubePile.Empty
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                }),
+                Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue)
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.IsLost.ShouldBeTrue();
+        }
+
+        [Test]
+        public void Outbreak_scenario_chain_reaction()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile =
+                game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Atlanta" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    "Chicago" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    // ensure no cubes on other cities so that there are no more chain reactions
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.OutbreakCounter.ShouldBe(2);
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
+            game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a))
+                .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
+            game.Board.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
+                .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
         [Repeat(10)]

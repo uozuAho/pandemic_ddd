@@ -28,8 +28,8 @@ public partial record PandemicGame
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
-            game = InfectCity(game, events);
-            if (!game.IsOver) game = InfectCity(game, events);
+            game = InfectCityFromPile(game, events);
+            if (!game.IsOver) game = InfectCityFromPile(game, events);
             if (!game.IsOver)
                 game = game.ApplyEvent(new TurnEnded(), events);
 

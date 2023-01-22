@@ -55,4 +55,9 @@ public record CubePile
     {
         return _cubes[colour];
     }
+
+    public override string ToString()
+    {
+        return string.Join(" ", _cubes.Select(c => $"{c.Key}: {c.Value}"));
+    }
 }

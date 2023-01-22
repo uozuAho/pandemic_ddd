@@ -319,7 +319,7 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var unshuffledCities = Board.Cities.Select(c => new InfectionCard(c)).OrderBy(_ => Rng.Next());
+        var unshuffledCities = Board.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
 
         return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
     }
@@ -347,7 +347,7 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 3; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
             }
         }
 
@@ -357,7 +357,7 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 2; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
             }
         }
 
@@ -367,7 +367,7 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 1; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
             }
         }
 
@@ -395,11 +395,11 @@ public partial record PandemicGame
         var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
         // infect city
-        if (game.Cubes.NumberOf(epidemicInfectionCard.City.Colour) < 3)
-            return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.City.Colour} cubes"), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City), events);
+        if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+            return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
 
         // shuffle infection cards
         game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
@@ -411,7 +411,7 @@ public partial record PandemicGame
         return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
     }
 
-    private static PandemicGame InfectCity(PandemicGame game, ICollection<IEvent> events)
+    private static PandemicGame InfectCityFromPile(PandemicGame game, ICollection<IEvent> events)
     {
         ThrowIfGameOver(game);
 
@@ -421,12 +421,47 @@ public partial record PandemicGame
         var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
-        if (game.IsEradicated(infectionCard.City.Colour))
+        if (game.IsEradicated(infectionCard.Colour))
             return game;
 
-        return game.Cubes.NumberOf(infectionCard.City.Colour) == 0
-            ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.City.Colour} cubes"), events)
-            : game.ApplyEvent(new CubeAddedToCity(infectionCard.City), events);
+        if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
+        {
+            return Outbreak(game, infectionCard.City, infectionCard.Colour, events, new HashSet<string> {infectionCard.City});
+        }
+
+        return game.Cubes.NumberOf(infectionCard.Colour) == 0
+            ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.Colour} cubes"), events)
+            : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+    }
+
+    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events, ISet<string> alreadyOutbroken)
+    {
+        var adjacent = game.Board.AdjacentCities[city].Select(c => game.CityByName(c)).ToList();
+
+        if (game.Cubes.NumberOf(colour) < adjacent.Count)
+            return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
+
+        game = game.ApplyEvent(new OutbreakCounterIncremented(), events);
+        if (game.OutbreakCounter == 8)
+            return game.ApplyEvent(new GameLost("8 outbreaks"), events);
+
+        foreach (var adj in adjacent)
+        {
+            if (adj.Cubes.NumberOf(colour) == 3)
+            {
+                if (!alreadyOutbroken.Contains(adj.Name))
+                {
+                    alreadyOutbroken.Add(adj.Name);
+                    game = Outbreak(game, adj.Name, colour, events, alreadyOutbroken);
+                }
+            }
+            else
+            {
+                game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+            }
+        }
+
+        return game;
     }
 
     private static void ThrowIfGameOver(PandemicGame game)
