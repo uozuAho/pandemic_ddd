@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - outbreak
-  - test: simple chain reaction
   - test: chain reaction: outbreaked city doesn't outbreak again
   - epidemic scenarios:
     - epidemic can trigger outbreak
