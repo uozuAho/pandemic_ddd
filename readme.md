@@ -9,7 +9,6 @@ implemented.
 # todo
 - outbreak
   - impl basic: outbreak, no loss, no chain reaction
-    - change infectioncard to take string + colour?
     - handle infecting cities with different colours
     - all adjacent cities have cube added
     - outbreak city has 3 cubes

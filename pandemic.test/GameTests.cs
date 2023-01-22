@@ -416,9 +416,9 @@ namespace pandemic.test
 
             foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
-                var city = game.CityByName(infectionCard.City.Name);
-                Assert.That(city.Cubes.NumberOf(infectionCard.City.Colour), Is.EqualTo(1),
-                    $"{infectionCard.City.Name} should have had 1 {infectionCard.City.Colour} cube added");
+                var city = game.CityByName(infectionCard.City);
+                Assert.That(city.Cubes.NumberOf(infectionCard.Colour), Is.EqualTo(1),
+                    $"{infectionCard.City} should have had 1 {infectionCard.Colour} cube added");
             }
 
             Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
@@ -1295,8 +1295,8 @@ namespace pandemic.test
 
             (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
-            var epidemicCity = initialGame.InfectionDrawPile.BottomCard.City;
-            game.CityByName(epidemicCity.Name).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
+            var epidemicCity = initialGame.InfectionDrawPile.BottomCard;
+            game.CityByName(epidemicCity.City).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
             game.InfectionRate.ShouldBe(2);
             game.InfectionDiscardPile.Count.ShouldBe(2);
             game.InfectionDrawPile.Count.ShouldBe(46);
@@ -1393,7 +1393,7 @@ namespace pandemic.test
                 }).ToImmutableList(),
 
                 // only blue cards in infection pile
-                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.City.Colour == Colour.Blue)),
+                InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.Colour == Colour.Blue)),
 
                 // blue cure discovered
                 CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
@@ -1409,7 +1409,7 @@ namespace pandemic.test
             game.IsEradicated(Colour.Blue).ShouldBe(true);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             eventList.ShouldContain(e => e is InfectionCardDrawn);
-            game.InfectionDiscardPile.Cards.ShouldContain(c => c.City.Colour == Colour.Blue);
+            game.InfectionDiscardPile.Cards.ShouldContain(c => c.Colour == Colour.Blue);
             game.Cities.ShouldNotContain(c => c.Cubes.NumberOf(Colour.Blue) > 0,
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
         }
@@ -1426,7 +1426,7 @@ namespace pandemic.test
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(new InfectionCard(game.Board.City("Atlanta"))),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
                     Cubes = CubePile.Empty
