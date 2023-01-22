@@ -1349,6 +1349,33 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_causes_outbreak_scenario()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                InfectionDiscardPile = Deck<InfectionCard>.Empty,
+                InfectionRateMarkerPosition = 5, // ensure that epidemic city is infected immediately
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList() // make sure no additional outbreaks occur
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            // assert
+            game.OutbreakCounter.ShouldBe(1);
+        }
+
+        [Test]
         public void Pass_reduces_num_actions()
         {
             var game = NewGame(new NewGameOptions
