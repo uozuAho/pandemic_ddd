@@ -442,6 +442,8 @@ public partial record PandemicGame
             return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
 
         game = game.ApplyEvent(new OutbreakCounterIncremented(), events);
+        if (game.OutbreakCounter == 8)
+            return game.ApplyEvent(new GameLost("8 outbreaks"), events);
 
         foreach (var adj in adjacent)
         {
