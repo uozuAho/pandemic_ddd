@@ -7,10 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- outbreak
-  - epidemic scenarios:
-    - epidemic can trigger outbreak
-  - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
+- test: number of cities infected = infection rate
+- add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
@@ -38,6 +36,7 @@ dotnet run
 - pandemic.drawing: draw game trees (graphviz dot output)
 - pandemic.server: host a game of pandemic over a network. Intended for use by
   https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
+  - unmaintained for now. May need some fixing before use.
 
 # Notes
 - I estimate about 9 x 10^85 possible games of pandemic. This is based on a
