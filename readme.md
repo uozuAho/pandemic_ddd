@@ -10,6 +10,8 @@ implemented.
 - eradicate disease
   - domain: cure markers have 2 sides: vial side and sunset side. sunset = eradicated
     - change CureDiscovered to use cure markers
+    - remove cure dictionary
+    - remove eradicated dictionary
   - diff with master before merge
 - outbreak
   - some leftover epidemic scenarios:

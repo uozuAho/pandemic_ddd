@@ -48,7 +48,10 @@ namespace pandemic.Aggregates.Game
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
         private bool IsCured(Colour colour) => CureDiscovered[colour];
-        public bool IsEradicated(Colour colour) => Eradicated[colour];
+
+        public bool IsEradicated(Colour colour) =>
+            CureMarkers.Single(m => m.Colour == colour).ShowingSide == CureMarkerSide.Sunset;
+
         private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public bool IsSameStateAs(PandemicGame other)

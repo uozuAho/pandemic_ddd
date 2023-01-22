@@ -67,9 +67,11 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, DiseaseEradicated evt)
     {
+        var cureMarker = game.CureMarkers.Single(m => m.Colour == evt.Colour);
+
         return game with
         {
-            Eradicated = game.Eradicated.SetItem(evt.Colour, true)
+            CureMarkers = game.CureMarkers.Replace(cureMarker, cureMarker.Flip())
         };
     }
 

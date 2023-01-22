@@ -1,4 +1,6 @@
-﻿namespace pandemic.Values;
+﻿using System;
+
+namespace pandemic.Values;
 
 internal enum CureMarkerSide
 {
@@ -6,4 +8,17 @@ internal enum CureMarkerSide
     Sunset
 };
 
-internal record CureMarker(Colour Colour, CureMarkerSide ShowingSide);
+internal record CureMarker(Colour Colour, CureMarkerSide ShowingSide)
+{
+    public CureMarker Flip()
+    {
+        var newShowingSide = ShowingSide switch
+        {
+            CureMarkerSide.Vial => CureMarkerSide.Sunset,
+            CureMarkerSide.Sunset => CureMarkerSide.Vial,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        return this with { ShowingSide = newShowingSide };
+    }
+}
