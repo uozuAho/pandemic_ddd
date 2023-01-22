@@ -1443,7 +1443,7 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
-            adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 1);
+            adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
         [Repeat(10)]

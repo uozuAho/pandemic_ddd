@@ -441,9 +441,11 @@ public partial record PandemicGame
         if (game.Cubes.NumberOf(colour) < adjacent.Count)
             return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
 
-        foreach (var city2 in adjacent)
+        game = game.ApplyEvent(new OutbreakCounterIncremented(), events);
+
+        foreach (var adj in adjacent)
         {
-            game = game.ApplyEvent(new CubeAddedToCity(city2.Name, colour), events);
+            game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
         }
 
         return game;
