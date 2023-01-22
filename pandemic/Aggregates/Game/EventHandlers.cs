@@ -196,8 +196,8 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyCubesAddedToCity(PandemicGame game, CubeAddedToCity cubeAddedToCity)
     {
-        var city = game.CityByName(cubeAddedToCity.City.Name);
-        var colour = cubeAddedToCity.City.Colour;
+        var city = game.CityByName(cubeAddedToCity.City);
+        var colour = cubeAddedToCity.Colour;
         var newCity = city.AddCube(colour);
 
         return game with

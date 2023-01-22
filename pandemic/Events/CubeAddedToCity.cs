@@ -1,6 +1,6 @@
-using pandemic.GameData;
+using pandemic.Values;
 
 namespace pandemic.Events
 {
-    public record CubeAddedToCity(CityData City) : IEvent;
+    public record CubeAddedToCity(string City, Colour Colour) : IEvent;
 }
