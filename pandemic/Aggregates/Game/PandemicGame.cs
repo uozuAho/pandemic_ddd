@@ -33,12 +33,20 @@ namespace pandemic.Aggregates.Game
 
         public ImmutableDictionary<Colour, bool> CureDiscovered { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
+
+        private ImmutableDictionary<Colour, bool> Eradicated { get; init; } =
+            ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
+
         public bool IsOver => IsLost || IsWon;
         public bool IsWon => CureDiscovered.All(c => c.Value);
         public bool IsLost => LossReason != "";
         public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
         public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
+
+        private bool IsCured(Colour colour) => CureDiscovered[colour];
+        public bool IsEradicated(Colour colour) => Eradicated[colour];
+        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -60,8 +68,6 @@ namespace pandemic.Aggregates.Game
 
             return true;
         }
-
-        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         public static int NumberOfEpidemicCards(Difficulty difficulty)
         {

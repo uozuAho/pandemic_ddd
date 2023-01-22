@@ -1409,6 +1409,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
 
             // assert
+            game.IsEradicated(Colour.Blue).ShouldBe(true);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is InfectionCardDrawn);
             game.InfectionDiscardPile.Cards.ShouldContain(c => c.City.Colour == Colour.Blue);

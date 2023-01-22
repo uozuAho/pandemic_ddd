@@ -8,6 +8,9 @@ implemented.
 
 # todo
 - eradicate disease
+  - domain: cure markers have 2 sides: vial side and sunset side. sunset = eradicated
+    - change CureDiscovered to use cure markers
+  - diff with master before merge
 - outbreak
   - some leftover epidemic scenarios:
     - epidemic can trigger outbreak
