@@ -1450,7 +1450,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void _8_outbreaks_causes_loss()
+        public void Outbreak_x8_causes_loss()
         {
             var game = NewGame(new NewGameOptions
             {
@@ -1470,6 +1470,35 @@ namespace pandemic.test
                         .AddCube(Colour.Blue)
                         .AddCube(Colour.Blue)
                 })
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.IsLost.ShouldBeTrue();
+        }
+
+        [Test]
+        public void Outbreak_causes_game_lost_when_cubes_run_out()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                Cities = game.Cities.Replace(atlanta, atlanta with
+                {
+                    Cubes = CubePile.Empty
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                        .AddCube(Colour.Blue)
+                }),
+                Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue)
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 

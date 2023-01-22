@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - outbreak
-  - test: lose game when outbreak causes run out of cubes
   - test: simple chain reaction
   - test: chain reaction: outbreaked city doesn't outbreak again
   - epidemic scenarios:
