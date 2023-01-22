@@ -37,6 +37,9 @@ namespace pandemic.Aggregates.Game
         private ImmutableDictionary<Colour, bool> Eradicated { get; init; } =
             ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => false);
 
+        private ImmutableList<CureMarker> CureMarkers { get; init; } =
+            ColourExtensions.AllColours.Select(c => new CureMarker(c, CureMarkerSide.Vial)).ToImmutableList();
+
         public bool IsOver => IsLost || IsWon;
         public bool IsWon => CureDiscovered.All(c => c.Value);
         public bool IsLost => LossReason != "";
