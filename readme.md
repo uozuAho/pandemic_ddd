@@ -44,6 +44,7 @@ Check tag `just-before-remove-unused-network-code` for a network game server imp
 - it has been shown that determining whether a game is winnable is NP-complete:
   https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
   found via: https://github.com/captn3m0/boardgame-research#pandemic
+- fuzz testing is great! it has turned up so many bugs that I hand't covered with simple unit tests
 
 ## Are all games winnable?
 This would be good to know. If not all games are winnable, then there's no point

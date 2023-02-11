@@ -1607,6 +1607,7 @@ namespace pandemic.test
                 if (game.Players.Any(p => p.Hand.Count > 7))
                     legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand);
 
+                // try a bunch of illegal commands
                 foreach (var illegalCommand in allPossibleCommands
                              .Except(legalCommands)
                              .OrderBy(_ => random.Next())
@@ -1641,6 +1642,8 @@ namespace pandemic.test
                 (game.InfectionDrawPile.Count + game.InfectionDiscardPile.Count).ShouldBe(48);
 
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
+
+                game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
             }
         }
 
