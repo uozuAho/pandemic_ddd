@@ -1456,12 +1456,13 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
 
-            var atlanta = game.CityByName("Atlanta");
+            var atlantaCity = game.CityByName("Atlanta");
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
-                Cities = game.Cities.Replace(atlanta, atlanta with
+                InfectionDrawPile = game.InfectionDrawPile.Remove(atlantaInfectionCard).PlaceOnTop(atlantaInfectionCard),
+                Cities = game.Cities.Replace(atlantaCity, atlantaCity with
                 {
                     Cubes = CubePile.Empty
                         .AddCube(Colour.Blue)
