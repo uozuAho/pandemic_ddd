@@ -362,7 +362,8 @@ namespace pandemic.test
         [Test]
         public void Player_draws_two_cards_after_last_action()
         {
-            var startingState = NewGameWithNoEpidemicCards();
+            var startingState = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+                .WithNoEpidemics();
 
             var game = startingState.SetCurrentPlayerAs(
                 startingState.CurrentPlayer with { ActionsRemaining = 1 });
@@ -470,7 +471,8 @@ namespace pandemic.test
         [Test]
         public void Player_must_discard_when_hand_is_full()
         {
-            var game = NewGameWithNoEpidemicCards();
+            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+                .WithNoEpidemics();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -497,8 +499,8 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_goes_to_discard_pile()
         {
-            // todo: extension: withNoEpidemicCards
-            var game = NewGameWithNoEpidemicCards();
+            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+                .WithNoEpidemics();
             var top7Cards = game.PlayerDrawPile.Top(7).ToList();
 
             game = game with
@@ -749,7 +751,8 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_can_end_turn()
         {
-            var game = NewGameWithNoEpidemicCards();
+            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+                .WithNoEpidemics();
 
             var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
 
@@ -1660,19 +1663,6 @@ namespace pandemic.test
             var (game, _) = PandemicGame.CreateNewGame(options);
 
             return game;
-        }
-
-        private static PandemicGame NewGameWithNoEpidemicCards()
-        {
-            var game = NewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            return game with
-            {
-                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
-            };
         }
     }
 }

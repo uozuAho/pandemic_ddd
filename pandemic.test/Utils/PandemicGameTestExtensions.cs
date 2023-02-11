@@ -1,4 +1,5 @@
-﻿using pandemic.Aggregates.Game;
+﻿using System.Linq;
+using pandemic.Aggregates.Game;
 using pandemic.Values;
 
 namespace pandemic.test.Utils;
@@ -16,5 +17,13 @@ public static class PandemicGameTestExtensions
     public static PandemicGame SetPlayer(this PandemicGame game, Role role, Player player)
     {
         return game with { Players = game.Players.Replace(game.PlayerByRole(role), player) };
+    }
+
+    public static PandemicGame WithNoEpidemics(this PandemicGame game)
+    {
+        return game with
+        {
+            PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard))
+        };
     }
 }
