@@ -28,6 +28,7 @@ public partial record PandemicGame
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
+            // bug here: infection rate not considered
             game = InfectCityFromPile(game, events);
             if (!game.IsOver) game = InfectCityFromPile(game, events);
             if (!game.IsOver)

@@ -403,9 +403,10 @@ namespace pandemic.test
             {
                 // epidemics mess with this test, remove them
                 PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards),
-                // InfectionRateMarkerPosition = 5
+                InfectionRateMarkerPosition = 5
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            game.InfectionRate.ShouldBe(4);
             var startingState = game;
 
             var events = new List<IEvent>();
@@ -414,16 +415,16 @@ namespace pandemic.test
             game = game.Do(new PassCommand(Role.Medic), events);
 
             // assert
-            game.InfectionDrawPile.Count.ShouldBe(startingState.InfectionDrawPile.Count - 2);
-            game.InfectionDiscardPile.Count.ShouldBe(startingState.InfectionDiscardPile.Count + 2);
+            game.InfectionDrawPile.Count.ShouldBe(startingState.InfectionDrawPile.Count - game.InfectionRate);
+            game.InfectionDiscardPile.Count.ShouldBe(startingState.InfectionDiscardPile.Count + game.InfectionRate);
 
-            foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
+            foreach (var infectionCard in game.InfectionDiscardPile.Top(game.InfectionRate))
             {
                 var city = game.CityByName(infectionCard.City);
                 city.Cubes.NumberOf(infectionCard.Colour).ShouldBe(1);
             }
 
-            game.Cubes.Counts().Values.Sum().ShouldBe(startingState.Cubes.Counts().Values.Sum() - 2);
+            game.Cubes.Counts().Values.Sum().ShouldBe(startingState.Cubes.Counts().Values.Sum() - game.InfectionRate);
         }
 
         [Test]
