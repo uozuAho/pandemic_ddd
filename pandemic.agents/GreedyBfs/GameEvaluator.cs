@@ -23,11 +23,10 @@ namespace pandemic.agents.GreedyBfs
             // diseases cured is great
             score += game.CuresDiscovered.Count * 1000;
 
-            // each research station on a unique color is good
-            // todo: not really, research stations don't need to be on different colours
+            // research stations are good
+            // even better: spread out (do later,,, maybe)
             score += game.Cities
                 .Where(c => c.HasResearchStation)
-                .GroupBy(c => game.Board.City(c.Name).Colour)
                 .Sum(_ => 100);
 
             score += game.Players

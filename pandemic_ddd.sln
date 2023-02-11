@@ -16,10 +16,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.console", "pandemi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.agents", "pandemic.agents\pandemic.agents.csproj", "{24C69B37-EBF5-4E88-AFAD-50496B24CD46}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.server", "pandemic.server\pandemic.server.csproj", "{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pandemic.server.test", "pandemic.server.test\pandemic.server.test.csproj", "{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.agents.test", "pandemic.agents.test\pandemic.agents.test.csproj", "{F4A58D9A-070B-4324-8CA0-586A0B115FBD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.drawing", "pandemic.drawing\pandemic.drawing.csproj", "{1594055F-37DC-4D2D-9E28-A5DF94D43BF2}"
@@ -88,30 +84,6 @@ Global
 		{24C69B37-EBF5-4E88-AFAD-50496B24CD46}.Release|x64.Build.0 = Release|Any CPU
 		{24C69B37-EBF5-4E88-AFAD-50496B24CD46}.Release|x86.ActiveCfg = Release|Any CPU
 		{24C69B37-EBF5-4E88-AFAD-50496B24CD46}.Release|x86.Build.0 = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|x64.Build.0 = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Debug|x86.Build.0 = Debug|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|x64.ActiveCfg = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|x64.Build.0 = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|x86.ActiveCfg = Release|Any CPU
-		{DD5B0EDC-B09B-475E-A364-2B3FCAE39C23}.Release|x86.Build.0 = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x64.Build.0 = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Debug|x86.Build.0 = Debug|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x64.ActiveCfg = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x64.Build.0 = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.ActiveCfg = Release|Any CPU
-		{3DDBF09D-9747-4C83-A6FF-964ED010DEE1}.Release|x86.Build.0 = Release|Any CPU
 		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4A58D9A-070B-4324-8CA0-586A0B115FBD}.Debug|x64.ActiveCfg = Debug|Any CPU

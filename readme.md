@@ -7,8 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- remove unused code: network, spiel etc.
-  - tag commit so u can get it back
+- fix flakey tests
 - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
@@ -35,9 +34,8 @@ dotnet run
 - pandemic.agents: agents that can play games
 - pandemic.console: scratchpad console app
 - pandemic.drawing: draw game trees (graphviz dot output)
-- pandemic.server: host a game of pandemic over a network. Intended for use by
-  https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
-  - unmaintained for now. May need some fixing before use.
+
+Check tag `just-before-remove-unused-network-code` for a network game server implementation.
 
 # Notes
 - I estimate about 9 x 10^85 possible games of pandemic. This is based on a

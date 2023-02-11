@@ -47,22 +47,9 @@ namespace pandemic
             return Game.ToString();
         }
 
-        public IEnumerable<int> LegalActionsInt()
-        {
-            // todo: how to map from meaningful actions to ints? Looks like OpenSpiel
-            // wants a way to do this too, see https://github.com/deepmind/open_spiel/blob/master/docs/contributing.md
-            // point 'Structured Action Spaces'
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<IPlayerCommand> LegalActions()
         {
             return _commandGenerator.LegalCommands(Game);
-        }
-
-        public string ActionToString(int currentPlayer, int action)
-        {
-            return "todo: implement me";
         }
 
         public void ApplyActionInt(int action)
