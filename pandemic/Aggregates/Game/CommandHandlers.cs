@@ -441,7 +441,7 @@ public partial record PandemicGame
         if (game.Cubes.NumberOf(colour) < adjacent.Count)
             return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
 
-        game = game.ApplyEvent(new OutbreakCounterIncremented(), events);
+        game = game.ApplyEvent(new OutbreakOccurred(city), events);
         if (game.OutbreakCounter == 8)
             return game.ApplyEvent(new GameLost("8 outbreaks"), events);
 

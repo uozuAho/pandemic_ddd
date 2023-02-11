@@ -21,18 +21,22 @@ public partial record PandemicGame
 
             if (game.APlayerMustDiscard) return game;
 
-            if (game.PhaseOfTurn == TurnPhase.InfectCities) game = InfectCities(game, eventList);
+            if (game.PhaseOfTurn == TurnPhase.InfectCities)
+            {
+                game = InfectCities(game, eventList);
+                if (!game.IsOver)
+                    game = game.ApplyEvent(new TurnEnded(), eventList);
+            }
 
             return game;
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
-            game = InfectCityFromPile(game, events);
-            if (!game.IsOver) game = InfectCityFromPile(game, events);
-            if (!game.IsOver)
-                game = game.ApplyEvent(new TurnEnded(), events);
-
+            for (var i = 0; i < game.InfectionRate; i++)
+            {
+                if (!game.IsOver) game = InfectCityFromPile(game, events);
+            }
             return game;
         }
 

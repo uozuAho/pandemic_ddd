@@ -61,12 +61,12 @@ public partial record PandemicGame
             EpidemicTriggered => game,
             PlayerPassed p => Apply(game, p),
             DiseaseEradicated e => Apply(game, e),
-            OutbreakCounterIncremented e => Apply(game, e),
+            OutbreakOccurred e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, OutbreakCounterIncremented evt)
+    private static PandemicGame Apply(PandemicGame game, OutbreakOccurred evt)
     {
         return game with { OutbreakCounter = game.OutbreakCounter + 1 };
     }

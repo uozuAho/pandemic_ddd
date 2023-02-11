@@ -394,34 +394,37 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var (startingState, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-            startingState = startingState with
+            game = game with
             {
                 // epidemics mess with this test, remove them
-                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards),
+                InfectionRateMarkerPosition = 5
             };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            game.InfectionRate.ShouldBe(4);
+            var startingState = game;
 
             var events = new List<IEvent>();
-            var game = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
 
-            Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
-            Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
 
-            foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
+            // assert
+            game.InfectionDrawPile.Count.ShouldBe(startingState.InfectionDrawPile.Count - game.InfectionRate);
+            game.InfectionDiscardPile.Count.ShouldBe(startingState.InfectionDiscardPile.Count + game.InfectionRate);
+
+            foreach (var infectionCard in game.InfectionDiscardPile.Top(game.InfectionRate))
             {
                 var city = game.CityByName(infectionCard.City);
-                Assert.That(city.Cubes.NumberOf(infectionCard.Colour), Is.EqualTo(1),
-                    $"{infectionCard.City} should have had 1 {infectionCard.Colour} cube added");
+                city.Cubes.NumberOf(infectionCard.Colour).ShouldBe(1);
             }
 
-            Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
+            game.Cubes.Counts().Values.Sum().ShouldBe(startingState.Cubes.Counts().Values.Sum() - game.InfectionRate);
         }
 
         [Test]
@@ -1452,23 +1455,26 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
 
-            var atlanta = game.CityByName("Atlanta");
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
-                Cities = game.Cities.Replace(atlanta, atlanta with
+                InfectionDrawPile =
+                    game.InfectionDrawPile.Remove(atlantaInfectionCard).PlaceOnTop(atlantaInfectionCard),
+                Cities = game.Cities.Select(c => c.Name switch
                 {
-                    Cubes = CubePile.Empty
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                })
+                    "Atlanta" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
             var initialGame = game;
 
-            (game, var events) = game.Do(new PassCommand(Role.Medic));
+            // act
+            (game, _) = game.Do(new PassCommand(Role.Medic));
 
             game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
