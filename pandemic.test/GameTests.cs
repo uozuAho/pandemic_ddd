@@ -1447,7 +1447,6 @@ namespace pandemic.test
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
         }
 
-        [Repeat(10)]
         [Test]
         public void Outbreak_infects_adjacent_cities()
         {
@@ -1456,26 +1455,27 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
 
-            var atlantaCity = game.CityByName("Atlanta");
             var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.Remove(atlantaInfectionCard).PlaceOnTop(atlantaInfectionCard),
-                Cities = game.Cities.Replace(atlantaCity, atlantaCity with
+                InfectionDrawPile =
+                    game.InfectionDrawPile.Remove(atlantaInfectionCard).PlaceOnTop(atlantaInfectionCard),
+                Cities = game.Cities.Select(c => c.Name switch
                 {
-                    Cubes = CubePile.Empty
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                })
+                    "Atlanta" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                    },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
             var initialGame = game;
 
-            (game, var events) = game.Do(new PassCommand(Role.Medic));
+            // act
+            (game, _) = game.Do(new PassCommand(Role.Medic));
 
-            // todo: flakey: should be 1, was 2
             game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));

@@ -8,6 +8,7 @@ implemented.
 
 # todo
 - test: number of cities infected = infection rate
+  - check inline todos/diff with master
 - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
