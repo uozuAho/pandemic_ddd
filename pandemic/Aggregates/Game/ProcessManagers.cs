@@ -28,10 +28,13 @@ public partial record PandemicGame
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
-            // bug here: infection rate not considered
-            game = InfectCityFromPile(game, events);
-            if (!game.IsOver) game = InfectCityFromPile(game, events);
+            for (var i = 0; i < game.InfectionRate; i++)
+            {
+                if (!game.IsOver) game = InfectCityFromPile(game, events);
+            }
+
             if (!game.IsOver)
+                // todo: move turn ended up?
                 game = game.ApplyEvent(new TurnEnded(), events);
 
             return game;
