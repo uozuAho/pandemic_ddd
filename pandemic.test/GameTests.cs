@@ -394,34 +394,36 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var (startingState, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
-            startingState = startingState with
+            game = game with
             {
                 // epidemics mess with this test, remove them
-                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards)
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards),
+                // InfectionRateMarkerPosition = 5
             };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+            var startingState = game;
 
             var events = new List<IEvent>();
-            var game = startingState.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Atlanta"), events);
 
-            Assert.AreEqual(startingState.InfectionDrawPile.Count - 2, game.InfectionDrawPile.Count);
-            Assert.AreEqual(startingState.InfectionDiscardPile.Count + 2, game.InfectionDiscardPile.Count);
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert
+            game.InfectionDrawPile.Count.ShouldBe(startingState.InfectionDrawPile.Count - 2);
+            game.InfectionDiscardPile.Count.ShouldBe(startingState.InfectionDiscardPile.Count + 2);
 
             foreach (var infectionCard in game.InfectionDiscardPile.Top(2))
             {
                 var city = game.CityByName(infectionCard.City);
-                Assert.That(city.Cubes.NumberOf(infectionCard.Colour), Is.EqualTo(1),
-                    $"{infectionCard.City} should have had 1 {infectionCard.Colour} cube added");
+                city.Cubes.NumberOf(infectionCard.Colour).ShouldBe(1);
             }
 
-            Assert.That(game.Cubes.Counts().Values.Sum(), Is.EqualTo(startingState.Cubes.Counts().Values.Sum() - 2));
+            game.Cubes.Counts().Values.Sum().ShouldBe(startingState.Cubes.Counts().Values.Sum() - 2);
         }
 
         [Test]
