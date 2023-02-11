@@ -1447,6 +1447,7 @@ namespace pandemic.test
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
         }
 
+        [Repeat(10)]
         [Test]
         public void Outbreak_infects_adjacent_cities()
         {
