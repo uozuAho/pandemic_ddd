@@ -21,7 +21,12 @@ public partial record PandemicGame
 
             if (game.APlayerMustDiscard) return game;
 
-            if (game.PhaseOfTurn == TurnPhase.InfectCities) game = InfectCities(game, eventList);
+            if (game.PhaseOfTurn == TurnPhase.InfectCities)
+            {
+                game = InfectCities(game, eventList);
+                if (!game.IsOver)
+                    game = game.ApplyEvent(new TurnEnded(), eventList);
+            }
 
             return game;
         }
@@ -32,11 +37,6 @@ public partial record PandemicGame
             {
                 if (!game.IsOver) game = InfectCityFromPile(game, events);
             }
-
-            if (!game.IsOver)
-                // todo: move turn ended up?
-                game = game.ApplyEvent(new TurnEnded(), events);
-
             return game;
         }
 

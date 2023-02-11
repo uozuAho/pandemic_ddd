@@ -1473,6 +1473,7 @@ namespace pandemic.test
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
+            // todo: flakey: should be 1, was 2
             game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
