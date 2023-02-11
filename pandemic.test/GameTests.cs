@@ -667,27 +667,28 @@ namespace pandemic.test
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count);
         }
 
-        [Repeat(10)]
         [Test]
         public void Scenario_share_knowledge_at_end_of_turn_when_both_players_hands_are_full()
         {
-            var game = NewGame(new NewGameOptions
+            var medicHand = PlayerHand.Of("Atlanta", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow");
+            var scientistHand = PlayerHand.Of("Miami", "Taipei", "Sydney", "Delhi", "Jakarta", "Beijing", "Seoul");
+
+            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+                .WithNoEpidemics();
+            game = game with
             {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards
+                    .Where(c => !medicHand.Contains(c) && !scientistHand.Contains(c)))
+            };
+
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = PlayerHand.Of("Atlanta", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow")
+                Hand = medicHand
             }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
             {
-                Hand = PlayerHand.Of("Miami", "Taipei", "Sydney", "Delhi", "Jakarta", "Beijing", "Seoul")
+                Hand = scientistHand
             });
-            // ensure no epidemics
-            game = game with
-            {
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard))
-            };
 
             var cardToShare = PlayerCards.CityCard("Atlanta");
             var commandGenerator = new PlayerCommandGenerator();
@@ -717,7 +718,6 @@ namespace pandemic.test
             game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
-            // todo: flakey: should not contain
             game.PlayerByRole(Role.Medic).Hand.CityCards.ShouldNotContain(cardToShare);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count - 2);
         }
