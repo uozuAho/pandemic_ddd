@@ -35,9 +35,8 @@ dotnet run
 - pandemic.agents: agents that can play games
 - pandemic.console: scratchpad console app
 - pandemic.drawing: draw game trees (graphviz dot output)
-- pandemic.server: host a game of pandemic over a network. Intended for use by
-  https://github.com/uozuAho/open_spiel_playground/blob/main/zmq_ttt/client.py
-  - unmaintained for now. May need some fixing before use.
+
+Check tag `just-before-remove-unused-network-code` for a network game server implementation.
 
 # Notes
 - I estimate about 9 x 10^85 possible games of pandemic. This is based on a
