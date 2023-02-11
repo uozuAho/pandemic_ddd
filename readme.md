@@ -7,8 +7,7 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- remove unused code: network, spiel etc.
-  - tag commit so u can get it back
+- fix flakey tests
 - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php

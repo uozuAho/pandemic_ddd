@@ -35,7 +35,7 @@ namespace pandemic.agents.test
                 Is.EqualTo(new[]
                 {
                     typeof(DiscoverCureCommand),
-                    typeof(BuildResearchStationCommand), // todo: this is wrong, not a valid command at this point
+                    typeof(BuildResearchStationCommand), // note that the comparer doesn't check for valid commands
                     typeof(DriveFerryCommand),
                     typeof(DiscardPlayerCardCommand), // this only ends up before direct flight due to order before sorting
                     typeof(DirectFlightCommand),
