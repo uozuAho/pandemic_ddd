@@ -95,4 +95,10 @@ public class Deck<T>
     {
         return new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
     }
+
+    public Deck<T> Remove(IEnumerable<T> cards)
+    {
+        var set = new HashSet<T>(cards);
+        return new Deck<T>(_cards.Where(c => c is not null && !set.Contains(c)));
+    }
 }

@@ -497,20 +497,24 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_goes_to_discard_pile()
         {
-            var game = NewGame(new NewGameOptions
+            // todo: extension: withNoEpidemicCards
+            var game = NewGameWithNoEpidemicCards();
+            var top7Cards = game.PlayerDrawPile.Top(7).ToList();
+
+            game = game with
             {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
+                PlayerDrawPile = game.PlayerDrawPile.Remove(top7Cards)
+            };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = new PlayerHand(PlayerCards.CityCards.Take(7))
+                Hand = new PlayerHand(top7Cards)
             });
-            (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+            (game, _) = game.Do(new PassCommand(Role.Medic));
 
             // act
             var cardToDiscard = game.CurrentPlayer.Hand.First();
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, cardToDiscard));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, cardToDiscard));
 
             // assert
             game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
@@ -661,6 +665,7 @@ namespace pandemic.test
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count);
         }
 
+        [Repeat(10)]
         [Test]
         public void Scenario_share_knowledge_at_end_of_turn_when_both_players_hands_are_full()
         {
@@ -710,6 +715,7 @@ namespace pandemic.test
             game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            // todo: flakey: should not contain
             game.PlayerByRole(Role.Medic).Hand.CityCards.ShouldNotContain(cardToShare);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count - 2);
         }
