@@ -426,12 +426,44 @@ public partial record PandemicGame
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
-            return Outbreak(game, infectionCard.City, infectionCard.Colour, events, new HashSet<string> {infectionCard.City});
+            return Outbreak2(game, infectionCard.City, infectionCard.Colour, events);
         }
 
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+    }
+
+    private static PandemicGame Outbreak2(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
+    {
+        var toOutbreak = new Queue<string>();
+        toOutbreak.Enqueue(city);
+
+        while (toOutbreak.Count > 0)
+        {
+            var next = toOutbreak.Dequeue();
+            game = game.ApplyEvent(new OutbreakOccurred(next), events);
+            if (game.OutbreakCounter == 8)
+                return game.ApplyEvent(new GameLost("8 outbreaks"), events);
+
+            var adjacent = game.Board.AdjacentCities[next].Select(game.CityByName).ToList();
+
+            foreach (var adj in adjacent)
+            {
+                if (adj.Cubes.NumberOf(colour) == 3)
+                {
+                    toOutbreak.Enqueue(adj.Name);
+                }
+                else
+                {
+                    if (game.Cubes.NumberOf(colour) == 0)
+                        return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
+                    game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+                }
+            }
+        }
+
+        return game;
     }
 
     private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events, ISet<string> alreadyOutbroken)
