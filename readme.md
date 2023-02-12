@@ -10,6 +10,7 @@ implemented.
 - add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
   - test: outbreak causes loss when cubes run out
   - invariant: game cube pile not negative, other negatives
+  - diff with main
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE

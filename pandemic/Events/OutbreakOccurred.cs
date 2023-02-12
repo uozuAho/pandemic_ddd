@@ -1,3 +1,3 @@
 ﻿namespace pandemic.Events;
 
-internal record OutbreakOccurred(string City) : IEvent;
+public record OutbreakOccurred(string City) : IEvent;

@@ -1378,13 +1378,38 @@ namespace pandemic.test
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-
             // act
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             // assert
             game.OutbreakCounter.ShouldBe(1);
+        }
+
+        [Test]
+        public void Epidemic_onto_existing_cubes_causes_outbreak()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+            var epidemicCity = game.CityByName(epidemicInfectionCard.City);
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cities = game.Cities.Replace(epidemicCity, epidemicCity.AddCube(epidemicInfectionCard.Colour))
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
+            events.ShouldContain(e => e is OutbreakOccurred);
         }
 
         [Test]
@@ -1701,6 +1726,8 @@ namespace pandemic.test
 
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
 
+                // todo: fail scenario: epidemic on city that already has 1 cube
+                // eg outbreak occured at adjacent city, then this city epidemics
                 game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
                     col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
             }
