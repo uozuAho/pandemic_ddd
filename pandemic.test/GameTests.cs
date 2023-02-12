@@ -1566,11 +1566,11 @@ namespace pandemic.test
                 {
                     "Atlanta" => c with
                     {
-                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                     },
                     "Chicago" => c with
                     {
-                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                     },
                     // ensure no cubes on other cities so that there are no more chain reactions
                     _ => c with { Cubes = CubePile.Empty }
