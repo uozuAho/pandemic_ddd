@@ -48,6 +48,11 @@ Check tag `just-before-remove-unused-network-code` for a network game server imp
   https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
   found via: https://github.com/captn3m0/boardgame-research#pandemic
 - fuzz testing is great! it has turned up so many bugs that I hand't covered with simple unit tests
+- dunno if 'process managers' are helping. Some commands cause other commands. Eg.
+  end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
+  etc. What to do? Just keep this complexity in the command handlers themselves?
+  Or, don't call commands from other commands, and instead handle multi-command
+  reactions with process managers?
 
 ## Are all games winnable?
 This would be good to know. If not all games are winnable, then there's no point

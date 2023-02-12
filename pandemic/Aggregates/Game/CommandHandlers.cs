@@ -397,9 +397,17 @@ public partial record PandemicGame
         // infect city
         if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
             return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+
+        for (var i = 0; i < 3; i++)
+        {
+            if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+            else
+            {
+                game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
+                break;
+            }
+        }
 
         // shuffle infection cards
         game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
