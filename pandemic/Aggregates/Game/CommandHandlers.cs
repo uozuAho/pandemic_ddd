@@ -426,7 +426,7 @@ public partial record PandemicGame
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
-            return Outbreak2(game, infectionCard.City, infectionCard.Colour, events);
+            return Outbreak(game, infectionCard.City, infectionCard.Colour, events);
         }
 
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
@@ -434,14 +434,16 @@ public partial record PandemicGame
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
     }
 
-    private static PandemicGame Outbreak2(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
+    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
     {
         var toOutbreak = new Queue<string>();
+        var outBroken = new List<string>();
         toOutbreak.Enqueue(city);
 
         while (toOutbreak.Count > 0)
         {
             var next = toOutbreak.Dequeue();
+            outBroken.Add(next);
             game = game.ApplyEvent(new OutbreakOccurred(next), events);
             if (game.OutbreakCounter == 8)
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
@@ -452,7 +454,8 @@ public partial record PandemicGame
             {
                 if (adj.Cubes.NumberOf(colour) == 3)
                 {
-                    toOutbreak.Enqueue(adj.Name);
+                    if (!outBroken.Contains(adj.Name))
+                        toOutbreak.Enqueue(adj.Name);
                 }
                 else
                 {
@@ -460,36 +463,6 @@ public partial record PandemicGame
                         return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
                     game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
                 }
-            }
-        }
-
-        return game;
-    }
-
-    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events, ISet<string> alreadyOutbroken)
-    {
-        var adjacent = game.Board.AdjacentCities[city].Select(c => game.CityByName(c)).ToList();
-
-        if (game.Cubes.NumberOf(colour) < adjacent.Count)
-            return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
-
-        game = game.ApplyEvent(new OutbreakOccurred(city), events);
-        if (game.OutbreakCounter == 8)
-            return game.ApplyEvent(new GameLost("8 outbreaks"), events);
-
-        foreach (var adj in adjacent)
-        {
-            if (adj.Cubes.NumberOf(colour) == 3)
-            {
-                if (!alreadyOutbroken.Contains(adj.Name))
-                {
-                    alreadyOutbroken.Add(adj.Name);
-                    game = Outbreak(game, adj.Name, colour, events, alreadyOutbroken);
-                }
-            }
-            else
-            {
-                game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
             }
         }
 

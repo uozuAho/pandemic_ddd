@@ -1578,7 +1578,7 @@ namespace pandemic.test
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            (game, _) = game.Do(new PassCommand(Role.Medic));
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             game.OutbreakCounter.ShouldBe(2);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
@@ -1589,9 +1589,8 @@ namespace pandemic.test
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
-        // this one caused 4 red cubes
         [Test]
-        public void Outbreak_scenario_chain_reaction_2()
+        public void Outbreak_scenario_chain_reaction_big()
         {
             var game = NewGame(new NewGameOptions
             {
@@ -1630,7 +1629,17 @@ namespace pandemic.test
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            (game, _) = game.Do(new PassCommand(Role.Medic));
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            // assert
+            game.OutbreakCounter.ShouldBe(5);
+
+            game.CityByName("Beijing").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Seoul").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Tokyo").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Shanghai").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Osaka").Cubes.NumberOf(Colour.Red).ShouldBe(3);
 
             game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
                 col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
