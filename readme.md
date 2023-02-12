@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
-  - diff with main
 - test: outbreak causes loss when cubes run out
 - invariant: game cube pile not negative, other negatives
 - add validation/invariant checks to game, disable for tests
