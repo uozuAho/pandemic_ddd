@@ -1589,6 +1589,53 @@ namespace pandemic.test
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
+        // this one caused 4 red cubes
+        [Test]
+        public void Outbreak_scenario_chain_reaction_2()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile =
+                    game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Beijing"))),
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Beijing" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Osaka" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Seoul" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Tokyo" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Shanghai" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 1)
+                    },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
+                col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
@@ -1645,7 +1692,8 @@ namespace pandemic.test
 
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
 
-                game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
+                game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
+                    col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
             }
         }
 
