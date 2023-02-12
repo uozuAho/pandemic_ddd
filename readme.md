@@ -7,7 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- add to fuzz test: all cities have 0 <= x <= 3 cubes of any colour
+- test: outbreak causes loss when cubes run out
+- invariant: game cube pile not negative, other negatives
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
@@ -44,6 +45,12 @@ Check tag `just-before-remove-unused-network-code` for a network game server imp
 - it has been shown that determining whether a game is winnable is NP-complete:
   https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
   found via: https://github.com/captn3m0/boardgame-research#pandemic
+- fuzz testing is great! it has turned up so many bugs that I hadn't covered with simple unit tests
+- dunno if 'process managers' are helping. Some commands cause other commands. Eg.
+  end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
+  etc. What to do? Just keep this complexity in the command handlers themselves?
+  Or, don't call commands from other commands, and instead handle multi-command
+  reactions with process managers?
 
 ## Are all games winnable?
 This would be good to know. If not all games are winnable, then there's no point

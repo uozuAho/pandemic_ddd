@@ -397,9 +397,17 @@ public partial record PandemicGame
         // infect city
         if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
             return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-        game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+
+        for (var i = 0; i < 3; i++)
+        {
+            if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+            else
+            {
+                game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
+                break;
+            }
+        }
 
         // shuffle infection cards
         game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
@@ -426,7 +434,7 @@ public partial record PandemicGame
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
-            return Outbreak(game, infectionCard.City, infectionCard.Colour, events, new HashSet<string> {infectionCard.City});
+            return Outbreak(game, infectionCard.City, infectionCard.Colour, events);
         }
 
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
@@ -434,30 +442,35 @@ public partial record PandemicGame
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
     }
 
-    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events, ISet<string> alreadyOutbroken)
+    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
     {
-        var adjacent = game.Board.AdjacentCities[city].Select(c => game.CityByName(c)).ToList();
+        var toOutbreak = new Queue<string>();
+        var outBroken = new List<string>();
+        toOutbreak.Enqueue(city);
 
-        if (game.Cubes.NumberOf(colour) < adjacent.Count)
-            return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
-
-        game = game.ApplyEvent(new OutbreakOccurred(city), events);
-        if (game.OutbreakCounter == 8)
-            return game.ApplyEvent(new GameLost("8 outbreaks"), events);
-
-        foreach (var adj in adjacent)
+        while (toOutbreak.Count > 0)
         {
-            if (adj.Cubes.NumberOf(colour) == 3)
+            var next = toOutbreak.Dequeue();
+            outBroken.Add(next);
+            game = game.ApplyEvent(new OutbreakOccurred(next), events);
+            if (game.OutbreakCounter == 8)
+                return game.ApplyEvent(new GameLost("8 outbreaks"), events);
+
+            var adjacent = game.Board.AdjacentCities[next].Select(game.CityByName).ToList();
+
+            foreach (var adj in adjacent)
             {
-                if (!alreadyOutbroken.Contains(adj.Name))
+                if (adj.Cubes.NumberOf(colour) == 3)
                 {
-                    alreadyOutbroken.Add(adj.Name);
-                    game = Outbreak(game, adj.Name, colour, events, alreadyOutbroken);
+                    if (!outBroken.Contains(adj.Name))
+                        toOutbreak.Enqueue(adj.Name);
                 }
-            }
-            else
-            {
-                game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+                else
+                {
+                    if (game.Cubes.NumberOf(colour) == 0)
+                        return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
+                    game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+                }
             }
         }
 

@@ -1378,13 +1378,38 @@ namespace pandemic.test
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-
             // act
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             // assert
             game.OutbreakCounter.ShouldBe(1);
+        }
+
+        [Test]
+        public void Epidemic_onto_existing_cubes_causes_outbreak()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+            var epidemicCity = game.CityByName(epidemicInfectionCard.City);
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cities = game.Cities.Replace(epidemicCity, epidemicCity.AddCube(epidemicInfectionCard.Colour))
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act
+            (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
+
+            game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
+            events.ShouldContain(e => e is OutbreakOccurred);
         }
 
         [Test]
@@ -1566,11 +1591,11 @@ namespace pandemic.test
                 {
                     "Atlanta" => c with
                     {
-                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                     },
                     "Chicago" => c with
                     {
-                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                     },
                     // ensure no cubes on other cities so that there are no more chain reactions
                     _ => c with { Cubes = CubePile.Empty }
@@ -1578,7 +1603,7 @@ namespace pandemic.test
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            (game, _) = game.Do(new PassCommand(Role.Medic));
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             game.OutbreakCounter.ShouldBe(2);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
@@ -1587,6 +1612,62 @@ namespace pandemic.test
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
             game.Board.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
+        }
+
+        [Test]
+        public void Outbreak_scenario_chain_reaction_big()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            game = game with
+            {
+                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
+                InfectionDrawPile =
+                    game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Beijing"))),
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Beijing" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Osaka" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Seoul" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Tokyo" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
+                    },
+                    "Shanghai" => c with
+                    {
+                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 1)
+                    },
+                    _ => c with { Cubes = CubePile.Empty }
+                }).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            // assert
+            game.OutbreakCounter.ShouldBe(5);
+
+            game.CityByName("Beijing").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Seoul").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Tokyo").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Shanghai").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+            game.CityByName("Osaka").Cubes.NumberOf(Colour.Red).ShouldBe(3);
+
+            game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
+                col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
         }
 
         [Repeat(10)]
@@ -1607,6 +1688,7 @@ namespace pandemic.test
                 if (game.Players.Any(p => p.Hand.Count > 7))
                     legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand);
 
+                // try a bunch of illegal commands
                 foreach (var illegalCommand in allPossibleCommands
                              .Except(legalCommands)
                              .OrderBy(_ => random.Next())
@@ -1623,6 +1705,8 @@ namespace pandemic.test
                         // do nothing: we want an exception thrown!
                     }
                 }
+
+                var previousGameState = game;
 
                 // do random action
                 var action = random.Choice(commandGenerator.LegalCommands(game));
@@ -1641,6 +1725,9 @@ namespace pandemic.test
                 (game.InfectionDrawPile.Count + game.InfectionDiscardPile.Count).ShouldBe(48);
 
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
+
+                game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
+                    col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
             }
         }
 
