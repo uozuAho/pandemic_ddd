@@ -1625,6 +1625,8 @@ namespace pandemic.test
                     }
                 }
 
+                var previousGameState = game;
+
                 // do random action
                 var action = random.Choice(commandGenerator.LegalCommands(game));
                 (game, var tempEvents) = game.Do(action);
