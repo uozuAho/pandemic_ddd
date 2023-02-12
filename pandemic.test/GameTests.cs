@@ -1726,8 +1726,6 @@ namespace pandemic.test
 
                 (game.ResearchStationPile + game.Cities.Count(c => c.HasResearchStation)).ShouldBe(6);
 
-                // todo: fail scenario: epidemic on city that already has 1 cube
-                // eg outbreak occured at adjacent city, then this city epidemics
                 game.Cities.ShouldAllBe(c => ColourExtensions.AllColours.All(
                     col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
             }
