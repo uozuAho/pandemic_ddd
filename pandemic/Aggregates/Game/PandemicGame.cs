@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using pandemic.Events;
 using pandemic.GameData;
@@ -130,6 +131,32 @@ namespace pandemic.Aggregates.Game
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);
+        }
+
+        private void ValidateInternalConsistency()
+        {
+            var totalCubes = Cubes.Counts().Values.Sum()
+                             + Cities.Sum(c => c.Cubes.Counts().Sum(cc => cc.Value));
+            Debug.Assert(totalCubes == 96);
+
+            foreach (var numCubes in Cubes.Counts())
+            {
+                Debug.Assert(numCubes.Value is >= 0 and <= 24);
+            }
+
+            foreach (var numCubes in Cities.SelectMany(city => city.Cubes.Counts()))
+            {
+                Debug.Assert(numCubes.Value is >= 0 and <= 3);
+            }
+
+            var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
+                                   + PlayerDrawPile.Count
+                                   + PlayerDiscardPile.Count;
+            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty));
+
+            Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
+
+            Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
         }
     }
 }
