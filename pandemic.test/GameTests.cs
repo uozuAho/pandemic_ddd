@@ -395,7 +395,7 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            var game = NewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
@@ -1747,7 +1747,9 @@ namespace pandemic.test
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
 
-            return game;
+            // allowing invalid game states makes many test scenarios much easier
+            // to set up
+            return game with { SelfConsistencyCheckingEnabled = false };
         }
     }
 }

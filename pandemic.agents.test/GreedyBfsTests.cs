@@ -125,7 +125,7 @@ namespace pandemic.agents.test
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist },
             });
 
-            return game;
+            return game with { SelfConsistencyCheckingEnabled = false };
         }
     }
 }
