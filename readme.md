@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- test: outbreak causes loss when cubes run out
-- invariant: game cube pile not negative, other negatives
 - add validation/invariant checks to game, disable for tests
 - implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
   - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
@@ -16,6 +14,8 @@ implemented.
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details
+  - dev log: review https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
+    - any learnings since then?
 
 # Quick start
 - install dotnet core (tested with v7)
@@ -45,12 +45,7 @@ Check tag `just-before-remove-unused-network-code` for a network game server imp
 - it has been shown that determining whether a game is winnable is NP-complete:
   https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
   found via: https://github.com/captn3m0/boardgame-research#pandemic
-- fuzz testing is great! it has turned up so many bugs that I hadn't covered with simple unit tests
-- dunno if 'process managers' are helping. Some commands cause other commands. Eg.
-  end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
-  etc. What to do? Just keep this complexity in the command handlers themselves?
-  Or, don't call commands from other commands, and instead handle multi-command
-  reactions with process managers?
+
 
 ## Are all games winnable?
 This would be good to know. If not all games are winnable, then there's no point
@@ -76,6 +71,22 @@ handle.
 
 ## Alternate implementations
 - https://github.com/alexzherdev/pandemic
+
+## Dev log / learnings
+- initial start: https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
+- fuzz testing is great! it has turned up so many bugs that I hadn't covered with simple unit tests
+- dunno if 'process managers' are helping. Some commands cause other commands. Eg.
+  end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
+  etc. What to do? Just keep this complexity in the command handlers themselves?
+  Or, don't call commands from other commands, and instead handle multi-command
+  reactions with process managers?
+- even though I'm not using event sourcing or even the events emitted by commands,
+  they have been very useful to debug complex bugs. Having the entire event history of
+  a game makes it easy to see where things have gone wrong. This would be laborious to
+  step through in the debugger.
+- using the rule to only modify aggregates via events has ensured that all game state
+  changes are captured. It's a bit of a pain to add a command + handler + event + handler,
+  but I think it's been worth it for the above point alone
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)

@@ -1560,10 +1560,7 @@ namespace pandemic.test
                 InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
-                    Cubes = CubePile.Empty
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
-                        .AddCube(Colour.Blue)
+                    Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                 }),
                 Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue)
             };
@@ -1716,6 +1713,7 @@ namespace pandemic.test
                 // check invariants
                 var totalCubes = game.Cubes.Counts().Values.Sum() + TotalNumCubesOnCities(game);
                 totalCubes.ShouldBe(96);
+                game.Cubes.Counts().Values.ShouldAllBe(v => v >= 0 && v <= 24);
 
                 var totalPlayerCards = game.Players.Select(p => p.Hand.Count).Sum()
                                        + game.PlayerDrawPile.Count
