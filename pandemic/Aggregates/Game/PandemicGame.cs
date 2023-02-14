@@ -30,6 +30,8 @@ namespace pandemic.Aggregates.Game
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
 
+        public bool SelfConsistencyCheckingEnabled { get; init; } = true;
+
         private Random Rng { get; } = new();
 
         public ImmutableList<CureMarker> CuresDiscovered { get; init; } = ImmutableList<CureMarker>.Empty;

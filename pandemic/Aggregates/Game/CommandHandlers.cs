@@ -50,7 +50,7 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
-        ValidateInternalConsistency();
+        if (SelfConsistencyCheckingEnabled) ValidateInternalConsistency();
         PreCommandChecks(command);
 
         var (game, events) = ExecuteCommand(command);
