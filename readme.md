@@ -7,8 +7,27 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- implement all game rules at https://www.ultraboardgames.com/pandemic/game-rules.php
-  - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
+- implement all game rules. left:
+  - special event cards: play at any time, not an action
+    - government grant: add a research station to any city
+    - event forecast: look at & rearrange the top 6 cards of the infection deck
+    - airlift: move any pawn to any city
+    - resilient population: remove any infection card from the discard pile from the game.
+      can be played between the infect & intensify steps of an epidemic
+    - one quiet night: skip next infect cities step
+  - role special abilities
+    - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
+    - operations expert:
+      - build a research station without a city card
+      - move from a station to anywhere by discarding a city card
+    - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured
+    - researcher: give any city card to a player in the same city
+    - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
+    - scientist: cure with 4 cards
+    - contingency planner:
+      - as an action, take any discarded event card and store it on this card
+        - only 1 card can be stored at a time, it's not part of your hand
+      - when this event card is played, remove it from the game
 - later
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
@@ -89,3 +108,4 @@ handle.
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
+    - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
