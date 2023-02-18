@@ -13,6 +13,8 @@ namespace pandemic.Values
 
     public record EpidemicCard : PlayerCard;
 
+    public record GovernmentGrantCard : PlayerCard;
+
     public class PlayerCardEqualityComparer : IEqualityComparer<PlayerCard>
     {
         public bool Equals(PlayerCard? x, PlayerCard? y)

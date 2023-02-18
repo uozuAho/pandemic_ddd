@@ -10,6 +10,11 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
+      - test: builds station, doesn't use action, goes to discard pile
+      - rename playercitycard.cs to playercards.cs
+      - command generator
+      - test: can use any time
+      - test: can use event instead of discarding
     - event forecast: look at & rearrange the top 6 cards of the infection deck
     - airlift: move any pawn to any city
     - resilient population: remove any infection card from the discard pile from the game.

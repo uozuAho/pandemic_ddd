@@ -1667,6 +1667,26 @@ namespace pandemic.test
                 col => c.Cubes.NumberOf(col) >= 0 && c.Cubes.NumberOf(col) <= 3));
         }
 
+        [Test]
+        public void Government_grant_builds_station_without_using_action()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+
+            (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
+
+            game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(4);
+            game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
