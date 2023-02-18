@@ -10,7 +10,8 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
-      - test: builds station, doesn't use action, goes to discard pile
+      - test: already research station throws
+      - test: not in hand throws
       - rename playercitycard.cs to playercards.cs
       - command generator
       - test: can use any time

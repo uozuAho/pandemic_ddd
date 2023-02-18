@@ -97,8 +97,16 @@ public partial record PandemicGame
             ShareKnowledgeGiveCommand cmd => Do(cmd),
             ShareKnowledgeTakeCommand cmd => Do(cmd),
             PassCommand cmd => Do(cmd),
+            GovernmentGrantCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)
+    {
+        var card = PlayerByRole(command.Role).Hand.Single(c => c is GovernmentGrantCard);
+
+        return ApplyEvents(new GovernmentGrantUsed(command.Role, command.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(PassCommand command)

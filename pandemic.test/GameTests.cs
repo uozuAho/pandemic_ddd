@@ -1675,7 +1675,7 @@ namespace pandemic.test
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
 
-            game.SetCurrentPlayerAs(game.CurrentPlayer with
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
