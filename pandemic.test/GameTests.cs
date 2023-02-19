@@ -1716,6 +1716,24 @@ namespace pandemic.test
             Should.Throw<GameRuleViolatedException>(() => game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago")));
         }
 
+        [Test]
+        public void Government_grant_can_play_when_not_your_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+            var scientist = game.PlayerByRole(Role.Scientist);
+            game = game.SetPlayer(Role.Scientist,
+                scientist with { Hand = scientist.Hand.Add(new GovernmentGrantCard()) });
+
+            (game, _) = game.Do(new GovernmentGrantCommand(Role.Scientist, "Chicago"));
+
+            game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+            game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(4);
+            game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(4);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
