@@ -1687,6 +1687,35 @@ namespace pandemic.test
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
         }
 
+        [Test]
+        public void Government_grant_on_existing_research_station_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            var chicago = game.CityByName("Chicago");
+            game = game with { Cities = game.Cities.Replace(chicago, chicago with { HasResearchStation = true }) };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago")));
+        }
+
+        [Test]
+        public void Government_grant_when_player_doesnt_have_card_throws()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            });
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago")));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

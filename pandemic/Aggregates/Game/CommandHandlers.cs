@@ -104,7 +104,13 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)
     {
-        var card = PlayerByRole(command.Role).Hand.Single(c => c is GovernmentGrantCard);
+        var player = PlayerByRole(command.Role);
+        var card = PlayerByRole(command.Role).Hand.SingleOrDefault(c => c is GovernmentGrantCard);
+        if (card is null) throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");
+
+        var city = CityByName(command.City);
+        if (city.HasResearchStation)
+            throw new GameRuleViolatedException("Cannot use government grant on a city with a research station");
 
         return ApplyEvents(new GovernmentGrantUsed(command.Role, command.City));
     }
