@@ -15,12 +15,6 @@ public partial record PandemicGame
                 || game.APlayerMustDiscard
                 || game.IsOver) return game;
 
-            if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
-
-            if (game.IsOver) return game;
-
-            if (game.APlayerMustDiscard) return game;
-
             if (game.Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
             {
                 if (game.SkipNextChanceToUseSpecialEvent)
@@ -28,6 +22,12 @@ public partial record PandemicGame
                 else
                     return game;
             }
+
+            if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
+
+            if (game.IsOver) return game;
+
+            if (game.APlayerMustDiscard) return game;
 
             if (game.PhaseOfTurn == TurnPhase.InfectCities)
             {

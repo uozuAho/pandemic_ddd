@@ -15,7 +15,7 @@ implemented.
           - DONE: during epidemic
           - after turn
           - multiple players have special event cards
-      - test: use special event card after last action
+      - test: can use special event card after last action
         - should be able to use before drawing cards & infecting cities
       - add to deck at start of game
       - command generator
