@@ -63,7 +63,16 @@ public partial record PandemicGame
             DiseaseEradicated e => Apply(game, e),
             OutbreakOccurred e => Apply(game, e),
             GovernmentGrantUsed e => Apply(game, e),
+            ChoseNotToUseSpecialEventCard e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ChoseNotToUseSpecialEventCard evt)
+    {
+        return game with
+        {
+            SkipNextChanceToUseSpecialEvent = true
         };
     }
 

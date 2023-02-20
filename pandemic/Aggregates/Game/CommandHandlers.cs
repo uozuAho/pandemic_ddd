@@ -98,8 +98,17 @@ public partial record PandemicGame
             ShareKnowledgeTakeCommand cmd => Do(cmd),
             PassCommand cmd => Do(cmd),
             GovernmentGrantCommand cmd => Do(cmd),
+            DontUseSpecialEventCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
+    {
+        if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
+            throw new GameRuleViolatedException("No player has a special event card");
+
+        return ApplyEvents(new ChoseNotToUseSpecialEventCard());
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)

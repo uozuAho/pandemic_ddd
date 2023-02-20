@@ -51,6 +51,11 @@ namespace pandemic.Aggregates.Game
 
         private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
+        /// <summary>
+        /// Players had the option to use a special event card, and chose not to
+        /// </summary>
+        private bool SkipNextChanceToUseSpecialEvent { get; init; }
+
         public bool IsSameStateAs(PandemicGame other)
         {
             if (LossReason != other.LossReason) return false;

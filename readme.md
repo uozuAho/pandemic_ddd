@@ -12,14 +12,19 @@ implemented.
     - government grant: add a research station to any city
       - test: choose not to use special event card, game continues
         - scenarios
-          - during epidemic
+          - DONE: during epidemic
           - after turn
-        - idea: DontUseSpecialEventCommand?
+          - multiple players have special event cards
+      - test: use special event card after last action
+        - should be able to use before drawing cards & infecting cities
       - add to deck at start of game
       - command generator
         - scenario: available at any time during both players' turn phases
         - scenario: during epidemic: between infect + intensify
         - all scenarios added in this branch
+      - invariants
+        - constant number of special event cards
+        - one of each
       - inline todos
       - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck
