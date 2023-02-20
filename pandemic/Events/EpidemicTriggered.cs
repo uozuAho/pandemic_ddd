@@ -1,3 +1,3 @@
 ﻿namespace pandemic.Events;
 
-internal record EpidemicTriggered : IEvent;
+public record EpidemicTriggered : IEvent;
