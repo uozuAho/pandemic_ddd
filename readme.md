@@ -15,7 +15,7 @@ implemented.
       - add to deck at start of game
       - command generator
         - scenario: available at any time during both players' turn phases
-      - rename playercitycard.cs to playercards.cs, split different cards into files
+        - scenario: during epidemic: between infect + intensify
       - inline todos
       - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck
