@@ -1762,7 +1762,6 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 
-        // todo: other special events too
         [Test]
         public void Government_grant_can_play_during_epidemic_after_infect()
         {

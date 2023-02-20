@@ -21,6 +21,8 @@ public partial record PandemicGame
 
             if (game.APlayerMustDiscard) return game;
 
+            if (game.Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard))) return game;
+
             if (game.PhaseOfTurn == TurnPhase.InfectCities)
             {
                 game = InfectCities(game, eventList);

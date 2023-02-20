@@ -13,7 +13,11 @@ namespace pandemic.Values
 
     public record EpidemicCard : PlayerCard;
 
-    public record GovernmentGrantCard : PlayerCard;
+    public interface ISpecialEventCard
+    {
+    }
+
+    public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
 
     public class PlayerCardEqualityComparer : IEqualityComparer<PlayerCard>
     {

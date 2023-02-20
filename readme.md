@@ -11,10 +11,11 @@ implemented.
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
       - test: can use between intensify & infect
+      - test: choose not to use special event card, game continues. DontUseSpecialEventCommand?
       - add to deck at start of game
       - command generator
         - scenario: available at any time during both players' turn phases
-      - rename playercitycard.cs to playercards.cs
+      - rename playercitycard.cs to playercards.cs, split different cards into files
       - inline todos
       - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck
@@ -22,6 +23,7 @@ implemented.
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic
     - one quiet night: skip next infect cities step
+    - Government_grant_can_play_during_epidemic_after_infect: test with all special events
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
     - operations expert:
