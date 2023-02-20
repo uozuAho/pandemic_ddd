@@ -1752,10 +1752,13 @@ namespace pandemic.test
             (game, _) = game.Do(new PassCommand(Role.Medic));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            // todo: PlayerCommandGenerator: should generate do gov grant here
+            game.CurrentPlayer.Hand.Count.ShouldBe(8);
 
+            // act: gov grant
             (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
 
+            game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 

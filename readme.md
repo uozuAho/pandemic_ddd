@@ -10,7 +10,6 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
-      - test: can use event instead of discarding
       - test: can use between intensify & infect
       - add to deck at start of game
       - command generator
