@@ -10,12 +10,16 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
-      - test: can use between intensify & infect
-      - test: choose not to use special event card, game continues. DontUseSpecialEventCommand?
+      - test: choose not to use special event card, game continues
+        - scenarios
+          - during epidemic
+          - after turn
+        - idea: DontUseSpecialEventCommand?
       - add to deck at start of game
       - command generator
         - scenario: available at any time during both players' turn phases
         - scenario: during epidemic: between infect + intensify
+        - all scenarios added in this branch
       - inline todos
       - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck

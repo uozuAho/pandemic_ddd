@@ -48,7 +48,7 @@ public partial record PandemicGame
         return game;
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
+    public (PandemicGame, IEnumerable<IEvent>) Do(ICommand command)
     {
         if (SelfConsistencyCheckingEnabled) ValidateInternalConsistency();
         PreCommandChecks(command);
@@ -64,7 +64,7 @@ public partial record PandemicGame
         return (game, eventList);
     }
 
-    private void PreCommandChecks(IPlayerCommand command)
+    private void PreCommandChecks(ICommand command)
     {
         ThrowIfGameOver(this);
 
@@ -75,14 +75,14 @@ public partial record PandemicGame
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
         }
 
-        if (command is IConsumesAction)
+        if (command is IPlayerCommand cmd and IConsumesAction)
         {
-            ThrowIfNotRolesTurn(command.Role);
-            ThrowIfNoActionsRemaining(PlayerByRole(command.Role));
+            ThrowIfNotRolesTurn(cmd.Role);
+            ThrowIfNoActionsRemaining(PlayerByRole(cmd.Role));
         }
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(IPlayerCommand command)
+    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(ICommand command)
     {
         return command switch
         {

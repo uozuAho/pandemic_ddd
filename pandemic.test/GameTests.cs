@@ -1802,6 +1802,39 @@ namespace pandemic.test
             eventList.ShouldContain(e => e is InfectionCardDrawn);
         }
 
+        [Test]
+        public void Special_event_choose_not_to_use_during_epidemic()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            }).WithNoEpidemics();
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+
+            // act: end turn, draw epidemic card
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            var eventList = events.ToList();
+            eventList.ShouldContain(e => e is EpidemicTriggered);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: choose not to use special event card
+            (game, events) = game.Do(new DontUseSpecialEventCommand());
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            eventList = events.ToList();
+            eventList.ShouldContain(e => e is InfectionCardDrawn);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
