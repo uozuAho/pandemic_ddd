@@ -1748,14 +1748,17 @@ namespace pandemic.test
                 Hand = new PlayerHand(game.PlayerDrawPile.Bottom(5).Concat(new[] { new GovernmentGrantCard() })),
             });
 
-            // act: end turn
-            (game, _) = game.Do(new PassCommand(Role.Medic));
+            // act: end turn, don't use event card before or during picking up cards
+            var eventList = new List<IEvent>();
+            game = game.Do(new PassCommand(Role.Medic), eventList);
+            game = game.Do(new DontUseSpecialEventCommand(), eventList);
+            game = game.Do(new DontUseSpecialEventCommand(), eventList);
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
 
             // act: gov grant
-            (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
+            game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), eventList);
 
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();

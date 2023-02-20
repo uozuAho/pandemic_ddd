@@ -39,7 +39,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
+    public PandemicGame Do(ICommand command, List<IEvent> events)
     {
         var (game, newEvents) = Do(command);
 
