@@ -15,7 +15,7 @@ public partial record PandemicGame
                 || game.APlayerMustDiscard
                 || game.IsOver) return game;
 
-            if (game.Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
+            if (game.APlayerHasASpecialEventCard)
             {
                 if (game.SkipNextChanceToUseSpecialEvent)
                     game = game with { SkipNextChanceToUseSpecialEvent = false };
@@ -57,6 +57,14 @@ public partial record PandemicGame
             if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
 
             if (game.IsOver) return game;
+
+            if (game.APlayerHasASpecialEventCard)
+            {
+                if (game.SkipNextChanceToUseSpecialEvent)
+                    game = game with { SkipNextChanceToUseSpecialEvent = false };
+                else
+                    return game;
+            }
 
             game = PickUpCard(game, events);
 

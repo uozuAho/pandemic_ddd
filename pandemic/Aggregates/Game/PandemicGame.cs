@@ -56,6 +56,8 @@ namespace pandemic.Aggregates.Game
         /// </summary>
         private bool SkipNextChanceToUseSpecialEvent { get; init; }
 
+        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
+
         public bool IsSameStateAs(PandemicGame other)
         {
             if (LossReason != other.LossReason) return false;

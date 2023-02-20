@@ -1783,6 +1783,7 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             (game, var events) = game.Do(new PassCommand(Role.Medic));
+            (game, events) = game.Do(new DontUseSpecialEventCommand());
 
             // assert: infect stage of epidemic has occurred
             var eventList = events.ToList();
