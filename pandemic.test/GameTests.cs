@@ -1835,37 +1835,37 @@ namespace pandemic.test
             eventList.ShouldContain(e => e is InfectionCardDrawn);
         }
 
-        // [Test]
-        // public void Special_event_choose_not_to_use_after_turn()
-        // {
-        //     var game = NewGame(new NewGameOptions
-        //     {
-        //         Roles = new[] { Role.Medic, Role.Scientist },
-        //     }).WithNoEpidemics();
-        //
-        //     game = game.SetCurrentPlayerAs(game.CurrentPlayer with
-        //     {
-        //         ActionsRemaining = 1,
-        //         Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
-        //     });
-        //
-        //     // act: pass, then no more actions remaining
-        //     (game, var events) = game.Do(new PassCommand(Role.Medic));
-        //
-        //     // assert: still medic's turn, can use special event card
-        //     var eventList = events.ToList();
-        //     game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-        //     eventList.ShouldNotContain(e => e is PlayerCardPickedUp);
-        //     eventList.ShouldNotContain(e => e is InfectionCardDrawn);
-        //
-        //     // act: don't use special event
-        //     (game, events) = game.Do(new DontUseSpecialEventCommand());
-        //
-        //     eventList = events.ToList();
-        //     game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-        //     eventList.ShouldContain(e => e is PlayerCardPickedUp);
-        //     eventList.ShouldContain(e => e is InfectionCardDrawn);
-        // }
+        [Test]
+        public void Special_event_choose_not_to_use_after_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            }).WithNoEpidemics();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+
+            // act: pass, then no more actions remaining
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            // assert: still medic's turn, can use special event card
+            var eventList = events.ToList();
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            eventList.ShouldNotContain(e => e is PlayerCardPickedUp);
+            eventList.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            (game, events) = game.Do(new DontUseSpecialEventCommand());
+
+            eventList = events.ToList();
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            eventList.ShouldContain(e => e is PlayerCardPickedUp);
+            eventList.ShouldContain(e => e is InfectionCardDrawn);
+        }
 
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
