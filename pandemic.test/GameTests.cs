@@ -1734,6 +1734,31 @@ namespace pandemic.test
             game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(4);
         }
 
+        [Test]
+        public void Government_grant_can_use_instead_of_discarding()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            }).WithNoEpidemics(); //.WithNoSpecialEvents(); //todo
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = new PlayerHand(game.PlayerDrawPile.Bottom(5).Concat(new[] { new GovernmentGrantCard() })),
+            });
+
+            // act: end turn
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            // todo: PlayerCommandGenerator: should generate do gov grant here
+
+            (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
