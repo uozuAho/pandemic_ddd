@@ -84,6 +84,7 @@ public partial record PandemicGame
 
         return game with
         {
+            ResearchStationPile = game.ResearchStationPile - 1,
             Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
             Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)

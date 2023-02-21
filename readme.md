@@ -10,10 +10,7 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
-      - in progress: add to deck at start of game
-        - need command generator to fix remaining tests
-          - command generator
-            - add to all possible commands
+      - throw when no research stations left
       - invariants
         - constant number of special event cards
         - one of each
