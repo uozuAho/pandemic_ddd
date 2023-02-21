@@ -166,7 +166,7 @@ namespace pandemic.Aggregates.Game
             var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
                                    + PlayerDrawPile.Count
                                    + PlayerDiscardPile.Count;
-            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty));
+            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
 
             Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
 
