@@ -1634,6 +1634,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
+            var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
             // act: end turn, draw epidemic card
@@ -1643,6 +1644,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1650,6 +1653,8 @@ namespace pandemic.test
             // assert: epidemic triggered
             events.ShouldContain(e => e is EpidemicTriggered);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: choose not to use special event card
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1658,6 +1663,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: choose not to use special event card
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1665,6 +1672,8 @@ namespace pandemic.test
             // assert: now it's the scientist's turn
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
         }
 
         [Test]
@@ -1681,6 +1690,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
+            var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
             // act: pass, then no more actions remaining
@@ -1690,6 +1700,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1698,6 +1710,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 1);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1706,6 +1720,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1714,6 +1730,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
         }
 
         [Test]
@@ -1733,6 +1751,7 @@ namespace pandemic.test
                 Hand = game.PlayerByRole(Role.Scientist).Hand.Add(new GovernmentGrantCard())
             });
 
+            var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
             // act: pass, then no more actions remaining
@@ -1742,6 +1761,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1750,6 +1771,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 1);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1758,6 +1781,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1766,6 +1791,8 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
         }
 
         [Repeat(10)]

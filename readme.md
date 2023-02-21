@@ -13,7 +13,6 @@ implemented.
       - in progress: add to deck at start of game
         - need command generator to fix remaining tests
           - command generator
-            - in progress: add expected legal commands to all special event card tests
             - add to all possible commands
       - invariants
         - constant number of special event cards
