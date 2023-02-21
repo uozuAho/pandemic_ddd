@@ -1785,26 +1785,26 @@ namespace pandemic.test
             });
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
+            var events = new List<IEvent>();
+
             // act: end turn, draw epidemic card
-            (game, var events) = game.Do(new PassCommand(Role.Medic));
-            (game, events) = game.Do(new DontUseSpecialEventCommand());
+            game = game.Do(new PassCommand(Role.Medic), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: infect stage of epidemic has occurred
-            var eventList = events.ToList();
-            eventList.ShouldContain(e => e is EpidemicTriggered);
-            eventList.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
-            eventList.ShouldNotContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: use special event card
-            (game, events) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
+            game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
 
             // assert: intensify stage of epidemic has occurred, turn is now over
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            eventList = events.ToList();
-            eventList.ShouldContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
         [Test]
@@ -1858,7 +1858,6 @@ namespace pandemic.test
             events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
-        // todo: same test, but scientist has the special event card this time
         [Test]
         public void Special_event_choose_not_to_use_after_turn()
         {
@@ -1895,6 +1894,58 @@ namespace pandemic.test
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: still medic's turn, can use special event before infection stage
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: it's finally the scientist's turn!
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
+        }
+
+        [Test]
+        public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn()
+        {
+            var game = NewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+            }).WithNoEpidemics();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+            });
+            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = game.PlayerByRole(Role.Scientist).Hand.Add(new GovernmentGrantCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act: pass, then no more actions remaining
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert: still medic's turn, can use scientist's special event card
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: medic has picked up one card, and has another chance to use special event card
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: still medic's turn, can use scientist's special event before infection stage
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);

@@ -14,19 +14,21 @@ implemented.
         - scenarios
           - DONE: during epidemic
           - DONE: after turn
-          - non-current player has special event card (see inline todo)
-          - multiple players have special event cards
+          - DONE: non-current player has special event card (see inline todo)
       - add to deck at start of game
       - command generator
-        - scenario: available at any time during both players' turn phases
-        - scenario: during epidemic: between infect + intensify
-        - all scenarios added in this branch
+        - add to existing test scenarios:
+          - scenario: available at any time during both players' turn phases
+          - scenario: during epidemic: between infect + intensify
+        - any other scenarios added in this branch
       - invariants
         - constant number of special event cards
         - one of each
       - inline todos
       - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck
+      - scenario: multiple players have special event cards
+        - copy existing scenarios where one player has an event card
     - airlift: move any pawn to any city
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic
