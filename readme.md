@@ -13,10 +13,9 @@ implemented.
       - test: choose not to use special event card, game continues
         - scenarios
           - DONE: during epidemic
-          - after turn
+          - DONE: after turn
+          - non-current player has special event card (see inline todo)
           - multiple players have special event cards
-      - test: can use special event card after last action
-        - should be able to use before drawing cards & infecting cities
       - add to deck at start of game
       - command generator
         - scenario: available at any time during both players' turn phases

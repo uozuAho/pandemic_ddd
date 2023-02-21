@@ -1825,21 +1825,40 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
-            // act: end turn, draw epidemic card
-            (game, var events) = game.Do(new PassCommand(Role.Medic));
+            var events = new List<IEvent>();
 
-            var eventList = events.ToList();
-            eventList.ShouldContain(e => e is EpidemicTriggered);
+            // act: end turn, draw epidemic card
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert: still medic's turn, can use special event card
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: epidemic triggered
+            events.ShouldContain(e => e is EpidemicTriggered);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: choose not to use special event card
-            (game, events) = game.Do(new DontUseSpecialEventCommand());
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
+            // assert: still medic's turn, can use special event before infection stage
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: choose not to use special event card
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: now it's the scientist's turn
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            eventList = events.ToList();
-            eventList.ShouldContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
+        // todo: same test, but scientist has the special event card this time
         [Test]
         public void Special_event_choose_not_to_use_after_turn()
         {
