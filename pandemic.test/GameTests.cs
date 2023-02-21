@@ -1156,10 +1156,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_can_end_game()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            }).WithNoEpidemics();
+            var game = DefaultTestGame();
             game = game with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
@@ -1315,10 +1312,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_x8_causes_loss()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             var atlanta = game.CityByName("Atlanta");
             game = game with
@@ -1369,10 +1363,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_scenario_chain_reaction()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             game = game with
             {
@@ -1462,10 +1453,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_builds_station_without_using_action()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1617,10 +1605,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_choose_not_to_use_during_epidemic()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            }).WithNoEpidemics();
+            var game = DefaultTestGame();
 
             game = game with
             {
@@ -1732,10 +1717,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            }).WithNoEpidemics();
+            var game = DefaultTestGame();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
