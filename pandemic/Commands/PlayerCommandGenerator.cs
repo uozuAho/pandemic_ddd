@@ -104,6 +104,10 @@ namespace pandemic.Commands
                         yield return new ShareKnowledgeTakeCommand(player.Role, card.City.Name, otherPlayer.Role);
                     }
                 }
+                foreach (var city in game.Cities)
+                {
+                    yield return new GovernmentGrantCommand(player.Role, city.Name);
+                }
             }
         }
 
