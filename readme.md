@@ -10,12 +10,14 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - government grant: add a research station to any city
-      - add to deck at start of game
-      - command generator
-        - add to existing test scenarios:
-          - scenario: available at any time during both players' turn phases
-          - scenario: during epidemic: between infect + intensify
-        - any other scenarios added in this branch
+      - in progress: add to deck at start of game
+        - need command generator to fix remaining tests
+          - command generator
+            - in progress: add expected legal commands to all special event card tests
+            - add to existing test scenarios:
+              - scenario: available at any time during both players' turn phases
+              - scenario: during epidemic: between infect + intensify
+            - any other scenarios added in this branch
       - invariants
         - constant number of special event cards
         - one of each

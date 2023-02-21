@@ -22,6 +22,8 @@ namespace pandemic.Commands
             if (_bufIdx > 0)
                 return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
 
+            SetSpecialEventCommands(game);
+
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {
                 SetDriveFerryCommands(game);
@@ -37,6 +39,25 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetSpecialEventCommands(PandemicGame game)
+        {
+            if (!game.APlayerHasASpecialEventCard) return;
+
+            foreach (var player in game.Players)
+            {
+                foreach (var card in player.Hand.Where(c => c is ISpecialEventCard))
+                {
+                    if (card is GovernmentGrantCard)
+                    {
+                        foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
+                        {
+                            _buffer[_bufIdx++] = new GovernmentGrantCommand(player.Role, city.Name);
+                        }
+                    }
+                }
+            }
         }
 
         private void SetPassCommands(PandemicGame game)

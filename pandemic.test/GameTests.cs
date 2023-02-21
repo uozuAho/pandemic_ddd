@@ -1481,6 +1481,10 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
+            new PlayerCommandGenerator()
+                .LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+
             (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
 
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(4);
