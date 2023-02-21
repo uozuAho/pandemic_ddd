@@ -9,7 +9,7 @@ namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
-        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[100];
+        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[1000];
         private int _bufIdx = 0;
 
         public IEnumerable<IPlayerCommand> LegalCommands(PandemicGame game)
@@ -19,10 +19,10 @@ namespace pandemic.Commands
             _bufIdx = 0;
 
             SetDiscardCommands(game);
-            if (_bufIdx > 0)
-                return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
-
             SetSpecialEventCommands(game);
+
+            if (game.APlayerMustDiscard)
+                return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
             {

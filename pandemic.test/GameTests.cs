@@ -1524,13 +1524,14 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_play_when_not_your_turn()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
             var scientist = game.PlayerByRole(Role.Scientist);
             game = game.SetPlayer(Role.Scientist,
                 scientist with { Hand = scientist.Hand.Add(new GovernmentGrantCard()) });
+
+            new PlayerCommandGenerator()
+                .LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             (game, _) = game.Do(new GovernmentGrantCommand(Role.Scientist, "Chicago"));
 
@@ -1542,10 +1543,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_use_instead_of_discarding()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            }).WithNoEpidemics(); //.WithNoSpecialEvents(); //todo
+            var game = DefaultTestGame();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1561,6 +1559,10 @@ namespace pandemic.test
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
+
+            new PlayerCommandGenerator()
+                .LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: gov grant
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), eventList);

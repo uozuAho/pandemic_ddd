@@ -17,7 +17,9 @@ implemented.
             - add to existing test scenarios:
               - scenario: available at any time during both players' turn phases
               - scenario: during epidemic: between infect + intensify
+              - test: no special event commands generated when players chose not to play one
             - any other scenarios added in this branch
+            - add to all possible commands
       - invariants
         - constant number of special event cards
         - one of each

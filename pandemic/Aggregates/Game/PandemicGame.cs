@@ -49,7 +49,7 @@ namespace pandemic.Aggregates.Game
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
 
-        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
+        public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         /// <summary>
         /// Players had the option to use a special event card, and chose not to
