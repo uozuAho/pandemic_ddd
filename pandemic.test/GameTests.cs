@@ -1589,10 +1589,13 @@ namespace pandemic.test
             });
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
+            var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: infect stage of epidemic has occurred
@@ -1602,6 +1605,8 @@ namespace pandemic.test
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            generator.LegalCommands(game)
+                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             // act: use special event card
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);

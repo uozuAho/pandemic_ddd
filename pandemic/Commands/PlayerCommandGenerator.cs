@@ -43,8 +43,6 @@ namespace pandemic.Commands
 
         private void SetSpecialEventCommands(PandemicGame game)
         {
-            if (!game.APlayerHasASpecialEventCard) return;
-
             foreach (var player in game.Players)
             {
                 foreach (var card in player.Hand.Where(c => c is ISpecialEventCard))
