@@ -20,7 +20,7 @@ namespace pandemic.test
         [TestCase("Washington")]
         public void Drive_or_ferry_player_moves_them_to_city(string toCity)
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -33,7 +33,7 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_garbage_city_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -45,7 +45,7 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_to_non_adjacent_city_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -57,7 +57,7 @@ namespace pandemic.test
         [Test]
         public void Drive_or_ferry_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -70,7 +70,7 @@ namespace pandemic.test
         [Test]
         public void Direct_flight_goes_to_city_and_discards_card()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -87,7 +87,7 @@ namespace pandemic.test
         [Test]
         public void Direct_flight_without_card_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -102,7 +102,7 @@ namespace pandemic.test
         [Test]
         public void Direct_flight_throws_when_not_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -117,7 +117,7 @@ namespace pandemic.test
         [Test]
         public void Direct_flight_to_current_city_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -131,7 +131,7 @@ namespace pandemic.test
         [Test]
         public void Direct_flight_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -148,7 +148,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_goes_to_city_and_discards_card()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -167,7 +167,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_to_garbage_city_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -179,7 +179,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_without_card_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -192,7 +192,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_to_current_location_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -205,7 +205,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_when_not_turn_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -221,7 +221,7 @@ namespace pandemic.test
         [Test]
         public void Charter_flight_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -240,7 +240,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_goes_to_city()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -265,7 +265,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_throws_if_destination_has_no_research_station()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -277,7 +277,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_throws_if_destination_is_current_location()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -289,7 +289,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_throws_if_location_has_no_research_station()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -315,7 +315,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -340,7 +340,7 @@ namespace pandemic.test
         [Test]
         public void Shuttle_flight_throws_if_not_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -362,7 +362,7 @@ namespace pandemic.test
         [Test]
         public void Player_draws_two_cards_after_last_action()
         {
-            var startingState = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+            var startingState = DefaultTestGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
                 .WithNoEpidemics();
 
             var game = startingState.SetCurrentPlayerAs(
@@ -378,7 +378,7 @@ namespace pandemic.test
         [Test]
         public void Player_attempts_fifth_action_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -395,7 +395,7 @@ namespace pandemic.test
         [Test]
         public void Cities_are_infected_after_player_turn_ends()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
                 Roles = new[] { Role.Medic, Role.Scientist }
@@ -431,7 +431,7 @@ namespace pandemic.test
         [Test]
         public void Game_ends_when_cubes_run_out()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -452,7 +452,7 @@ namespace pandemic.test
         [Test]
         public void It_is_next_players_turn_after_infect_cities()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -471,7 +471,7 @@ namespace pandemic.test
         [Test]
         public void Player_must_discard_when_hand_is_full()
         {
-            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+            var game = DefaultTestGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
                 .WithNoEpidemics();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
@@ -499,7 +499,7 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_goes_to_discard_pile()
         {
-            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+            var game = DefaultTestGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
                 .WithNoEpidemics();
             var top7Cards = game.PlayerDrawPile.Top(7).ToList();
 
@@ -526,7 +526,7 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_when_no_actions_infects_cities()
         {
-            var initialGame = NewGame(new NewGameOptions
+            var initialGame = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -547,7 +547,7 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_when_no_actions_and_nine_cards_must_discard_another()
         {
-            var initialGame = NewGame(new NewGameOptions
+            var initialGame = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -567,7 +567,7 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_does_not_cause_card_pickup()
         {
-            var initialGame = NewGame(new NewGameOptions
+            var initialGame = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -588,7 +588,7 @@ namespace pandemic.test
         [Test]
         public void Discard_player_card_throws_when_not_in_hand()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -605,7 +605,7 @@ namespace pandemic.test
         [Test]
         public void Scenario_share_knowledge_give_then_other_player_must_discard()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -637,7 +637,7 @@ namespace pandemic.test
         [Test]
         public void Scenario_share_knowledge_take_then_other_player_must_discard()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -673,7 +673,7 @@ namespace pandemic.test
             var medicHand = PlayerHand.Of("Atlanta", "New York", "Bogota", "Milan", "Lima", "Paris", "Moscow");
             var scientistHand = PlayerHand.Of("Miami", "Taipei", "Sydney", "Delhi", "Jakarta", "Beijing", "Seoul");
 
-            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+            var game = DefaultTestGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
                 .WithNoEpidemics();
             game = game with
             {
@@ -725,7 +725,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_works()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -751,7 +751,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
+            var game = DefaultTestGame(new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } })
                 .WithNoEpidemics();
 
             var chicagoPlayerCard = PlayerCards.CityCard("Chicago");
@@ -769,7 +769,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_when_not_in_city_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -785,7 +785,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_without_correct_city_card_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -803,7 +803,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_where_already_exists_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -823,7 +823,7 @@ namespace pandemic.test
         [Test]
         public void Build_research_station_when_none_left_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
                 {
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
@@ -846,7 +846,7 @@ namespace pandemic.test
         [Test]
         public void Cure_disease_works()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -869,7 +869,7 @@ namespace pandemic.test
         [Test]
         public void Cure_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -888,7 +888,7 @@ namespace pandemic.test
         [Test]
         public void Cure_last_disease_wins()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
                 {
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
@@ -917,7 +917,7 @@ namespace pandemic.test
         [Test]
         public void Cure_last_disease_on_last_action_wins()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
                 {
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
@@ -947,7 +947,7 @@ namespace pandemic.test
         [Test]
         public void Cure_when_not_at_research_station_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -966,7 +966,7 @@ namespace pandemic.test
         [Test]
         public void Cure_when_not_enough_cards_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -985,7 +985,7 @@ namespace pandemic.test
         [Test]
         public void Cure_with_different_colours_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1011,7 +1011,7 @@ namespace pandemic.test
         [Test]
         public void Cure_already_cured_disease_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
                 {
                     Roles = new[] { Role.Medic, Role.Scientist }
                 }) with
@@ -1036,7 +1036,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_card_goes_to_discard_pile()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1063,7 +1063,7 @@ namespace pandemic.test
         [Test]
         public void Treat_disease_works()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1085,7 +1085,7 @@ namespace pandemic.test
         [Test]
         public void Treat_disease_throws_if_wrong_city()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1107,7 +1107,7 @@ namespace pandemic.test
         [Test]
         public void Treat_disease_throws_if_no_cubes()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1126,7 +1126,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_give_works()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1152,7 +1152,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_give_throws_when_receiver_not_in_same_city()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1177,7 +1177,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_give_throws_when_not_in_matching_location()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1201,7 +1201,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_give_throws_when_player_doesnt_have_card()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1223,7 +1223,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_to_self_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1241,7 +1241,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_receiver_must_discard_if_more_than_7_cards()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1263,7 +1263,7 @@ namespace pandemic.test
         [Test]
         public void Share_knowledge_take_works()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1289,7 +1289,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
                 Rng = new Random(1237)
@@ -1319,7 +1319,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_increases_infection_rate()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1341,10 +1341,10 @@ namespace pandemic.test
         [Test]
         public void Epidemic_can_end_game()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
-            });
+            }).WithNoEpidemics();
             game = game with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
@@ -1363,7 +1363,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_causes_outbreak_scenario()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1388,7 +1388,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_onto_existing_cubes_causes_outbreak()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1415,7 +1415,7 @@ namespace pandemic.test
         [Test]
         public void Pass_reduces_num_actions()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1428,10 +1428,7 @@ namespace pandemic.test
         [Test]
         public void Pass_can_end_turn()
         {
-            var game = NewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            }).WithNoEpidemics();
+            var game = DefaultTestGame().WithNoEpidemics();
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
@@ -1443,7 +1440,7 @@ namespace pandemic.test
         [Test]
         public void Eradicate_causes_infection_cards_to_have_no_effect()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
@@ -1484,7 +1481,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_infects_adjacent_cities()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1519,7 +1516,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_x8_causes_loss()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1548,7 +1545,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_causes_game_lost_when_cubes_run_out()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1574,7 +1571,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_scenario_chain_reaction()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1614,7 +1611,7 @@ namespace pandemic.test
         [Test]
         public void Outbreak_scenario_chain_reaction_big()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1670,7 +1667,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_builds_station_without_using_action()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1690,7 +1687,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_on_existing_research_station_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1708,7 +1705,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_when_player_doesnt_have_card_throws()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1719,7 +1716,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_play_when_not_your_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             });
@@ -1737,7 +1734,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_use_instead_of_discarding()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             }).WithNoEpidemics(); //.WithNoSpecialEvents(); //todo
@@ -1769,7 +1766,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_play_during_epidemic_after_infect()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             }).WithNoEpidemics();
@@ -1810,7 +1807,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_choose_not_to_use_during_epidemic()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             }).WithNoEpidemics();
@@ -1861,7 +1858,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_choose_not_to_use_after_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             }).WithNoEpidemics();
@@ -1910,7 +1907,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn()
         {
-            var game = NewGame(new NewGameOptions
+            var game = DefaultTestGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
             }).WithNoEpidemics();
@@ -2035,7 +2032,18 @@ namespace pandemic.test
             Assert.IsTrue(events.Any(e => e is TurnEnded));
         }
 
-        private static PandemicGame NewGame(NewGameOptions options)
+        private static PandemicGame DefaultTestGame()
+        {
+            var options = new NewGameOptions
+            {
+                Roles = new [] { Role.Medic, Role.Scientist},
+                IncludeSpecialEventCards = false
+            };
+
+            return DefaultTestGame(options);
+        }
+
+        private static PandemicGame DefaultTestGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
 

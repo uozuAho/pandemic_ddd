@@ -24,7 +24,7 @@ public partial record PandemicGame
         game = game
             .SetDifficulty(options.Difficulty, events)
             .SetupInfectionDeck(events)
-            .ShufflePlayerDrawPileForDealing(events);
+            .ShufflePlayerDrawPileForDealing(events, options.IncludeSpecialEventCards);
 
         game = DoInitialInfection(game, events);
 
@@ -353,11 +353,11 @@ public partial record PandemicGame
         return ApplyEvent(new PlayerAdded(role), events);
     }
 
-    private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
+    private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events, bool includeSpecialEventCards)
     {
         var playerCards = Board.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
-            .Concat(SpecialEventCards.All)
+            .Concat(includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>())
             .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 
