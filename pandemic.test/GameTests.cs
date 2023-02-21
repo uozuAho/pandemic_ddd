@@ -1112,12 +1112,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-                Rng = new Random(1237)
-                // just in case: a seed of 1238 causes failure
-            });
+            var game = DefaultTestGame();
 
             game = game with
             {
@@ -1288,33 +1283,30 @@ namespace pandemic.test
         [Test]
         public void Outbreak_infects_adjacent_cities()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
             game = game with
             {
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
                 InfectionDrawPile =
-                    game.InfectionDrawPile.Remove(atlantaInfectionCard).PlaceOnTop(atlantaInfectionCard),
+                    game.InfectionDrawPile
+                        .Remove(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
                 Cities = game.Cities.Select(c => c.Name switch
                 {
                     "Atlanta" => c with
                     {
-                        Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue).AddCube(Colour.Blue)
+                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                     },
                     _ => c with { Cubes = CubePile.Empty }
                 }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
-            var initialGame = game;
 
             // act
             (game, _) = game.Do(new PassCommand(Role.Medic));
 
-            game.OutbreakCounter.ShouldBe(initialGame.OutbreakCounter + 1);
+            game.OutbreakCounter.ShouldBe(1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
             adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
@@ -1352,25 +1344,24 @@ namespace pandemic.test
         [Test]
         public void Outbreak_causes_game_lost_when_cubes_run_out()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             var atlanta = game.CityByName("Atlanta");
+            var atlantaInfectionCard = new InfectionCard("Atlanta", Colour.Blue);
             game = game with
             {
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                InfectionDrawPile = game.InfectionDrawPile
+                    .Remove(atlantaInfectionCard)
+                    .PlaceOnTop(atlantaInfectionCard),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
                     Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
                 }),
-                Cubes = CubePile.Empty.AddCube(Colour.Blue).AddCube(Colour.Blue)
+                Cubes = CubePile.Empty.AddCubes(Colour.Blue, 2)
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
-            (game, _) = game.Do(new PassCommand(Role.Medic));
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             game.IsLost.ShouldBeTrue();
         }
@@ -1686,10 +1677,7 @@ namespace pandemic.test
         [Test]
         public void Special_event_choose_not_to_use_after_turn()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            }).WithNoEpidemics();
+            var game = DefaultTestGame();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1875,6 +1863,8 @@ namespace pandemic.test
         private static PandemicGame DefaultTestGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
+
+            game = game.WithNoEpidemics();
 
             // allowing invalid game states makes many test scenarios much easier
             // to set up
