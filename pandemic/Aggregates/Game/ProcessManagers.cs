@@ -50,6 +50,8 @@ public partial record PandemicGame
 
         private static PandemicGame DrawCards(PandemicGame game, ICollection<IEvent> events)
         {
+            if (game.CardsDrawn == 2) return game.ApplyEvent(new TurnPhaseEnded(), events);
+
             game = PickUpCard(game, events);
 
             if (game.IsOver) return game;
@@ -65,6 +67,8 @@ public partial record PandemicGame
                 else
                     return game;
             }
+
+            if (game.CardsDrawn == 2) return game.ApplyEvent(new TurnPhaseEnded(), events);
 
             game = PickUpCard(game, events);
 

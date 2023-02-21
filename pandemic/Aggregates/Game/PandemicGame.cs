@@ -58,6 +58,11 @@ namespace pandemic.Aggregates.Game
 
         private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
 
+        /// <summary>
+        /// Number of cards drawn during the current 'draw cards' phase
+        /// </summary>
+        private int CardsDrawn { get; init; }
+
         public bool IsSameStateAs(PandemicGame other)
         {
             if (LossReason != other.LossReason) return false;

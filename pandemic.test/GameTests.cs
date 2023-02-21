@@ -1762,6 +1762,7 @@ namespace pandemic.test
 
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 

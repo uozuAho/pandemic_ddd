@@ -125,7 +125,11 @@ public partial record PandemicGame
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        return game with { PhaseOfTurn = nextPhase };
+        return game with
+        {
+            PhaseOfTurn = nextPhase,
+            CardsDrawn = game.PhaseOfTurn == TurnPhase.DrawCards ? 0 : game.CardsDrawn
+        };
     }
 
     private static PandemicGame ApplyTreatedDisease(PandemicGame game, TreatedDisease evt)
@@ -243,6 +247,7 @@ public partial record PandemicGame
 
         return game with
         {
+            CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {
