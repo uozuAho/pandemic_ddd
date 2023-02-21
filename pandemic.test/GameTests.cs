@@ -1854,22 +1854,39 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
+            var events = new List<IEvent>();
+
             // act: pass, then no more actions remaining
-            (game, var events) = game.Do(new PassCommand(Role.Medic));
+            game = game.Do(new PassCommand(Role.Medic), events);
 
             // assert: still medic's turn, can use special event card
-            var eventList = events.ToList();
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            eventList.ShouldNotContain(e => e is PlayerCardPickedUp);
-            eventList.ShouldNotContain(e => e is InfectionCardDrawn);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
 
             // act: don't use special event
-            (game, events) = game.Do(new DontUseSpecialEventCommand());
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            eventList = events.ToList();
+            // assert: medic has picked up one card, and has another chance to use special event card
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: still medic's turn, can use special event before infection stage
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: it's finally the scientist's turn!
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            eventList.ShouldContain(e => e is PlayerCardPickedUp);
-            eventList.ShouldContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
         }
 
         [Repeat(10)]
