@@ -357,6 +357,7 @@ public partial record PandemicGame
     {
         var playerCards = Board.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
+            .Concat(SpecialEventCards.All)
             .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 

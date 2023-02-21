@@ -189,6 +189,8 @@ namespace pandemic.GameData
 
         public Dictionary<string, List<string>> AdjacentCities => _adjacencyLookup;
 
+        public static readonly int NumberOfSpecialEventCards = SpecialEventCards.All.Count;
+
         private static readonly Dictionary<(string, string), int> _distanceLookup = BuildDriveFerryDistanceLookup();
 
         public static int DriveFerryDistance(string city1, string city2)
