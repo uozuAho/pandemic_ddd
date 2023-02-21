@@ -113,6 +113,8 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)
     {
+        if (ResearchStationPile == 0) throw new GameRuleViolatedException("No research stations left");
+
         var player = PlayerByRole(command.Role);
         var card = PlayerByRole(command.Role).Hand.SingleOrDefault(c => c is GovernmentGrantCard);
         if (card is null) throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");

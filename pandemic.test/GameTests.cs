@@ -1496,10 +1496,7 @@ namespace pandemic.test
         [Test]
         public void Government_grant_on_existing_research_station_throws()
         {
-            var game = DefaultTestGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist },
-            });
+            var game = DefaultTestGame();
 
             var chicago = game.CityByName("Chicago");
             game = game with { Cities = game.Cities.Replace(chicago, chicago with { HasResearchStation = true }) };
@@ -1514,9 +1511,18 @@ namespace pandemic.test
         [Test]
         public void Government_grant_when_player_doesnt_have_card_throws()
         {
-            var game = DefaultTestGame(new NewGameOptions
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago")));
+        }
+
+        [Test]
+        public void Government_grant_when_no_stations_left_throws()
+        {
+            var game = DefaultTestGame() with { ResearchStationPile = 0 };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
-                Roles = new[] { Role.Medic, Role.Scientist },
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
             Should.Throw<GameRuleViolatedException>(() => game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago")));
