@@ -168,6 +168,16 @@ namespace pandemic.Aggregates.Game
                                    + PlayerDiscardPile.Count;
             Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
 
+            var specialEventCards = Players
+                .SelectMany(p => p.Hand)
+                .Concat(PlayerDrawPile.Cards)
+                .Concat(PlayerDiscardPile.Cards)
+                .Where(c => c is ISpecialEventCard)
+                .ToList();
+
+            Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
+            Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
+
             Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);

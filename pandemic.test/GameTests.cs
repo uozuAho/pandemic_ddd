@@ -1794,7 +1794,7 @@ namespace pandemic.test
                 var legalCommands = commandGenerator.LegalCommands(game).ToList();
 
                 if (game.Players.Any(p => p.Hand.Count > 7))
-                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand);
+                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c is ISpecialEventCommand);
 
                 // try a bunch of illegal commands
                 foreach (var illegalCommand in allPossibleCommands
