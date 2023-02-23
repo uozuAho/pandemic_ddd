@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using System.Linq;
 using NUnit.Framework;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.GameData;
+using pandemic.test.Utils;
 using pandemic.Values;
 
 namespace pandemic.agents.test
@@ -123,7 +123,10 @@ namespace pandemic.agents.test
             {
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist },
+                IncludeSpecialEventCards = false
             });
+
+            game = game.WithNoEpidemics();
 
             return game with { SelfConsistencyCheckingEnabled = false };
         }
