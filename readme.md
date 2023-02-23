@@ -9,9 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - special event cards: play at any time, not an action
-    - government grant: add a research station to any city
-      - inline todos
-      - diff with master
     - event forecast: look at & rearrange the top 6 cards of the infection deck
       - scenario: multiple players have special event cards
         - copy existing scenarios where one player has an event card
