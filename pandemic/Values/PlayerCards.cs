@@ -11,6 +11,7 @@ public record EpidemicCard : PlayerCard;
 public interface ISpecialEventCard { }
 
 public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
+public record EventForecastCard : PlayerCard, ISpecialEventCard;
 
 public static class SpecialEventCards
 {

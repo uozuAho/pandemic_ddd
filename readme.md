@@ -10,8 +10,14 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - event forecast: look at & rearrange the top 6 cards of the infection deck
-      - scenario: multiple players have special event cards
-        - copy existing scenarios where one player has an event card
+      - happy path
+      - throw if not in hand
+      - throw if given cards are not in top 6 of infection deck
+      - add to SpecialEventCards
+      - command generator
+      - check gov grant scenarios: any more to cover for event forecast?
+    - scenario: multiple players have special event cards
+      - copy existing scenarios where one player has an event card
     - airlift: move any pawn to any city
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic

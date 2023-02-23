@@ -9,9 +9,17 @@ namespace pandemic.Values;
 /// </summary>
 public class Deck<T>
 {
+    /// <summary>
+    /// The deck, in bottom to top order
+    /// Index 0 | ---- bottom     top -----X highest index.
+    /// </summary>
     private readonly List<T> _cards;
 
     public int Count => _cards.Count;
+
+    /// <summary>
+    /// Get the cards in the deck, in bottom to top order. Ie. the first card (index 0) is the bottom of the deck.
+    /// </summary>
     public IEnumerable<T> Cards => _cards.Select(c => c);
     public T TopCard => _cards.Last();
     public static Deck<T> Empty => new();

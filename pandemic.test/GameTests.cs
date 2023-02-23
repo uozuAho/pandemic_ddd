@@ -1778,6 +1778,31 @@ namespace pandemic.test
                 .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
         }
 
+        [Test]
+        public void Event_forecast_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new EventForecastCard())
+            });
+
+            var top6InfectionCards = new Deck<InfectionCard>(game.InfectionDrawPile.Top(6));
+            var newInfectionCardOrder = top6InfectionCards
+                .Remove(top6InfectionCards.TopCard)
+                .PlaceAtBottom(top6InfectionCards.TopCard);
+
+            // todo: command generator: all possible combinations of event forecasts
+
+            (game, var events) = game.Do(new EventForecastCommand(Role.Medic, newInfectionCardOrder.Cards));
+
+            game.InfectionDrawPile.Top(6).ShouldBe(newInfectionCardOrder.Cards);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EventForecastCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<EventForecastCard>();
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
