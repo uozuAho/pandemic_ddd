@@ -62,7 +62,32 @@ public partial record PandemicGame
             PlayerPassed p => Apply(game, p),
             DiseaseEradicated e => Apply(game, e),
             OutbreakOccurred e => Apply(game, e),
+            GovernmentGrantUsed e => Apply(game, e),
+            ChoseNotToUseSpecialEventCard e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ChoseNotToUseSpecialEventCard evt)
+    {
+        return game with
+        {
+            SkipNextChanceToUseSpecialEvent = true
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, GovernmentGrantUsed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+        var card = player.Hand.Single(c => c is GovernmentGrantCard);
+        var city = game.CityByName(evt.City);
+
+        return game with
+        {
+            ResearchStationPile = game.ResearchStationPile - 1,
+            Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
+            Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
         };
     }
 
@@ -101,7 +126,11 @@ public partial record PandemicGame
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        return game with { PhaseOfTurn = nextPhase };
+        return game with
+        {
+            PhaseOfTurn = nextPhase,
+            CardsDrawn = game.PhaseOfTurn == TurnPhase.DrawCards ? 0 : game.CardsDrawn
+        };
     }
 
     private static PandemicGame ApplyTreatedDisease(PandemicGame game, TreatedDisease evt)
@@ -219,6 +248,7 @@ public partial record PandemicGame
 
         return game with
         {
+            CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
             {

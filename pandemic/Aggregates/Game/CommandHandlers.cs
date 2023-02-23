@@ -24,7 +24,7 @@ public partial record PandemicGame
         game = game
             .SetDifficulty(options.Difficulty, events)
             .SetupInfectionDeck(events)
-            .ShufflePlayerDrawPileForDealing(events);
+            .ShufflePlayerDrawPileForDealing(events, options.IncludeSpecialEventCards);
 
         game = DoInitialInfection(game, events);
 
@@ -39,7 +39,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
+    public PandemicGame Do(ICommand command, List<IEvent> events)
     {
         var (game, newEvents) = Do(command);
 
@@ -48,7 +48,7 @@ public partial record PandemicGame
         return game;
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
+    public (PandemicGame, IEnumerable<IEvent>) Do(ICommand command)
     {
         if (SelfConsistencyCheckingEnabled) ValidateInternalConsistency();
         PreCommandChecks(command);
@@ -64,25 +64,25 @@ public partial record PandemicGame
         return (game, eventList);
     }
 
-    private void PreCommandChecks(IPlayerCommand command)
+    private void PreCommandChecks(ICommand command)
     {
         ThrowIfGameOver(this);
 
         var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
         if (playerWhoMustDiscard != null)
         {
-            if (command is not DiscardPlayerCardCommand)
+            if (command is not DiscardPlayerCardCommand and not ISpecialEventCommand)
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
         }
 
-        if (command is IConsumesAction)
+        if (command is IPlayerCommand cmd and IConsumesAction)
         {
-            ThrowIfNotRolesTurn(command.Role);
-            ThrowIfNoActionsRemaining(PlayerByRole(command.Role));
+            ThrowIfNotRolesTurn(cmd.Role);
+            ThrowIfNoActionsRemaining(PlayerByRole(cmd.Role));
         }
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(IPlayerCommand command)
+    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(ICommand command)
     {
         return command switch
         {
@@ -97,8 +97,33 @@ public partial record PandemicGame
             ShareKnowledgeGiveCommand cmd => Do(cmd),
             ShareKnowledgeTakeCommand cmd => Do(cmd),
             PassCommand cmd => Do(cmd),
+            GovernmentGrantCommand cmd => Do(cmd),
+            DontUseSpecialEventCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
+    {
+        if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
+            throw new GameRuleViolatedException("No player has a special event card");
+
+        return ApplyEvents(new ChoseNotToUseSpecialEventCard());
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)
+    {
+        if (ResearchStationPile == 0) throw new GameRuleViolatedException("No research stations left");
+
+        var player = PlayerByRole(command.Role);
+        var card = PlayerByRole(command.Role).Hand.SingleOrDefault(c => c is GovernmentGrantCard);
+        if (card is null) throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");
+
+        var city = CityByName(command.City);
+        if (city.HasResearchStation)
+            throw new GameRuleViolatedException("Cannot use government grant on a city with a research station");
+
+        return ApplyEvents(new GovernmentGrantUsed(command.Role, command.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(PassCommand command)
@@ -330,10 +355,11 @@ public partial record PandemicGame
         return ApplyEvent(new PlayerAdded(role), events);
     }
 
-    private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events)
+    private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events, bool includeSpecialEventCards)
     {
         var playerCards = Board.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
+            .Concat(includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>())
             .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 

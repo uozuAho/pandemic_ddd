@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace pandemic.Values;
@@ -93,10 +94,19 @@ public class Deck<T>
 
     public Deck<T> Remove(T card)
     {
+        var newDeck = new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
+
+        if (newDeck.Count == Count) throw new InvalidOperationException($"Deck does not contain {card}");
+
+        return newDeck;
+    }
+
+    public Deck<T> RemoveIfPresent(T card)
+    {
         return new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
     }
 
-    public Deck<T> Remove(IEnumerable<T> cards)
+    public Deck<T> RemoveIfPresent(IEnumerable<T> cards)
     {
         var set = new HashSet<T>(cards);
         return new Deck<T>(_cards.Where(c => c is not null && !set.Contains(c)));

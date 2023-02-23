@@ -16,10 +16,11 @@ namespace pandemic.test.Utils
                     yield return new NewGameOptions
                     {
                         Difficulty = difficulty,
-                        Roles = Enum.GetValues<Role>().Take(numPlayers).ToArray()
+                        Roles = Enum.GetValues<Role>().Take(numPlayers).ToArray(),
+                        IncludeSpecialEventCards = true
                     };
                 }
-                
+
             }
         }
     }

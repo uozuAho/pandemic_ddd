@@ -9,7 +9,7 @@ namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
-        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[100];
+        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[1000];
         private int _bufIdx = 0;
 
         public IEnumerable<IPlayerCommand> LegalCommands(PandemicGame game)
@@ -19,7 +19,9 @@ namespace pandemic.Commands
             _bufIdx = 0;
 
             SetDiscardCommands(game);
-            if (_bufIdx > 0)
+            SetSpecialEventCommands(game);
+
+            if (game.APlayerMustDiscard)
                 return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
 
             if (game.CurrentPlayer.ActionsRemaining > 0)
@@ -37,6 +39,23 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetSpecialEventCommands(PandemicGame game)
+        {
+            foreach (var player in game.Players)
+            {
+                foreach (var card in player.Hand.Where(c => c is ISpecialEventCard))
+                {
+                    if (card is GovernmentGrantCard)
+                    {
+                        foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
+                        {
+                            _buffer[_bufIdx++] = new GovernmentGrantCommand(player.Role, city.Name);
+                        }
+                    }
+                }
+            }
         }
 
         private void SetPassCommands(PandemicGame game)
@@ -84,6 +103,10 @@ namespace pandemic.Commands
                         yield return new ShareKnowledgeGiveCommand(player.Role, card.City.Name, otherPlayer.Role);
                         yield return new ShareKnowledgeTakeCommand(player.Role, card.City.Name, otherPlayer.Role);
                     }
+                }
+                foreach (var city in game.Cities)
+                {
+                    yield return new GovernmentGrantCommand(player.Role, city.Name);
                 }
             }
         }

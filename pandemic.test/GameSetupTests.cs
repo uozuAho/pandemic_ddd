@@ -29,7 +29,10 @@ namespace pandemic.test
 
             // decks
             Assert.That(game.PlayerDrawPile.Count, Is.EqualTo(
-                StandardGameBoard.NumberOfCities + numberOfEpidemicCards - numberOfPlayers * numberOfCardsPerPlayer));
+                StandardGameBoard.NumberOfCities
+                + StandardGameBoard.NumberOfSpecialEventCards
+                + numberOfEpidemicCards
+                - numberOfPlayers * numberOfCardsPerPlayer));
             Assert.That(game.PlayerDrawPile.Cards.Count(c => c is EpidemicCard) == numberOfEpidemicCards);
             AssertEpidemicCardsAreDistributed(game.PlayerDrawPile, game.Difficulty);
 

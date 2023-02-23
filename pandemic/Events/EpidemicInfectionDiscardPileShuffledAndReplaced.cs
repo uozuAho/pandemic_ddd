@@ -3,4 +3,4 @@ using pandemic.Values;
 
 namespace pandemic.Events;
 
-internal record EpidemicInfectionDiscardPileShuffledAndReplaced(IEnumerable<InfectionCard> ShuffledDiscardPile) : IEvent;
+public record EpidemicInfectionDiscardPileShuffledAndReplaced(IEnumerable<InfectionCard> ShuffledDiscardPile) : IEvent;

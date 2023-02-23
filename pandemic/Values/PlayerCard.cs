@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using pandemic.GameData;
 
 namespace pandemic.Values
 {
@@ -8,10 +7,6 @@ namespace pandemic.Values
     {
         public static IEqualityComparer<PlayerCard> DefaultEqualityComparer = new PlayerCardEqualityComparer();
     }
-
-    public record PlayerCityCard(CityData City) : PlayerCard;
-
-    public record EpidemicCard : PlayerCard;
 
     public class PlayerCardEqualityComparer : IEqualityComparer<PlayerCard>
     {
@@ -25,6 +20,8 @@ namespace pandemic.Values
             {
                 return xCity.City.Name == yCity.City.Name;
             }
+
+            if (x is GovernmentGrantCard && y is GovernmentGrantCard) return true;
 
             return false;
         }

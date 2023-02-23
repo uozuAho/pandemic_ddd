@@ -49,7 +49,19 @@ namespace pandemic.Aggregates.Game
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
 
-        private bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
+        public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
+
+        /// <summary>
+        /// Players had the option to use a special event card, and chose not to
+        /// </summary>
+        private bool SkipNextChanceToUseSpecialEvent { get; init; }
+
+        public bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
+
+        /// <summary>
+        /// Number of cards drawn during the current 'draw cards' phase
+        /// </summary>
+        private int CardsDrawn { get; init; }
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -154,7 +166,17 @@ namespace pandemic.Aggregates.Game
             var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
                                    + PlayerDrawPile.Count
                                    + PlayerDiscardPile.Count;
-            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty));
+            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
+
+            var specialEventCards = Players
+                .SelectMany(p => p.Hand)
+                .Concat(PlayerDrawPile.Cards)
+                .Concat(PlayerDiscardPile.Cards)
+                .Where(c => c is ISpecialEventCard)
+                .ToList();
+
+            Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
+            Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
 
             Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
 
