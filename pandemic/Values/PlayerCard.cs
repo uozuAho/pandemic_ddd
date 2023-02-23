@@ -21,7 +21,7 @@ namespace pandemic.Values
                 return xCity.City.Name == yCity.City.Name;
             }
 
-            // todo: special event cards not covered. Make failing test first
+            if (x is GovernmentGrantCard && y is GovernmentGrantCard) return true;
 
             return false;
         }
