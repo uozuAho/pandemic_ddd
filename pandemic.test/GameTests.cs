@@ -420,7 +420,7 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.Remove(top7Cards)
+                PlayerDrawPile = game.PlayerDrawPile.RemoveIfPresent(top7Cards)
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1287,7 +1287,7 @@ namespace pandemic.test
             {
                 InfectionDrawPile =
                     game.InfectionDrawPile
-                        .Remove(atlantaInfectionCard)
+                        .RemoveIfPresent(atlantaInfectionCard)
                         .PlaceOnTop(atlantaInfectionCard),
                 Cities = game.Cities.Select(c => c.Name switch
                 {
@@ -1345,7 +1345,7 @@ namespace pandemic.test
             game = game with
             {
                 InfectionDrawPile = game.InfectionDrawPile
-                    .Remove(atlantaInfectionCard)
+                    .RemoveIfPresent(atlantaInfectionCard)
                     .PlaceOnTop(atlantaInfectionCard),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
@@ -1365,11 +1365,14 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            var chicago = new InfectionCard("Chicago", Colour.Blue);
             game = game with
             {
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
                 InfectionDrawPile =
-                game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                        .RemoveIfPresent(chicago),
                 Cities = game.Cities.Select(c => c.Name switch
                 {
                     "Atlanta" => c with
@@ -1402,11 +1405,14 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
+            var beijing = new InfectionCard("Beijing", Colour.Red);
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
             game = game with
             {
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile =
-                    game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Beijing"))),
+                InfectionDrawPile = game.InfectionDrawPile
+                    .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                    .RemoveIfPresent(beijing).PlaceOnTop(beijing),
                 Cities = game.Cities.Select(c => c.Name switch
                 {
                     "Beijing" => c with
