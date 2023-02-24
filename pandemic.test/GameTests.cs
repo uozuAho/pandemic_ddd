@@ -1791,13 +1791,14 @@ namespace pandemic.test
             var top6InfectionCards = new Deck<InfectionCard>(game.InfectionDrawPile.Top(6));
             var newInfectionCardOrder = top6InfectionCards
                 .Remove(top6InfectionCards.TopCard)
-                .PlaceAtBottom(top6InfectionCards.TopCard);
+                .PlaceAtBottom(top6InfectionCards.TopCard)
+                .Cards.ToImmutableList();
 
             // todo: command generator: all possible combinations of event forecasts
 
-            (game, var events) = game.Do(new EventForecastCommand(Role.Medic, newInfectionCardOrder.Cards));
+            (game, var events) = game.Do(new EventForecastCommand(Role.Medic, newInfectionCardOrder));
 
-            game.InfectionDrawPile.Top(6).ShouldBe(newInfectionCardOrder.Cards);
+            game.InfectionDrawPile.Top(6).ShouldBe(newInfectionCardOrder);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is EventForecastCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<EventForecastCard>();
@@ -1809,7 +1810,7 @@ namespace pandemic.test
             var game = DefaultTestGame();
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new EventForecastCommand(Role.Medic, Enumerable.Empty<InfectionCard>())));
+                game.Do(new EventForecastCommand(Role.Medic, ImmutableList<InfectionCard>.Empty)));
         }
 
         [Test]
@@ -1823,7 +1824,7 @@ namespace pandemic.test
             });
 
             var cardsToReorder = game.InfectionDrawPile.Top(5)
-                .Concat(game.InfectionDrawPile.Bottom(1)).ToList();
+                .Concat(game.InfectionDrawPile.Bottom(1)).ToImmutableList();
 
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new EventForecastCommand(game.CurrentPlayer.Role, cardsToReorder)));

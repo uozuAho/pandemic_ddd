@@ -10,9 +10,9 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - event forecast: look at & rearrange the top 6 cards of the infection deck
-      - change card/cmd/event collection to immutable
       - add to SpecialEventCards
       - command generator
+        - see existing tests/todos
       - check gov grant scenarios: any more to cover for event forecast?
     - scenario: multiple players have special event cards
       - copy existing scenarios where one player has an event card
