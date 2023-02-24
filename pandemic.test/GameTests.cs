@@ -1803,6 +1803,15 @@ namespace pandemic.test
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<EventForecastCard>();
         }
 
+        [Test]
+        public void Event_forecast_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new EventForecastCommand(Role.Medic, Enumerable.Empty<InfectionCard>())));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

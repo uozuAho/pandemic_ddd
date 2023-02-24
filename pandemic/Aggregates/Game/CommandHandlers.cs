@@ -106,6 +106,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
     {
+        if (!PlayerByRole(cmd.Role).Hand.Contains(new EventForecastCard()))
+            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the event forecast card");
+
         return ApplyEvents(new EventForecastUsed(cmd.Role, cmd.Cards));
     }
 

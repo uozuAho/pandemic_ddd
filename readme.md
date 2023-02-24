@@ -10,8 +10,6 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - event forecast: look at & rearrange the top 6 cards of the infection deck
-      - happy path
-      - throw if not in hand
       - throw if given cards are not in top 6 of infection deck
       - add to SpecialEventCards
       - command generator
