@@ -17,6 +17,7 @@ public static class SpecialEventCards
 {
     public static readonly ImmutableList<PlayerCard> All = new List<PlayerCard>
     {
-        new GovernmentGrantCard()
+        new GovernmentGrantCard(),
+        new EventForecastCard()
     }.ToImmutableList();
 }

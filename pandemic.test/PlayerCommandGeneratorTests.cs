@@ -243,6 +243,22 @@ namespace pandemic.test
             _generator.LegalCommands(game).ShouldContain(new PassCommand(Role.Medic));
         }
 
+        [Test]
+        public void Generates_all_event_forecast_permutations()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new EventForecastCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is EventForecastCommand, 6*5*4*3*2*1);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

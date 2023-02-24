@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using Combinatorics.Collections;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
 using pandemic.Values;
@@ -52,6 +54,15 @@ namespace pandemic.Commands
                         foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
                         {
                             _buffer[_bufIdx++] = new GovernmentGrantCommand(player.Role, city.Name);
+                        }
+                    }
+
+                    if (card is EventForecastCard)
+                    {
+                        var perms = new Permutations<InfectionCard>(game.InfectionDrawPile.Top(6), new InfectionCardComparer());
+                        foreach (var perm in perms)
+                        {
+                            _buffer[_bufIdx++] = new EventForecastCommand(player.Role, perm.ToImmutableList());
                         }
                     }
                 }
@@ -246,4 +257,19 @@ namespace pandemic.Commands
             return game.CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == game.CurrentPlayer.Location);
         }
     }
+
+    /// <summary>
+    /// Needed for generating permutations of event forecasts
+    /// </summary>
+    class InfectionCardComparer : IComparer<InfectionCard>
+    {
+        public int Compare(InfectionCard? x, InfectionCard? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (ReferenceEquals(null, y)) return 1;
+            if (ReferenceEquals(null, x)) return -1;
+            return string.Compare(x.City, y.City, StringComparison.Ordinal);
+        }
+    }
 }
+
