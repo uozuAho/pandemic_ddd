@@ -1812,6 +1812,23 @@ namespace pandemic.test
                 game.Do(new EventForecastCommand(Role.Medic, Enumerable.Empty<InfectionCard>())));
         }
 
+        [Test]
+        public void Event_forecast_throws_if_cards_are_not_at_top_of_infection_deck()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new EventForecastCard())
+            });
+
+            var cardsToReorder = game.InfectionDrawPile.Top(5)
+                .Concat(game.InfectionDrawPile.Bottom(1)).ToList();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new EventForecastCommand(game.CurrentPlayer.Role, cardsToReorder)));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
