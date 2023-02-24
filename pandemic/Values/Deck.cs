@@ -109,6 +109,21 @@ public class Deck<T>
         return newDeck;
     }
 
+    public Deck<T> Remove(IEnumerable<T> cards)
+    {
+        var set = cards.ToHashSet();
+        var toRemove = _cards.Where(c => set.Contains(c)).ToHashSet();
+
+        if (toRemove.Count < set.Count)
+        {
+            var missingCards = _cards.Except(set);
+
+            throw new InvalidOperationException($"Deck does not contain {string.Join(',', missingCards)}");
+        }
+
+        return new Deck<T>(_cards.Where(c => !toRemove.Contains(c)));
+    }
+
     public Deck<T> RemoveIfPresent(T card)
     {
         return new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
