@@ -1722,6 +1722,7 @@ namespace pandemic.test
         }
 
         [TestCase(typeof(GovernmentGrantCard))]
+        [TestCase(typeof(EventForecastCard))]
         public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn(Type eventCardType)
         {
             var game = DefaultTestGame();
