@@ -9,9 +9,17 @@ namespace pandemic.Values;
 /// </summary>
 public class Deck<T>
 {
+    /// <summary>
+    /// The deck, in bottom to top order
+    /// Index 0 | ---- bottom     top -----X highest index.
+    /// </summary>
     private readonly List<T> _cards;
 
     public int Count => _cards.Count;
+
+    /// <summary>
+    /// Get the cards in the deck, in bottom to top order. Ie. the first card (index 0) is the bottom of the deck.
+    /// </summary>
     public IEnumerable<T> Cards => _cards.Select(c => c);
     public T TopCard => _cards.Last();
     public static Deck<T> Empty => new();
@@ -99,6 +107,21 @@ public class Deck<T>
         if (newDeck.Count == Count) throw new InvalidOperationException($"Deck does not contain {card}");
 
         return newDeck;
+    }
+
+    public Deck<T> Remove(IEnumerable<T> cards)
+    {
+        var set = cards.ToHashSet();
+        var toRemove = _cards.Where(c => set.Contains(c)).ToHashSet();
+
+        if (toRemove.Count < set.Count)
+        {
+            var missingCards = _cards.Except(set);
+
+            throw new InvalidOperationException($"Deck does not contain {string.Join(',', missingCards)}");
+        }
+
+        return new Deck<T>(_cards.Where(c => !toRemove.Contains(c)));
     }
 
     public Deck<T> RemoveIfPresent(T card)

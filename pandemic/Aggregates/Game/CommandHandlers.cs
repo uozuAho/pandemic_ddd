@@ -99,8 +99,25 @@ public partial record PandemicGame
             PassCommand cmd => Do(cmd),
             GovernmentGrantCommand cmd => Do(cmd),
             DontUseSpecialEventCommand cmd => Do(cmd),
+            EventForecastCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
+    {
+        if (!PlayerByRole(cmd.Role).Hand.Contains(new EventForecastCard()))
+            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the event forecast card");
+
+        var top6InfectionCards = InfectionDrawPile.Top(6).ToList();
+        if (cmd.Cards.Any(c => !top6InfectionCards.Contains(c)))
+        {
+            throw new GameRuleViolatedException(
+                "Not in the top 6 cards of the infection deck: " +
+                $"{string.Join(',', top6InfectionCards.Except(cmd.Cards))}");
+        }
+
+        return ApplyEvents(new EventForecastUsed(cmd.Role, cmd.Cards));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
