@@ -10,9 +10,6 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - airlift: move any pawn to any city
-      - happy path
-      - throw if not in hand
-      - throw if already in city
       - add to all cards, command generator
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic

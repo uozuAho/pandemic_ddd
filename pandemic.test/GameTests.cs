@@ -1837,6 +1837,29 @@ namespace pandemic.test
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
         }
 
+        [Test]
+        public void Airlift_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Paris")));
+        }
+
+        [Test]
+        public void Airlift_throws_if_already_at_destination()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Atlanta")));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
