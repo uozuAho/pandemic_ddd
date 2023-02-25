@@ -11,7 +11,7 @@ namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
-        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[1000];
+        private readonly IPlayerCommand[] _buffer = new IPlayerCommand[2000];
         private int _bufIdx = 0;
 
         public IEnumerable<IPlayerCommand> LegalCommands(PandemicGame game)

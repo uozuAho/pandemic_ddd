@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -50,6 +51,8 @@ namespace pandemic.Values
 
         public PlayerHand Remove(PlayerCard card)
         {
+            if (!Cards.Contains(card)) throw new InvalidOperationException($"{card} not in hand");
+
             return this with { Cards = Cards.Remove(card) };
         }
     }
