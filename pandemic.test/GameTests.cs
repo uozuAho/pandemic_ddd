@@ -1794,8 +1794,6 @@ namespace pandemic.test
                 .PlaceAtBottom(top6InfectionCards.TopCard)
                 .Cards.ToImmutableList();
 
-            // todo: command generator: all possible combinations of event forecasts
-
             (game, var events) = game.Do(new EventForecastCommand(Role.Medic, newInfectionCardOrder));
 
             game.InfectionDrawPile.Top(6).ShouldBe(newInfectionCardOrder);
