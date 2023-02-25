@@ -65,7 +65,24 @@ public partial record PandemicGame
             GovernmentGrantUsed e => Apply(game, e),
             ChoseNotToUseSpecialEventCard e => Apply(game, e),
             EventForecastUsed e => Apply(game, e),
+            AirliftUsed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, AirliftUsed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+        var card = player.Hand.Single(c => c is AirliftCard);
+
+        return game with
+        {
+            Players = game.Players.Replace(player, player with
+            {
+                Location = evt.City,
+                Hand = player.Hand.Remove(card)
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
         };
     }
 

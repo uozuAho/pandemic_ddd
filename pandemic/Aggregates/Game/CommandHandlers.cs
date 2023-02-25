@@ -100,8 +100,14 @@ public partial record PandemicGame
             GovernmentGrantCommand cmd => Do(cmd),
             DontUseSpecialEventCommand cmd => Do(cmd),
             EventForecastCommand cmd => Do(cmd),
+            AirliftCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
+    {
+        return ApplyEvents(new AirliftUsed(cmd.Role, cmd.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
