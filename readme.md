@@ -9,8 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - special event cards: play at any time, not an action
-    - event forecast: look at & rearrange the top 6 cards of the infection deck
-      - check gov grant scenarios: any more to cover for event forecast?
     - scenario: multiple players have special event cards
       - copy existing scenarios where one player has an event card
     - airlift: move any pawn to any city
@@ -18,6 +16,8 @@ implemented.
       can be played between the infect & intensify steps of an epidemic
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
+    - maybe: scenarios: can play special events at certain times
+      - see gov grant tests. hard to parameterise, need the card and the appropriate command
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
     - operations expert:
