@@ -1819,6 +1819,24 @@ namespace pandemic.test
                 game.Do(new EventForecastCommand(game.CurrentPlayer.Role, cardsToReorder)));
         }
 
+        [Test]
+        public void Airlift_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Paris"));
+
+            game.CurrentPlayer.Location.ShouldBe("Paris");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
