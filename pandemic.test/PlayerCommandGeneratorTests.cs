@@ -248,7 +248,8 @@ namespace pandemic.test
         {
             var game = CreateNewGame(new NewGameOptions
             {
-                Roles = new[] { Role.Medic, Role.Scientist }
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
