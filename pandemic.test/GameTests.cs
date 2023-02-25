@@ -1609,8 +1609,10 @@ namespace pandemic.test
             events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
-        [Test]
-        public void Special_event_choose_not_to_use_during_epidemic()
+        public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
+
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Special_event_choose_not_to_use_during_epidemic(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
 
@@ -1621,7 +1623,7 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+                Hand = game.CurrentPlayer.Hand.Add(eventCard)
             });
 
             var generator = new PlayerCommandGenerator();
@@ -1634,8 +1636,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1643,8 +1644,7 @@ namespace pandemic.test
             // assert: epidemic triggered
             events.ShouldContain(e => e is EpidemicTriggered);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: choose not to use special event card
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1653,8 +1653,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: choose not to use special event card
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1662,19 +1661,18 @@ namespace pandemic.test
             // assert: now it's the scientist's turn
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
         }
 
-        [Test]
-        public void Special_event_choose_not_to_use_after_turn()
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Special_event_choose_not_to_use_after_turn(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
                 ActionsRemaining = 1,
-                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+                Hand = game.CurrentPlayer.Hand.Add(eventCard)
             });
 
             var generator = new PlayerCommandGenerator();
@@ -1687,8 +1685,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1697,8 +1694,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 1);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1707,8 +1703,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1717,17 +1712,13 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
         }
 
-        [TestCase(typeof(GovernmentGrantCard))]
-        [TestCase(typeof(EventForecastCard))]
-        public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn(Type eventCardType)
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
-            var eventCard = (PlayerCard)Activator.CreateInstance(eventCardType);
-            Debug.Assert(eventCard != null);
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
