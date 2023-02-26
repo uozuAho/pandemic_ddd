@@ -1819,6 +1819,66 @@ namespace pandemic.test
                 game.Do(new EventForecastCommand(game.CurrentPlayer.Role, cardsToReorder)));
         }
 
+        [Test]
+        public void Airlift_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Paris"));
+
+            game.CurrentPlayer.Location.ShouldBe("Paris");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
+        }
+
+        [Test]
+        public void Airlift_can_move_any_pawn()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+            var otherPlayer = Role.Scientist;
+
+            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, otherPlayer, "Paris"));
+
+            game.PlayerByRole(otherPlayer).Location.ShouldBe("Paris");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
+        }
+
+        [Test]
+        public void Airlift_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Paris")));
+        }
+
+        [Test]
+        public void Airlift_throws_if_already_at_destination()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Atlanta")));
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

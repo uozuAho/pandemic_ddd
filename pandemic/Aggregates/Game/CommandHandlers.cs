@@ -100,8 +100,20 @@ public partial record PandemicGame
             GovernmentGrantCommand cmd => Do(cmd),
             DontUseSpecialEventCommand cmd => Do(cmd),
             EventForecastCommand cmd => Do(cmd),
+            AirliftCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
+    {
+        if (!PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard()))
+            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
+
+        if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
+            throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
+
+        return ApplyEvents(new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)

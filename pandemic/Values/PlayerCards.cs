@@ -12,12 +12,14 @@ public interface ISpecialEventCard { }
 
 public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
 public record EventForecastCard : PlayerCard, ISpecialEventCard;
+public record AirliftCard : PlayerCard, ISpecialEventCard;
 
 public static class SpecialEventCards
 {
     public static readonly ImmutableList<PlayerCard> All = new List<PlayerCard>
     {
         new GovernmentGrantCard(),
-        new EventForecastCard()
+        new EventForecastCard(),
+        new AirliftCard()
     }.ToImmutableList();
 }

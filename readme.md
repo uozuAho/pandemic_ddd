@@ -9,9 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - special event cards: play at any time, not an action
-    - scenario: multiple players have special event cards
-      - copy existing scenarios where one player has an event card
-    - airlift: move any pawn to any city
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic
     - one quiet night: skip next infect cities step
@@ -108,6 +105,11 @@ handle.
 - using the rule to only modify aggregates via events has ensured that all game state
   changes are captured. It's a bit of a pain to add a command + handler + event + handler,
   but I think it's been worth it for the above point alone
+- unexplored parts of DDD
+  - aggregate design. The entire game state needs to be consistent at all times, so there's
+    been no need/opportunity to create smaller aggregates
+  - eventual consistency: same reason as above
+  - strategic design
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)

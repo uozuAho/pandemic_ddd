@@ -45,27 +45,42 @@ namespace pandemic.Commands
 
         private void SetSpecialEventCommands(PandemicGame game)
         {
-            foreach (var player in game.Players)
+            foreach (var playerWithCard in game.Players)
             {
-                foreach (var card in player.Hand.Where(c => c is ISpecialEventCard))
+                foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
                 {
-                    if (card is GovernmentGrantCard)
-                    {
-                        foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
-                        {
-                            _buffer[_bufIdx++] = new GovernmentGrantCommand(player.Role, city.Name);
-                        }
-                    }
-
-                    if (card is EventForecastCard)
-                    {
-                        var perms = new Permutations<InfectionCard>(game.InfectionDrawPile.Top(6), new InfectionCardComparer());
-                        foreach (var perm in perms)
-                        {
-                            _buffer[_bufIdx++] = new EventForecastCommand(player.Role, perm.ToImmutableList());
-                        }
-                    }
+                    if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
+                    else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
+                    else if (card is AirliftCard) SetAirlifts(game, playerWithCard);
                 }
+            }
+        }
+
+        private void SetAirlifts(PandemicGame game, Player playerWithCard)
+        {
+            foreach (var playerToAirlift in game.Players)
+            {
+                foreach (var city in game.Cities.Where(c => c.Name != playerToAirlift.Location))
+                {
+                    _buffer[_bufIdx++] = new AirliftCommand(playerWithCard.Role, playerToAirlift.Role, city.Name);
+                }
+            }
+        }
+
+        private void SetEventForecasts(PandemicGame game, Player playerWithCard)
+        {
+            var perms = new Permutations<InfectionCard>(game.InfectionDrawPile.Top(6), new InfectionCardComparer());
+            foreach (var perm in perms)
+            {
+                _buffer[_bufIdx++] = new EventForecastCommand(playerWithCard.Role, perm.ToImmutableList());
+            }
+        }
+
+        private void SetGovernmentGrants(PandemicGame game, Player playerWithCard)
+        {
+            foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
+            {
+                _buffer[_bufIdx++] = new GovernmentGrantCommand(playerWithCard.Role, city.Name);
             }
         }
 
