@@ -9,8 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - special event cards: play at any time, not an action
-    - airlift: move any pawn to any city
-      - refactor SetSpecialEventCommands
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic
     - one quiet night: skip next infect cities step
