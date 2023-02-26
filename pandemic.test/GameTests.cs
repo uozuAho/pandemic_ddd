@@ -1838,6 +1838,25 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Airlift_can_move_any_pawn()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+            var otherPlayer = Role.Scientist;
+
+            (game, var events) = game.Do(new AirliftCommand(otherPlayer, "Paris"));
+
+            game.PlayerByRole(otherPlayer).Location.ShouldBe("Paris");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
+        }
+
+        [Test]
         public void Airlift_throws_if_not_in_hand()
         {
             var game = DefaultTestGame();

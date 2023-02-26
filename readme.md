@@ -10,8 +10,9 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - airlift: move any pawn to any city
-      - add to all cards, command generator
       - oops fix: _any_ pawn to any city, not only the card holder
+        - unit test
+        - command generator test: more commands
     - resilient population: remove any infection card from the discard pile from the game.
       can be played between the infect & intensify steps of an epidemic
     - one quiet night: skip next infect cities step
