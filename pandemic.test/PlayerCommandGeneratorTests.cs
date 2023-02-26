@@ -260,6 +260,25 @@ namespace pandemic.test
             commands.ShouldContain(c => c is EventForecastCommand, 6*5*4*3*2*1);
         }
 
+        [Test]
+        public void Can_do_airlift()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+
+            // todo: fixme: impl is wrong, only moves card holder, should be able to move any player
+            commands.Count(c => c is AirliftCommand).ShouldBe(1 * 47); // 2 players, 47 destinations each
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

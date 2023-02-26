@@ -20,5 +20,6 @@ public static class SpecialEventCards
     {
         new GovernmentGrantCard(),
         new EventForecastCard(),
+        new AirliftCard()
     }.ToImmutableList();
 }

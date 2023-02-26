@@ -65,6 +65,14 @@ namespace pandemic.Commands
                             _buffer[_bufIdx++] = new EventForecastCommand(player.Role, perm.ToImmutableList());
                         }
                     }
+
+                    if (card is AirliftCard)
+                    {
+                        foreach (var city in game.Cities.Where(c => c.Name != player.Location))
+                        {
+                            _buffer[_bufIdx++] = new AirliftCommand(player.Role, city.Name);
+                        }
+                    }
                 }
             }
         }

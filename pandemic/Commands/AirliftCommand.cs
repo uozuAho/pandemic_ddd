@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record AirliftCommand(Role Role, string City) : IPlayerCommand;
+public record AirliftCommand(Role Role, string City) : IPlayerCommand, ISpecialEventCommand;
