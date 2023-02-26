@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.agents.test
@@ -53,21 +54,20 @@ namespace pandemic.agents.test
             Assert.IsFalse(DfsWithHeuristicsAgent.CanWin(game));
         }
 
+        // 20 cards = 4 * 5: enough to cure all 4 diseases, ignoring special abilities
         [Test]
         public void Can_win_when_none_cured_and_20_cards_available()
         {
-            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
                 Difficulty = Difficulty.Normal,
-                Roles = new[] { Role.Scientist, Role.Medic }
+                Roles = new[] { Role.Scientist, Role.Medic },
+                IncludeSpecialEventCards = false
             });
             var cardsInPlayersHands = game.Players.Sum(p => p.Hand.Count);
-            var cardsInPlayerDrawPile = 20 - cardsInPlayersHands;
             game = game with
             {
-                PlayerDrawPile = new Deck<PlayerCard>(Enumerable
-                    .Range(0, cardsInPlayerDrawPile)
-                    .Select(_ => new EpidemicCard()))
+                PlayerDrawPile = new Deck<PlayerCard>(PlayerCards.CityCards.Take(20 - cardsInPlayersHands))
             };
 
             Assert.IsTrue(DfsWithHeuristicsAgent.CanWin(game));
