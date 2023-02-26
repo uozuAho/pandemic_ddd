@@ -1923,6 +1923,44 @@ namespace pandemic.test
                 game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDrawPile.TopCard)));
         }
 
+        [Test]
+        public void Resilient_population_can_play_during_epidemic_after_infect()
+        {
+            var game = DefaultTestGame().WithNoEpidemics();
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act: end turn, draw epidemic card
+            game = game.Do(new PassCommand(Role.Medic), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: infect stage of epidemic has occurred
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: use special event card
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+            game = game.Do(new ResilientPopulationCommand(Role.Medic, infectionCardToRemove), events);
+
+            // assert: turn is over, infection card is out of the game
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is InfectionCardDrawn);
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
