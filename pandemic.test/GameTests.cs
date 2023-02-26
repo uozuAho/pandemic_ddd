@@ -1879,6 +1879,26 @@ namespace pandemic.test
                 game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Atlanta")));
         }
 
+        [Test]
+        public void Resilient_population_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+
+            (game, var events) = game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, infectionCardToRemove));
+
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is ResilientPopulationCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<ResilientPopulationCard>();
+        }
+
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
