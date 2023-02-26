@@ -1894,9 +1894,33 @@ namespace pandemic.test
             (game, var events) = game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, infectionCardToRemove));
 
             game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is ResilientPopulationCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<ResilientPopulationCard>();
+        }
+
+        [Test]
+        public void Resilient_population_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDiscardPile.TopCard)));
+        }
+
+        [Test]
+        public void Resilient_population_throws_if_infection_card_is_not_in_discard_pile()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDrawPile.TopCard)));
         }
 
         [Repeat(10)]

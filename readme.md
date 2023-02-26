@@ -10,9 +10,6 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
-      - unhappy cases:
-        - not in hand
-        - not in discard pile
       - scenario: can be played between the infect & intensify steps of an epidemic
         - assert that the card is no longer in the deck
       - add to all cards/command gen

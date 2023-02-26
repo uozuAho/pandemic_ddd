@@ -108,6 +108,12 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
     {
+        if (!PlayerByRole(cmd.Role).Hand.Contains(new ResilientPopulationCard()))
+            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the resilient population card");
+
+        if (!InfectionDiscardPile.Cards.Contains(cmd.Card))
+            throw new GameRuleViolatedException($"{cmd.Card} is not in the discard pile");
+
         return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
 
