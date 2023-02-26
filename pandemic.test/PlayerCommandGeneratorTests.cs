@@ -275,8 +275,7 @@ namespace pandemic.test
 
             var commands = _generator.LegalCommands(game);
 
-            // todo: fixme: impl is wrong, only moves card holder, should be able to move any player
-            commands.Count(c => c is AirliftCommand).ShouldBe(1 * 47); // 2 players, 47 destinations each
+            commands.Count(c => c is AirliftCommand).ShouldBe(2 * 47); // 2 players, 47 destinations each
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)

@@ -1829,7 +1829,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Paris"));
+            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Paris"));
 
             game.CurrentPlayer.Location.ShouldBe("Paris");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
@@ -1848,7 +1848,7 @@ namespace pandemic.test
             });
             var otherPlayer = Role.Scientist;
 
-            (game, var events) = game.Do(new AirliftCommand(otherPlayer, "Paris"));
+            (game, var events) = game.Do(new AirliftCommand(game.CurrentPlayer.Role, otherPlayer, "Paris"));
 
             game.PlayerByRole(otherPlayer).Location.ShouldBe("Paris");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
@@ -1862,7 +1862,7 @@ namespace pandemic.test
             var game = DefaultTestGame();
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Paris")));
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Paris")));
         }
 
         [Test]
@@ -1876,7 +1876,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new AirliftCommand(game.CurrentPlayer.Role, "Atlanta")));
+                game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Atlanta")));
         }
 
         [Repeat(10)]

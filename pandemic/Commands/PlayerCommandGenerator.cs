@@ -45,15 +45,15 @@ namespace pandemic.Commands
 
         private void SetSpecialEventCommands(PandemicGame game)
         {
-            foreach (var player in game.Players)
+            foreach (var playerWithCard in game.Players)
             {
-                foreach (var card in player.Hand.Where(c => c is ISpecialEventCard))
+                foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
                 {
                     if (card is GovernmentGrantCard)
                     {
                         foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
                         {
-                            _buffer[_bufIdx++] = new GovernmentGrantCommand(player.Role, city.Name);
+                            _buffer[_bufIdx++] = new GovernmentGrantCommand(playerWithCard.Role, city.Name);
                         }
                     }
 
@@ -62,15 +62,18 @@ namespace pandemic.Commands
                         var perms = new Permutations<InfectionCard>(game.InfectionDrawPile.Top(6), new InfectionCardComparer());
                         foreach (var perm in perms)
                         {
-                            _buffer[_bufIdx++] = new EventForecastCommand(player.Role, perm.ToImmutableList());
+                            _buffer[_bufIdx++] = new EventForecastCommand(playerWithCard.Role, perm.ToImmutableList());
                         }
                     }
 
                     if (card is AirliftCard)
                     {
-                        foreach (var city in game.Cities.Where(c => c.Name != player.Location))
+                        foreach (var playerToAirlift in game.Players)
                         {
-                            _buffer[_bufIdx++] = new AirliftCommand(player.Role, city.Name);
+                            foreach (var city in game.Cities.Where(c => c.Name != playerToAirlift.Location))
+                            {
+                                _buffer[_bufIdx++] = new AirliftCommand(playerWithCard.Role, playerToAirlift.Role, city.Name);
+                            }
                         }
                     }
                 }

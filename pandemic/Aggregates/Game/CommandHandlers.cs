@@ -110,10 +110,10 @@ public partial record PandemicGame
         if (!PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
 
-        if (PlayerByRole(cmd.Role).Location == cmd.City)
+        if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
             throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
 
-        return ApplyEvents(new AirliftUsed(cmd.Role, cmd.City));
+        return ApplyEvents(new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)

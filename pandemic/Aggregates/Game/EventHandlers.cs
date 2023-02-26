@@ -72,16 +72,33 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, AirliftUsed evt)
     {
-        var player = game.PlayerByRole(evt.Role);
-        var card = player.Hand.Single(c => c is AirliftCard);
+        var playerWithCard = game.PlayerByRole(evt.Role);
+        var card = playerWithCard.Hand.Single(c => c is AirliftCard);
+        var playerToMove = game.PlayerByRole(evt.PlayerToMove);
+
+        ImmutableList<Player> updatedPlayers;
+        if (playerWithCard == playerToMove)
+        {
+            updatedPlayers = game.Players.Replace(playerWithCard, playerWithCard with
+            {
+                Location = evt.City,
+                Hand = playerWithCard.Hand.Remove(card)
+            });
+        }
+        else
+        {
+            updatedPlayers = game.Players.Replace(playerWithCard, playerWithCard with
+            {
+                Hand = playerWithCard.Hand.Remove(card)
+            }).Replace(playerToMove, playerToMove with
+            {
+                Location = evt.City
+            });
+        }
 
         return game with
         {
-            Players = game.Players.Replace(player, player with
-            {
-                Location = evt.City,
-                Hand = player.Hand.Remove(card)
-            }),
+            Players = updatedPlayers,
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
         };
     }
