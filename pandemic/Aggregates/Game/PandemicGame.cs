@@ -56,12 +56,14 @@ namespace pandemic.Aggregates.Game
         /// </summary>
         private bool SkipNextChanceToUseSpecialEvent { get; init; }
 
-        public bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
+        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
 
         /// <summary>
         /// Number of cards drawn during the current 'draw cards' phase
         /// </summary>
         private int CardsDrawn { get; init; }
+
+        private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
 
         public bool IsSameStateAs(PandemicGame other)
         {

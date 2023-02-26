@@ -10,8 +10,12 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
+      - unhappy cases:
+        - not in hand
+        - not in discard pile
       - scenario: can be played between the infect & intensify steps of an epidemic
         - assert that the card is no longer in the deck
+      - add to all cards/command gen
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
     - maybe: scenarios: can play special events at certain times

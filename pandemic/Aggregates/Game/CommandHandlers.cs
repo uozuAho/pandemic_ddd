@@ -101,8 +101,14 @@ public partial record PandemicGame
             DontUseSpecialEventCommand cmd => Do(cmd),
             EventForecastCommand cmd => Do(cmd),
             AirliftCommand cmd => Do(cmd),
+            ResilientPopulationCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
+    {
+        return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)

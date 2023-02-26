@@ -66,7 +66,25 @@ public partial record PandemicGame
             ChoseNotToUseSpecialEventCard e => Apply(game, e),
             EventForecastUsed e => Apply(game, e),
             AirliftUsed e => Apply(game, e),
+            ResilientPopulationUsed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ResilientPopulationUsed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+        var eventCard = player.Hand.Single(c => c is ResilientPopulationCard);
+
+        return game with
+        {
+            InfectionDiscardPile = game.InfectionDiscardPile.Remove(evt.InfectionCard),
+            InfectionCardsRemovedFromGame = game.InfectionCardsRemovedFromGame.Add(evt.InfectionCard),
+            Players = game.Players.Replace(player, player with
+            {
+                Hand = player.Hand.Remove(eventCard)
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(eventCard)
         };
     }
 
