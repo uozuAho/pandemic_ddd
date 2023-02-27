@@ -8,7 +8,9 @@ implemented.
 
 # todo
 - fix epidemic
-  - WIP: add epidemic to TurnPhase
+  - WIP: instead of doing all in RunGameUntilPlayerCommandIsAvailable, make it do one thing,
+    call repeatedly until a human input is required (like a game loop?)
+    - same with DrawCards
   - allow special event between infect & intensify (un-ignore test)
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:

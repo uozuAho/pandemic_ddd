@@ -1126,8 +1126,6 @@ namespace pandemic.test
 
             (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
-            events.ShouldContain(e => e is EpidemicCityInfected); // todo: remove this temporary assertion
-
             var epidemicCity = initialGame.InfectionDrawPile.BottomCard;
             game.CityByName(epidemicCity.City).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
             game.InfectionRate.ShouldBe(2);
@@ -1966,6 +1964,7 @@ namespace pandemic.test
             game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
         }
 
+        [Timeout(1000)]
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)

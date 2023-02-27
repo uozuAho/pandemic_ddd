@@ -65,6 +65,13 @@ namespace pandemic.Aggregates.Game
 
         private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
 
+        private bool PlayerCommandRequired()
+        {
+            return PhaseOfTurn == TurnPhase.DoActions
+                   || APlayerMustDiscard
+                   || (APlayerHasASpecialEventCard && !SkipNextChanceToUseSpecialEvent);
+        }
+
         public bool IsSameStateAs(PandemicGame other)
         {
             if (LossReason != other.LossReason) return false;

@@ -25,6 +25,8 @@ public partial record PandemicGame
 
             if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
 
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) game = Epidemic(game, eventList);
+
             if (game.IsOver) return game;
 
             if (game.APlayerMustDiscard) return game;
@@ -56,7 +58,7 @@ public partial record PandemicGame
 
             if (game.IsOver) return game;
 
-            if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) return game;
 
             if (game.IsOver) return game;
 
@@ -74,7 +76,7 @@ public partial record PandemicGame
 
             if (game.IsOver) return game;
 
-            if (events.Last() is EpidemicTriggered) game = Epidemic(game, events);
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) return game;
 
             return game.ApplyEvent(new TurnPhaseEnded(), events);
         }

@@ -59,7 +59,10 @@ public partial record PandemicGame
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
             game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
 
-        game = PostCommandProcessor.RunGameUntilPlayerCommandIsAvailable(game, eventList);
+        while (!game.IsOver && !game.PlayerCommandRequired())
+        {
+            game = PostCommandProcessor.RunGameUntilPlayerCommandIsAvailable(game, eventList);
+        }
 
         return (game, eventList);
     }
