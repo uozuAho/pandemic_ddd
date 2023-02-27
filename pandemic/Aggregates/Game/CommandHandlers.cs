@@ -461,8 +461,9 @@ public partial record PandemicGame
     private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
     {
         var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
 
-        // infect city
+        // infect: add 3 cubes to epidemic city
         if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
             return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
 
@@ -477,8 +478,7 @@ public partial record PandemicGame
             }
         }
 
-        // shuffle infection cards
-        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
+        // intensify: shuffle infection cards
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
         game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
 

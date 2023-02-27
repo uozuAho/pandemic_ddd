@@ -7,11 +7,18 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- fix epidemic
+  - allow special event between infect & intensify
+  - test: city with 2 cubes, epidemic drawn, should only outbreak once
+  - test scenario: pick up 2 epidemics. Expectations:
+      - only one infection stage occurs
+      - second epidemic: 1 infection card in discard, will be drawn on infect stage
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
       - scenario: can be played between the infect & intensify steps of an epidemic
         - assert that the card is no longer in the deck
+      - scenario: draw 2 epidemics, use resilient population to prevent outbreak on second
       - add to all cards/command gen
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
@@ -112,6 +119,9 @@ handle.
     been no need/opportunity to create smaller aggregates
   - eventual consistency: same reason as above
   - strategic design
+- it's frustrating that it still seems to be taking ages to implement a seemingly simple
+  game. Maybe it's not simple? What's taking so long? Each special event seems to take about
+  1h to code, even now that I've done the first one (which took ... a week!?)
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
