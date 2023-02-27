@@ -38,27 +38,7 @@ public partial record PandemicGame
 
         private static PandemicGame DrawCards(PandemicGame game, ICollection<IEvent> events)
         {
-            if (game.CardsDrawn == 2) return game.ApplyEvent(new TurnPhaseEnded(), events);
-
-            game = PickUpCard(game, events);
-
-            if (game.IsOver) return game;
-
-            if (game.PhaseOfTurn == TurnPhase.Epidemic) return game;
-
-            if (game.IsOver) return game;
-
-            if (game.PlayerCommandRequired()) return game;
-
-            if (game.CardsDrawn == 2) return game.ApplyEvent(new TurnPhaseEnded(), events);
-
-            game = PickUpCard(game, events);
-
-            if (game.IsOver) return game;
-
-            if (game.PhaseOfTurn == TurnPhase.Epidemic) return game;
-
-            return game.ApplyEvent(new TurnPhaseEnded(), events);
+            return PickUpCard(game, events);
         }
     }
 }
