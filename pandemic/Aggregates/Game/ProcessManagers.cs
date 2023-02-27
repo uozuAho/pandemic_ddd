@@ -12,13 +12,11 @@ public partial record PandemicGame
         {
             if (game.PlayerCommandRequired()) return game;
 
-            if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
+            if (game.PhaseOfTurn == TurnPhase.DrawCards) return DrawCards(game, eventList);
 
-            if (game.PhaseOfTurn == TurnPhase.Epidemic) game = Epidemic(game, eventList);
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) return Epidemic(game, eventList);
 
             if (game.IsOver) return game;
-
-            if (game.APlayerMustDiscard) return game;
 
             if (game.PhaseOfTurn == TurnPhase.InfectCities)
             {

@@ -1588,7 +1588,9 @@ namespace pandemic.test
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
             generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events); // after actions finished
+            game = game.Do(new DontUseSpecialEventCommand(), events); // after draw card
+                                                                      // change so we don't need two commands here?
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
@@ -1646,6 +1648,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: choose not to use special event card
+            game = game.Do(new DontUseSpecialEventCommand(), events);
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: still medic's turn, can use special event before infection stage
