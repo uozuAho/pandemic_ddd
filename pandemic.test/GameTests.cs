@@ -1593,7 +1593,7 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
+            events.ShouldContain(e => e is EpidemicIntensifyCompleted);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
@@ -1947,7 +1947,7 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
+            events.ShouldContain(e => e is EpidemicIntensifyCompleted);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 

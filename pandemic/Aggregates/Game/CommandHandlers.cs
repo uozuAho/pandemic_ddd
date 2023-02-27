@@ -480,7 +480,7 @@ public partial record PandemicGame
 
         // intensify: shuffle infection cards
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
-        game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
+        game = game.ApplyEvent(new EpidemicIntensifyCompleted(shuffledDiscardPile), events);
 
         game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
         var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);

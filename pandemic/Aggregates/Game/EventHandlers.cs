@@ -55,7 +55,7 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
-            EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
+            EpidemicIntensifyCompleted e => Apply(game, e),
             InfectionRateMarkerProgressed e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
             EpidemicTriggered => game,
@@ -466,7 +466,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicInfectionDiscardPileShuffledAndReplaced evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicIntensifyCompleted evt)
     {
         return game with
         {
