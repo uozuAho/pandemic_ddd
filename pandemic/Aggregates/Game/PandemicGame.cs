@@ -52,9 +52,9 @@ namespace pandemic.Aggregates.Game
         public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         /// <summary>
-        /// Players had the option to use a special event card, and chose not to
+        /// A special event can be used, if any player has one.
         /// </summary>
-        private bool SkipNextChanceToUseSpecialEvent { get; init; }
+        private bool SpecialEventCanBeUsed { get; init; } = true;
 
         private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
 
@@ -69,7 +69,7 @@ namespace pandemic.Aggregates.Game
         {
             return PhaseOfTurn == TurnPhase.DoActions
                    || APlayerMustDiscard
-                   || (APlayerHasASpecialEventCard && !SkipNextChanceToUseSpecialEvent);
+                   || (APlayerHasASpecialEventCard && SpecialEventCanBeUsed);
         }
 
         public bool IsSameStateAs(PandemicGame other)

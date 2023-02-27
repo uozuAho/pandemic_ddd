@@ -12,8 +12,8 @@ public partial record PandemicGame
         {
             if (game.PlayerCommandRequired()) return game;
 
-            if (game.APlayerHasASpecialEventCard && game.SkipNextChanceToUseSpecialEvent)
-                game = game with { SkipNextChanceToUseSpecialEvent = false };
+            if (game.APlayerHasASpecialEventCard && !game.SpecialEventCanBeUsed)
+                game = game with { SpecialEventCanBeUsed = true };
 
             if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
 
@@ -56,8 +56,8 @@ public partial record PandemicGame
 
             if (game.APlayerHasASpecialEventCard)
             {
-                if (game.SkipNextChanceToUseSpecialEvent)
-                    game = game with { SkipNextChanceToUseSpecialEvent = false };
+                if (!game.SpecialEventCanBeUsed)
+                    game = game with { SpecialEventCanBeUsed = true };
                 else
                     return game;
             }

@@ -148,7 +148,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            SkipNextChanceToUseSpecialEvent = true
+            SpecialEventCanBeUsed = false
         };
     }
 
