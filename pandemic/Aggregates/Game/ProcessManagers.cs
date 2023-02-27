@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -7,21 +6,14 @@ namespace pandemic.Aggregates.Game;
 
 public partial record PandemicGame
 {
-    private static class PostCommandProcessor
+    private static class NonPlayerStepper
     {
-        public static PandemicGame RunGameUntilPlayerCommandIsAvailable(PandemicGame game, List<IEvent> eventList)
+        public static PandemicGame Step(PandemicGame game, List<IEvent> eventList)
         {
-            if (game.PhaseOfTurn == TurnPhase.DoActions
-                || game.APlayerMustDiscard
-                || game.IsOver) return game;
+            if (game.PlayerCommandRequired()) return game;
 
-            if (game.APlayerHasASpecialEventCard)
-            {
-                if (game.SkipNextChanceToUseSpecialEvent)
-                    game = game with { SkipNextChanceToUseSpecialEvent = false };
-                else
-                    return game;
-            }
+            if (game.APlayerHasASpecialEventCard && game.SkipNextChanceToUseSpecialEvent)
+                game = game with { SkipNextChanceToUseSpecialEvent = false };
 
             if (game.PhaseOfTurn == TurnPhase.DrawCards) game = DrawCards(game, eventList);
 

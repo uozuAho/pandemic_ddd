@@ -61,7 +61,7 @@ public partial record PandemicGame
 
         while (!game.IsOver && !game.PlayerCommandRequired())
         {
-            game = PostCommandProcessor.RunGameUntilPlayerCommandIsAvailable(game, eventList);
+            game = NonPlayerStepper.Step(game, eventList);
         }
 
         return (game, eventList);
