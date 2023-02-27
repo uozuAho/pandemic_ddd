@@ -461,7 +461,12 @@ public partial record PandemicGame
     private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
     {
         var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
+        var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
+
+        game = game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
+
+        // increase the infection rate
+        game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
 
         // infect: add 3 cubes to epidemic city
         if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
@@ -478,15 +483,12 @@ public partial record PandemicGame
             }
         }
 
+        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
         game = game.ApplyEvent(new EpidemicInfectCompleted(), events);
 
         // intensify: shuffle infection cards
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
-        game = game.ApplyEvent(new EpidemicIntensifyCompleted(shuffledDiscardPile), events);
-
-        game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
-        var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
-        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
+        return game.ApplyEvent(new EpidemicIntensifyCompleted(shuffledDiscardPile), events);
     }
 
     private static PandemicGame InfectCityFromPile(PandemicGame game, ICollection<IEvent> events)
