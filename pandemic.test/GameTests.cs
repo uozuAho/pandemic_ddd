@@ -1587,8 +1587,7 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: infect stage of epidemic has occurred

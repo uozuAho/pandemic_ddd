@@ -8,9 +8,8 @@ implemented.
 
 # todo
 - fix epidemic
-  - WIP: instead of doing all in RunGameUntilPlayerCommandIsAvailable, make it do one thing,
-    call repeatedly until a human input is required (like a game loop?)
-    - same with DrawCards
+  - WIP: simplify non-human step + DrawCards
+    - make 'chose not to use special event' act as a latch, only enable when player can next use an event
   - allow special event between infect & intensify (un-ignore test)
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
