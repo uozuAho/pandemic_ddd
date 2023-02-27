@@ -1126,6 +1126,8 @@ namespace pandemic.test
 
             (game, var events) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
+            events.ShouldContain(e => e is EpidemicInfectCompleted); // todo: remove this temporary assertion
+
             var epidemicCity = initialGame.InfectionDrawPile.BottomCard;
             game.CityByName(epidemicCity.City).Cubes.NumberOf(epidemicCity.Colour).ShouldBe(3);
             game.InfectionRate.ShouldBe(2);
@@ -1947,7 +1949,8 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicIntensifyCompleted);
+            // events.ShouldContain(e => e is EpidemicInfectCompleted); //todo: uncomment
+            events.ShouldNotContain(e => e is EpidemicIntensifyCompleted);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
@@ -1957,6 +1960,7 @@ namespace pandemic.test
 
             // assert: turn is over, infection card is out of the game
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is EpidemicIntensifyCompleted);
             events.ShouldContain(e => e is InfectionCardDrawn);
             game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
             game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);

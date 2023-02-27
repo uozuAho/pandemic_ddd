@@ -55,6 +55,7 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
+            EpidemicInfectCompleted e => game,
             EpidemicIntensifyCompleted e => Apply(game, e),
             InfectionRateMarkerProgressed e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),

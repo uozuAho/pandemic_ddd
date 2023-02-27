@@ -478,6 +478,8 @@ public partial record PandemicGame
             }
         }
 
+        game = game.ApplyEvent(new EpidemicInfectCompleted(), events);
+
         // intensify: shuffle infection cards
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
         game = game.ApplyEvent(new EpidemicIntensifyCompleted(shuffledDiscardPile), events);
