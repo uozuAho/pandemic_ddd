@@ -8,7 +8,8 @@ implemented.
 
 # todo
 - fix epidemic
-  - allow special event between infect & intensify
+  - WIP: add epidemic to TurnPhase
+  - allow special event between infect & intensify (un-ignore test)
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
       - only one infection stage occurs

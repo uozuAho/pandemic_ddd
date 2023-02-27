@@ -1925,7 +1925,7 @@ namespace pandemic.test
                 game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDrawPile.TopCard)));
         }
 
-        [Ignore("Unskip this after epidemic fixed")]
+        [Ignore("run me once epidemic turn phase implemented")]
         [Test]
         public void Resilient_population_can_play_during_epidemic_after_infect()
         {
@@ -1949,7 +1949,7 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            // events.ShouldContain(e => e is EpidemicInfectCompleted); //todo: uncomment
+            events.ShouldContain(e => e is EpidemicInfectCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensifyCompleted);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
