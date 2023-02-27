@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -10,22 +11,16 @@ public partial record PandemicGame
     {
         public static PandemicGame Step(PandemicGame game, List<IEvent> eventList)
         {
-            if (game.PlayerCommandRequired()) return game;
+            if (game.PlayerCommandRequired() || game.IsOver) return game;
 
-            if (game.PhaseOfTurn == TurnPhase.DrawCards) return DrawCards(game, eventList);
-
-            if (game.PhaseOfTurn == TurnPhase.Epidemic) return Epidemic(game, eventList);
-
-            if (game.IsOver) return game;
-
-            if (game.PhaseOfTurn == TurnPhase.InfectCities)
+            return game.PhaseOfTurn switch
             {
-                game = InfectCities(game, eventList);
-                if (!game.IsOver)
-                    game = game.ApplyEvent(new TurnEnded(), eventList);
-            }
-
-            return game;
+                TurnPhase.DrawCards => DrawCards(game, eventList),
+                TurnPhase.Epidemic => Epidemic(game, eventList),
+                TurnPhase.InfectCities => InfectCities(game, eventList),
+                TurnPhase.DoActions => throw new InvalidOperationException("Player command?"),
+                _ => throw new InvalidOperationException("Shouldn't get here")
+            };
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
@@ -34,6 +29,10 @@ public partial record PandemicGame
             {
                 if (!game.IsOver) game = InfectCityFromPile(game, events);
             }
+
+            if (!game.IsOver)
+                game = game.ApplyEvent(new TurnEnded(), events);
+
             return game;
         }
 
