@@ -33,7 +33,7 @@ public partial record PandemicGame
         return @event switch
         {
             DifficultySet d => game with {Difficulty = d.Difficulty},
-            EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
+            EpidemicPlayerCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
             InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
             PlayerAdded p => ApplyPlayerAdded(game, p),
@@ -55,9 +55,9 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
-            EpidemicInfectCompleted e => game,
-            EpidemicIntensifyCompleted e => Apply(game, e),
-            InfectionRateMarkerProgressed e => Apply(game, e),
+            EpidemicCityInfected e => game,
+            EpidemicIntensified e => Apply(game, e),
+            InfectionRateIncreased e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
             EpidemicTriggered => game,
             PlayerPassed p => Apply(game, p),
@@ -217,7 +217,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicCardDiscarded e)
+    private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicPlayerCardDiscarded e)
     {
         var player = game.PlayerByRole(e.Player.Role);
         var discardedCard = player.Hand.First(c => c is EpidemicCard);
@@ -467,7 +467,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicIntensifyCompleted evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicIntensified evt)
     {
         return game with
         {
@@ -476,7 +476,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, InfectionRateMarkerProgressed _)
+    private static PandemicGame Apply(PandemicGame game, InfectionRateIncreased _)
     {
         return game with
         {
