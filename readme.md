@@ -9,7 +9,6 @@ implemented.
 # todo
 - fix epidemic
   - WIP: simplify non-human step + DrawCards
-    - make 'chose not to use special event' act as a latch, only enable when player can next use an event
   - allow special event between infect & intensify (un-ignore test)
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:

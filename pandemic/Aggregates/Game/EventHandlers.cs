@@ -55,7 +55,7 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
-            EpidemicCityInfected e => game,
+            EpidemicCityInfected e => Apply(game, e),
             EpidemicIntensified e => Apply(game, e),
             InfectionRateIncreased e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
@@ -70,6 +70,11 @@ public partial record PandemicGame
             ResilientPopulationUsed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicCityInfected evt)
+    {
+        return game with { SpecialEventCanBeUsed = true };
     }
 
     private static PandemicGame Apply(PandemicGame game, EpidemicTriggered evt)
@@ -324,6 +329,7 @@ public partial record PandemicGame
 
         return game with
         {
+            SpecialEventCanBeUsed = true,
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
