@@ -322,7 +322,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard,
+            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6,
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
@@ -494,7 +494,8 @@ public partial record PandemicGame
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
             CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
-            PhaseOfTurn = TurnPhase.DoActions
+            PhaseOfTurn = TurnPhase.DoActions,
+            SpecialEventCanBeUsed = true
         };
     }
 }

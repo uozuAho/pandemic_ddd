@@ -45,6 +45,8 @@ namespace pandemic.Commands
 
         private void SetSpecialEventCommands(PandemicGame game)
         {
+            if (!game.SpecialEventCanBeUsed) return;
+
             foreach (var playerWithCard in game.Players)
             {
                 foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
