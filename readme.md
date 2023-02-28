@@ -7,10 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- fix epidemic
-  - test scenario: pick up 2 epidemics. Expectations:
-      - only one infection stage occurs
-      - second epidemic: 1 infection card in discard, will be drawn on infect stage
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.

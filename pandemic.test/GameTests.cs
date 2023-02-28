@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
@@ -1242,6 +1243,40 @@ namespace pandemic.test
 
             game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             events.ShouldContain(e => e is OutbreakOccurred, 1);
+        }
+
+        [Test]
+        public void Epidemic_double()
+        {
+            var game = DefaultTestGame();
+            var epidemicInfectionCards = game.InfectionDrawPile.Bottom(2).ToList();
+            var epidemicInfectionCard1 = epidemicInfectionCards[0];
+            var epidemicInfectionCard2 = epidemicInfectionCards[1];
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    new EpidemicCard(),
+                    new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            game.InfectionRateMarkerPosition.ShouldBe(2);
+            game.CityByName(epidemicInfectionCard1.City).Cubes.NumberOf(epidemicInfectionCard1.Colour).ShouldBe(3);
+            game.CityByName(epidemicInfectionCard2.City).Cubes.NumberOf(epidemicInfectionCard2.Colour).ShouldBe(3);
+
+            // city 2 was the only card in the infection discard pile on the second epidemic, so should outbreak
+            // during the infection stage
+            events.ShouldContain(new OutbreakOccurred(epidemicInfectionCard2.City));
+
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 
         [Test]
