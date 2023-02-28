@@ -8,11 +8,9 @@ implemented.
 
 # todo
 - WIP: pass ends all actions
-  - something like this failed in fuzz:
-    - medic has 6 cards, scientist has 4
-    - medic drives as last action
-    - medic picks up city card then epidemic card
-    - fuzz fail: no epidemic cards in hand when running Epidemic()
+  - test: generator: shouldn't discard while drawing cards, or while epidemic is in progress
+  - test: same as Epidemic_after_7_cards_in_hand, but epidemic is second card drawn
+  - turn up fuzz tests, check for failures
 - add special events to all command generator
 - implement all game rules. left:
   - special event cards: play at any time, not an action

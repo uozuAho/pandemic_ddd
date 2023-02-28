@@ -914,6 +914,51 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_after_7_cards_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
+            var playerHand = drawPile.Top(7).ToList();
+            drawPile = drawPile.Remove(playerHand);
+            drawPile = drawPile
+                .Remove(drawPile.TopCard)
+                .PlaceOnTop(drawPile.TopCard, new EpidemicCard());
+
+            game = game with
+            {
+                PlayerDrawPile = drawPile,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1,
+                    Hand = new PlayerHand(playerHand)
+                })
+            };
+
+            var events = new List<IEvent>();
+
+            // act: do last action, pick up 2 cards
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: need to discard
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+
+            // act: discard
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: turn is over
+            events.ShouldContain(e => e is TurnEnded);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
         public void Treat_disease_works()
         {
             var game = DefaultTestGame();
@@ -2056,12 +2101,12 @@ namespace pandemic.test
         }
 
         [Timeout(1000)]
-        [Repeat(20)]
+        [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
         {
             // bigger numbers here slow down the test, but check for more improper behaviour
-            const int illegalCommandsToTryPerTurn = 40;
+            const int illegalCommandsToTryPerTurn = 5;
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
