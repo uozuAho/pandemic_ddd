@@ -45,6 +45,8 @@ namespace pandemic.Commands
 
         private void SetSpecialEventCommands(PandemicGame game)
         {
+            if (!game.SpecialEventCanBeUsed) return;
+
             foreach (var playerWithCard in game.Players)
             {
                 foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
@@ -52,7 +54,16 @@ namespace pandemic.Commands
                     if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
                     else if (card is AirliftCard) SetAirlifts(game, playerWithCard);
+                    else if (card is ResilientPopulationCard) SetResilientPopulations(game, playerWithCard);
                 }
+            }
+        }
+
+        private void SetResilientPopulations(PandemicGame game, Player playerWithCard)
+        {
+            foreach (var infectionCard in game.InfectionDiscardPile.Cards)
+            {
+                _buffer[_bufIdx++] = new ResilientPopulationCommand(playerWithCard.Role, infectionCard);
             }
         }
 

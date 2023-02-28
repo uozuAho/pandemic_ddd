@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -29,6 +30,7 @@ namespace pandemic.Aggregates.Game
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
+        private readonly PlayerCommandGenerator _commandGenerator = new();
 
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
 
@@ -52,16 +54,21 @@ namespace pandemic.Aggregates.Game
         public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         /// <summary>
-        /// Players had the option to use a special event card, and chose not to
+        /// A special event can be used, if any player has one. Toggled off when players choose not to use an event.
         /// </summary>
-        private bool SkipNextChanceToUseSpecialEvent { get; init; }
-
-        public bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard));
+        public bool SpecialEventCanBeUsed { get; init; } = true;
 
         /// <summary>
         /// Number of cards drawn during the current 'draw cards' phase
         /// </summary>
         private int CardsDrawn { get; init; }
+
+        private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
+
+        private bool PlayerCommandRequired()
+        {
+            return !IsOver && _commandGenerator.LegalCommands(this).Any();
+        }
 
         public bool IsSameStateAs(PandemicGame other)
         {
@@ -178,7 +185,10 @@ namespace pandemic.Aggregates.Game
             Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
             Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
 
-            Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
+            Debug.Assert(
+                InfectionDrawPile.Count
+                + InfectionDiscardPile.Count
+                + InfectionCardsRemovedFromGame.Count == 48);
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
         }

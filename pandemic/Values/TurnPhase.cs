@@ -4,5 +4,7 @@ public enum TurnPhase
 {
     DoActions,
     DrawCards,
-    InfectCities
+    Epidemic,
+    EpidemicIntensify,
+    InfectCities,
 }

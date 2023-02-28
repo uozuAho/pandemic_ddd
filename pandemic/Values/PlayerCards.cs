@@ -13,6 +13,7 @@ public interface ISpecialEventCard { }
 public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
 public record EventForecastCard : PlayerCard, ISpecialEventCard;
 public record AirliftCard : PlayerCard, ISpecialEventCard;
+public record ResilientPopulationCard : PlayerCard, ISpecialEventCard;
 
 public static class SpecialEventCards
 {
@@ -20,6 +21,7 @@ public static class SpecialEventCards
     {
         new GovernmentGrantCard(),
         new EventForecastCard(),
-        new AirliftCard()
+        new AirliftCard(),
+        new ResilientPopulationCard()
     }.ToImmutableList();
 }

@@ -32,21 +32,21 @@ public partial record PandemicGame
     {
         return @event switch
         {
-            DifficultySet d => game with {Difficulty = d.Difficulty},
-            EpidemicCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
+            DifficultySet d => game with { Difficulty = d.Difficulty },
+            EpidemicPlayerCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
-            InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
+            InfectionDeckSetUp s => game with { InfectionDrawPile = new Deck<InfectionCard>(s.Deck) },
             PlayerAdded p => ApplyPlayerAdded(game, p),
             PlayerMoved p => ApplyPlayerMoved(game, p),
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
             PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
             PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile)},
+            PlayerDrawPileSetupWithEpidemicCards p => game with { PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile) },
             PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
             PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
             CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
             CureDiscovered c => ApplyCureDiscovered(game, c),
-            GameLost g => game with {LossReason = g.Reason},
+            GameLost g => game with { LossReason = g.Reason },
             TurnEnded t => ApplyTurnEnded(game),
             PlayerDirectFlewTo p => ApplyPlayerDirectFlewTo(game, p),
             PlayerCharterFlewTo p => ApplyPlayerCharterFlewTo(game, p),
@@ -55,10 +55,11 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
-            EpidemicInfectionDiscardPileShuffledAndReplaced e => Apply(game, e),
-            InfectionRateMarkerProgressed e => Apply(game, e),
+            EpidemicCityInfected e => Apply(game, e),
+            EpidemicIntensified e => Apply(game, e),
+            InfectionRateIncreased e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
-            EpidemicTriggered => game,
+            EpidemicTriggered e => Apply(game, e),
             PlayerPassed p => Apply(game, p),
             DiseaseEradicated e => Apply(game, e),
             OutbreakOccurred e => Apply(game, e),
@@ -66,7 +67,35 @@ public partial record PandemicGame
             ChoseNotToUseSpecialEventCard e => Apply(game, e),
             EventForecastUsed e => Apply(game, e),
             AirliftUsed e => Apply(game, e),
+            ResilientPopulationUsed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicCityInfected evt)
+    {
+        return game with { SpecialEventCanBeUsed = true };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, EpidemicTriggered evt)
+    {
+        return game with { PhaseOfTurn = TurnPhase.Epidemic };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ResilientPopulationUsed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+        var eventCard = player.Hand.Single(c => c is ResilientPopulationCard);
+
+        return game with
+        {
+            InfectionDiscardPile = game.InfectionDiscardPile.Remove(evt.InfectionCard),
+            InfectionCardsRemovedFromGame = game.InfectionCardsRemovedFromGame.Add(evt.InfectionCard),
+            Players = game.Players.Replace(player, player with
+            {
+                Hand = player.Hand.Remove(eventCard)
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(eventCard)
         };
     }
 
@@ -124,7 +153,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            SkipNextChanceToUseSpecialEvent = true
+            SpecialEventCanBeUsed = false
         };
     }
 
@@ -164,23 +193,16 @@ public partial record PandemicGame
 
         return game with
         {
-            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 })
+            SpecialEventCanBeUsed = false,
+            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 }),
         };
     }
 
     private static PandemicGame Apply(PandemicGame game, TurnPhaseEnded evt)
     {
-        var nextPhase = game.PhaseOfTurn switch
-        {
-            TurnPhase.DoActions => TurnPhase.DrawCards,
-            TurnPhase.DrawCards => TurnPhase.InfectCities,
-            TurnPhase.InfectCities => TurnPhase.DoActions,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
         return game with
         {
-            PhaseOfTurn = nextPhase,
+            PhaseOfTurn = evt.NextPhase,
             CardsDrawn = game.PhaseOfTurn == TurnPhase.DrawCards ? 0 : game.CardsDrawn
         };
     }
@@ -198,16 +220,16 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicCardDiscarded e)
+    private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicPlayerCardDiscarded e)
     {
-        var player = game.PlayerByRole(e.Player.Role);
+        var player = game.PlayerByRole(e.Role);
         var discardedCard = player.Hand.First(c => c is EpidemicCard);
 
         return game with
         {
             Players = game.Players.Replace(player, player with
             {
-                Hand = e.Player.Hand.Remove(discardedCard)
+                Hand = player.Hand.Remove(discardedCard)
             }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discardedCard)
         };
@@ -300,6 +322,7 @@ public partial record PandemicGame
 
         return game with
         {
+            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6,
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
@@ -448,7 +471,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicInfectionDiscardPileShuffledAndReplaced evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicIntensified evt)
     {
         return game with
         {
@@ -457,7 +480,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, InfectionRateMarkerProgressed _)
+    private static PandemicGame Apply(PandemicGame game, InfectionRateIncreased _)
     {
         return game with
         {
@@ -471,7 +494,8 @@ public partial record PandemicGame
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
             CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
-            PhaseOfTurn = TurnPhase.DoActions
+            PhaseOfTurn = TurnPhase.DoActions,
+            SpecialEventCanBeUsed = true
         };
     }
 }

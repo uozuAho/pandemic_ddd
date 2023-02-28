@@ -10,7 +10,7 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
-      can be played between the infect & intensify steps of an epidemic
+      - diff with master ... done a lot in this branch
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
     - maybe: scenarios: can play special events at certain times
@@ -110,6 +110,9 @@ handle.
     been no need/opportunity to create smaller aggregates
   - eventual consistency: same reason as above
   - strategic design
+- it's frustrating that it still seems to be taking ages to implement a seemingly simple
+  game. Maybe it's not simple? What's taking so long? Each special event seems to take about
+  1h to code, even now that I've done the first one (which took ... a week!?)
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)

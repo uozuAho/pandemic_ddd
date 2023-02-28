@@ -1,3 +1,5 @@
-﻿namespace pandemic.Events;
+﻿using pandemic.Values;
 
-internal record TurnPhaseEnded : IEvent;
+namespace pandemic.Events;
+
+internal record TurnPhaseEnded(TurnPhase NextPhase) : IEvent;

@@ -14,14 +14,12 @@ namespace pandemic.Values
         {
             if (x == null || y == null) return false;
 
-            if (x is EpidemicCard && y is EpidemicCard) return true;
-
             if (x is PlayerCityCard xCity && y is PlayerCityCard yCity)
             {
                 return xCity.City.Name == yCity.City.Name;
             }
 
-            if (x is GovernmentGrantCard && y is GovernmentGrantCard) return true;
+            if (x.GetType() == y.GetType()) return true;
 
             return false;
         }

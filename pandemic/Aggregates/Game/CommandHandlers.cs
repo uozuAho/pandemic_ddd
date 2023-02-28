@@ -57,9 +57,12 @@ public partial record PandemicGame
 
         var eventList = events.ToList();
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
-            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
+            game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), eventList);
 
-        game = PostCommandProcessor.RunGameUntilPlayerCommandIsAvailable(game, eventList);
+        while (!game.IsOver && !game.PlayerCommandRequired())
+        {
+            game = NonPlayerStepper.Step(game, eventList);
+        }
 
         return (game, eventList);
     }
@@ -101,8 +104,20 @@ public partial record PandemicGame
             DontUseSpecialEventCommand cmd => Do(cmd),
             EventForecastCommand cmd => Do(cmd),
             AirliftCommand cmd => Do(cmd),
+            ResilientPopulationCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
+    {
+        if (!PlayerByRole(cmd.Role).Hand.Contains(new ResilientPopulationCard()))
+            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the resilient population card");
+
+        if (!InfectionDiscardPile.Cards.Contains(cmd.Card))
+            throw new GameRuleViolatedException($"{cmd.Card} is not in the discard pile");
+
+        return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
@@ -441,38 +456,12 @@ public partial record PandemicGame
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-        if (card is EpidemicCard) game = game.ApplyEvent(new EpidemicTriggered(), events);
+        if (card is EpidemicCard)
+            game = game.ApplyEvent(new EpidemicTriggered(), events);
+        else if (game.CardsDrawn == 2)
+            game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.InfectCities), events);
 
         return game;
-    }
-
-    private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
-    {
-        var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-
-        // infect city
-        if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-            return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-
-        for (var i = 0; i < 3; i++)
-        {
-            if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-            else
-            {
-                game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
-                break;
-            }
-        }
-
-        // shuffle infection cards
-        game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
-        var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
-        game = game.ApplyEvent(new EpidemicInfectionDiscardPileShuffledAndReplaced(shuffledDiscardPile), events);
-
-        game = game.ApplyEvent(new InfectionRateMarkerProgressed(), events);
-        var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
-        return game.ApplyEvent(new EpidemicCardDiscarded(game.CurrentPlayer, epidemicCard), events);
     }
 
     private static PandemicGame InfectCityFromPile(PandemicGame game, ICollection<IEvent> events)

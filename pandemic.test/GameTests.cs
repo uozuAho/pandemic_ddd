@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
@@ -1136,6 +1137,34 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_allows_special_event_after_pass_ends_turn()
+        {
+            var game = DefaultTestGame();
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+        }
+
+        [Test]
         public void Epidemic_increases_infection_rate()
         {
             var game = DefaultTestGame();
@@ -1196,7 +1225,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Epidemic_onto_existing_cubes_causes_outbreak()
+        public void Epidemic_onto_existing_cube_causes_outbreak()
         {
             var game = DefaultTestGame();
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
@@ -1219,6 +1248,121 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_onto_multiple_existing_cubes_causes_outbreak()
+        {
+            // set the rng to prevent the epidemic city ending up on the top of the
+            // infection pile after the epidemic
+            var game = DefaultTestGame(DefaultTestGameOptions() with {Rng = new Random(1234)});
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+            var epidemicCity = game.CityByName(epidemicInfectionCard.City);
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cities = game.Cities.Select(c => c.Name == epidemicCity.Name
+                    ? epidemicCity
+                        .AddCube(epidemicInfectionCard.Colour)
+                        .AddCube(epidemicInfectionCard.Colour)
+                    : c with { Cubes = CubePile.Empty }).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
+            events.ShouldContain(e => e is OutbreakOccurred, 1);
+        }
+
+        [Test]
+        public void Epidemic_double()
+        {
+            var game = DefaultTestGame();
+            var epidemicInfectionCards = game.InfectionDrawPile.Bottom(2).ToList();
+            var epidemicInfectionCard1 = epidemicInfectionCards[0];
+            var epidemicInfectionCard2 = epidemicInfectionCards[1];
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    new EpidemicCard(),
+                    new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            game.InfectionRateMarkerPosition.ShouldBe(2);
+            game.CityByName(epidemicInfectionCard1.City).Cubes.NumberOf(epidemicInfectionCard1.Colour).ShouldBe(3);
+            game.CityByName(epidemicInfectionCard2.City).Cubes.NumberOf(epidemicInfectionCard2.Colour).ShouldBe(3);
+
+            // city 2 was the only card in the infection discard pile on the second epidemic, so should outbreak
+            // during the infection stage
+            events.ShouldContain(new OutbreakOccurred(epidemicInfectionCard2.City));
+
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Scenario_epidemic_double_prevent_outbreak_with_resilient_population()
+        {
+            var game = DefaultTestGame();
+            var epidemicInfectionCards = game.InfectionDrawPile.Bottom(2).ToList();
+            var epidemicInfectionCard1 = epidemicInfectionCards[0];
+            var epidemicInfectionCard2 = epidemicInfectionCards[1];
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    new EpidemicCard(),
+                    new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act: end turn
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert: current state should be: first epidemic, just after infect step,
+            // chance to use resilient population card
+            events.ShouldContain(e => e is EpidemicCityInfected, 1);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: don't use it just yet
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: current state should be second epidemic, just after infect step
+            events.ShouldContain(e => e is EpidemicCityInfected, 2);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: use resilient population
+            game = game.Do(new ResilientPopulationCommand(Role.Medic, epidemicInfectionCard2), events);
+
+            game.InfectionRateMarkerPosition.ShouldBe(2);
+            game.CityByName(epidemicInfectionCard1.City).Cubes.NumberOf(epidemicInfectionCard1.Colour).ShouldBe(3);
+            game.CityByName(epidemicInfectionCard2.City).Cubes.NumberOf(epidemicInfectionCard2.Colour).ShouldBe(3);
+
+            // city 2 was the only card in the infection discard pile on the second epidemic,
+            // so an outbreak would have occurred here if the resilient population card wasn't used
+            events.ShouldNotContain(new OutbreakOccurred(epidemicInfectionCard2.City));
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
         public void Pass_reduces_num_actions()
         {
             var game = DefaultTestGame();
@@ -1233,6 +1377,22 @@ namespace pandemic.test
         {
             var game = DefaultTestGame().WithNoEpidemics();
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            events.ShouldContain(e => e is TurnEnded);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Pass_skips_special_event()
+        {
+            var game = DefaultTestGame();
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
@@ -1544,22 +1704,19 @@ namespace pandemic.test
                 Hand = new PlayerHand(game.PlayerDrawPile.Bottom(5).Concat(new[] { new GovernmentGrantCard() })),
             });
 
-            // act: end turn, don't use event card before or during picking up cards
+            // act: end turn
             var eventList = new List<IEvent>();
             game = game.Do(new PassCommand(Role.Medic), eventList);
-            game = game.Do(new DontUseSpecialEventCommand(), eventList);
-            game = game.Do(new DontUseSpecialEventCommand(), eventList);
 
+            // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
-
-            new PlayerCommandGenerator()
-                .LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: gov grant
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), eventList);
 
+            // assert
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
@@ -1587,25 +1744,23 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
-            game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            // assert: infect stage of epidemic has occurred
+            // assert: epidemic card drawn, infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicInfectionDiscardPileShuffledAndReplaced);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: use special event card
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
 
             // assert: intensify stage of epidemic has occurred, turn is now over
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is EpidemicIntensified);
             events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
@@ -1632,35 +1787,23 @@ namespace pandemic.test
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
 
-            // assert: still medic's turn, can use special event card
+            // assert: epidemic infection occurred, chance to use special event before intensify
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is PlayerCardPickedUp);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            // assert: epidemic triggered
-            events.ShouldContain(e => e is EpidemicTriggered);
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: choose not to use special event card
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            // assert: epidemic intensified, 2 cards picked up, turn over
+            events.ShouldContain(e => e is EpidemicIntensified);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: choose not to use special event card
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: now it's the scientist's turn
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            events.ShouldContain(e => e is InfectionCardDrawn);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
         }
 
@@ -1678,37 +1821,18 @@ namespace pandemic.test
             var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
-            // act: pass, then no more actions remaining
-            game = game.Do(new PassCommand(Role.Medic), events);
+            // act
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
 
-            // assert: still medic's turn, can use special event card
+            // assert: still a chance to use special event before picking up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            // assert: medic has picked up one card, and has another chance to use special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: it's finally the scientist's turn!
+            // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
@@ -1732,37 +1856,18 @@ namespace pandemic.test
             var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
-            // act: pass, then no more actions remaining
-            game = game.Do(new PassCommand(Role.Medic), events);
+            // act
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
 
-            // assert: still medic's turn, can use scientist's special event card
+            // assert: scientist still a chance to use special event before medic picks up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            // assert: medic has picked up one card, and has another chance to use special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use scientist's special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: it's finally the scientist's turn!
+            // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
@@ -1879,6 +1984,90 @@ namespace pandemic.test
                 game.Do(new AirliftCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Role, "Atlanta")));
         }
 
+        [Test]
+        public void Resilient_population_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+
+            (game, var events) = game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, infectionCardToRemove));
+
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is ResilientPopulationCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<ResilientPopulationCard>();
+        }
+
+        [Test]
+        public void Resilient_population_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDiscardPile.TopCard)));
+        }
+
+        [Test]
+        public void Resilient_population_throws_if_infection_card_is_not_in_discard_pile()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDrawPile.TopCard)));
+        }
+
+        [Test]
+        public void Resilient_population_can_play_during_epidemic_after_infect()
+        {
+            var game = DefaultTestGame().WithNoEpidemics();
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act: end turn, draw epidemic card
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert: infect stage of epidemic has occurred
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: use special event card
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+            game = game.Do(new ResilientPopulationCommand(Role.Medic, infectionCardToRemove), events);
+
+            // assert: turn is over, infection card is out of the game
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is EpidemicIntensified);
+            events.ShouldContain(e => e is InfectionCardDrawn);
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+            game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
+        }
+
+        [Timeout(1000)]
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
@@ -1918,6 +2107,7 @@ namespace pandemic.test
                 var previousGameState = game;
 
                 // do random action
+                legalCommands.Count.ShouldBePositive(game.ToString());
                 var action = random.Choice(legalCommands);
                 (game, var tempEvents) = game.Do(action);
                 events.AddRange(tempEvents);
@@ -1938,15 +2128,18 @@ namespace pandemic.test
             Assert.IsTrue(events.Any(e => e is TurnEnded));
         }
 
-        private static PandemicGame DefaultTestGame()
+        private static NewGameOptions DefaultTestGameOptions()
         {
-            var options = new NewGameOptions
+            return new NewGameOptions
             {
-                Roles = new [] { Role.Medic, Role.Scientist},
+                Roles = new[] { Role.Medic, Role.Scientist },
                 IncludeSpecialEventCards = false
             };
+        }
 
-            return DefaultTestGame(options);
+        private static PandemicGame DefaultTestGame()
+        {
+            return DefaultTestGame(DefaultTestGameOptions());
         }
 
         private static PandemicGame DefaultTestGame(NewGameOptions options)
