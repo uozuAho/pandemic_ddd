@@ -8,9 +8,6 @@ implemented.
 
 # todo
 - implement all game rules. left:
-  - remove opportunity for special event after epidemic is triggered
-    - test: after passing (with special event) causes epidemic, can use the special event again
-    - check for leftover todos
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
       - add to all cards/command gen

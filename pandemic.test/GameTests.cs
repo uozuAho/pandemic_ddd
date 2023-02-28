@@ -1137,6 +1137,34 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_allows_special_event_after_pass_ends_turn()
+        {
+            var game = DefaultTestGame();
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            // assert
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+        }
+
+        [Test]
         public void Epidemic_increases_infection_rate()
         {
             var game = DefaultTestGame();
