@@ -59,7 +59,7 @@ public partial record PandemicGame
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), eventList);
 
-        while (!game.PlayerCommandRequired())
+        while (!game.IsOver && !game.PlayerCommandRequired())
         {
             game = NonPlayerStepper.Step(game, eventList);
         }
