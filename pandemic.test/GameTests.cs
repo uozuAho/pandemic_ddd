@@ -1794,9 +1794,17 @@ namespace pandemic.test
             var events = new List<IEvent>();
 
             // act
-            game = game.Do(new PassCommand(Role.Medic), events);
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
 
-            // assert
+            // assert: still a chance to use special event before picking up cards
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
@@ -1820,8 +1828,16 @@ namespace pandemic.test
             var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
-            // act: note that pass means scientist also doesn't want to use special event card
-            game = game.Do(new PassCommand(Role.Medic), events);
+            // act
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: scientist still a chance to use special event before medic picks up cards
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            events.ShouldNotContain(e => e is PlayerCardPickedUp);
+            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+
+            // act: don't use special event
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);

@@ -9,9 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - remove opportunity for special event after epidemic is triggered
-    - test: non-pass command as last action still allows special event to be played
-    - test: pass command when holding a special event passes the special event too
-    - test: after passing (with special event) ends turn, can use the special event again
     - test: after passing (with special event) causes epidemic, can use the special event again
     - check for leftover todos
   - special event cards: play at any time, not an action
