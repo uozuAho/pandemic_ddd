@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - fix epidemic
-  - WIP: simplify non-human step + DrawCards
   - allow special event between infect & intensify (un-ignore test)
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
