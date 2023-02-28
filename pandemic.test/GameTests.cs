@@ -1305,10 +1305,8 @@ namespace pandemic.test
 
             var events = new List<IEvent>();
 
-            // act
+            // act: end turn
             game = game.Do(new PassCommand(Role.Medic), events);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: current state should be: first epidemic, just after infect step,
             // chance to use resilient population card
@@ -1316,8 +1314,6 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-            // act: choose not to use after epidemic card is drawn. todo: remove need for this?
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: current state should be second epidemic, just after infect step
@@ -1353,6 +1349,22 @@ namespace pandemic.test
         {
             var game = DefaultTestGame().WithNoEpidemics();
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            events.ShouldContain(e => e is TurnEnded);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Pass_skips_special_event()
+        {
+            var game = DefaultTestGame();
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
@@ -1664,22 +1676,19 @@ namespace pandemic.test
                 Hand = new PlayerHand(game.PlayerDrawPile.Bottom(5).Concat(new[] { new GovernmentGrantCard() })),
             });
 
-            // act: end turn, don't use event card before or during picking up cards
+            // act: end turn
             var eventList = new List<IEvent>();
             game = game.Do(new PassCommand(Role.Medic), eventList);
-            game = game.Do(new DontUseSpecialEventCommand(), eventList);
-            game = game.Do(new DontUseSpecialEventCommand(), eventList);
 
+            // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
-
-            new PlayerCommandGenerator()
-                .LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: gov grant
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), eventList);
 
+            // assert
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<GovernmentGrantCard>();
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
@@ -1707,12 +1716,8 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
-            generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
-            game = game.Do(new DontUseSpecialEventCommand(), events); // after actions finished
-            game = game.Do(new DontUseSpecialEventCommand(), events); // after draw card
-                                                                      // change so we don't need two commands here?
 
-            // assert: infect stage of epidemic has occurred
+            // assert: epidemic card drawn, infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
             events.ShouldContain(e => e is EpidemicCityInfected);
             events.ShouldNotContain(e => e is EpidemicIntensified);
@@ -1754,36 +1759,23 @@ namespace pandemic.test
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
 
-            // assert: still medic's turn, can use special event card
+            // assert: epidemic infection occurred, chance to use special event before intensify
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            events.ShouldContain(e => e is PlayerCardPickedUp);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
-            // assert: epidemic triggered
-            events.ShouldContain(e => e is EpidemicTriggered);
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: choose not to use special event card
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            // assert: epidemic intensified, 2 cards picked up, turn over
+            events.ShouldContain(e => e is EpidemicIntensified);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: choose not to use special event card
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: now it's the scientist's turn
+            events.ShouldContain(e => e is InfectionCardDrawn, 2);
+            events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            events.ShouldContain(e => e is InfectionCardDrawn);
             generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
         }
 
@@ -1801,37 +1793,10 @@ namespace pandemic.test
             var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
-            // act: pass, then no more actions remaining
+            // act
             game = game.Do(new PassCommand(Role.Medic), events);
 
-            // assert: still medic's turn, can use special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: medic has picked up one card, and has another chance to use special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: it's finally the scientist's turn!
+            // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
@@ -1855,37 +1820,10 @@ namespace pandemic.test
             var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
-            // act: pass, then no more actions remaining
+            // act: note that pass means scientist also doesn't want to use special event card
             game = game.Do(new PassCommand(Role.Medic), events);
 
-            // assert: still medic's turn, can use scientist's special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: medic has picked up one card, and has another chance to use special event card
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 1);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: still medic's turn, can use scientist's special event before infection stage
-            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
-            events.ShouldNotContain(e => e is InfectionCardDrawn);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
-
-            // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-
-            // assert: it's finally the scientist's turn!
+            // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
@@ -2065,8 +2003,6 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
-            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);

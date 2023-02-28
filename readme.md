@@ -8,10 +8,17 @@ implemented.
 
 # todo
 - implement all game rules. left:
+  - remove opportunity for special event after epidemic is triggered
+    - test: non-pass command as last action still allows special event to be played
+    - test: pass command when holding a special event passes the special event too
+    - test: after passing (with special event) ends turn, can use the special event again
+    - test: after passing (with special event) causes epidemic, can use the special event again
+    - check for leftover todos
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
-      - git stash pop
       - add to all cards/command gen
+        - git stash pop
+      - diff with master ... done a lot in this branch
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
     - maybe: scenarios: can play special events at certain times

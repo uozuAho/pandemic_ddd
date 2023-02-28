@@ -193,7 +193,8 @@ public partial record PandemicGame
 
         return game with
         {
-            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 })
+            SpecialEventCanBeUsed = false,
+            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 }),
         };
     }
 
@@ -321,7 +322,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = true,
+            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard,
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
