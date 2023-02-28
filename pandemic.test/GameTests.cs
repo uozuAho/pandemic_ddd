@@ -1222,7 +1222,9 @@ namespace pandemic.test
         [Test]
         public void Epidemic_onto_multiple_existing_cubes_causes_outbreak()
         {
-            var game = DefaultTestGame();
+            // set the rng to prevent the epidemic city ending up on the top of the
+            // infection pile after the epidemic
+            var game = DefaultTestGame(DefaultTestGameOptions() with {Rng = new Random(1234)});
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
 
@@ -1231,10 +1233,11 @@ namespace pandemic.test
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
                     PlayerCards.CityCard("Atlanta"),
                     new EpidemicCard()),
-                Cities = game.Cities.Replace(epidemicCity,
-                    epidemicCity
+                Cities = game.Cities.Select(c => c.Name == epidemicCity.Name
+                    ? epidemicCity
                         .AddCube(epidemicInfectionCard.Colour)
-                        .AddCube(epidemicInfectionCard.Colour))
+                        .AddCube(epidemicInfectionCard.Colour)
+                    : c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
@@ -2144,15 +2147,18 @@ namespace pandemic.test
             Assert.IsTrue(events.Any(e => e is TurnEnded));
         }
 
-        private static PandemicGame DefaultTestGame()
+        private static NewGameOptions DefaultTestGameOptions()
         {
-            var options = new NewGameOptions
+            return new NewGameOptions
             {
-                Roles = new [] { Role.Medic, Role.Scientist},
+                Roles = new[] { Role.Medic, Role.Scientist },
                 IncludeSpecialEventCards = false
             };
+        }
 
-            return DefaultTestGame(options);
+        private static PandemicGame DefaultTestGame()
+        {
+            return DefaultTestGame(DefaultTestGameOptions());
         }
 
         private static PandemicGame DefaultTestGame(NewGameOptions options)

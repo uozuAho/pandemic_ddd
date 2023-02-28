@@ -2,5 +2,5 @@ using pandemic.Values;
 
 namespace pandemic.Events
 {
-    internal record EpidemicPlayerCardDiscarded(Player Player, EpidemicCard Card) : IEvent;
+    internal record EpidemicPlayerCardDiscarded(Role Role, EpidemicCard Card) : IEvent;
 }

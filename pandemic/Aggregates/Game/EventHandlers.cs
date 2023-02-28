@@ -221,14 +221,14 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyEpidemicCardDiscarded(PandemicGame game, EpidemicPlayerCardDiscarded e)
     {
-        var player = game.PlayerByRole(e.Player.Role);
+        var player = game.PlayerByRole(e.Role);
         var discardedCard = player.Hand.First(c => c is EpidemicCard);
 
         return game with
         {
             Players = game.Players.Replace(player, player with
             {
-                Hand = e.Player.Hand.Remove(discardedCard)
+                Hand = player.Hand.Remove(discardedCard)
             }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(discardedCard)
         };

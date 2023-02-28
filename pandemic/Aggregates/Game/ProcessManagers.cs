@@ -38,7 +38,7 @@ public partial record PandemicGame
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
             var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
 
-            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer, epidemicCard), events);
+            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
 
             // increase the infection rate
             game = game.ApplyEvent(new InfectionRateIncreased(), events);
