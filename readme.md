@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - fix epidemic
-  - break up epidemic/intensify handlers
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
       - only one infection stage occurs
