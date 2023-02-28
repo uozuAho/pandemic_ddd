@@ -32,21 +32,21 @@ public partial record PandemicGame
     {
         return @event switch
         {
-            DifficultySet d => game with {Difficulty = d.Difficulty},
+            DifficultySet d => game with { Difficulty = d.Difficulty },
             EpidemicPlayerCardDiscarded e => ApplyEpidemicCardDiscarded(game, e),
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
-            InfectionDeckSetUp s => game with {InfectionDrawPile = new Deck<InfectionCard>(s.Deck)},
+            InfectionDeckSetUp s => game with { InfectionDrawPile = new Deck<InfectionCard>(s.Deck) },
             PlayerAdded p => ApplyPlayerAdded(game, p),
             PlayerMoved p => ApplyPlayerMoved(game, p),
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
             PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
             PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
-            PlayerDrawPileSetupWithEpidemicCards p => game with {PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile)},
+            PlayerDrawPileSetupWithEpidemicCards p => game with { PlayerDrawPile = new Deck<PlayerCard>(p.DrawPile) },
             PlayerDrawPileShuffledForDealing p => ApplyPlayerDrawPileSetUp(game, p),
             PlayerCardDiscarded p => ApplyPlayerCardDiscarded(game, p),
             CubeAddedToCity c => ApplyCubesAddedToCity(game, c),
             CureDiscovered c => ApplyCureDiscovered(game, c),
-            GameLost g => game with {LossReason = g.Reason},
+            GameLost g => game with { LossReason = g.Reason },
             TurnEnded t => ApplyTurnEnded(game),
             PlayerDirectFlewTo p => ApplyPlayerDirectFlewTo(game, p),
             PlayerCharterFlewTo p => ApplyPlayerCharterFlewTo(game, p),
@@ -199,17 +199,9 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, TurnPhaseEnded evt)
     {
-        var nextPhase = game.PhaseOfTurn switch
-        {
-            TurnPhase.DoActions => TurnPhase.DrawCards,
-            TurnPhase.DrawCards => TurnPhase.InfectCities,
-            TurnPhase.InfectCities => TurnPhase.DoActions,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
         return game with
         {
-            PhaseOfTurn = nextPhase,
+            PhaseOfTurn = evt.NextPhase,
             CardsDrawn = game.PhaseOfTurn == TurnPhase.DrawCards ? 0 : game.CardsDrawn
         };
     }
@@ -480,11 +472,8 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, EpidemicIntensified evt)
     {
-        var nextPhase = game.CardsDrawn == 2 ? TurnPhase.InfectCities : TurnPhase.DrawCards;
-
         return game with
         {
-            PhaseOfTurn = nextPhase,
             InfectionDiscardPile = Deck<InfectionCard>.Empty,
             InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(evt.ShuffledDiscardPile)
         };

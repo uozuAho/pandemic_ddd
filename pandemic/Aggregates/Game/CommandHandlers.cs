@@ -57,7 +57,7 @@ public partial record PandemicGame
 
         var eventList = events.ToList();
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
-            game = game.ApplyEvent(new TurnPhaseEnded(), eventList);
+            game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), eventList);
 
         while (!game.IsOver && !game.PlayerCommandRequired())
         {
@@ -456,8 +456,10 @@ public partial record PandemicGame
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-        if (game.CardsDrawn == 2) game = game.ApplyEvent(new TurnPhaseEnded(), events);
-        if (card is EpidemicCard) game = game.ApplyEvent(new EpidemicTriggered(), events);
+        if (card is EpidemicCard)
+            game = game.ApplyEvent(new EpidemicTriggered(), events);
+        else if (game.CardsDrawn == 2)
+            game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.InfectCities), events);
 
         return game;
     }
@@ -492,7 +494,8 @@ public partial record PandemicGame
 
         // intensify: shuffle & place infection discard pile onto draw pile
         var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
-        return game.ApplyEvent(new EpidemicIntensified(shuffledDiscardPile), events);
+        game = game.ApplyEvent(new EpidemicIntensified(shuffledDiscardPile), events);
+        return game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), events);
     }
 
     private static PandemicGame InfectCityFromPile(PandemicGame game, ICollection<IEvent> events)
