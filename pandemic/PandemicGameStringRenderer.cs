@@ -21,9 +21,13 @@ namespace pandemic
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
             sb.AppendLine($"cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
-            sb.AppendLine($"  location: {game.CurrentPlayer.Location}");
-            sb.AppendLine($"  remaining actions: {game.CurrentPlayer.ActionsRemaining}");
-            sb.AppendLine($"  hand: {string.Join("\n    ", game.CurrentPlayer.Hand)}");
+            foreach (var player in game.Players)
+            {
+                sb.AppendLine($"player: {player.Role}");
+                sb.AppendLine($"  location: {player.Location}");
+                sb.AppendLine($"  remaining actions: {player.ActionsRemaining}");
+                sb.AppendLine($"  hand: {string.Join("\n    ", player.Hand)}");
+            }
             sb.AppendLine("cities with cubes:");
             foreach (var city in game.Cities)
             {

@@ -1726,11 +1726,12 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_play_during_epidemic_after_infect()
         {
-            var game = DefaultTestGame().WithNoEpidemics();
+            var game = DefaultTestGame();
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2068,12 +2069,12 @@ namespace pandemic.test
         }
 
         [Timeout(1000)]
-        [Repeat(10)]
+        [Repeat(20)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
         public void Fuzz_for_invalid_states(NewGameOptions options)
         {
             // bigger numbers here slow down the test, but check for more improper behaviour
-            const int illegalCommandsToTryPerTurn = 10;
+            const int illegalCommandsToTryPerTurn = 40;
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
@@ -2096,6 +2097,9 @@ namespace pandemic.test
                     {
                         game.Do(illegalCommand);
                         Console.WriteLine(game);
+                        Console.WriteLine();
+                        Console.WriteLine("Events, in reverse:");
+                        Console.WriteLine(string.Join('\n', events.Reversed()));
                         Assert.Fail($"Expected {illegalCommand} to throw");
                     }
                     catch (GameRuleViolatedException)
@@ -2109,8 +2113,16 @@ namespace pandemic.test
                 // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
                 var action = random.Choice(legalCommands);
-                (game, var tempEvents) = game.Do(action);
-                events.AddRange(tempEvents);
+                try
+                {
+                    (game, var tempEvents) = game.Do(action);
+                    events.AddRange(tempEvents);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine(game);
+                    throw;
+                }
             }
         }
 
