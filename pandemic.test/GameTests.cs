@@ -1280,6 +1280,62 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Scenario_epidemic_double_prevent_outbreak_with_resilient_population()
+        {
+            var game = DefaultTestGame();
+            var epidemicInfectionCards = game.InfectionDrawPile.Bottom(2).ToList();
+            var epidemicInfectionCard1 = epidemicInfectionCards[0];
+            var epidemicInfectionCard2 = epidemicInfectionCards[1];
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    new EpidemicCard(),
+                    new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = game.CurrentPlayer.Hand.Add(new ResilientPopulationCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.Medic), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: current state should be: first epidemic, just after infect step,
+            // chance to use resilient population card
+            events.ShouldContain(e => e is EpidemicCityInfected, 1);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: don't use it just yet
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+            // act: choose not to use after epidemic card is drawn. todo: remove need for this?
+            game = game.Do(new DontUseSpecialEventCommand(), events);
+
+            // assert: current state should be second epidemic, just after infect step
+            events.ShouldContain(e => e is EpidemicCityInfected, 2);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            // act: use resilient population
+            game = game.Do(new ResilientPopulationCommand(Role.Medic, epidemicInfectionCard2), events);
+
+            game.InfectionRateMarkerPosition.ShouldBe(2);
+            game.CityByName(epidemicInfectionCard1.City).Cubes.NumberOf(epidemicInfectionCard1.Colour).ShouldBe(3);
+            game.CityByName(epidemicInfectionCard2.City).Cubes.NumberOf(epidemicInfectionCard2.Colour).ShouldBe(3);
+
+            // city 2 was the only card in the infection discard pile on the second epidemic,
+            // so an outbreak would have occurred here if the resilient population card wasn't used
+            events.ShouldNotContain(new OutbreakOccurred(epidemicInfectionCard2.City));
+
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
         public void Pass_reduces_num_actions()
         {
             var game = DefaultTestGame();
