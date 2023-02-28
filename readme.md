@@ -8,7 +8,7 @@ implemented.
 
 # todo
 - fix epidemic
-  - allow special event between infect & intensify (un-ignore test)
+  - break up epidemic/intensify handlers
   - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
       - only one infection stage occurs

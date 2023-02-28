@@ -5,5 +5,6 @@ public enum TurnPhase
     DoActions,
     DrawCards,
     Epidemic,
-    InfectCities
+    EpidemicIntensify,
+    InfectCities,
 }

@@ -1594,19 +1594,20 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicIntensified);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game)
-                .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
+            generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: use special event card
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
 
             // assert: intensify stage of epidemic has occurred, turn is now over
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+            events.ShouldContain(e => e is EpidemicIntensified);
             events.ShouldContain(e => e is InfectionCardDrawn);
         }
 
@@ -1925,7 +1926,6 @@ namespace pandemic.test
                 game.Do(new ResilientPopulationCommand(game.CurrentPlayer.Role, game.InfectionDrawPile.TopCard)));
         }
 
-        [Ignore("run me once epidemic turn phase implemented")]
         [Test]
         public void Resilient_population_can_play_during_epidemic_after_infect()
         {
@@ -1945,6 +1945,7 @@ namespace pandemic.test
 
             // act: end turn, draw epidemic card
             game = game.Do(new PassCommand(Role.Medic), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
             game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: infect stage of epidemic has occurred

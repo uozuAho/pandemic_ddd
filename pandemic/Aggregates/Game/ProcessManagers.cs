@@ -19,6 +19,7 @@ public partial record PandemicGame
             {
                 TurnPhase.DrawCards => DrawCards(game, eventList),
                 TurnPhase.Epidemic => Epidemic(game, eventList),
+                TurnPhase.EpidemicIntensify => Epidemic(game, eventList),
                 TurnPhase.InfectCities => InfectCities(game, eventList),
                 TurnPhase.DoActions => throw new InvalidOperationException("Player command?"),
                 _ => throw new InvalidOperationException("Shouldn't get here")
@@ -34,36 +35,48 @@ public partial record PandemicGame
 
         private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
         {
-            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-            var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
-
-            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer, epidemicCard), events);
-
-            // increase the infection rate
-            game = game.ApplyEvent(new InfectionRateIncreased(), events);
-
-            // infect: add 3 cubes to epidemic city
-            if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-
-            for (var i = 0; i < 3; i++)
+            if (game.PhaseOfTurn == TurnPhase.Epidemic)
             {
-                if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                    game = game.ApplyEvent(new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-                else
+                var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+                var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
+
+                game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer, epidemicCard), events);
+
+                // increase the infection rate
+                game = game.ApplyEvent(new InfectionRateIncreased(), events);
+
+                // infect: add 3 cubes to epidemic city
+                if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                    return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
+
+                for (var i = 0; i < 3; i++)
                 {
-                    game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
-                    break;
+                    if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                        game = game.ApplyEvent(
+                            new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+                    else
+                    {
+                        game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
+                        break;
+                    }
                 }
+
+                game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
+                game = game.ApplyEvent(new EpidemicCityInfected(), events);
+                game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.EpidemicIntensify), events);
+
+                return game;
             }
 
-            game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
-            game = game.ApplyEvent(new EpidemicCityInfected(), events);
+            if (game.PhaseOfTurn == TurnPhase.EpidemicIntensify)
+            {
+                // intensify: shuffle & place infection discard pile onto draw pile
+                var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
+                game = game.ApplyEvent(new EpidemicIntensified(shuffledDiscardPile), events);
+                return game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), events);
+            }
 
-            // intensify: shuffle & place infection discard pile onto draw pile
-            var shuffledDiscardPile = game.InfectionDiscardPile.Cards.Shuffle(game.Rng).ToList();
-            game = game.ApplyEvent(new EpidemicIntensified(shuffledDiscardPile), events);
-            return game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), events);
+            throw new InvalidOperationException("asdf");
         }
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
