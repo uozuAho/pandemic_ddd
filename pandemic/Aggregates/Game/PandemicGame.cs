@@ -52,7 +52,7 @@ namespace pandemic.Aggregates.Game
         public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         /// <summary>
-        /// A special event can be used, if any player has one.
+        /// A special event can be used, if any player has one. Toggled off when players choose not to use an event.
         /// </summary>
         private bool SpecialEventCanBeUsed { get; init; } = true;
 
@@ -187,7 +187,10 @@ namespace pandemic.Aggregates.Game
             Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
             Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
 
-            Debug.Assert(InfectionDrawPile.Count + InfectionDiscardPile.Count == 48);
+            Debug.Assert(
+                InfectionDrawPile.Count
+                + InfectionDiscardPile.Count
+                + InfectionCardsRemovedFromGame.Count == 48);
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
         }

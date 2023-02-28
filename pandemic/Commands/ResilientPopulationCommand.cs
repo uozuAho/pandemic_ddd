@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record ResilientPopulationCommand(Role Role, InfectionCard Card) : IPlayerCommand;
+public record ResilientPopulationCommand(Role Role, InfectionCard Card) : IPlayerCommand, ISpecialEventCommand;

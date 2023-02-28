@@ -2107,6 +2107,7 @@ namespace pandemic.test
                 var previousGameState = game;
 
                 // do random action
+                legalCommands.Count.ShouldBePositive(game.ToString());
                 var action = random.Choice(legalCommands);
                 (game, var tempEvents) = game.Do(action);
                 events.AddRange(tempEvents);
