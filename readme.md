@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - fix epidemic
-  - test: city with 2 cubes, epidemic drawn, should only outbreak once
   - test scenario: pick up 2 epidemics. Expectations:
       - only one infection stage occurs
       - second epidemic: 1 infection card in discard, will be drawn on infect stage

@@ -1196,7 +1196,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Epidemic_onto_existing_cubes_causes_outbreak()
+        public void Epidemic_onto_existing_cube_causes_outbreak()
         {
             var game = DefaultTestGame();
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
@@ -1216,6 +1216,32 @@ namespace pandemic.test
 
             game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             events.ShouldContain(e => e is OutbreakOccurred);
+        }
+
+        [Test]
+        public void Epidemic_onto_multiple_existing_cubes_causes_outbreak()
+        {
+            var game = DefaultTestGame();
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+            var epidemicCity = game.CityByName(epidemicInfectionCard.City);
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                Cities = game.Cities.Replace(epidemicCity,
+                    epidemicCity
+                        .AddCube(epidemicInfectionCard.Colour)
+                        .AddCube(epidemicInfectionCard.Colour))
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
+
+            game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
+            events.ShouldContain(e => e is OutbreakOccurred, 1);
         }
 
         [Test]
