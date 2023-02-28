@@ -78,6 +78,7 @@ namespace pandemic.agents.test
             var game = ANewGame();
             game = game with
             {
+                PhaseOfTurn = TurnPhase.DrawCards,
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     Location = "Miami",

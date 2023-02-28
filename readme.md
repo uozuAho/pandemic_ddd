@@ -10,8 +10,6 @@ implemented.
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - resilient population: remove any infection card from the discard pile from the game.
-      - add to all cards/command gen
-        - change PlayerCommandRequired to use command generator
       - diff with master ... done a lot in this branch
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
