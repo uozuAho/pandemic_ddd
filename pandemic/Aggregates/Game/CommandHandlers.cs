@@ -172,7 +172,15 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(PassCommand command)
     {
-        return ApplyEvents(new PlayerPassed(command.Role));
+        if (CurrentPlayer.Role != command.Role)
+            throw new GameRuleViolatedException($"It's not {command.Role}'s turn");
+
+        if (PhaseOfTurn != TurnPhase.DoActions)
+            throw new GameRuleViolatedException("You can only pass when you have actions to spend");
+
+        return ApplyEvents(
+            new PlayerPassed(command.Role),
+            new TurnPhaseEnded(TurnPhase.DrawCards));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)

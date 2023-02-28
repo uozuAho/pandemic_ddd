@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Sockets;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
@@ -1363,20 +1361,9 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Pass_reduces_num_actions()
-        {
-            var game = DefaultTestGame();
-
-            (game, _) = game.Do(new PassCommand(Role.Medic));
-
-            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-        }
-
-        [Test]
-        public void Pass_can_end_turn()
+        public void Pass_ends_turn()
         {
             var game = DefaultTestGame().WithNoEpidemics();
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
@@ -2121,6 +2108,9 @@ namespace pandemic.test
                 catch (Exception)
                 {
                     Console.WriteLine(game);
+                    Console.WriteLine();
+                    Console.WriteLine("Events, in reverse:");
+                    Console.WriteLine(string.Join('\n', events.Reversed()));
                     throw;
                 }
             }

@@ -7,8 +7,12 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- pass ends all actions
-- make fuzz test fast
+- WIP: pass ends all actions
+  - something like this failed in fuzz:
+    - medic has 6 cards, scientist has 4
+    - medic drives as last action
+    - medic picks up city card then epidemic card
+    - fuzz fail: no epidemic cards in hand when running Epidemic()
 - add special events to all command generator
 - implement all game rules. left:
   - special event cards: play at any time, not an action
