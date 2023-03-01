@@ -940,14 +940,67 @@ namespace pandemic.test
             // act: do last action, pick up 2 cards
             game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
 
-            // assert: need to discard
+            // assert: epidemic has occurred
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is EpidemicTriggered);
             events.ShouldContain(e => e is EpidemicCityInfected);
             events.ShouldContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+
+            // assert: need to discard
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
+            game.APlayerMustDiscard.ShouldBeTrue();
+
+            // act: discard
+            game = game.Do(
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                events);
+
+            // assert: turn is over
+            events.ShouldContain(e => e is TurnEnded);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Epidemic_after_7_cards_in_hand__epidemic_is_second_card()
+        {
+            var game = DefaultTestGame();
+
+            var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
+            var playerHand = drawPile.Top(7).ToList();
+            drawPile = drawPile.Remove(playerHand);
+            drawPile = drawPile
+                .Remove(drawPile.TopCard)
+                .PlaceOnTop(new EpidemicCard(), drawPile.TopCard);
+
+            game = game with
+            {
+                PlayerDrawPile = drawPile,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1,
+                    Hand = new PlayerHand(playerHand)
+                })
+            };
+
+            var events = new List<IEvent>();
+
+            // act: do last action, pick up 2 cards
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: epidemic has occurred
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+
+            // assert: need to discard
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
+            game.APlayerMustDiscard.ShouldBeTrue();
 
             // act: discard
             game = game.Do(
