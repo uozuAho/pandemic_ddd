@@ -2210,6 +2210,14 @@ namespace pandemic.test
         }
 
         [Test]
+        public void One_quiet_night_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
+        }
+
+        [Test]
         public void Dispatcher_can_move_self_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
@@ -2283,11 +2291,15 @@ namespace pandemic.test
         }
 
         [Test]
-        public void One_quiet_night_throws_if_not_in_hand()
+        public void Dispatcher_can_drive_ferry_other_pawn()
         {
-            var game = DefaultTestGame();
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
 
-            Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
+            game = game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Chicago"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
         }
 
         [Test]
