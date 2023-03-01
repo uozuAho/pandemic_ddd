@@ -2237,6 +2237,29 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_can_move_other_pawn_to_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Dispatcher, Role.Medic, Role.Scientist }
+            });
+            var medic = game.PlayerByRole(Role.Medic);
+            var scientist = game.PlayerByRole(Role.Scientist);
+            game = game with
+            {
+                Players = game.Players
+                    .Replace(medic, medic with { Location = "Paris" })
+                    .Replace(scientist, scientist with { Location = "Bogota" })
+            };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Medic, Role.Scientist), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Bogota");
+        }
+
+        [Test]
         public void One_quiet_night_throws_if_not_in_hand()
         {
             var game = DefaultTestGame();
