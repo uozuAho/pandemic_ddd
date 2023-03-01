@@ -11,9 +11,12 @@ namespace pandemic.test
 {
     class SpielRandomAgentTests
     {
-        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void PlaysGameToCompletion(NewGameOptions options)
+        [Test]
+        [Repeat(10)]
+        public void PlaysGameToCompletion()
         {
+            var options = NewGameOptionsGenerator.RandomOptions();
+
             var random = new Random();
             PandemicGame game;
             List<IEvent> events;

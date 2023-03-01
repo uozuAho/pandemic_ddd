@@ -12,9 +12,12 @@ namespace pandemic.test
 {
     class PandemicGameEventTests
     {
-        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void State_built_from_events_is_same_as_final_state(NewGameOptions options)
+        [Test]
+        [Repeat(10)]
+        public void State_built_from_events_is_same_as_final_state()
         {
+            var options = NewGameOptionsGenerator.RandomOptions();
+
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             PandemicGame game;

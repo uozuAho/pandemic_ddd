@@ -11,9 +11,12 @@ namespace pandemic.test
 {
     public class GameSetup
     {
-        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void Initial_game_state_is_correct(NewGameOptions options)
+        [Test]
+        [Repeat(10)]
+        public void Initial_game_state_is_correct()
         {
+            var options = NewGameOptionsGenerator.RandomOptions();
+
             var (game, _) = PandemicGame.CreateNewGame(options);
             var numberOfPlayers = options.Roles.Count;
             var numberOfCardsPerPlayer = PandemicGame.InitialPlayerHandSize(numberOfPlayers);
