@@ -2,4 +2,8 @@
 
 namespace pandemic.Commands;
 
-public record ShareKnowledgeTakeCommand(Role Role, string City, Role TakeFromRole) : IPlayerCommand, IConsumesAction;
+public record ShareKnowledgeTakeCommand(Role Role, string City, Role TakeFromRole) : IPlayerCommand
+{
+    public bool ConsumesAction => true;
+    public bool IsSpecialEvent => false;
+}

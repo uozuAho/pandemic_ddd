@@ -404,7 +404,7 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
-            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c is IConsumesAction))
+            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c.ConsumesAction))
             {
                 Assert.That(
                     () => game.Do(command),
@@ -1884,7 +1884,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicTriggered);
             events.ShouldContain(e => e is EpidemicCityInfected);
             events.ShouldNotContain(e => e is EpidemicIntensified);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1895,7 +1895,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
             events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -1918,7 +1918,7 @@ namespace pandemic.test
             // assert: still a chance to use special event before picking up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1927,7 +1927,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -1953,7 +1953,7 @@ namespace pandemic.test
             // assert: scientist still a chance to use special event before medic picks up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -1962,7 +1962,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
-            generator.LegalCommands(game).ShouldContain(c => c is ISpecialEventCommand);
+            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
         [Test]
@@ -2351,7 +2351,7 @@ namespace pandemic.test
                 var legalCommands = commandGenerator.LegalCommands(game).ToList();
 
                 if (game.Players.Any(p => p.Hand.Count > 7))
-                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c is ISpecialEventCommand);
+                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c.IsSpecialEvent);
 
                 // try a bunch of illegal commands
                 foreach (var illegalCommand in allPossibleCommands

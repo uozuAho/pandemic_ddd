@@ -2,4 +2,8 @@
 
 namespace pandemic.Commands;
 
-public record ResilientPopulationCommand(Role Role, InfectionCard Card) : IPlayerCommand, ISpecialEventCommand;
+public record ResilientPopulationCommand(Role Role, InfectionCard Card) : IPlayerCommand
+{
+    public bool ConsumesAction => false;
+    public bool IsSpecialEvent => true;
+}

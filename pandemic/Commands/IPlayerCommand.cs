@@ -8,4 +8,8 @@ public interface IPlayerCommand : ICommand
     /// The role 'issuing' the command
     /// </summary>
     Role Role { get; }
+
+    bool ConsumesAction { get; }
+
+    bool IsSpecialEvent { get; }
 }

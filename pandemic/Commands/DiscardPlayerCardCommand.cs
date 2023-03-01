@@ -14,4 +14,7 @@ public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerComm
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+
+    public bool ConsumesAction => false;
+    public bool IsSpecialEvent => false;
 }

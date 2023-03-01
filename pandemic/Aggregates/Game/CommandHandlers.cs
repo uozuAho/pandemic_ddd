@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Cryptography;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -74,11 +75,11 @@ public partial record PandemicGame
         var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
         if (playerWhoMustDiscard != null)
         {
-            if (command is not DiscardPlayerCardCommand and not ISpecialEventCommand)
+            if (command is not DiscardPlayerCardCommand && command is IPlayerCommand { IsSpecialEvent: false })
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
         }
 
-        if (command is IPlayerCommand cmd and IConsumesAction)
+        if (command is IPlayerCommand { ConsumesAction: true } cmd)
         {
             ThrowIfNotRolesTurn(cmd.Role);
             ThrowIfNoActionsRemaining(PlayerByRole(cmd.Role));
