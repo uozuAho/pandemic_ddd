@@ -68,8 +68,27 @@ public partial record PandemicGame
             EventForecastUsed e => Apply(game, e),
             AirliftUsed e => Apply(game, e),
             ResilientPopulationUsed e => Apply(game, e),
-            OneQuietNightUsed => game,
+            OneQuietNightUsed e => Apply(game, e),
+            OneQuietNightPassed e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed evt)
+    {
+        return game with { SkipNextInfectPhase = false };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OneQuietNightUsed evt)
+    {
+        var player = game.PlayerByRole(evt.Role);
+        var card = player.Hand.Single(c => c is OneQuietNightCard);
+
+        return game with
+        {
+            SkipNextInfectPhase = true,
+            Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
         };
     }
 

@@ -2167,6 +2167,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new OneQuietNightCard())
             });
             var initial = game;
+            var playerWithCard = game.CurrentPlayer.Role;
 
             var events = new List<IEvent>();
             game = game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role), events);
@@ -2175,7 +2176,7 @@ namespace pandemic.test
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.InfectionDiscardPile.ShouldBe(initial.InfectionDiscardPile);
             game.InfectionDrawPile.ShouldBe(initial.InfectionDrawPile);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is OneQuietNightCard);
+            game.PlayerByRole(playerWithCard).Hand.ShouldNotContain(c => c is OneQuietNightCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<OneQuietNightCard>();
         }
 
