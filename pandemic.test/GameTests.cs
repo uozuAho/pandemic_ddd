@@ -2289,11 +2289,13 @@ namespace pandemic.test
             Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
         }
 
+        [Test]
         [Timeout(1000)]
-        [Repeat(10)]
-        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void Fuzz_for_invalid_states(NewGameOptions options)
+        [Repeat(100)]
+        public void Fuzz_for_invalid_states()
         {
+            var options = NewGameOptionsGenerator.RandomOptions();
+
             // bigger numbers here slow down the test, but check for more improper behaviour
             const int illegalCommandsToTryPerTurn = 10;
             var commandGenerator = new PlayerCommandGenerator();

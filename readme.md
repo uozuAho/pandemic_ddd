@@ -11,9 +11,8 @@ implemented.
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - as an action: move any pawn to the location of any other pawn
-        - command generator legal commands
-        - add dispatcher to fuzz tests
-        - all commands
+        - WIP: remove non random options generator
+        - add to all commands generator
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
         - drive ferry
         - direct flight
