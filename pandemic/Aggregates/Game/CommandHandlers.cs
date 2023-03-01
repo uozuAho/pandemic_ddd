@@ -114,6 +114,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDriveFerryPawnCommand cmd)
     {
+        if (CurrentPlayer.Role != Role.Dispatcher)
+            throw new GameRuleViolatedException("It's not the dispatcher's turn");
+
         return ApplyEvents(new DispatcherDroveFerriedPawn(cmd.Role, cmd.City));
     }
 

@@ -2291,7 +2291,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_drive_ferry_other_pawn()
+        public void Dispatcher_drive_ferry_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
             var events = new List<IEvent>();
@@ -2300,6 +2300,16 @@ namespace pandemic.test
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
+        }
+
+        [Test]
+        public void Dispatcher_drive_ferry_other_pawn_throws_if_not_dispatchers_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Medic, Role.Dispatcher } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Chicago"), events));
         }
 
         [Test]
