@@ -12,7 +12,8 @@ implemented.
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
         - drive ferry
-          - check other drive ferry cases
+          - legal commands
+          - all commands
         - direct flight
         - charter flight
         - shuttle flight

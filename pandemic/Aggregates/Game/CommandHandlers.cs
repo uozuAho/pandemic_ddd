@@ -117,6 +117,10 @@ public partial record PandemicGame
         if (CurrentPlayer.Role != Role.Dispatcher)
             throw new GameRuleViolatedException("It's not the dispatcher's turn");
 
+        var playerToMove = PlayerByRole(cmd.Role);
+        if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
+            throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
+
         return ApplyEvents(new DispatcherDroveFerriedPawn(cmd.Role, cmd.City));
     }
 
