@@ -2208,6 +2208,14 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         }
 
+        [Test]
+        public void One_quiet_night_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
+        }
+
         [Timeout(1000)]
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]

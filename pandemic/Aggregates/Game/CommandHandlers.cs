@@ -112,6 +112,10 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
     {
+        var player = PlayerByRole(cmd.Role);
+        if (!player.Hand.Contains(new OneQuietNightCard()))
+            throw new GameRuleViolatedException($"{player.Role} doesn't have the one quiet night card");
+
         return ApplyEvents(new OneQuietNightUsed(cmd.Role));
     }
 
