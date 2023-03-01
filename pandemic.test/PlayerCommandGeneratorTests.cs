@@ -294,8 +294,10 @@ namespace pandemic.test
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 0 };
 
+            // can discard before starting to draw
+            // scenario: share knowledge puts another player over hand limit at the end of a turn
             var commands = _generator.LegalCommands(game);
-            commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand);
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
 
