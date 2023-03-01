@@ -6,11 +6,9 @@ namespace pandemic.Values;
 
 public record CubePile
 {
-    private readonly IImmutableDictionary<Colour, int> _cubes;
-
     private CubePile()
     {
-        _cubes = new Dictionary<Colour, int>
+        Counts = new Dictionary<Colour, int>
         {
             { Colour.Black, 0 },
             { Colour.Blue, 0 },
@@ -21,48 +19,45 @@ public record CubePile
 
     public CubePile(IImmutableDictionary<Colour, int> cubes)
     {
-        _cubes = cubes;
+        Counts = cubes;
     }
 
     public static readonly CubePile Empty = new();
 
     public bool HasSameCubesAs(CubePile other)
     {
-        return _cubes.SequenceEqual(other._cubes);
+        return Counts.SequenceEqual(other.Counts);
     }
 
     public CubePile AddCube(Colour colour)
     {
-        return new CubePile(_cubes.SetItem(colour, _cubes[colour] + 1));
+        return new CubePile(Counts.SetItem(colour, Counts[colour] + 1));
     }
 
     public CubePile AddCubes(Colour colour, int numCubes)
     {
-        return new CubePile(_cubes.SetItem(colour, _cubes[colour] + numCubes));
+        return new CubePile(Counts.SetItem(colour, Counts[colour] + numCubes));
     }
 
     public CubePile RemoveCube(Colour colour)
     {
-        return new CubePile(_cubes.SetItem(colour, _cubes[colour] - 1));
+        return new CubePile(Counts.SetItem(colour, Counts[colour] - 1));
     }
 
     public bool Any()
     {
-        return _cubes.Values.Any(v => v > 0);
+        return Counts.Values.Any(v => v > 0);
     }
 
-    public IImmutableDictionary<Colour, int> Counts()
-    {
-        return _cubes;
-    }
+    public IImmutableDictionary<Colour, int> Counts { get; }
 
     public int NumberOf(Colour colour)
     {
-        return _cubes[colour];
+        return Counts[colour];
     }
 
     public override string ToString()
     {
-        return string.Join(" ", _cubes.Select(c => $"{c.Key}: {c.Value}"));
+        return string.Join(" ", Counts.Select(c => $"{c.Key}: {c.Value}"));
     }
 }

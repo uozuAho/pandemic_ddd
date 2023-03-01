@@ -261,7 +261,7 @@ namespace pandemic.Commands
         {
             var currentLocation = game.CurrentPlayer.Location;
             var nonZeroCubeColours = game
-                .CityByName(currentLocation).Cubes.Counts()
+                .CityByName(currentLocation).Cubes.Counts
                 .Where(kv => kv.Value > 0)
                 .Select(kv => kv.Key);
 
