@@ -68,6 +68,7 @@ public partial record PandemicGame
             EventForecastUsed e => Apply(game, e),
             AirliftUsed e => Apply(game, e),
             ResilientPopulationUsed e => Apply(game, e),
+            OneQuietNightUsed => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }

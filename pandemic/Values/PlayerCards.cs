@@ -14,6 +14,7 @@ public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
 public record EventForecastCard : PlayerCard, ISpecialEventCard;
 public record AirliftCard : PlayerCard, ISpecialEventCard;
 public record ResilientPopulationCard : PlayerCard, ISpecialEventCard;
+public record OneQuietNightCard : PlayerCard, ISpecialEventCard;
 
 public static class SpecialEventCards
 {

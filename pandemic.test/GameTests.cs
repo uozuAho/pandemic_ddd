@@ -2157,6 +2157,28 @@ namespace pandemic.test
             game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
         }
 
+        [Test]
+        public void One_quiet_night_happy_path()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new OneQuietNightCard())
+            });
+            var initial = game;
+
+            var events = new List<IEvent>();
+            game = game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new PassCommand(game.CurrentPlayer.Role), events);
+
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            game.InfectionDiscardPile.ShouldBe(initial.InfectionDiscardPile);
+            game.InfectionDrawPile.ShouldBe(initial.InfectionDrawPile);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is OneQuietNightCard);
+            game.PlayerDiscardPile.TopCard.ShouldBeOfType<OneQuietNightCard>();
+        }
+
         [Timeout(1000)]
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
