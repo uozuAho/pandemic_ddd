@@ -2163,7 +2163,7 @@ namespace pandemic.test
         public void Fuzz_for_invalid_states(NewGameOptions options)
         {
             // bigger numbers here slow down the test, but check for more improper behaviour
-            const int illegalCommandsToTryPerTurn = 5;
+            const int illegalCommandsToTryPerTurn = 10;
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);

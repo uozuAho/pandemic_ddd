@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- WIP: pass ends all actions
-  - turn up fuzz tests, check for failures
 - add special events to all command generator
 - implement all game rules. left:
   - special event cards: play at any time, not an action
