@@ -2237,6 +2237,16 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_move_pawn_to_pawn_throws_when_already_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Dispatcher, Role.Medic), events));
+        }
+
+        [Test]
         public void Dispatcher_can_move_other_pawn_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with
