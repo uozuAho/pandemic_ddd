@@ -122,6 +122,7 @@ namespace pandemic.Commands
 
                 }
             }
+
             foreach (var player in game.Players)
             {
                 yield return new PassCommand(player.Role);
@@ -144,6 +145,19 @@ namespace pandemic.Commands
                 foreach (var city in game.Cities)
                 {
                     yield return new GovernmentGrantCommand(player.Role, city.Name);
+
+                    foreach (var player2 in game.Players)
+                    {
+                        yield return new AirliftCommand(player.Role, player2.Role, city.Name);
+                    }
+
+                }
+
+                yield return new EventForecastCommand(player.Role, game.InfectionDiscardPile.Top(6).ToImmutableList());
+
+                foreach (var card in game.InfectionDiscardPile.Cards)
+                {
+                    yield return new ResilientPopulationCommand(player.Role, card);
                 }
             }
         }

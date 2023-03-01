@@ -7,7 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- add special events to all command generator
 - implement all game rules. left:
   - special event cards: play at any time, not an action
     - one quiet night: skip next infect cities step
