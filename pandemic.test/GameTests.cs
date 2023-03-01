@@ -1863,7 +1863,8 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2209,6 +2210,79 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_can_move_self_to_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var medic = game.PlayerByRole(Role.Medic);
+            game = game with { Players = game.Players.Replace(medic, medic with { Location = "Paris" }) };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Dispatcher, Role.Medic), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Location.ShouldBe("Paris");
+        }
+
+        [Test]
+        public void Dispatcher_can_move_other_pawn_to_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var medic = game.PlayerByRole(Role.Medic);
+            game = game with { Players = game.Players.Replace(medic, medic with { Location = "Paris" }) };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Medic, Role.Dispatcher), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Atlanta");
+        }
+
+        [Test]
+        public void Dispatcher_move_pawn_to_pawn_throws_when_already_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Dispatcher, Role.Medic), events));
+        }
+
+        [Test]
+        public void Dispatcher_move_pawn_to_pawn_throws_if_not_dispatchers_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Medic, Role.Dispatcher } });
+            var medic = game.PlayerByRole(Role.Medic);
+            game = game with { Players = game.Players.Replace(medic, medic with { Location = "Paris" }) };
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Dispatcher, Role.Medic), events));
+        }
+
+        [Test]
+        public void Dispatcher_can_move_other_pawn_to_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Dispatcher, Role.Medic, Role.Scientist }
+            });
+            var medic = game.PlayerByRole(Role.Medic);
+            var scientist = game.PlayerByRole(Role.Scientist);
+            game = game with
+            {
+                Players = game.Players
+                    .Replace(medic, medic with { Location = "Paris" })
+                    .Replace(scientist, scientist with { Location = "Bogota" })
+            };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Medic, Role.Scientist), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Bogota");
+        }
+
+        [Test]
         public void One_quiet_night_throws_if_not_in_hand()
         {
             var game = DefaultTestGame();
@@ -2216,11 +2290,13 @@ namespace pandemic.test
             Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
         }
 
+        [Test]
         [Timeout(1000)]
-        [Repeat(10)]
-        [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
-        public void Fuzz_for_invalid_states(NewGameOptions options)
+        [Repeat(100)]
+        public void Fuzz_for_invalid_states()
         {
+            var options = NewGameOptionsGenerator.RandomOptions();
+
             // bigger numbers here slow down the test, but check for more improper behaviour
             const int illegalCommandsToTryPerTurn = 10;
             var commandGenerator = new PlayerCommandGenerator();

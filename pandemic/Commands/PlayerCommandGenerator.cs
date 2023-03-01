@@ -38,9 +38,28 @@ namespace pandemic.Commands
                 SetShareKnowledgeGiveCommands(game);
                 SetShareKnowledgeTakeCommands(game);
                 SetPassCommands(game);
+                SetDispatcherCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetDispatcherCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.Dispatcher
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            foreach (var player1 in game.Players)
+            {
+                foreach (var player2 in game.Players)
+                {
+                    if (player1 == player2) continue;
+                    if (player1.Location == player2.Location) continue;
+
+                    _buffer[_bufIdx++] = new DispatcherMovePawnToOtherPawnCommand(player1.Role, player2.Role);
+                }
+            }
         }
 
         private void SetSpecialEventCommands(PandemicGame game)
@@ -109,6 +128,9 @@ namespace pandemic.Commands
             }
         }
 
+        /// <summary>
+        /// Not really _all_ possible commands, but a lot
+        /// </summary>
         public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)
         {
             foreach (var city in game.Cities)
@@ -168,6 +190,11 @@ namespace pandemic.Commands
                 }
 
                 yield return new OneQuietNightCommand(player.Role);
+
+                foreach (var otherPlayer in game.Players)
+                {
+                    yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, otherPlayer.Role);
+                }
             }
         }
 

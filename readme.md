@@ -7,14 +7,14 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- perf
-  - random: 1306 games, 45191 states
-  - greedy bfs: 5 games, ~8k states each
 - implement all game rules. left:
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
-      - as an action: move any pawn to the location of any other pawn
+        - drive ferry
+        - direct flight
+        - charter flight
+        - shuttle flight
     - operations expert:
       - build a research station without a city card
       - move from a station to anywhere by discarding a city card

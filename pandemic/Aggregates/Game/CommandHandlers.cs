@@ -106,8 +106,21 @@ public partial record PandemicGame
             AirliftCommand cmd => Do(cmd),
             ResilientPopulationCommand cmd => Do(cmd),
             OneQuietNightCommand cmd => Do(cmd),
+            DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
+    {
+        if (CurrentPlayer.Role != Role.Dispatcher)
+            throw new GameRuleViolatedException("It's not the dispatcher's turn");
+
+        if (PlayerByRole(cmd.Role).Location == PlayerByRole(cmd.DestinationRole).Location)
+            throw new GameRuleViolatedException(
+                $"{cmd.Role} is already at {PlayerByRole(cmd.DestinationRole).Location}");
+
+        return ApplyEvents(new DispatcherMovedPawnToOther(cmd.Role, cmd.DestinationRole));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
