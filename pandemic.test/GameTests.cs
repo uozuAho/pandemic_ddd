@@ -1856,7 +1856,6 @@ namespace pandemic.test
 
         public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
 
-        // [Repeat((100))]
         [TestCaseSource(nameof(AllSpecialEventCards))]
         public void Special_event_choose_not_to_use_during_epidemic(PlayerCard eventCard)
         {
@@ -1864,7 +1863,8 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
