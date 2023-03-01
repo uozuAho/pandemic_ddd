@@ -950,7 +950,9 @@ namespace pandemic.test
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
 
             // act: discard
-            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+            game = game.Do(
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                events);
 
             // assert: turn is over
             events.ShouldContain(e => e is TurnEnded);
