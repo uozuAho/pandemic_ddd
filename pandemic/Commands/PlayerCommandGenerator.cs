@@ -60,6 +60,16 @@ namespace pandemic.Commands
                     _buffer[_bufIdx++] = new DispatcherMovePawnToOtherPawnCommand(player1.Role, player2.Role);
                 }
             }
+
+            foreach (var otherPlayer in game.Players)
+            {
+                if (otherPlayer.Role == Role.Dispatcher) continue;
+
+                foreach (var adjacentCity in game.Board.AdjacentCities[otherPlayer.Location])
+                {
+                    _buffer[_bufIdx++] = new DispatcherDriveFerryPawnCommand(otherPlayer.Role, adjacentCity);
+                }
+            }
         }
 
         private void SetSpecialEventCommands(PandemicGame game)
