@@ -168,9 +168,12 @@ namespace pandemic.Aggregates.Game
                 Debug.Assert(numCubes.Value is >= 0 and <= 24);
             }
 
-            foreach (var numCubes in Cities.SelectMany(city => city.Cubes.Counts))
+            foreach (var city in Cities)
             {
-                Debug.Assert(numCubes.Value is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Black) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Blue) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Red) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Yellow) is >= 0 and <= 3);
             }
 
             var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
