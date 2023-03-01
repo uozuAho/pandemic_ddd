@@ -10,4 +10,6 @@ public interface IPlayerCommand : ICommand
     Role Role { get; }
 
     bool ConsumesAction { get; }
+
+    bool IsSpecialEvent { get; }
 }

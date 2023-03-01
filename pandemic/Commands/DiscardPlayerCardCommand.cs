@@ -16,4 +16,5 @@ public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerComm
     }
 
     public bool ConsumesAction => false;
+    public bool IsSpecialEvent => false;
 }

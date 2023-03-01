@@ -14,4 +14,5 @@ public record CharterFlightCommand(Role Role, PlayerCityCard DiscardCard, string
     }
 
     public bool ConsumesAction => true;
+    public bool IsSpecialEvent => false;
 }

@@ -6,6 +6,7 @@ namespace pandemic.Commands;
 public record DiscoverCureCommand(Role Role, PlayerCityCard[] Cards) : IPlayerCommand
 {
     public bool ConsumesAction => true;
+    public bool IsSpecialEvent => false;
 
     public override string ToString()
     {

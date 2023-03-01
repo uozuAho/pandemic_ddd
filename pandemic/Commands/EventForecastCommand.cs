@@ -4,7 +4,8 @@ using pandemic.Values;
 namespace pandemic.Commands;
 
 public record EventForecastCommand(Role Role, ImmutableList<InfectionCard> Cards)
-    : IPlayerCommand, ISpecialEventCommand
+    : IPlayerCommand
 {
     public bool ConsumesAction => false;
+    public bool IsSpecialEvent => true;
 }

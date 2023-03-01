@@ -7,4 +7,5 @@ public record DispatcherMovePawnToOtherPawnCommand(Role PlayerToMove, Role Desti
     public Role Role => Role.Dispatcher;
 
     public bool ConsumesAction => true;
+    public bool IsSpecialEvent => false;
 }

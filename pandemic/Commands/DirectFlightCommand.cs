@@ -8,6 +8,7 @@ namespace pandemic.Commands;
 public record DirectFlightCommand(Role Role, string Destination) : IPlayerCommand
 {
     public bool ConsumesAction => true;
+    public bool IsSpecialEvent => false;
 
     public override string ToString()
     {
