@@ -161,18 +161,19 @@ namespace pandemic.Aggregates.Game
 
         private void ValidateInternalConsistency()
         {
-            var totalCubes = Cubes.Counts().Values.Sum()
-                             + Cities.Sum(c => c.Cubes.Counts().Sum(cc => cc.Value));
-            Debug.Assert(totalCubes == 96);
+            Debug.Assert(TotalCubesInGame() == 96);
 
-            foreach (var numCubes in Cubes.Counts())
+            foreach (var numCubes in Cubes.Counts)
             {
                 Debug.Assert(numCubes.Value is >= 0 and <= 24);
             }
 
-            foreach (var numCubes in Cities.SelectMany(city => city.Cubes.Counts()))
+            foreach (var city in Cities)
             {
-                Debug.Assert(numCubes.Value is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Black) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Blue) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Red) is >= 0 and <= 3);
+                Debug.Assert(city.Cubes.NumberOf(Colour.Yellow) is >= 0 and <= 3);
             }
 
             var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
@@ -196,6 +197,26 @@ namespace pandemic.Aggregates.Game
                 + InfectionCardsRemovedFromGame.Count == 48);
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
+        }
+
+        private int TotalCubesInGame()
+        {
+            var totalCubes = 0;
+
+            totalCubes += Cubes.NumberOf(Colour.Black);
+            totalCubes += Cubes.NumberOf(Colour.Blue);
+            totalCubes += Cubes.NumberOf(Colour.Red);
+            totalCubes += Cubes.NumberOf(Colour.Yellow);
+
+            foreach (var city in Cities)
+            {
+                totalCubes += city.Cubes.NumberOf(Colour.Black);
+                totalCubes += city.Cubes.NumberOf(Colour.Blue);
+                totalCubes += city.Cubes.NumberOf(Colour.Red);
+                totalCubes += city.Cubes.NumberOf(Colour.Yellow);
+            }
+
+            return totalCubes;
         }
     }
 }
