@@ -113,6 +113,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
     {
+        if (CurrentPlayer.Role != Role.Dispatcher)
+            throw new GameRuleViolatedException("It's not the dispatcher's turn");
+
         if (PlayerByRole(cmd.Role).Location == PlayerByRole(cmd.DestinationRole).Location)
             throw new GameRuleViolatedException(
                 $"{cmd.Role} is already at {PlayerByRole(cmd.DestinationRole).Location}");

@@ -2247,6 +2247,18 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_move_pawn_to_pawn_throws_if_not_dispatchers_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Medic, Role.Dispatcher } });
+            var medic = game.PlayerByRole(Role.Medic);
+            game = game with { Players = game.Players.Replace(medic, medic with { Location = "Paris" }) };
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Dispatcher, Role.Medic), events));
+        }
+
+        [Test]
         public void Dispatcher_can_move_other_pawn_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with

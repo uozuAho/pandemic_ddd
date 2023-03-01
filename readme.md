@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - as an action: move any pawn to the location of any other pawn
-        - throw if not the dispatcher's turn
         - command generator legal commands
         - all commands
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
