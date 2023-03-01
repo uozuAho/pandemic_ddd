@@ -78,7 +78,15 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, DispatcherDroveFerriedPawn evt)
     {
-        return game;
+        var dispatcher = game.PlayerByRole(Role.Dispatcher);
+        var player = game.PlayerByRole(evt.Role);
+
+        return game with
+        {
+            Players = game.Players
+                .Replace(player, player with { Location = evt.City })
+                .Replace(dispatcher, dispatcher with { ActionsRemaining = dispatcher.ActionsRemaining - 1 })
+        };
     }
 
     private static PandemicGame Apply(PandemicGame game, DispatcherMovedPawnToOther evt)
