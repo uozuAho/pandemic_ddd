@@ -188,8 +188,8 @@ namespace pandemic.Commands
                     foreach (var player2 in game.Players)
                     {
                         yield return new AirliftCommand(player.Role, player2.Role, city.Name);
+                        yield return new DispatcherDriveFerryPawnCommand(player2.Role, city.Name);
                     }
-
                 }
 
                 yield return new EventForecastCommand(player.Role, game.InfectionDiscardPile.Top(6).ToImmutableList());
@@ -201,9 +201,9 @@ namespace pandemic.Commands
 
                 yield return new OneQuietNightCommand(player.Role);
 
-                foreach (var otherPlayer in game.Players)
+                foreach (var player2 in game.Players)
                 {
-                    yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, otherPlayer.Role);
+                    yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, player2.Role);
                 }
             }
         }

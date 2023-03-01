@@ -12,9 +12,8 @@ implemented.
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - fuzz fail: invalid command allowed: dispatcher move pawn during infect cities phase
         - game to string: print turn phase
+      - fuzz fail: dispatcher was allow to special drive/ferry self
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
-        - WIP: drive ferry
-          - all commands
         - direct flight
         - charter flight
         - shuttle flight
