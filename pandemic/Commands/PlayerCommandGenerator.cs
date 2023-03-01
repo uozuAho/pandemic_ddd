@@ -151,6 +151,7 @@ namespace pandemic.Commands
         private void SetDiscardCommands(PandemicGame game)
         {
             if (game is { PhaseOfTurn: TurnPhase.DrawCards, CardsDrawn: < 2 }) return;
+            if (game.PhaseOfTurn is TurnPhase.Epidemic or TurnPhase.EpidemicIntensify) return;
 
             foreach (var player in game.Players)
             {

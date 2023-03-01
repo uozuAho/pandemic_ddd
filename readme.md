@@ -8,7 +8,6 @@ implemented.
 
 # todo
 - WIP: pass ends all actions
-  - test: generator: shouldn't discard while drawing cards, or while epidemic is in progress
   - test: same as Epidemic_after_7_cards_in_hand, but epidemic is second card drawn
   - turn up fuzz tests, check for failures
 - add special events to all command generator

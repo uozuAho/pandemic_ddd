@@ -309,6 +309,26 @@ namespace pandemic.test
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
         }
 
+        [Test]
+        public void No_discards_while_epidemic_is_in_progress()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            game = game with { PhaseOfTurn = TurnPhase.Epidemic };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
