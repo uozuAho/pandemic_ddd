@@ -2180,6 +2180,34 @@ namespace pandemic.test
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<OneQuietNightCard>();
         }
 
+        [Test]
+        public void One_quiet_night_only_skips_one_infect_phase()
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new OneQuietNightCard())
+            });
+
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new PassCommand(game.CurrentPlayer.Role), events);
+
+            // assert: no infection, turn over
+            events.ShouldNotContain(e => e is InfectionCardDrawn);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+
+            // act: pass turn
+            game = game.Do(new PassCommand(game.CurrentPlayer.Role), events);
+
+            // assert: infection occurred, turn over
+            events.ShouldContain(e => e is InfectionCardDrawn);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+        }
+
         [Timeout(1000)]
         [Repeat(10)]
         [TestCaseSource(typeof(NewGameOptionsGenerator), nameof(NewGameOptionsGenerator.AllOptions))]
