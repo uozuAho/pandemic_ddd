@@ -26,7 +26,7 @@ namespace pandemic.Commands
             if (game.APlayerMustDiscard)
                 return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
 
-            if (game.CurrentPlayer.ActionsRemaining > 0)
+            if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
             {
                 SetDriveFerryCommands(game);
                 SetBuildResearchStationCommands(game);
@@ -150,6 +150,8 @@ namespace pandemic.Commands
 
         private void SetDiscardCommands(PandemicGame game)
         {
+            if (game is { PhaseOfTurn: TurnPhase.DrawCards, CardsDrawn: < 2 }) return;
+
             foreach (var player in game.Players)
             {
                 if (player.Hand.Count <= 7) continue;

@@ -61,7 +61,7 @@ namespace pandemic.Aggregates.Game
         /// <summary>
         /// Number of cards drawn during the current 'draw cards' phase
         /// </summary>
-        private int CardsDrawn { get; init; }
+        public int CardsDrawn { get; init; }
 
         private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
 
