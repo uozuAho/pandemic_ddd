@@ -8,12 +8,6 @@ implemented.
 
 # todo
 - implement all game rules. left:
-  - special event cards: play at any time, not an action
-    - one quiet night: skip next infect cities step
-      - add to all commands
-    - Government_grant_can_play_during_epidemic_after_infect: test with all special events
-    - maybe: scenarios: can play special events at certain times
-      - see gov grant tests. hard to parameterise, need the card and the appropriate command
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
     - operations expert:
