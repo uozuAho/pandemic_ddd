@@ -70,8 +70,14 @@ public partial record PandemicGame
             ResilientPopulationUsed e => Apply(game, e),
             OneQuietNightUsed e => Apply(game, e),
             OneQuietNightPassed e => Apply(game, e),
+            DispatcherMovedPawnToOther e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, DispatcherMovedPawnToOther evt)
+    {
+        return game;
     }
 
     private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed evt)

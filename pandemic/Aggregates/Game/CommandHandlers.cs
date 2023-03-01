@@ -106,8 +106,14 @@ public partial record PandemicGame
             AirliftCommand cmd => Do(cmd),
             ResilientPopulationCommand cmd => Do(cmd),
             OneQuietNightCommand cmd => Do(cmd),
+            DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
+    {
+        return ApplyEvents(new DispatcherMovedPawnToOther(cmd.Role, cmd.DestinationRole));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
