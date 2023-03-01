@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Sockets;
 using NUnit.Framework;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
@@ -592,14 +590,16 @@ namespace pandemic.test
             var commandGenerator = new PlayerCommandGenerator();
 
             var gameStateBeforeShare = game;
-            (game, _) = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, cardToShare.City.Name, Role.Scientist));
+            var events = new List<IEvent>();
+
+            game = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, cardToShare.City.Name, Role.Scientist), events);
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(6);
 
             commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")));
+            game = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")), events);
 
             // medic should now have picked up 2 cards, and needs to discard
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
@@ -608,9 +608,9 @@ namespace pandemic.test
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count,
                 "infection step should not have occurred yet");
 
-            (game, var lastEvents) = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Moscow")));
+            game = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Moscow")), events);
 
-            lastEvents.ShouldContain(e => e is TurnEnded);
+            events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             game.CurrentPlayer.Hand.Count.ShouldBe(7);
             game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
@@ -913,6 +913,106 @@ namespace pandemic.test
 
             Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
+        }
+
+        [Test]
+        public void Epidemic_after_7_cards_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
+            var playerHand = drawPile.Top(7).ToList();
+            drawPile = drawPile.Remove(playerHand);
+            drawPile = drawPile
+                .Remove(drawPile.TopCard)
+                .PlaceOnTop(drawPile.TopCard, new EpidemicCard());
+
+            game = game with
+            {
+                PlayerDrawPile = drawPile,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1,
+                    Hand = new PlayerHand(playerHand)
+                })
+            };
+
+            var events = new List<IEvent>();
+
+            // act: do last action, pick up 2 cards
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: epidemic has occurred
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+
+            // assert: need to discard
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
+            game.APlayerMustDiscard.ShouldBeTrue();
+
+            // act: discard
+            game = game.Do(
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                events);
+
+            // assert: turn is over
+            events.ShouldContain(e => e is TurnEnded);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
+        }
+
+        [Test]
+        public void Epidemic_after_7_cards_in_hand__epidemic_is_second_card()
+        {
+            var game = DefaultTestGame();
+
+            var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
+            var playerHand = drawPile.Top(7).ToList();
+            drawPile = drawPile.Remove(playerHand);
+            drawPile = drawPile
+                .Remove(drawPile.TopCard)
+                .PlaceOnTop(new EpidemicCard(), drawPile.TopCard);
+
+            game = game with
+            {
+                PlayerDrawPile = drawPile,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    ActionsRemaining = 1,
+                    Hand = new PlayerHand(playerHand)
+                })
+            };
+
+            var events = new List<IEvent>();
+
+            // act: do last action, pick up 2 cards
+            game = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"), events);
+
+            // assert: epidemic has occurred
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicIntensified);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+
+            // assert: need to discard
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
+            game.APlayerMustDiscard.ShouldBeTrue();
+
+            // act: discard
+            game = game.Do(
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                events);
+
+            // assert: turn is over
+            events.ShouldContain(e => e is TurnEnded);
+            game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
+            game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         }
 
         [Test]
@@ -1363,20 +1463,9 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Pass_reduces_num_actions()
-        {
-            var game = DefaultTestGame();
-
-            (game, _) = game.Do(new PassCommand(Role.Medic));
-
-            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-        }
-
-        [Test]
-        public void Pass_can_end_turn()
+        public void Pass_ends_turn()
         {
             var game = DefaultTestGame().WithNoEpidemics();
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
@@ -1726,11 +1815,12 @@ namespace pandemic.test
         [Test]
         public void Government_grant_can_play_during_epidemic_after_infect()
         {
-            var game = DefaultTestGame().WithNoEpidemics();
+            var game = DefaultTestGame();
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2096,6 +2186,9 @@ namespace pandemic.test
                     {
                         game.Do(illegalCommand);
                         Console.WriteLine(game);
+                        Console.WriteLine();
+                        Console.WriteLine("Events, in reverse:");
+                        Console.WriteLine(string.Join('\n', events.Reversed()));
                         Assert.Fail($"Expected {illegalCommand} to throw");
                     }
                     catch (GameRuleViolatedException)
@@ -2109,8 +2202,19 @@ namespace pandemic.test
                 // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
                 var action = random.Choice(legalCommands);
-                (game, var tempEvents) = game.Do(action);
-                events.AddRange(tempEvents);
+                try
+                {
+                    (game, var tempEvents) = game.Do(action);
+                    events.AddRange(tempEvents);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine(game);
+                    Console.WriteLine();
+                    Console.WriteLine("Events, in reverse:");
+                    Console.WriteLine(string.Join('\n', events.Reversed()));
+                    throw;
+                }
             }
         }
 

@@ -7,10 +7,9 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- add special events to all command generator
 - implement all game rules. left:
   - special event cards: play at any time, not an action
-    - resilient population: remove any infection card from the discard pile from the game.
-      - diff with master ... done a lot in this branch
     - one quiet night: skip next infect cities step
     - Government_grant_can_play_during_epidemic_after_infect: test with all special events
     - maybe: scenarios: can play special events at certain times

@@ -194,7 +194,7 @@ public partial record PandemicGame
         return game with
         {
             SpecialEventCanBeUsed = false,
-            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 }),
+            Players = game.Players.Replace(player, player with { ActionsRemaining = 0 }),
         };
     }
 

@@ -278,6 +278,59 @@ namespace pandemic.test
             commands.Count(c => c is AirliftCommand).ShouldBe(2 * 47); // 2 players, 47 destinations each
         }
 
+        [Test]
+        public void No_discards_while_drawing_cards()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 0 };
+
+            // can discard before starting to draw
+            // scenario: share knowledge puts another player over hand limit at the end of a turn
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+
+            game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
+
+            commands = _generator.LegalCommands(game);
+            commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
+
+            game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
+
+            // draw cards is done, should now be able to discard
+            commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void No_discards_while_epidemic_is_in_progress()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            game = game with { PhaseOfTurn = TurnPhase.Epidemic };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
