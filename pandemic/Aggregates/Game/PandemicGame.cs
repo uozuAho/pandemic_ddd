@@ -65,6 +65,11 @@ namespace pandemic.Aggregates.Game
 
         private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
 
+        /// <summary>
+        /// enabled by using the 'one quiet night' special event card
+        /// </summary>
+        private bool SkipNextInfectPhase { get; init; }
+
         private bool PlayerCommandRequired()
         {
             return !IsOver && _commandGenerator.LegalCommands(this).Any();

@@ -105,8 +105,18 @@ public partial record PandemicGame
             EventForecastCommand cmd => Do(cmd),
             AirliftCommand cmd => Do(cmd),
             ResilientPopulationCommand cmd => Do(cmd),
+            OneQuietNightCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
+    {
+        var player = PlayerByRole(cmd.Role);
+        if (!player.Hand.Contains(new OneQuietNightCard()))
+            throw new GameRuleViolatedException($"{player.Role} doesn't have the one quiet night card");
+
+        return ApplyEvents(new OneQuietNightUsed(cmd.Role));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)

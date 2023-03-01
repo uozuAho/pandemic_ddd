@@ -55,8 +55,14 @@ namespace pandemic.Commands
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
                     else if (card is AirliftCard) SetAirlifts(game, playerWithCard);
                     else if (card is ResilientPopulationCard) SetResilientPopulations(game, playerWithCard);
+                    else if (card is OneQuietNightCard) SetOneQuietNights(game, playerWithCard);
                 }
             }
+        }
+
+        private void SetOneQuietNights(PandemicGame game, Player playerWithCard)
+        {
+            _buffer[_bufIdx++] = new OneQuietNightCommand(playerWithCard.Role);
         }
 
         private void SetResilientPopulations(PandemicGame game, Player playerWithCard)
@@ -142,6 +148,7 @@ namespace pandemic.Commands
                         yield return new ShareKnowledgeTakeCommand(player.Role, card.City.Name, otherPlayer.Role);
                     }
                 }
+
                 foreach (var city in game.Cities)
                 {
                     yield return new GovernmentGrantCommand(player.Role, city.Name);
@@ -159,6 +166,8 @@ namespace pandemic.Commands
                 {
                     yield return new ResilientPopulationCommand(player.Role, card);
                 }
+
+                yield return new OneQuietNightCommand(player.Role);
             }
         }
 
