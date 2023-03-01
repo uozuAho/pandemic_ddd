@@ -331,6 +331,43 @@ namespace pandemic.test
             commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
         }
 
+        [Test]
+        public void Dispatcher_cannot_move_pawn_to_pawn_if_already_at_destination()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist, Role.QuarantineSpecialist, Role.Medic },
+                IncludeSpecialEventCards = false
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldNotContain(c => c is DispatcherMovePawnToOtherPawnCommand);
+        }
+
+        [Test]
+        public void Dispatcher_can_move_any_pawn_to_any_other_pawn()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist, Role.Researcher, Role.Medic },
+                IncludeSpecialEventCards = false
+            });
+            var scientist = game.PlayerByRole(Role.Scientist);
+            var researcher = game.PlayerByRole(Role.Researcher);
+            var medic = game.PlayerByRole(Role.Medic);
+            game = game with
+            {
+                Players = game.Players
+                    .Replace(scientist, scientist with { Location = "Algiers" })
+                    .Replace(researcher, researcher with { Location = "Paris" })
+                    .Replace(medic, medic with { Location = "Moscow" })
+            };
+
+            var commands = _generator.LegalCommands(game);
+            // 12 possible commands: each of the 4 players can be moved to 3 other locations
+            commands.ShouldContain(c => c is DispatcherMovePawnToOtherPawnCommand, 12);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
