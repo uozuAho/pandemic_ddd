@@ -404,7 +404,7 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
-            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c is IConsumesAction))
+            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c.ConsumesAction))
             {
                 Assert.That(
                     () => game.Do(command),

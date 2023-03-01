@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Cryptography;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -78,7 +79,7 @@ public partial record PandemicGame
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
         }
 
-        if (command is IPlayerCommand cmd and IConsumesAction)
+        if (command is IPlayerCommand { ConsumesAction: true } cmd)
         {
             ThrowIfNotRolesTurn(cmd.Role);
             ThrowIfNoActionsRemaining(PlayerByRole(cmd.Role));

@@ -2,4 +2,7 @@
 
 namespace pandemic.Commands;
 
-public record GovernmentGrantCommand(Role Role, string City) : IPlayerCommand, ISpecialEventCommand;
+public record GovernmentGrantCommand(Role Role, string City) : IPlayerCommand, ISpecialEventCommand
+{
+    public bool ConsumesAction => false;
+}
