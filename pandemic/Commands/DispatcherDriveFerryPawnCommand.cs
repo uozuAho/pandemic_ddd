@@ -2,4 +2,7 @@
 
 namespace pandemic.Commands;
 
-public record DispatcherDriveFerryPawnCommand(Role Role, string City) : IPlayerCommand, IConsumesAction;
+public record DispatcherDriveFerryPawnCommand(Role PlayerToMove, string City) : IPlayerCommand, IConsumesAction
+{
+    public Role Role => Role.Dispatcher;
+}

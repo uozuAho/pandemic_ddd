@@ -10,9 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
-      - WIP: make dispatcher abilities consume action, make role as per other Role, add extra role attribute
-      - fuzz fail: invalid command allowed: dispatcher move pawn during infect cities phase?
-        - after special card picked up
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
         - direct flight
         - charter flight
