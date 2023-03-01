@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
-        - drive ferry
         - direct flight
         - charter flight
         - shuttle flight
@@ -91,6 +90,7 @@ handle.
 ## Dev log / learnings
 - initial start: https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
 - fuzz testing is great! it has turned up so many bugs that I hadn't covered with simple unit tests
+  - although it does encourage me to be lazy and assume it will catch any cases I can't be bothered writing
 - dunno if 'process managers' are helping. Some commands cause other commands. Eg.
   end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
   etc. What to do? Just keep this complexity in the command handlers themselves?

@@ -2,4 +2,7 @@
 
 namespace pandemic.Commands;
 
-public record DispatcherMovePawnToOtherPawnCommand(Role Role, Role DestinationRole) : IPlayerCommand;
+public record DispatcherMovePawnToOtherPawnCommand(Role PlayerToMove, Role DestinationRole) : IPlayerCommand, IConsumesAction
+{
+    public Role Role => Role.Dispatcher;
+}

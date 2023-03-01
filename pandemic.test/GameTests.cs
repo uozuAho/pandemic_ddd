@@ -2210,6 +2210,14 @@ namespace pandemic.test
         }
 
         [Test]
+        public void One_quiet_night_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
+        }
+
+        [Test]
         public void Dispatcher_can_move_self_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
@@ -2283,11 +2291,45 @@ namespace pandemic.test
         }
 
         [Test]
-        public void One_quiet_night_throws_if_not_in_hand()
+        public void Dispatcher_drive_ferry_other_pawn()
         {
-            var game = DefaultTestGame();
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
 
-            Should.Throw<GameRuleViolatedException>(() => game.Do(new OneQuietNightCommand(game.CurrentPlayer.Role)));
+            game = game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Chicago"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
+        }
+
+        [Test]
+        public void Dispatcher_drive_ferry_other_pawn_throws_if_used_on_dispatcher()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDriveFerryPawnCommand(Role.Dispatcher, "Chicago"), events));
+        }
+
+        [Test]
+        public void Dispatcher_drive_ferry_other_pawn_throws_if_not_dispatchers_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Medic, Role.Dispatcher } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Chicago"), events));
+        }
+
+        [Test]
+        public void Dispatcher_drive_ferry_other_pawn_throws_not_adjacent()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Moscow"), events));
         }
 
         [Test]
@@ -2344,6 +2386,7 @@ namespace pandemic.test
                 }
                 catch (Exception)
                 {
+                    Console.WriteLine($"Chosen action: {action}");
                     Console.WriteLine(game);
                     Console.WriteLine();
                     Console.WriteLine("Events, in reverse:");

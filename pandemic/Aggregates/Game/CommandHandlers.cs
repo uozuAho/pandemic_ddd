@@ -107,8 +107,25 @@ public partial record PandemicGame
             ResilientPopulationCommand cmd => Do(cmd),
             OneQuietNightCommand cmd => Do(cmd),
             DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
+            DispatcherDriveFerryPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDriveFerryPawnCommand cmd)
+    {
+        if (CurrentPlayer.Role != Role.Dispatcher)
+            throw new GameRuleViolatedException("It's not the dispatcher's turn");
+
+        if (cmd.PlayerToMove == Role.Dispatcher)
+            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+
+        var playerToMove = PlayerByRole(cmd.PlayerToMove);
+
+        if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
+            throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
+
+        return ApplyEvents(new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
@@ -116,11 +133,11 @@ public partial record PandemicGame
         if (CurrentPlayer.Role != Role.Dispatcher)
             throw new GameRuleViolatedException("It's not the dispatcher's turn");
 
-        if (PlayerByRole(cmd.Role).Location == PlayerByRole(cmd.DestinationRole).Location)
+        if (PlayerByRole(cmd.PlayerToMove).Location == PlayerByRole(cmd.DestinationRole).Location)
             throw new GameRuleViolatedException(
-                $"{cmd.Role} is already at {PlayerByRole(cmd.DestinationRole).Location}");
+                $"{cmd.PlayerToMove} is already at {PlayerByRole(cmd.DestinationRole).Location}");
 
-        return ApplyEvents(new DispatcherMovedPawnToOther(cmd.Role, cmd.DestinationRole));
+        return ApplyEvents(new DispatcherMovedPawnToOther(cmd.PlayerToMove, cmd.DestinationRole));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)

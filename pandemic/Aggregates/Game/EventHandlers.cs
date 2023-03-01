@@ -71,7 +71,21 @@ public partial record PandemicGame
             OneQuietNightUsed e => Apply(game, e),
             OneQuietNightPassed e => Apply(game, e),
             DispatcherMovedPawnToOther e => Apply(game, e),
+            DispatcherDroveFerriedPawn e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, DispatcherDroveFerriedPawn evt)
+    {
+        var dispatcher = game.PlayerByRole(Role.Dispatcher);
+        var player = game.PlayerByRole(evt.Role);
+
+        return game with
+        {
+            Players = game.Players
+                .Replace(player, player with { Location = evt.City })
+                .Replace(dispatcher, dispatcher with { ActionsRemaining = dispatcher.ActionsRemaining - 1 })
         };
     }
 
