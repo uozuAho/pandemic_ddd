@@ -2303,6 +2303,16 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_drive_ferry_other_pawn_throws_if_used_on_dispatcher()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDriveFerryPawnCommand(Role.Dispatcher, "Chicago"), events));
+        }
+
+        [Test]
         public void Dispatcher_drive_ferry_other_pawn_throws_if_not_dispatchers_turn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Medic, Role.Dispatcher } });
@@ -2376,6 +2386,7 @@ namespace pandemic.test
                 }
                 catch (Exception)
                 {
+                    Console.WriteLine($"Chosen action: {action}");
                     Console.WriteLine(game);
                     Console.WriteLine();
                     Console.WriteLine("Events, in reverse:");

@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record DispatcherDriveFerryPawnCommand(Role Role, string City) : IPlayerCommand;
+public record DispatcherDriveFerryPawnCommand(Role Role, string City) : IPlayerCommand, IConsumesAction;

@@ -14,13 +14,18 @@ namespace pandemic
                 if (game.IsWon) sb.AppendLine("Game won!");
                 else sb.AppendLine("Game lost. " + game.LossReason);
             }
+            else
+            {
+                sb.AppendLine("Game not over");
+            }
+            sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
+            sb.AppendLine($"turn phase: {game.PhaseOfTurn}");
             sb.AppendLine($"infection rate: {game.InfectionRate}");
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
             sb.AppendLine($"cards on player draw pile: {game.PlayerDrawPile.Count}");
             sb.AppendLine($"cards on infection deck: {game.InfectionDrawPile.Count}");
-            sb.AppendLine($"cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
-            sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
+            sb.AppendLine($"diseases cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
             foreach (var player in game.Players)
             {
                 sb.AppendLine($"player: {player.Role}");
