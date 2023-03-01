@@ -128,6 +128,9 @@ namespace pandemic.Commands
             }
         }
 
+        /// <summary>
+        /// Not really _all_ possible commands, but a lot
+        /// </summary>
         public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)
         {
             foreach (var city in game.Cities)
@@ -187,6 +190,11 @@ namespace pandemic.Commands
                 }
 
                 yield return new OneQuietNightCommand(player.Role);
+
+                foreach (var otherPlayer in game.Players)
+                {
+                    yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, otherPlayer.Role);
+                }
             }
         }
 

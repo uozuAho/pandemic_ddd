@@ -1856,6 +1856,7 @@ namespace pandemic.test
 
         public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
 
+        // [Repeat((100))]
         [TestCaseSource(nameof(AllSpecialEventCards))]
         public void Special_event_choose_not_to_use_during_epidemic(PlayerCard eventCard)
         {
