@@ -55,8 +55,14 @@ namespace pandemic.Commands
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
                     else if (card is AirliftCard) SetAirlifts(game, playerWithCard);
                     else if (card is ResilientPopulationCard) SetResilientPopulations(game, playerWithCard);
+                    else if (card is OneQuietNightCard) SetOneQuietNights(game, playerWithCard);
                 }
             }
+        }
+
+        private void SetOneQuietNights(PandemicGame game, Player playerWithCard)
+        {
+            _buffer[_bufIdx++] = new OneQuietNightCommand(playerWithCard.Role);
         }
 
         private void SetResilientPopulations(PandemicGame game, Player playerWithCard)

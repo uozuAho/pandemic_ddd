@@ -2,4 +2,4 @@
 
 namespace pandemic.Commands;
 
-public record OneQuietNightCommand(Role Role) : IPlayerCommand;
+public record OneQuietNightCommand(Role Role) : IPlayerCommand, ISpecialEventCommand;

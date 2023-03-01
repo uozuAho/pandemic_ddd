@@ -23,6 +23,7 @@ public static class SpecialEventCards
         new GovernmentGrantCard(),
         new EventForecastCard(),
         new AirliftCard(),
-        new ResilientPopulationCard()
+        new ResilientPopulationCard(),
+        new OneQuietNightCard()
     }.ToImmutableList();
 }
