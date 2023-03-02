@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - operations expert:
       - (once per turn) move from a station to anywhere by discarding a city card
-        - throw if card not in hand
         - legal commands
         - all commands
     - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured

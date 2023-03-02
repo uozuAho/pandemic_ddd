@@ -2614,6 +2614,17 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_move_from_station_to_anywhere_throws_if_card_not_in_hand()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

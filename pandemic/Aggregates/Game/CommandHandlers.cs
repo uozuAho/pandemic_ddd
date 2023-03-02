@@ -131,6 +131,9 @@ public partial record PandemicGame
         if (!opexCurrentCity.HasResearchStation)
             throw new GameRuleViolatedException($"{opex.Location} doesn't have a research station");
 
+        if (!opex.Hand.Contains(cmd.Card))
+            throw new GameRuleViolatedException($"Operations expert doesn't have the {cmd.Card.City.Name} card");
+
         return ApplyEvents(new OperationsExpertDiscardedToMoveFromStation(cmd.Card.City.Name, cmd.Destination));
     }
 
