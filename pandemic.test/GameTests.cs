@@ -2336,9 +2336,9 @@ namespace pandemic.test
         public void Dispatcher_direct_fly_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
-            game.SetCurrentPlayerAs(game.CurrentPlayer with
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
-                Hand = PlayerHand.Empty.Add(PlayerCards.CityCard("Chicago"))
+                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
             });
             var events = new List<IEvent>();
 
