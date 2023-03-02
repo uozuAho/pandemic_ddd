@@ -10,9 +10,22 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - medic
-      - remove all cubes of a colour when treating disease
-        - happy
       - insta-remove cubes when cured
+        - when moving to a city
+          - happy
+            - drive ferry
+              - inline todos
+            - shuttle
+            - direct
+            - charter
+            - moved by dispatcher
+            - any other move types?
+          - eradicates if last of cubes
+        - when cubes would be placed where medic is
+          - infection card
+          - outbreak
+          - epidemic
+          - anything else?
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards

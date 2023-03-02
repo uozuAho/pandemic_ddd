@@ -79,7 +79,25 @@ public partial record PandemicGame
             DispatcherShuttleFlewPawn e => Apply(game, e),
             OperationsExpertBuiltResearchStation e => Apply(game, e),
             OperationsExpertDiscardedToMoveFromStation e => Apply(game, e),
+            MedicTreatedDisease e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, MedicTreatedDisease evt)
+    {
+        var medic = game.PlayerByRole(Role.Medic);
+        var city = game.CityByName(evt.City);
+        var numCubes = city.Cubes.NumberOf(evt.Colour);
+
+        return game with
+        {
+            Players = game.Players.Replace(medic, medic with { ActionsRemaining = medic.ActionsRemaining - 1 }),
+            Cities = game.Cities.Replace(city, city with
+            {
+                Cubes = city.Cubes.RemoveAll(evt.Colour)
+            }),
+            Cubes = game.Cubes.AddCubes(evt.Colour, numCubes),
         };
     }
 

@@ -2644,6 +2644,26 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_when_cured__drive_ferry()
+        {
+            var game = DefaultTestGame();
+            var chicago = game.CityByName("Chicago");
+            game = game with
+            {
+                // todo: add cure method to game
+                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial)),
+                Cities = game.Cities.Replace(chicago, chicago with { Cubes = chicago.Cubes.AddCube(Colour.Blue) })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

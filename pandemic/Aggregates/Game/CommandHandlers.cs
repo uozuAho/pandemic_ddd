@@ -448,7 +448,9 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("No disease cubes to remove");
 
         var events = new List<IEvent>();
-        var game = ApplyEvent(new TreatedDisease(role, city, colour), events);
+        var game = role == Role.Medic
+            ? ApplyEvent(new MedicTreatedDisease(city, colour), events)
+            : ApplyEvent(new TreatedDisease(role, city, colour), events);
 
         if (game.IsCured(command.Colour) && game.Cities.Sum(c => c.Cubes.NumberOf(command.Colour)) == 0)
             game = game.ApplyEvent(new DiseaseEradicated(command.Colour), events);
