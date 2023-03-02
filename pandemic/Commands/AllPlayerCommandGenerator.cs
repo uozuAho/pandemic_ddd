@@ -54,6 +54,7 @@ public static class AllPlayerCommandGenerator
                 {
                     yield return new DispatcherDriveFerryPawnCommand(player2.Role, city.Name);
                     yield return new DispatcherDirectFlyPawnCommand(player2.Role, city.Name);
+                    yield return new DispatcherCharterFlyPawnCommand(player2.Role, city.Name);
                 }
             }
 
