@@ -111,8 +111,16 @@ public partial record PandemicGame
             DispatcherDirectFlyPawnCommand cmd => Do(cmd),
             DispatcherCharterFlyPawnCommand cmd => Do(cmd),
             DispatcherShuttleFlyPawnCommand cmd => Do(cmd),
+            OperationsExpertBuildResearchStation cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertBuildResearchStation cmd)
+    {
+        var opex = PlayerByRole(Role.OperationsExpert);
+
+        return ApplyEvents(new OperationsExpertBuiltResearchStation(opex.Location));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherShuttleFlyPawnCommand cmd)

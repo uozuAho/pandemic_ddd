@@ -2501,6 +2501,19 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_builds_research_station_without_card()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
+            var events = new List<IEvent>();
+
+            game = game.Do(new OperationsExpertBuildResearchStation(), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

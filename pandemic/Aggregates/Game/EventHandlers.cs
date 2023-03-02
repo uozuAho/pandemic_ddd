@@ -76,8 +76,14 @@ public partial record PandemicGame
             DispatcherDirectFlewPawn e => Apply(game, e),
             DispatcherCharterFlewPawn e => Apply(game, e),
             DispatcherShuttleFlewPawn e => Apply(game, e),
+            OperationsExpertBuiltResearchStation e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation evt)
+    {
+        return game;
     }
 
     private static PandemicGame Apply(PandemicGame game, DispatcherShuttleFlewPawn evt)

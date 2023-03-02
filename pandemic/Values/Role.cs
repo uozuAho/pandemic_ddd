@@ -6,6 +6,7 @@ namespace pandemic.Values
         Scientist,
         QuarantineSpecialist,
         Researcher,
-        Dispatcher
+        Dispatcher,
+        OperationsExpert
     }
 }
