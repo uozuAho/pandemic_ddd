@@ -119,6 +119,13 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
+        var dispatcher = PlayerByRole(Role.Dispatcher);
+        var playerToMove = PlayerByRole(cmd.PlayerToMove);
+        var card = dispatcher.Hand.CityCards.SingleOrDefault(c => c.City.Name == playerToMove.Location);
+
+        if (card == null)
+            throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
+
         return ApplyEvents(new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination));
     }
 
