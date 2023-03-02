@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.VisualBasic;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -83,7 +84,17 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation evt)
     {
-        return game;
+        var opex = game.PlayerByRole(Role.OperationsExpert);
+        var city = game.CityByName(opex.Location);
+
+        return game with
+        {
+            Players = game.Players.Replace(opex, opex with { ActionsRemaining = opex.ActionsRemaining - 1 }),
+            Cities = game.Cities.Replace(city, city with
+            {
+                HasResearchStation = true
+            })
+        };
     }
 
     private static PandemicGame Apply(PandemicGame game, DispatcherShuttleFlewPawn evt)

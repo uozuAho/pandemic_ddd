@@ -2504,7 +2504,7 @@ namespace pandemic.test
         public void Operations_expert_builds_research_station_without_card()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
-            game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
             var events = new List<IEvent>();
 
             game = game.Do(new OperationsExpertBuildResearchStation(), events);
