@@ -21,7 +21,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_build_research_station()
+        public void Build_research_station()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
@@ -39,7 +39,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cannot_build_research_station_when_one_already_exists()
+        public void Build_research_station_skip_when_one_already_exists()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
@@ -58,7 +58,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cannot_build_research_station_if_none_left()
+        public void Build_research_station_no_commands_if_none_left()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
@@ -77,7 +77,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_cure()
+        public void Discover_cure()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -98,7 +98,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cure_uses_5_cards()
+        public void Discover_cure_uses_5_cards()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -122,7 +122,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_direct_fly()
+        public void Direct_fly()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var atlantaCard = PlayerCards.CityCard("Atlanta");
@@ -140,7 +140,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_charter_fly()
+        public void Charter_fly()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -165,7 +165,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_shuttle_fly()
+        public void Shuttle_fly()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -186,7 +186,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_treat_disease()
+        public void Treat_disease()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -204,7 +204,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_share_give_knowledge()
+        public void Share_give_knowledge()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -217,7 +217,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_share_take_knowledge()
+        public void Share_take_knowledge()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -233,7 +233,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_pass()
+        public void Pass()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -244,7 +244,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Generates_all_event_forecast_permutations()
+        public void Event_forecast_generates_all_permutations()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -261,7 +261,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_do_airlift()
+        public void Airlift()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -279,7 +279,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void No_discards_while_drawing_cards()
+        public void Discard_none_while_drawing_cards()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -312,7 +312,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void No_discards_while_epidemic_is_in_progress()
+        public void Discard_none_while_epidemic_is_in_progress()
         {
             var game = CreateNewGame(new NewGameOptions
             {
