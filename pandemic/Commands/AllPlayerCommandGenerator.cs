@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using pandemic.Aggregates.Game;
@@ -45,6 +46,17 @@ public static class AllPlayerCommandGenerator
     }
 
     private static IEnumerable<IPlayerCommand> RoleSpecialAbilities(PandemicGame game)
+    {
+        foreach (var cmd in DispatcherCommands(game)) yield return cmd;
+        foreach (var cmd in OperationsExpertCommands(game)) yield return cmd;
+    }
+
+    private static IEnumerable<IPlayerCommand> OperationsExpertCommands(PandemicGame game)
+    {
+        yield return new OperationsExpertBuildResearchStation();
+    }
+
+    private static IEnumerable<IPlayerCommand> DispatcherCommands(PandemicGame game)
     {
         foreach (var player in game.Players)
         {

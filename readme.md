@@ -10,9 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - operations expert:
-      - build a research station without a city card
-        - legal commands
-        - all commands
       - move from a station to anywhere by discarding a city card
     - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured
     - researcher: give any city card to a player in the same city
