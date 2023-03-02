@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
-        - detour: add missing tests for legal command generator
         - shuttle flight
     - operations expert:
       - build a research station without a city card
@@ -28,6 +27,12 @@ implemented.
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details
+  - fitness funcs
+    - all ICommands must be generated in legal & all command generator tests
+      - just use test coverage?
+    - only events modify state
+    - events don't contain conditional logic (?)
+    - pandemic project doesn't depend on other projects
   - dev log: review https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
     - any learnings since then?
 

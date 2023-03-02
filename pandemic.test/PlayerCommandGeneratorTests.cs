@@ -21,7 +21,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_build_research_station()
+        public void Build_research_station()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
@@ -39,7 +39,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cannot_build_research_station_when_one_already_exists()
+        public void Build_research_station_skip_when_one_already_exists()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
@@ -58,7 +58,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cannot_build_research_station_if_none_left()
+        public void Build_research_station_no_commands_if_none_left()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
@@ -77,7 +77,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_cure()
+        public void Discover_cure()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -98,7 +98,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Cure_uses_5_cards()
+        public void Discover_cure_uses_5_cards()
         {
             var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
             {
@@ -122,7 +122,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_direct_fly()
+        public void Direct_fly()
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var atlantaCard = PlayerCards.CityCard("Atlanta");
@@ -140,7 +140,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_charter_fly()
+        public void Charter_fly()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -165,7 +165,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_shuttle_fly()
+        public void Shuttle_fly()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -186,7 +186,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_treat_disease()
+        public void Treat_disease()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -204,7 +204,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_share_give_knowledge()
+        public void Share_give_knowledge()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -217,7 +217,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_share_take_knowledge()
+        public void Share_take_knowledge()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -233,7 +233,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_pass()
+        public void Pass()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -244,7 +244,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Generates_all_event_forecast_permutations()
+        public void Event_forecast_generates_all_permutations()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -261,7 +261,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Can_do_airlift()
+        public void Airlift()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -279,7 +279,25 @@ namespace pandemic.test
         }
 
         [Test]
-        public void No_discards_while_drawing_cards()
+        public void Discard_while_actions_remaining()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand, 8);
+        }
+
+        [Test]
+        public void Discard_before_drawing_cards()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -298,10 +316,25 @@ namespace pandemic.test
             // scenario: share knowledge puts another player over hand limit at the end of a turn
             var commands = _generator.LegalCommands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void Discard_none_while_drawing_cards()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
 
-            commands = _generator.LegalCommands(game);
+            var commands = _generator.LegalCommands(game);
             commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
@@ -312,7 +345,26 @@ namespace pandemic.test
         }
 
         [Test]
-        public void No_discards_while_epidemic_is_in_progress()
+        public void Discard_after_drawing_cards()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+            game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void Discard_none_while_epidemic_is_in_progress()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -332,7 +384,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_cannot_move_pawn_to_pawn_if_already_at_destination()
+        public void Dispatcher_move_pawn_to_pawn_none_if_already_at_destination()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -345,7 +397,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_any_pawn_to_any_other_pawn()
+        public void Dispatcher_move_any_pawn_to_any_other_pawn()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -369,6 +421,19 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_drive_ferry()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DispatcherDriveFerryPawnCommand, 3); // all neighbours of atlanta
+        }
+
+        [Test]
         public void Dispatcher_charter_fly()
         {
             var game = CreateNewGame(new NewGameOptions
@@ -380,6 +445,23 @@ namespace pandemic.test
 
             var commands = _generator.LegalCommands(game);
             commands.ShouldContain(c => c is DispatcherCharterFlyPawnCommand, 47); // all except current city
+        }
+
+        [Test]
+        public void Dispatcher_direct_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Paris", "Moscow", "Sydney")
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DispatcherDirectFlyPawnCommand, 3); // all in hand except current city
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)
