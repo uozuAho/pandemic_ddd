@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -109,8 +108,23 @@ public partial record PandemicGame
             OneQuietNightCommand cmd => Do(cmd),
             DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
             DispatcherDriveFerryPawnCommand cmd => Do(cmd),
+            DispatcherDirectFlyPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)
+    {
+        if (cmd.PlayerToMove == Role.Dispatcher)
+            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+
+        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+            throw new GameRuleViolatedException($"Dispatcher doesn't have the {cmd.City} card");
+
+        if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
+            throw new GameRuleViolatedException($"{cmd.PlayerToMove} is already at {cmd.City}");
+
+        return ApplyEvents(new DispatcherDirectFlewPawn(cmd.PlayerToMove, cmd.City));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDriveFerryPawnCommand cmd)

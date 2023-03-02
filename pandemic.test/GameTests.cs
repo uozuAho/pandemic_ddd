@@ -404,7 +404,7 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
-            foreach (var command in PlayerCommandGenerator.AllPossibleCommands(game).Where(c => c.ConsumesAction))
+            foreach (var command in AllPlayerCommandGenerator.AllPossibleCommands(game).Where(c => c.ConsumesAction))
             {
                 Assert.That(
                     () => game.Do(command),
@@ -2333,6 +2333,61 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_direct_fly_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
+            });
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
+        }
+
+        [Test]
+        public void Dispatcher_direct_fly_throws_if_used_on_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
+            });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDirectFlyPawnCommand(Role.Dispatcher, "Chicago"), events));
+        }
+
+        [Test]
+        public void Dispatcher_direct_fly_throws_if_player_is_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
+            }).SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events));
+        }
+
+        [Test]
+        public void Dispatcher_direct_fly_throws_if_card_not_in_hand()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
@@ -2344,7 +2399,7 @@ namespace pandemic.test
             var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
-            var allPossibleCommands = PlayerCommandGenerator.AllPossibleCommands(game).ToList();
+            var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
