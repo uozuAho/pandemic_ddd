@@ -118,6 +118,9 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
+        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+            throw new GameRuleViolatedException($"Dispatcher doesn't have the {cmd.City} card");
+
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
             throw new GameRuleViolatedException($"{cmd.PlayerToMove} is already at {cmd.City}");
 
