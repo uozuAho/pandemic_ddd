@@ -14,6 +14,57 @@ public static class AllPlayerCommandGenerator
     /// </summary>
     public static IEnumerable<IPlayerCommand> AllPossibleCommands(PandemicGame game)
     {
+        foreach (var cmd in StandardCommands(game)) yield return cmd;
+        foreach (var cmd2 in SpecialEvents(game)) yield return cmd2;
+        foreach (var cmd3 in RoleSpecialAbilities(game)) yield return cmd3;
+    }
+
+    private static IEnumerable<IPlayerCommand> SpecialEvents(PandemicGame game)
+    {
+        foreach (var player in game.Players)
+        {
+            foreach (var city in game.Cities)
+            {
+                yield return new GovernmentGrantCommand(player.Role, city.Name);
+
+                foreach (var player2 in game.Players)
+                {
+                    yield return new AirliftCommand(player.Role, player2.Role, city.Name);
+                }
+            }
+
+            yield return new EventForecastCommand(player.Role, game.InfectionDiscardPile.Top(6).ToImmutableList());
+
+            foreach (var card in game.InfectionDiscardPile.Cards)
+            {
+                yield return new ResilientPopulationCommand(player.Role, card);
+            }
+
+            yield return new OneQuietNightCommand(player.Role);
+        }
+    }
+
+    private static IEnumerable<IPlayerCommand> RoleSpecialAbilities(PandemicGame game)
+    {
+        foreach (var player in game.Players)
+        {
+            foreach (var city in game.Cities)
+            {
+                foreach (var player2 in game.Players)
+                {
+                    yield return new DispatcherDriveFerryPawnCommand(player2.Role, city.Name);
+                }
+            }
+
+            foreach (var player2 in game.Players)
+            {
+                yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, player2.Role);
+            }
+        }
+    }
+
+    private static IEnumerable<IPlayerCommand> StandardCommands(PandemicGame game)
+    {
         foreach (var city in game.Cities)
         {
             foreach (var player in game.Players)
@@ -28,7 +79,6 @@ public static class AllPlayerCommandGenerator
                 {
                     yield return new TreatDiseaseCommand(player.Role, city.Name, colour);
                 }
-
             }
         }
 
@@ -50,31 +100,6 @@ public static class AllPlayerCommandGenerator
                     yield return new ShareKnowledgeGiveCommand(player.Role, card.City.Name, otherPlayer.Role);
                     yield return new ShareKnowledgeTakeCommand(player.Role, card.City.Name, otherPlayer.Role);
                 }
-            }
-
-            foreach (var city in game.Cities)
-            {
-                yield return new GovernmentGrantCommand(player.Role, city.Name);
-
-                foreach (var player2 in game.Players)
-                {
-                    yield return new AirliftCommand(player.Role, player2.Role, city.Name);
-                    yield return new DispatcherDriveFerryPawnCommand(player2.Role, city.Name);
-                }
-            }
-
-            yield return new EventForecastCommand(player.Role, game.InfectionDiscardPile.Top(6).ToImmutableList());
-
-            foreach (var card in game.InfectionDiscardPile.Cards)
-            {
-                yield return new ResilientPopulationCommand(player.Role, card);
-            }
-
-            yield return new OneQuietNightCommand(player.Role);
-
-            foreach (var player2 in game.Players)
-            {
-                yield return new DispatcherMovePawnToOtherPawnCommand(player.Role, player2.Role);
             }
         }
     }
