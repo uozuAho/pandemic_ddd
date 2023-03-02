@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -72,8 +73,14 @@ public partial record PandemicGame
             OneQuietNightPassed e => Apply(game, e),
             DispatcherMovedPawnToOther e => Apply(game, e),
             DispatcherDroveFerriedPawn e => Apply(game, e),
+            DispatcherDirectFlewPawn e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, DispatcherDirectFlewPawn evt)
+    {
+        return game;
     }
 
     private static PandemicGame Apply(PandemicGame game, DispatcherDroveFerriedPawn evt)
