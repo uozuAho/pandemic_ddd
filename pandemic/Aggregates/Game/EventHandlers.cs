@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.VisualBasic;
-using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
 using pandemic.Values;
@@ -80,7 +78,20 @@ public partial record PandemicGame
             OperationsExpertBuiltResearchStation e => Apply(game, e),
             OperationsExpertDiscardedToMoveFromStation e => Apply(game, e),
             MedicTreatedDisease e => Apply(game, e),
+            MedicAutoRemovedCubes e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, MedicAutoRemovedCubes evt)
+    {
+        var city = game.CityByName(evt.City);
+        var numberOfCubes = city.Cubes.NumberOf(evt.Colour);
+
+        return game with
+        {
+            Cities = game.Cities.Replace(city, city with { Cubes = city.Cubes.RemoveAll(evt.Colour) }),
+            Cubes = game.Cubes.AddCubes(evt.Colour, numberOfCubes)
         };
     }
 

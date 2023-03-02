@@ -14,7 +14,9 @@ implemented.
         - when moving to a city
           - happy
             - drive ferry
-              - inline todos
+              - inline todos in last commit
+              - doesn't remove colour if not cured
+              - remove multiple colours if all cured
             - shuttle
             - direct
             - charter

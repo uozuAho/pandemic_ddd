@@ -915,6 +915,7 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
+        // [Repeat(100)] // todo: fix me, flakey
         [Test]
         public void Epidemic_after_7_cards_in_hand()
         {
@@ -2647,12 +2648,15 @@ namespace pandemic.test
         public void Medic_auto_removes_cubes_when_cured__drive_ferry()
         {
             var game = DefaultTestGame();
-            var chicago = game.CityByName("Chicago");
             game = game with
             {
                 // todo: add cure method to game
                 CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial)),
-                Cities = game.Cities.Replace(chicago, chicago with { Cubes = chicago.Cubes.AddCube(Colour.Blue) })
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Chicago" => c with { Cubes = CubePile.Empty.AddCube(Colour.Blue) },
+                    _ => c with{Cubes = CubePile.Empty}
+                }).ToImmutableList()
             };
             var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
 

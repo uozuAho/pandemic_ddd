@@ -324,7 +324,20 @@ public partial record PandemicGame
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
         }
 
-        return ApplyEvents(new PlayerMoved(role, destination));
+        var destinationCity = CityByName(destination);
+
+        var events = new List<IEvent> { new PlayerMoved(role, destination) };
+
+        if (role == Role.Medic)
+        {
+            foreach (var colour in ColourExtensions.AllColours)
+            {
+                if (IsCured(colour) && destinationCity.Cubes.NumberOf(colour) > 0)
+                    events.Add(new MedicAutoRemovedCubes(destination, colour));
+            }
+        }
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(CharterFlightCommand cmd)
