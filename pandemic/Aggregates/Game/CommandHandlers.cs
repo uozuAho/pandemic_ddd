@@ -119,8 +119,11 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertDiscardToMoveFromStation cmd)
     {
-        var opex = PlayerByRole(Role.OperationsExpert);
+        var opex = (OperationsExpert)PlayerByRole(Role.OperationsExpert);
         var opexCurrentCity = CityByName(opex.Location);
+
+        if (opex.HasUsedDiscardAndMoveAbilityThisTurn)
+            throw new GameRuleViolatedException("This ability can only be used once per turn");
 
         if (!opexCurrentCity.HasResearchStation)
             throw new GameRuleViolatedException($"{opex.Location} doesn't have a research station");

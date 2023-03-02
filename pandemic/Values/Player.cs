@@ -5,7 +5,7 @@ namespace pandemic.Values
 {
     public record Player
     {
-        public Role Role { get; init; }
+        public virtual Role Role { get; init; }
         public string Location { get; init; } = "Atlanta";
         public PlayerHand Hand { get; init; } = PlayerHand.Empty;
         public int ActionsRemaining { get; init; } = 4;
