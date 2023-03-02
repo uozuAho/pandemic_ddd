@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -116,6 +115,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)
     {
+        if (cmd.PlayerToMove == Role.Dispatcher)
+            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+
         return ApplyEvents(new DispatcherDirectFlewPawn(cmd.PlayerToMove, cmd.City));
     }
 

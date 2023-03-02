@@ -12,7 +12,6 @@ implemented.
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
         - direct flight
-          - happy
           - throw if pawn at destination
           - throw if done on self
           - throw if not have card
