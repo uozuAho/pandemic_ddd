@@ -119,6 +119,9 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertBuildResearchStation cmd)
     {
         var opex = PlayerByRole(Role.OperationsExpert);
+        var city = CityByName(opex.Location);
+
+        if (city.HasResearchStation) throw new GameRuleViolatedException($"{city.Name} already has a research station");
 
         return ApplyEvents(new OperationsExpertBuiltResearchStation(opex.Location));
     }

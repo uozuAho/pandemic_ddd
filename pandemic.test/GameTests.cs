@@ -2514,6 +2514,15 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_builds_research_station_throws_when_already_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new OperationsExpertBuildResearchStation(), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
