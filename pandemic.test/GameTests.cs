@@ -2625,6 +2625,25 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_treat_disease_removes_all_cubes()
+        {
+            var game = DefaultTestGame();
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 3);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

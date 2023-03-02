@@ -9,7 +9,10 @@ implemented.
 # todo
 - implement all game rules. left:
   - role special abilities
-    - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured
+    - medic
+      - remove all cubes of a colour when treating disease
+        - happy
+      - insta-remove cubes when cured
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards
