@@ -81,7 +81,23 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, DispatcherCharterFlewPawn evt)
     {
-        return game;
+        var dispatcher = game.PlayerByRole(Role.Dispatcher);
+        var playerToMove = game.PlayerByRole(evt.PlayerToMove);
+        var card = dispatcher.Hand.CityCards.Single(c => c.City.Name == playerToMove.Location);
+
+        return game with
+        {
+            Players = game.Players.Replace(dispatcher, dispatcher with
+            {
+                ActionsRemaining = dispatcher.ActionsRemaining - 1,
+                Hand = dispatcher.Hand.Remove(card)
+            }).Replace(playerToMove, playerToMove with
+            {
+                Location = evt.Destination
+            }),
+
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
     }
 
     private static PandemicGame Apply(PandemicGame game, DispatcherDirectFlewPawn evt)
