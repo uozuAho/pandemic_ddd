@@ -369,6 +369,19 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_drive_ferry()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DispatcherDriveFerryPawnCommand, 3); // all neighbours of atlanta
+        }
+
+        [Test]
         public void Dispatcher_charter_fly()
         {
             var game = CreateNewGame(new NewGameOptions
