@@ -12,8 +12,6 @@ implemented.
     - dispatcher: https://boardgames.stackexchange.com/questions/9035/what-are-legal-ways-to-use-the-dispatchers-special-ability-in-pandemic
       - move other players' pawns as if they are your own. including eg charter flight, using own cards
         - shuttle flight
-          - throws if not on research station
-          - throws if destination doesn't have research station
           - any other shuttle tests
           - legal commands
           - all commands

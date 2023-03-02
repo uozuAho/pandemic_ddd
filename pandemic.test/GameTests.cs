@@ -2481,6 +2481,16 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_shuttle_fly_other_pawn_throws_when_destination_has_no_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Moscow"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

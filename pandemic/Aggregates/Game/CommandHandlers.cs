@@ -120,11 +120,13 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
-        var dispatcher = PlayerByRole(Role.Dispatcher);
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
         if (!CityByName(playerToMove.Location).HasResearchStation)
             throw new GameRuleViolatedException($"{playerToMove.Location} does not have a research station");
+
+        if (!CityByName(cmd.City).HasResearchStation)
+            throw new GameRuleViolatedException($"{cmd.City} does not have a research station");
 
         return ApplyEvents(new DispatcherShuttleFlewPawn(cmd.PlayerToMove, cmd.City));
     }
