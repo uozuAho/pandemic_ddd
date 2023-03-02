@@ -647,6 +647,15 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyTurnEnded(PandemicGame game)
     {
+        if (game.CurrentPlayer.Role == Role.OperationsExpert)
+        {
+            var opex = (OperationsExpert)game.CurrentPlayer;
+            game = game with
+            {
+                Players = game.Players.Replace(opex, opex with { HasUsedDiscardAndMoveAbilityThisTurn = false })
+            };
+        }
+
         return game with
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),

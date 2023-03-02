@@ -2579,10 +2579,26 @@ namespace pandemic.test
             };
             var events = new List<IEvent>();
 
+            // act: use discard + move ability
             game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicagoCard, "Moscow"), events);
 
+            // assert: can't use again this turn
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events));
+
+            // act: pass turn
+            game = game.Do(new PassCommand(Role.OperationsExpert), events);
+            // act: pass turn (medic)
+            game = game.Do(new PassCommand(Role.Medic), events);
+            game.CurrentPlayer.Role.ShouldBe(Role.OperationsExpert);
+
+            // act: use discard + move ability that failed last time
+            game = game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Hand.ShouldNotContain(sydneyCard);
+            game.PlayerDiscardPile.TopCard.ShouldBe(sydneyCard);
+            game.CurrentPlayer.Location.ShouldBe("Paris");
         }
 
         [Test]
