@@ -2442,6 +2442,20 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_shuttle_fly_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var moscow = game.CityByName("Moscow");
+            game = game with { Cities = game.Cities.Replace(moscow, moscow with { HasResearchStation = true }) };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Moscow"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Moscow");
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
