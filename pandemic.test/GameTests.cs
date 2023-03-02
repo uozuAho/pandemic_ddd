@@ -2566,6 +2566,26 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_moves_from_station_to_anywhere_only_once_per_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicagoCard = PlayerCards.CityCard("Chicago");
+            var sydneyCard = PlayerCards.CityCard("Sydney");
+            var moscowCity = game.CityByName("Moscow");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicagoCard, sydneyCard) });
+            game = game with
+            {
+                Cities = game.Cities.Replace(moscowCity, moscowCity with { HasResearchStation = true })
+            };
+            var events = new List<IEvent>();
+
+            game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicagoCard, "Moscow"), events);
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
