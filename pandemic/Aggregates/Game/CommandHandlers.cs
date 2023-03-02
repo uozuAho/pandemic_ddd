@@ -109,8 +109,27 @@ public partial record PandemicGame
             DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
             DispatcherDriveFerryPawnCommand cmd => Do(cmd),
             DispatcherDirectFlyPawnCommand cmd => Do(cmd),
+            DispatcherCharterFlyPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherCharterFlyPawnCommand cmd)
+    {
+        if (cmd.PlayerToMove == Role.Dispatcher)
+            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+
+        var dispatcher = PlayerByRole(Role.Dispatcher);
+        var playerToMove = PlayerByRole(cmd.PlayerToMove);
+        var card = dispatcher.Hand.CityCards.SingleOrDefault(c => c.City.Name == playerToMove.Location);
+
+        if (card == null)
+            throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
+
+        if (playerToMove.Location == cmd.Destination)
+            throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.Destination}");
+
+        return ApplyEvents(new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)

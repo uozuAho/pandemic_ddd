@@ -368,6 +368,20 @@ namespace pandemic.test
             commands.ShouldContain(c => c is DispatcherMovePawnToOtherPawnCommand, 12);
         }
 
+        [Test]
+        public void Dispatcher_charter_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DispatcherCharterFlyPawnCommand, 47); // all except current city
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

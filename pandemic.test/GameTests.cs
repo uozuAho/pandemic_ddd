@@ -2336,16 +2336,16 @@ namespace pandemic.test
         public void Dispatcher_direct_fly_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
-            {
-                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
-            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicago) });
             var events = new List<IEvent>();
 
             game = game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events);
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
+            game.CurrentPlayer.Hand.ShouldNotContain(chicago);
+            game.PlayerDiscardPile.TopCard.ShouldBe(chicago);
         }
 
         [Test]
@@ -2385,6 +2385,60 @@ namespace pandemic.test
 
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events));
+        }
+
+        [Test]
+        public void Dispatcher_charter_fly_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherCharterFlyPawnCommand(Role.Medic, "Paris"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Paris");
+            game.CurrentPlayer.Hand.ShouldNotContain(atlanta);
+            game.PlayerDiscardPile.TopCard.ShouldBe(atlanta);
+        }
+
+        [Test]
+        public void Dispatcher_charter_fly_other_throws_when_used_on_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherCharterFlyPawnCommand(Role.Dispatcher, "Paris"), events));
+        }
+
+        [Test]
+        public void Dispatcher_charter_fly_other_throws_when_player_is_not_on_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) })
+                .SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherCharterFlyPawnCommand(Role.Medic, "Paris"), events));
+        }
+
+        [Test]
+        public void Dispatcher_charter_fly_other_pawn_throws_if_already_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherCharterFlyPawnCommand(Role.Medic, "Atlanta"), events));
         }
 
         [Test]
