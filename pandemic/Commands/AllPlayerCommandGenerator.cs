@@ -54,6 +54,13 @@ public static class AllPlayerCommandGenerator
     private static IEnumerable<IPlayerCommand> OperationsExpertCommands(PandemicGame game)
     {
         yield return new OperationsExpertBuildResearchStation();
+        foreach (var card in PlayerCards.CityCards)
+        {
+            foreach (var destination in game.Cities)
+            {
+                yield return new OperationsExpertDiscardToMoveFromStation(card, destination.Name);
+            }
+        }
     }
 
     private static IEnumerable<IPlayerCommand> DispatcherCommands(PandemicGame game)

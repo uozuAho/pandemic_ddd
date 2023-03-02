@@ -112,8 +112,29 @@ public partial record PandemicGame
             DispatcherCharterFlyPawnCommand cmd => Do(cmd),
             DispatcherShuttleFlyPawnCommand cmd => Do(cmd),
             OperationsExpertBuildResearchStation cmd => Do(cmd),
+            OperationsExpertDiscardToMoveFromStation cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertDiscardToMoveFromStation cmd)
+    {
+        var opex = (OperationsExpert)PlayerByRole(Role.OperationsExpert);
+        var opexCurrentCity = CityByName(opex.Location);
+
+        if (opex.HasUsedDiscardAndMoveAbilityThisTurn)
+            throw new GameRuleViolatedException("This ability can only be used once per turn");
+
+        if (opex.Location == cmd.Destination)
+            throw new GameRuleViolatedException($"Operations expert is already at {cmd.Destination}");
+
+        if (!opexCurrentCity.HasResearchStation)
+            throw new GameRuleViolatedException($"{opex.Location} doesn't have a research station");
+
+        if (!opex.Hand.Contains(cmd.Card))
+            throw new GameRuleViolatedException($"Operations expert doesn't have the {cmd.Card.City.Name} card");
+
+        return ApplyEvents(new OperationsExpertDiscardedToMoveFromStation(cmd.Card.City.Name, cmd.Destination));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertBuildResearchStation cmd)

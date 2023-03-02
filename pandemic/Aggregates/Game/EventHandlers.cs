@@ -78,7 +78,26 @@ public partial record PandemicGame
             DispatcherCharterFlewPawn e => Apply(game, e),
             DispatcherShuttleFlewPawn e => Apply(game, e),
             OperationsExpertBuiltResearchStation e => Apply(game, e),
+            OperationsExpertDiscardedToMoveFromStation e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OperationsExpertDiscardedToMoveFromStation evt)
+    {
+        var opex = (OperationsExpert)game.PlayerByRole(Role.OperationsExpert);
+        var card = opex.Hand.CityCards.Single(c => c.City.Name == evt.DiscardedCard);
+
+        return game with
+        {
+            Players = game.Players.Replace(opex, opex with
+            {
+                Location = evt.Destination,
+                ActionsRemaining = opex.ActionsRemaining - 1,
+                Hand = opex.Hand.Remove(card),
+                HasUsedDiscardAndMoveAbilityThisTurn = true
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
         };
     }
 
@@ -483,12 +502,13 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame ApplyPlayerAdded(PandemicGame pandemicGame, PlayerAdded playerAdded)
+    private static PandemicGame ApplyPlayerAdded(PandemicGame game, PlayerAdded evt)
     {
-        var newPlayers = pandemicGame.Players.Select(p => p with { }).ToList();
-        newPlayers.Add(new Player {Role = playerAdded.Role, Location = "Atlanta"});
+        var newPlayer = evt.Role == Role.OperationsExpert
+            ? new OperationsExpert { Location = "Atlanta" }
+            : new Player { Role = evt.Role, Location = "Atlanta" };
 
-        return pandemicGame with { Players = newPlayers.ToImmutableList() };
+        return game with { Players = game.Players.Add(newPlayer) };
     }
 
     private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
@@ -627,6 +647,15 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyTurnEnded(PandemicGame game)
     {
+        if (game.CurrentPlayer.Role == Role.OperationsExpert)
+        {
+            var opex = (OperationsExpert)game.CurrentPlayer;
+            game = game with
+            {
+                Players = game.Players.Replace(opex, opex with { HasUsedDiscardAndMoveAbilityThisTurn = false })
+            };
+        }
+
         return game with
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),

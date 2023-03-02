@@ -2535,6 +2535,96 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_moves_from_station_to_anywhere()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicago) });
+            var events = new List<IEvent>();
+
+            game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Hand.ShouldNotContain(chicago);
+            game.PlayerDiscardPile.TopCard.ShouldBe(chicago);
+        }
+
+        [Test]
+        public void Operations_expert_moves_from_station_throws_when_not_on_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(chicago),
+                Location = "Paris"
+            });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Moscow"), events));
+        }
+
+        [Test]
+        public void Operations_expert_moves_from_station_to_anywhere_only_once_per_turn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicagoCard = PlayerCards.CityCard("Chicago");
+            var sydneyCard = PlayerCards.CityCard("Sydney");
+            var moscowCity = game.CityByName("Moscow");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicagoCard, sydneyCard) });
+            game = game with
+            {
+                Cities = game.Cities.Replace(moscowCity, moscowCity with { HasResearchStation = true })
+            };
+            var events = new List<IEvent>();
+
+            // act: use discard + move ability
+            game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicagoCard, "Moscow"), events);
+
+            // assert: can't use again this turn
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events));
+
+            // act: pass turn
+            game = game.Do(new PassCommand(Role.OperationsExpert), events);
+            // act: pass turn (medic)
+            game = game.Do(new PassCommand(Role.Medic), events);
+            game.CurrentPlayer.Role.ShouldBe(Role.OperationsExpert);
+
+            // act: use discard + move ability that failed last time
+            game = game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.CurrentPlayer.Hand.ShouldNotContain(sydneyCard);
+            game.PlayerDiscardPile.TopCard.ShouldBe(sydneyCard);
+            game.CurrentPlayer.Location.ShouldBe("Paris");
+        }
+
+        [Test]
+        public void Operations_expert_move_from_station_throws_if_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicago) });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Atlanta"), events));
+        }
+
+        [Test]
+        public void Operations_expert_move_from_station_to_anywhere_throws_if_card_not_in_hand()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
