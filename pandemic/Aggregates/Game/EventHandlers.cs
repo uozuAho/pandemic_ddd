@@ -85,7 +85,19 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, OperationsExpertDiscardedToMoveFromStation evt)
     {
-        return game;
+        var opex = game.PlayerByRole(Role.OperationsExpert);
+        var card = opex.Hand.CityCards.Single(c => c.City.Name == evt.DiscardedCard);
+
+        return game with
+        {
+            Players = game.Players.Replace(opex, opex with
+            {
+                Location = evt.Destination,
+                ActionsRemaining = opex.ActionsRemaining - 1,
+                Hand = opex.Hand.Remove(card)
+            }),
+            PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
     }
 
     private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation evt)
