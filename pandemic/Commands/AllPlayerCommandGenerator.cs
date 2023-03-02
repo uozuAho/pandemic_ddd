@@ -53,6 +53,7 @@ public static class AllPlayerCommandGenerator
                 foreach (var player2 in game.Players)
                 {
                     yield return new DispatcherDriveFerryPawnCommand(player2.Role, city.Name);
+                    yield return new DispatcherDirectFlyPawnCommand(player2.Role, city.Name);
                 }
             }
 
