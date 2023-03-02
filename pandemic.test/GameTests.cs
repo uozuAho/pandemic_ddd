@@ -2456,6 +2456,18 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_shuttle_fly_throws_when_used_on_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var moscow = game.CityByName("Moscow");
+            game = game with { Cities = game.Cities.Replace(moscow, moscow with { HasResearchStation = true }) };
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Dispatcher, "Moscow"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

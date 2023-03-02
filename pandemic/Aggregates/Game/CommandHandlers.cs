@@ -117,6 +117,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherShuttleFlyPawnCommand cmd)
     {
+        if (cmd.PlayerToMove == Role.Dispatcher)
+            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+
         return ApplyEvents(new DispatcherShuttleFlewPawn(cmd.PlayerToMove, cmd.City));
     }
 
