@@ -122,6 +122,9 @@ public partial record PandemicGame
 
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
+        if (playerToMove.Location == cmd.City)
+            throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.City}");
+
         if (!CityByName(playerToMove.Location).HasResearchStation)
             throw new GameRuleViolatedException($"{playerToMove.Location} does not have a research station");
 
