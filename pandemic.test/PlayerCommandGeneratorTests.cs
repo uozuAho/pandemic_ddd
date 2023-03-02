@@ -495,6 +495,21 @@ namespace pandemic.test
             commands.ShouldContain(c => c is OperationsExpertBuildResearchStation, 1);
         }
 
+        [Test]
+        public void Operations_expert_move_from_research_station()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.OperationsExpert, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+
+            var possibleCommands = game.CurrentPlayer.Hand.Count * 47;
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is OperationsExpertDiscardToMoveFromStation, possibleCommands);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

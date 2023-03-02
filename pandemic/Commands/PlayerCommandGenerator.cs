@@ -56,6 +56,17 @@ namespace pandemic.Commands
 
             if (!city.HasResearchStation)
                 _buffer[_bufIdx++] = new OperationsExpertBuildResearchStation();
+
+            if (city.HasResearchStation)
+            {
+                foreach (var card in opex.Hand.CityCards)
+                {
+                    foreach (var city2 in game.Cities.Where(c => c.Name != opex.Location))
+                    {
+                        _buffer[_bufIdx++] = new OperationsExpertDiscardToMoveFromStation(card, city2.Name);
+                    }
+                }
+            }
         }
 
         private void SetDispatcherCommands(PandemicGame game)
