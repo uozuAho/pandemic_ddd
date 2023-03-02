@@ -118,6 +118,9 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
+        if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
+            throw new GameRuleViolatedException($"{cmd.PlayerToMove} is already at {cmd.City}");
+
         return ApplyEvents(new DispatcherDirectFlewPawn(cmd.PlayerToMove, cmd.City));
     }
 

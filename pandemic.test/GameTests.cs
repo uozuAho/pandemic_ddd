@@ -2363,6 +2363,20 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_direct_fly_throws_if_player_is_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCard("Chicago"))
+            }).SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
