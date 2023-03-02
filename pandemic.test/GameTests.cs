@@ -2511,6 +2511,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+            game.ResearchStationPile.ShouldBe(4);
         }
 
         [Test]

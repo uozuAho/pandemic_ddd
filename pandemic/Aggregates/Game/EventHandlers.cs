@@ -93,7 +93,8 @@ public partial record PandemicGame
             Cities = game.Cities.Replace(city, city with
             {
                 HasResearchStation = true
-            })
+            }),
+            ResearchStationPile = game.ResearchStationPile - 1
         };
     }
 
