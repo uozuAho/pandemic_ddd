@@ -382,6 +382,23 @@ namespace pandemic.test
             commands.ShouldContain(c => c is DispatcherCharterFlyPawnCommand, 47); // all except current city
         }
 
+        [Test]
+        public void Dispatcher_direct_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Dispatcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Paris", "Moscow", "Sydney")
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DispatcherDirectFlyPawnCommand, 3); // all in hand except current city
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
