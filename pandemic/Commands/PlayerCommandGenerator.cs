@@ -53,6 +53,25 @@ namespace pandemic.Commands
             SetDispatcherMovePawnToOtherPawns(game);
             SetDispatcherDriveFerryCommands(game);
             SetDispatcherDirectFlightCommands(game);
+            SetDispatcherCharterFlightCommands(game);
+        }
+
+        private void SetDispatcherCharterFlightCommands(PandemicGame game)
+        {
+            foreach (var otherPlayer in game.Players)
+            {
+                if (otherPlayer.Role == Role.Dispatcher) continue;
+
+                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards)
+                {
+                    if (otherPlayer.Location != card.City.Name) continue;
+
+                    foreach (var city in game.Cities.Where(city => city.Name != otherPlayer.Location))
+                    {
+                        _buffer[_bufIdx++] = new DispatcherCharterFlyPawnCommand(otherPlayer.Role, city.Name);
+                    }
+                }
+            }
         }
 
         private void SetDispatcherDirectFlightCommands(PandemicGame game)
