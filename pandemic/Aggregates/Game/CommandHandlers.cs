@@ -126,6 +126,9 @@ public partial record PandemicGame
         if (card == null)
             throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
 
+        if (playerToMove.Location == cmd.Destination)
+            throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.Destination}");
+
         return ApplyEvents(new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination));
     }
 
