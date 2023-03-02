@@ -2442,6 +2442,65 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_shuttle_fly_other_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var moscow = game.CityByName("Moscow");
+            game = game with { Cities = game.Cities.Replace(moscow, moscow with { HasResearchStation = true }) };
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Moscow"), events);
+
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            game.PlayerByRole(Role.Medic).Location.ShouldBe("Moscow");
+        }
+
+        [Test]
+        public void Dispatcher_shuttle_fly_throws_when_used_on_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var moscow = game.CityByName("Moscow");
+            game = game with { Cities = game.Cities.Replace(moscow, moscow with { HasResearchStation = true }) };
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Dispatcher, "Moscow"), events));
+        }
+
+        [Test]
+        public void Dispatcher_shuttle_fly_other_pawn_throws_if_not_on_research_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var moscow = game.CityByName("Moscow");
+            game = game with { Cities = game.Cities.Replace(moscow, moscow with { HasResearchStation = true }) };
+            game = game.SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Moscow"), events));
+        }
+
+        [Test]
+        public void Dispatcher_shuttle_fly_other_pawn_throws_when_destination_has_no_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Moscow"), events));
+        }
+
+        [Test]
+        public void Dispatcher_shuttle_fly_other_pawn_throws_if_already_at_destination()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Atlanta"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
