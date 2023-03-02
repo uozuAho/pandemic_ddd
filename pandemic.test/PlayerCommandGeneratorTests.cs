@@ -279,7 +279,25 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Discard_none_while_drawing_cards()
+        public void Discard_while_actions_remaining()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 1,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand, 8);
+        }
+
+        [Test]
+        public void Discard_before_drawing_cards()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -298,16 +316,50 @@ namespace pandemic.test
             // scenario: share knowledge puts another player over hand limit at the end of a turn
             var commands = _generator.LegalCommands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void Discard_none_while_drawing_cards()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
 
-            commands = _generator.LegalCommands(game);
+            var commands = _generator.LegalCommands(game);
             commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
 
             // draw cards is done, should now be able to discard
             commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is DiscardPlayerCardCommand);
+        }
+
+        [Test]
+        public void Discard_after_drawing_cards()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+            game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
+
+            var commands = _generator.LegalCommands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
         }
 
@@ -332,7 +384,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_cannot_move_pawn_to_pawn_if_already_at_destination()
+        public void Dispatcher_move_pawn_to_pawn_none_if_already_at_destination()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -345,7 +397,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_any_pawn_to_any_other_pawn()
+        public void Dispatcher_move_any_pawn_to_any_other_pawn()
         {
             var game = CreateNewGame(new NewGameOptions
             {
