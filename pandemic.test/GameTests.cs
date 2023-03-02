@@ -2404,6 +2404,18 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dispatcher_charter_fly_other_throws_when_used_on_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DispatcherCharterFlyPawnCommand(Role.Dispatcher, "Paris"), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
