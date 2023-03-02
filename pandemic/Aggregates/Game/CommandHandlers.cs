@@ -109,8 +109,14 @@ public partial record PandemicGame
             DispatcherMovePawnToOtherPawnCommand cmd => Do(cmd),
             DispatcherDriveFerryPawnCommand cmd => Do(cmd),
             DispatcherDirectFlyPawnCommand cmd => Do(cmd),
+            DispatcherCharterFlyPawnCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherCharterFlyPawnCommand cmd)
+    {
+        return ApplyEvents(new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)
