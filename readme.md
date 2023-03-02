@@ -10,7 +10,15 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - operations expert:
-      - move from a station to anywhere by discarding a city card
+      - (once per turn) move from a station to anywhere by discarding a city card
+        - happy
+        - throw when not on station
+        - throw on 2nd attempt in same turn
+        - happy 2: can do again next turn
+        - throw if already at dest
+        - throw if card not in hand
+        - legal commands
+        - all commands
     - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
