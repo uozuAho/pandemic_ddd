@@ -2523,6 +2523,17 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_builds_research_station_throws_when_no_stations_left()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
+            game = game with { ResearchStationPile = 0 };
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new OperationsExpertBuildResearchStation(), events));
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

@@ -121,6 +121,7 @@ public partial record PandemicGame
         var opex = PlayerByRole(Role.OperationsExpert);
         var city = CityByName(opex.Location);
 
+        if (ResearchStationPile == 0) throw new GameRuleViolatedException("There are no research stations left");
         if (city.HasResearchStation) throw new GameRuleViolatedException($"{city.Name} already has a research station");
 
         return ApplyEvents(new OperationsExpertBuiltResearchStation(opex.Location));

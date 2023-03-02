@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - operations expert:
       - build a research station without a city card
-        - throw when no stations left
         - legal commands
         - all commands
       - move from a station to anywhere by discarding a city card
