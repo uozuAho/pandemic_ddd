@@ -10,7 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - operations expert:
-      - build a research station without a city card
       - move from a station to anywhere by discarding a city card
     - medic: remove all cubes of a colour when treating disease, insta-remove cubes when cured
     - researcher: give any city card to a player in the same city
@@ -20,6 +19,7 @@ implemented.
       - as an action, take any discarded event card and store it on this card
         - only 1 card can be stored at a time, it's not part of your hand
       - when this event card is played, remove it from the game
+- can a heroic game be won?
 - later
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense

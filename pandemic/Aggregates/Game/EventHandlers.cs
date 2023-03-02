@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.VisualBasic;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.GameData;
@@ -76,7 +77,24 @@ public partial record PandemicGame
             DispatcherDirectFlewPawn e => Apply(game, e),
             DispatcherCharterFlewPawn e => Apply(game, e),
             DispatcherShuttleFlewPawn e => Apply(game, e),
+            OperationsExpertBuiltResearchStation e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation evt)
+    {
+        var opex = game.PlayerByRole(Role.OperationsExpert);
+        var city = game.CityByName(opex.Location);
+
+        return game with
+        {
+            Players = game.Players.Replace(opex, opex with { ActionsRemaining = opex.ActionsRemaining - 1 }),
+            Cities = game.Cities.Replace(city, city with
+            {
+                HasResearchStation = true
+            }),
+            ResearchStationPile = game.ResearchStationPile - 1
         };
     }
 
