@@ -119,6 +119,12 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertDiscardToMoveFromStation cmd)
     {
+        var opex = PlayerByRole(Role.OperationsExpert);
+        var opexCurrentCity = CityByName(opex.Location);
+
+        if (!opexCurrentCity.HasResearchStation)
+            throw new GameRuleViolatedException($"{opex.Location} doesn't have a research station");
+
         return ApplyEvents(new OperationsExpertDiscardedToMoveFromStation(cmd.Card.City.Name, cmd.Destination));
     }
 

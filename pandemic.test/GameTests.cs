@@ -2539,7 +2539,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
             var chicago = PlayerCards.CityCard("Chicago");
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicago)});
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicago) });
             var events = new List<IEvent>();
 
             game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events);
@@ -2547,6 +2547,22 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.CurrentPlayer.Hand.ShouldNotContain(chicago);
             game.PlayerDiscardPile.TopCard.ShouldBe(chicago);
+        }
+
+        [Test]
+        public void Operations_expert_moves_from_station_throws_when_not_on_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of(chicago),
+                Location = "Paris"
+            });
+            var events = new List<IEvent>();
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Moscow"), events));
         }
 
         [Test]

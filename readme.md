@@ -11,8 +11,6 @@ implemented.
   - role special abilities
     - operations expert:
       - (once per turn) move from a station to anywhere by discarding a city card
-        - happy
-        - throw when not on station
         - throw on 2nd attempt in same turn
         - happy 2: can do again next turn
         - throw if already at dest
