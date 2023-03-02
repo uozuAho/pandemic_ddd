@@ -481,6 +481,20 @@ namespace pandemic.test
             commands.ShouldContain(c => c is DispatcherShuttleFlyPawnCommand, 47); // all except current city
         }
 
+        [Test]
+        public void Operations_expert_build_research_station()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.OperationsExpert, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is OperationsExpertBuildResearchStation, 1);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

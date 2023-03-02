@@ -39,9 +39,23 @@ namespace pandemic.Commands
                 SetShareKnowledgeTakeCommands(game);
                 SetPassCommands(game);
                 SetDispatcherCommands(game);
+                SetOperationsExpertCommands(game);
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetOperationsExpertCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.OperationsExpert
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            var opex = game.PlayerByRole(Role.OperationsExpert);
+            var city = game.CityByName(opex.Location);
+
+            if (!city.HasResearchStation)
+                _buffer[_bufIdx++] = new OperationsExpertBuildResearchStation();
         }
 
         private void SetDispatcherCommands(PandemicGame game)
