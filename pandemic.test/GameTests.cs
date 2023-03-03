@@ -2650,10 +2650,8 @@ namespace pandemic.test
         public void Medic_auto_removes_cubes_when_cured__drive_ferry()
         {
             var game = DefaultTestGame();
-            game = game with
+            game = game.Cure(Colour.Blue) with
             {
-                // todo: add cure method to game
-                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial)),
                 Cities = game.Cities.Select(c => c.Name switch
                 {
                     "Chicago" => c with { Cubes = CubePile.Empty.AddCube(Colour.Blue) },

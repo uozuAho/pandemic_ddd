@@ -154,6 +154,17 @@ namespace pandemic.Aggregates.Game
             return this with { };
         }
 
+        public PandemicGame Cure(Colour colour)
+        {
+            if (CuresDiscovered.Any(c => c.Colour == Colour.Blue))
+                throw new InvalidOperationException("Blue is already cured");
+
+            return this with
+            {
+                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial))
+            };
+        }
+
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);
