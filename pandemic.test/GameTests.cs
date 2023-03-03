@@ -2628,6 +2628,27 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_for_multiple_cured_diseases()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .Cure(Colour.Red)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .AddCube("Chicago", Colour.Red);
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+            var startingRedCubes = game.Cubes.NumberOf(Colour.Red);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Red).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.Cubes.NumberOf(Colour.Red).ShouldBe(startingRedCubes + 1);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

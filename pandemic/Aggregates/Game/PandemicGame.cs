@@ -156,8 +156,8 @@ namespace pandemic.Aggregates.Game
 
         public PandemicGame Cure(Colour colour)
         {
-            if (CuresDiscovered.Any(c => c.Colour == Colour.Blue))
-                throw new InvalidOperationException("Blue is already cured");
+            if (CuresDiscovered.Any(c => c.Colour == colour))
+                throw new InvalidOperationException($"{colour} is already cured");
 
             return this with
             {

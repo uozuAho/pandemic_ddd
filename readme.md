@@ -13,8 +13,6 @@ implemented.
       - auto remove cubes when cured
         - when moving to a city
           - happy
-            - drive ferry
-              - remove multiple colours if all cured
             - shuttle
             - direct
             - charter
