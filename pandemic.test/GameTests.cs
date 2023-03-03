@@ -927,14 +927,14 @@ namespace pandemic.test
                 .Remove(drawPile.TopCard)
                 .PlaceOnTop(drawPile.TopCard, new EpidemicCard());
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = drawPile,
                 Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
                 {
                     ActionsRemaining = 1,
                     Hand = new PlayerHand(playerHand)
-                })
+                }),
             };
 
             var events = new List<IEvent>();
@@ -1306,14 +1306,13 @@ namespace pandemic.test
         public void Epidemic_causes_outbreak_scenario()
         {
             var game = DefaultTestGame();
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
                     PlayerCards.CityCard("Atlanta"),
                     new EpidemicCard()),
                 InfectionDiscardPile = Deck<InfectionCard>.Empty,
                 InfectionRateMarkerPosition = 5, // ensure that epidemic city is infected immediately
-                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList() // make sure no additional outbreaks occur
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
@@ -1356,17 +1355,15 @@ namespace pandemic.test
             var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
 
-            game = game with
-            {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
-                    PlayerCards.CityCard("Atlanta"),
-                    new EpidemicCard()),
-                Cities = game.Cities.Select(c => c.Name == epidemicCity.Name
-                    ? epidemicCity
-                        .AddCube(epidemicInfectionCard.Colour)
-                        .AddCube(epidemicInfectionCard.Colour)
-                    : c with { Cubes = CubePile.Empty }).ToImmutableList()
-            };
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCube(epidemicCity.Name, epidemicInfectionCard.Colour)
+                    .AddCube(epidemicCity.Name, epidemicInfectionCard.Colour) with
+                {
+                    PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                        PlayerCards.CityCard("Atlanta"),
+                        new EpidemicCard()),
+                };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             // act
@@ -1384,12 +1381,11 @@ namespace pandemic.test
             var epidemicInfectionCard1 = epidemicInfectionCards[0];
             var epidemicInfectionCard2 = epidemicInfectionCards[1];
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
                     new EpidemicCard(),
                     new EpidemicCard()),
-                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
@@ -1418,12 +1414,11 @@ namespace pandemic.test
             var epidemicInfectionCard1 = epidemicInfectionCards[0];
             var epidemicInfectionCard2 = epidemicInfectionCards[1];
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
                     new EpidemicCard(),
                     new EpidemicCard()),
-                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1493,23 +1488,13 @@ namespace pandemic.test
         public void Eradicate_causes_infection_cards_to_have_no_effect()
         {
             var game = DefaultTestGame();
-            game = game with
+            game = game
+                .RemoveAllCubesFromCities()
+                .AddCube("Atlanta", Colour.Blue)
+                .Cure(Colour.Blue) with
             {
-                // 1 blue cube on Atlanta, no other cubes
-                Cities = game.Cities.Select(c => c.Name switch
-                {
-                    "Atlanta" => c with { Cubes = CubePile.Empty.AddCube(Colour.Blue) },
-                    _ => c with { Cubes = CubePile.Empty }
-                }).ToImmutableList(),
-
-                // prevent epidemics
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-
                 // only blue cards in infection pile
                 InfectionDrawPile = new Deck<InfectionCard>(game.InfectionDrawPile.Cards.Where(c => c.Colour == Colour.Blue)),
-
-                // blue cure discovered
-                CuresDiscovered = game.CuresDiscovered.Add(new CureMarker(Colour.Blue, CureMarkerSide.Vial))
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
@@ -1533,20 +1518,14 @@ namespace pandemic.test
             var game = DefaultTestGame();
 
             var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
-            game = game with
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
             {
                 InfectionDrawPile =
                     game.InfectionDrawPile
                         .RemoveIfPresent(atlantaInfectionCard)
                         .PlaceOnTop(atlantaInfectionCard),
-                Cities = game.Cities.Select(c => c.Name switch
-                {
-                    "Atlanta" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
-                    },
-                    _ => c with { Cubes = CubePile.Empty }
-                }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
@@ -1617,26 +1596,16 @@ namespace pandemic.test
 
             var atlanta = new InfectionCard("Atlanta", Colour.Blue);
             var chicago = new InfectionCard("Chicago", Colour.Blue);
-            game = game with
-            {
-                InfectionDrawPile =
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3)
+                    .AddCubes("Chicago", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
                     game.InfectionDrawPile
                         .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
                         .RemoveIfPresent(chicago),
-                Cities = game.Cities.Select(c => c.Name switch
-                {
-                    "Atlanta" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
-                    },
-                    "Chicago" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3)
-                    },
-                    // ensure no cubes on other cities so that there are no more chain reactions
-                    _ => c with { Cubes = CubePile.Empty }
-                }).ToImmutableList()
-            };
+                };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             (game, var events) = game.Do(new PassCommand(Role.Medic));
@@ -1657,37 +1626,18 @@ namespace pandemic.test
 
             var beijing = new InfectionCard("Beijing", Colour.Red);
             var atlanta = new InfectionCard("Atlanta", Colour.Blue);
-            game = game with
-            {
-                PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile
-                    .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
-                    .RemoveIfPresent(beijing).PlaceOnTop(beijing),
-                Cities = game.Cities.Select(c => c.Name switch
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Beijing", Colour.Red, 3)
+                    .AddCubes("Osaka", Colour.Red, 3)
+                    .AddCubes("Seoul", Colour.Red, 3)
+                    .AddCubes("Tokyo", Colour.Red, 3)
+                    .AddCubes("Shanghai", Colour.Red, 1) with
                 {
-                    "Beijing" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
-                    },
-                    "Osaka" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
-                    },
-                    "Seoul" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
-                    },
-                    "Tokyo" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 3)
-                    },
-                    "Shanghai" => c with
-                    {
-                        Cubes = CubePile.Empty.AddCubes(Colour.Red, 1)
-                    },
-                    _ => c with { Cubes = CubePile.Empty }
-                }).ToImmutableList()
-            };
+                    InfectionDrawPile = game.InfectionDrawPile
+                        .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                        .RemoveIfPresent(beijing).PlaceOnTop(beijing),
+                };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
 
             // act
@@ -1817,10 +1767,9 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
-                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1861,10 +1810,9 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
                 PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
-                Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2124,9 +2072,9 @@ namespace pandemic.test
         {
             var game = DefaultTestGame().WithNoEpidemics();
 
-            game = game with
+            game = game.RemoveAllCubesFromCities() with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2618,10 +2566,86 @@ namespace pandemic.test
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
             var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
             var events = new List<IEvent>();
 
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events));
+        }
+
+        [Test]
+        public void Medic_treat_disease_removes_all_cubes()
+        {
+            var game = DefaultTestGame();
+            var atlanta = game.CityByName("Atlanta");
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+            game.CurrentPlayer.Role.ShouldBe(Role.Medic);
+
+            (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 3);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__drive_ferry()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes__only_for_cured_diseases()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .AddCube("Chicago", Colour.Red);
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Red).ShouldBe(1);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_for_multiple_cured_diseases()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .Cure(Colour.Red)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .AddCube("Chicago", Colour.Red);
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+            var startingRedCubes = game.Cubes.NumberOf(Colour.Red);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Red).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.Cubes.NumberOf(Colour.Red).ShouldBe(startingRedCubes + 1);
         }
 
         [Test]

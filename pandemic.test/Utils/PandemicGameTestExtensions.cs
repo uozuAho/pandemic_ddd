@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.Values;
 
@@ -24,6 +25,14 @@ public static class PandemicGameTestExtensions
         return game with
         {
             PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard))
+        };
+    }
+
+    public static PandemicGame RemoveAllCubesFromCities(this PandemicGame game)
+    {
+        return game with
+        {
+            Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
         };
     }
 }

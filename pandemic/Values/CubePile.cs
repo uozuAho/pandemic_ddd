@@ -44,6 +44,11 @@ public record CubePile
         return new CubePile(Counts.SetItem(colour, Counts[colour] - 1));
     }
 
+    public CubePile RemoveAll(Colour colour)
+    {
+        return new CubePile(Counts.SetItem(colour, 0));
+    }
+
     public bool Any()
     {
         return Counts.Values.Any(v => v > 0);

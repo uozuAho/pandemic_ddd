@@ -324,7 +324,20 @@ public partial record PandemicGame
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
         }
 
-        return ApplyEvents(new PlayerMoved(role, destination));
+        var destinationCity = CityByName(destination);
+
+        var events = new List<IEvent> { new PlayerMoved(role, destination) };
+
+        if (role == Role.Medic)
+        {
+            foreach (var colour in ColourExtensions.AllColours)
+            {
+                if (IsCured(colour) && destinationCity.Cubes.NumberOf(colour) > 0)
+                    events.Add(new MedicAutoRemovedCubes(destination, colour));
+            }
+        }
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(CharterFlightCommand cmd)
@@ -448,7 +461,9 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("No disease cubes to remove");
 
         var events = new List<IEvent>();
-        var game = ApplyEvent(new TreatedDisease(role, city, colour), events);
+        var game = role == Role.Medic
+            ? ApplyEvent(new MedicTreatedDisease(city, colour), events)
+            : ApplyEvent(new TreatedDisease(role, city, colour), events);
 
         if (game.IsCured(command.Colour) && game.Cities.Sum(c => c.Cubes.NumberOf(command.Colour)) == 0)
             game = game.ApplyEvent(new DiseaseEradicated(command.Colour), events);

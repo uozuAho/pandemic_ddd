@@ -154,6 +154,32 @@ namespace pandemic.Aggregates.Game
             return this with { };
         }
 
+        public PandemicGame Cure(Colour colour)
+        {
+            if (CuresDiscovered.Any(c => c.Colour == colour))
+                throw new InvalidOperationException($"{colour} is already cured");
+
+            return this with
+            {
+                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial))
+            };
+        }
+
+        public PandemicGame AddCube(string city, Colour colour)
+        {
+            return AddCubes(city, colour, 1);
+        }
+
+        public PandemicGame AddCubes(string city, Colour colour, int numCubes)
+        {
+            var city_ = CityByName(city);
+
+            return this with
+            {
+                Cities = Cities.Replace(city_, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
+            };
+        }
+
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);

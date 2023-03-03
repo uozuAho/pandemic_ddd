@@ -4,7 +4,14 @@ namespace pandemic.Values;
 
 public enum CureMarkerSide
 {
+    /// <summary>
+    /// Vial = cured
+    /// </summary>
     Vial,
+
+    /// <summary>
+    /// Sunset = eradicated
+    /// </summary>
     Sunset
 };
 
