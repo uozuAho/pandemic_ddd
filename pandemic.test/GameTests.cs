@@ -915,7 +915,6 @@ namespace pandemic.test
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
-        // [Repeat(100)] // todo: fix me, flakey
         [Test]
         public void Epidemic_after_7_cards_in_hand()
         {
@@ -935,7 +934,8 @@ namespace pandemic.test
                 {
                     ActionsRemaining = 1,
                     Hand = new PlayerHand(playerHand)
-                })
+                }),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
             };
 
             var events = new List<IEvent>();
@@ -2127,7 +2127,8 @@ namespace pandemic.test
 
             game = game with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                Cities = game.Cities.Select(c => c with{Cubes = CubePile.Empty}).ToImmutableList()
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -2619,6 +2620,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.OperationsExpert, Role.Medic } });
             var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Empty });
             var events = new List<IEvent>();
 
             Should.Throw<GameRuleViolatedException>(() =>
