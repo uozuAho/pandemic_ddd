@@ -2668,6 +2668,33 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes__only_for_cured_diseases()
+        {
+            var game = DefaultTestGame();
+            game = game.Cure(Colour.Blue) with
+            {
+                // todo: add 'remove all cubes from cities' helper
+                Cities = game.Cities.Select(c => c.Name switch
+                {
+                    "Chicago" => c with
+                    {
+                        Cubes = CubePile.Empty
+                            .AddCube(Colour.Blue)
+                            .AddCube(Colour.Red)
+                    },
+                    _ => c with{Cubes = CubePile.Empty}
+                }).ToImmutableList()
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Red).ShouldBe(1);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

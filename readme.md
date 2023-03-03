@@ -10,12 +10,10 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - medic
-      - insta-remove cubes when cured
+      - auto remove cubes when cured
         - when moving to a city
           - happy
             - drive ferry
-              - inline todos in last commit
-              - doesn't remove colour if not cured
               - remove multiple colours if all cured
             - shuttle
             - direct
