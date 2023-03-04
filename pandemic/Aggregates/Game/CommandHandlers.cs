@@ -358,7 +358,10 @@ public partial record PandemicGame
         if (discardCard.City.Name != PlayerByRole(role).Location)
             throw new GameRuleViolatedException("Discarded card must match current location");
 
-        return ApplyEvents(new PlayerCharterFlewTo(role, destination));
+        IEnumerable<IEvent> events = new[] { new PlayerCharterFlewTo(role, destination) };
+        if (role == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(destination));
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscardPlayerCardCommand command)

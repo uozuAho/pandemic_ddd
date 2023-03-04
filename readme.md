@@ -13,7 +13,6 @@ implemented.
       - auto remove cubes when cured
         - when moving to a city
           - happy
-            - charter
             - moved by dispatcher
             - any other move types?
           - add to self validation: assert no cured cubes on medic

@@ -2689,6 +2689,25 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_when_cured__charter_flight()
+        {
+            var game = DefaultTestGame();
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, atlanta, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
