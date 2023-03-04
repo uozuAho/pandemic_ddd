@@ -2653,16 +2653,17 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
             game = game
-                    .Cure(Colour.Blue)
-                    .RemoveAllCubesFromCities()
-                    .AddCube("Chicago", Colour.Blue) with
-                {
-                    Cities = game.Cities.Replace(game.CityByName("Chicago"),
-                        game.CityByName("Chicago") with { HasResearchStation = true })
-                };
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            game = game with
+            {
+                Cities = game.Cities.Replace(game.CityByName("Chicago"),
+                    game.CityByName("Chicago") with { HasResearchStation = true })
+            };
             var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
 
-            (game, _) = game.Do(new ShuttleFlightCommand(game.CurrentPlayer.Role, "Chicago"));
+            (game, var events) = game.Do(new ShuttleFlightCommand(game.CurrentPlayer.Role, "Chicago"));
 
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
             game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);

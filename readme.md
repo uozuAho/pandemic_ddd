@@ -13,7 +13,6 @@ implemented.
       - auto remove cubes when cured
         - when moving to a city
           - happy
-            - shuttle
             - direct
             - charter
             - moved by dispatcher
