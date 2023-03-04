@@ -14,14 +14,18 @@ implemented.
         - when moving to a city
           - happy
             - moved by dispatcher
-            - any other move types?
+              - charter
+              - direct
+              - shuttle
+              - pawn to pawn
           - add to self validation: assert no cured cubes on medic
-          - eradicates if last of cubes
         - when cubes would be placed where medic is
           - infection card
           - outbreak
           - epidemic
           - anything else?
+        - eradicates if last of cubes
+        - add to self validation: assert disease is eradicated if cured and no cubes
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards

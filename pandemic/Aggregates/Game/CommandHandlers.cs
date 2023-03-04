@@ -212,7 +212,10 @@ public partial record PandemicGame
         if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
             throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
 
-        return ApplyEvents(new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City));
+        IEnumerable<IEvent> events = new[] { new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City) };
+        if (cmd.PlayerToMove == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(cmd.City));
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
