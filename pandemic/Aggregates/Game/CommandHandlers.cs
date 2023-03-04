@@ -182,7 +182,10 @@ public partial record PandemicGame
         if (playerToMove.Location == cmd.Destination)
             throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.Destination}");
 
-        return ApplyEvents(new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination));
+        IEnumerable<IEvent> events = new[] { new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination) };
+        if (cmd.PlayerToMove == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(cmd.Destination));
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)

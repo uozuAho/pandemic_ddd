@@ -14,7 +14,6 @@ implemented.
         - when moving to a city
           - happy
             - moved by dispatcher
-              - charter
               - direct
               - shuttle
               - pawn to pawn
