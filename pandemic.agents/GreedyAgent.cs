@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 
@@ -11,7 +12,8 @@ public class GreedyAgent
         var bestScore = int.MinValue;
         IPlayerCommand? bestCommand = null;
 
-        foreach (var command in game.LegalCommands)
+        var commands = game.LegalCommands().ToList();
+        foreach (var command in commands)
         {
             var (nextState, _) = game.Do(command);
 

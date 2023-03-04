@@ -32,7 +32,10 @@ namespace pandemic.Aggregates.Game
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
         private readonly PlayerCommandGenerator _commandGenerator = new();
 
-        public IEnumerable<IPlayerCommand> LegalCommands => _commandGenerator.LegalCommands(this);
+        public IEnumerable<IPlayerCommand> LegalCommands()
+        {
+            return _commandGenerator.LegalCommands(this);
+        }
 
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
 

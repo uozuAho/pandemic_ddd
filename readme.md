@@ -8,11 +8,9 @@ implemented.
 
 # todo
 - use greedy agent for fuzz testing
-  - get rid of ICommand?
-  - add dont use event command to generator (and all commands)
-    - test: dont gen when players chose to skip
   - fix failing fuzz
   - also use random moves for fuzzing
+- test: cmd gen generates special events & 'dont use' commands for all players, regardless of turn
 - implement all game rules. left:
   - role special abilities
     - medic

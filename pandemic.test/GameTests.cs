@@ -2860,6 +2860,7 @@ namespace pandemic.test
                 // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
                 // var command = random.Choice(legalCommands);
+
                 var command = agent.BestCommand(game);
                 try
                 {
