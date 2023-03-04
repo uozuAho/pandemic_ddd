@@ -37,7 +37,7 @@ public partial record PandemicGame
             InfectionCardDrawn i => ApplyInfectionCardDrawn(game, i),
             InfectionDeckSetUp s => game with { InfectionDrawPile = new Deck<InfectionCard>(s.Deck) },
             PlayerAdded p => ApplyPlayerAdded(game, p),
-            PlayerMoved p => ApplyPlayerMoved(game, p),
+            PlayerDroveFerried p => ApplyPlayerMoved(game, p),
             ResearchStationBuilt r => ApplyResearchStationBuilt(game, r),
             PlayerCardPickedUp p => ApplyPlayerCardPickedUp(game),
             PlayerCardsDealt d => ApplyPlayerCardsDealt(game, d),
@@ -540,15 +540,15 @@ public partial record PandemicGame
         return game with { Players = game.Players.Add(newPlayer) };
     }
 
-    private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerMoved playerMoved)
+    private static PandemicGame ApplyPlayerMoved(PandemicGame pandemicGame, PlayerDroveFerried playerDroveFerried)
     {
         var newPlayers = pandemicGame.Players.Select(p => p).ToList();
-        var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerMoved.Role);
+        var movedPlayerIdx = newPlayers.FindIndex(p => p.Role == playerDroveFerried.Role);
         var movedPlayer = newPlayers[movedPlayerIdx];
 
         newPlayers[movedPlayerIdx] = movedPlayer with
         {
-            Location = playerMoved.Location,
+            Location = playerDroveFerried.Location,
             ActionsRemaining = movedPlayer.ActionsRemaining - 1
         };
 

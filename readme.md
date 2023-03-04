@@ -11,19 +11,13 @@ implemented.
   - role special abilities
     - medic
       - auto remove cubes when cured
-        - when moving to a city
-          - happy
-            - shuttle
-            - direct
-            - charter
-            - moved by dispatcher
-            - any other move types?
-          - eradicates if last of cubes
         - when cubes would be placed where medic is
           - infection card
           - outbreak
           - epidemic
           - anything else?
+        - eradicates if last of cubes
+        - add to self validation: assert disease is eradicated if cured and no cubes
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards
@@ -31,7 +25,17 @@ implemented.
       - as an action, take any discarded event card and store it on this card
         - only 1 card can be stored at a time, it's not part of your hand
       - when this event card is played, remove it from the game
+  - anyone can clear all cubes when a disease is cured
 - can a heroic game be won?
+  - pandemic strategies
+    - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
+    - indicates 6 is possible, some strats: https://boardgamegeek.com/thread/2356305/questions-pandemic-base-game-heroic-mode
+        - clear cubes early game, while building hands
+        - more players: easier to clear cubes, harder to cure. Inverse for fewer players
+    - read more:
+        - BGA has replays! stats here: https://forum.boardgamearena.com/viewtopic.php?t=25373
+        - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
+        - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
 - later
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense

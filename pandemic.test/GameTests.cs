@@ -2166,7 +2166,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_self_to_other_pawn()
+        public void Dispatcher_moves_self_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
             var medic = game.PlayerByRole(Role.Medic);
@@ -2180,7 +2180,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_other_pawn_to_self()
+        public void Dispatcher_moves_other_pawn_to_self()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
             var medic = game.PlayerByRole(Role.Medic);
@@ -2216,7 +2216,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_other_pawn_to_other_pawn()
+        public void Dispatcher_moves_other_pawn_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with
             {
@@ -2646,6 +2646,169 @@ namespace pandemic.test
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Red).ShouldBe(0);
             game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
             game.Cubes.NumberOf(Colour.Red).ShouldBe(startingRedCubes + 1);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__shuttle()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            game = game with
+            {
+                Cities = game.Cities.Replace(game.CityByName("Chicago"),
+                    game.CityByName("Chicago") with { HasResearchStation = true })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new ShuttleFlightCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__direct_flight()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Chicago") });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new DirectFlightCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__charter_flight()
+        {
+            var game = DefaultTestGame();
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new CharterFlightCommand(game.CurrentPlayer.Role, atlanta, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_drive_ferry()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new DispatcherDriveFerryPawnCommand(Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_charter_flight()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            var atlanta = PlayerCards.CityCard("Atlanta");
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(atlanta) });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new DispatcherCharterFlyPawnCommand(Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_direct_flight()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Chicago") });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_move_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Dispatcher, Role.Medic }
+            });
+            var medic = game.PlayerByRole(Role.Medic);
+            var dispatcher = game.PlayerByRole(Role.Dispatcher);
+            game = game
+                    .Cure(Colour.Yellow)
+                    .RemoveAllCubesFromCities()
+                    .AddCube("Bogota", Colour.Yellow) with
+                {
+                    Players = game.Players
+                        .Replace(medic, medic with { Location = "Paris" })
+                        .Replace(dispatcher, dispatcher with { Location = "Bogota" })
+                };
+            var startingYellowCubes = game.Cubes.NumberOf(Colour.Yellow);
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Medic, Role.Dispatcher), events);
+
+            game.CityByName("Bogota").Cubes.NumberOf(Colour.Yellow).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Yellow).ShouldBe(startingYellowCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_shuttle()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            game = game with
+            {
+                Cities = game.Cities.Replace(game.CityByName("Chicago"),
+                    game.CityByName("Chicago") with { HasResearchStation = true })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new DispatcherShuttleFlyPawnCommand(Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 
         [Test]
