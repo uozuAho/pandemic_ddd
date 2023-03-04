@@ -182,10 +182,9 @@ public partial record PandemicGame
         if (playerToMove.Location == cmd.Destination)
             throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.Destination}");
 
-        IEnumerable<IEvent> events = new[] { new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination) };
-        if (cmd.PlayerToMove == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(cmd.Destination));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination) }.Concat(
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.Destination)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)
@@ -215,10 +214,9 @@ public partial record PandemicGame
         if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
             throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
 
-        IEnumerable<IEvent> events = new[] { new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City) };
-        if (cmd.PlayerToMove == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(cmd.City));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City) }.Concat(
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
@@ -330,22 +328,20 @@ public partial record PandemicGame
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
         }
 
-        var events = new List<IEvent> { new PlayerMoved(role, destination) };
-
-        if (role == Role.Medic)
-            events.AddRange(MedicAutoRemoveCubes(destination));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new PlayerDroveFerried(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
     }
 
-    private IEnumerable<IEvent> MedicAutoRemoveCubes(string medicArrivedAtCity)
+    private IEnumerable<IEvent> AnyMedicAutoRemoves(Role player, string arrivedAtCity)
     {
-        var city = CityByName(medicArrivedAtCity);
+        if (player != Role.Medic) yield break;
+
+        var city = CityByName(arrivedAtCity);
 
         foreach (var colour in ColourExtensions.AllColours)
         {
             if (IsCured(colour) && city.Cubes.NumberOf(colour) > 0)
-                yield return new MedicAutoRemovedCubes(medicArrivedAtCity, colour);
+                yield return new MedicAutoRemovedCubes(arrivedAtCity, colour);
         }
     }
 
@@ -364,10 +360,8 @@ public partial record PandemicGame
         if (discardCard.City.Name != PlayerByRole(role).Location)
             throw new GameRuleViolatedException("Discarded card must match current location");
 
-        IEnumerable<IEvent> events = new[] { new PlayerCharterFlewTo(role, destination) };
-        if (role == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(destination));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new PlayerCharterFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscardPlayerCardCommand command)
@@ -442,10 +436,8 @@ public partial record PandemicGame
         if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
 
-        IEnumerable<IEvent> events = new[] { new PlayerDirectFlewTo(role, destination) };
-        if (role == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(destination));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new PlayerDirectFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShuttleFlightCommand command)
@@ -461,11 +453,8 @@ public partial record PandemicGame
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
 
-        IEnumerable<IEvent> events = new[] { new PlayerShuttleFlewTo(role, destination) };
-
-        if (role == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(destination));
-
-        return ApplyEvents(events);
+        return ApplyEvents(
+            new[] { new PlayerShuttleFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(TreatDiseaseCommand command)
