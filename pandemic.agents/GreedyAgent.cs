@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 
@@ -9,10 +9,14 @@ public class GreedyAgent
 {
     public IPlayerCommand BestCommand(PandemicGame game)
     {
+        return BestCommand(game, game.LegalCommands());
+    }
+
+    public IPlayerCommand BestCommand(PandemicGame game, IEnumerable<IPlayerCommand> commands)
+    {
         var bestScore = int.MinValue;
         IPlayerCommand? bestCommand = null;
 
-        var commands = game.LegalCommands().ToList();
         foreach (var command in commands)
         {
             var (nextState, _) = game.Do(command);

@@ -8,7 +8,11 @@ implemented.
 
 # todo
 - use greedy agent for fuzz testing
-  - fix failing fuzz
+  - fuzz fail: test thought this was an illegal command, I don't think so:
+    - dispatcher uses airlift to move researcher to Kinshasa
+    - current player = researcher, actions remaining: 1, location: Atlanta
+    - dispatcher has airlift card
+    - phase: do actions
   - also use random moves for fuzzing
 - test: cmd gen generates special events & 'dont use' commands for all players, regardless of turn
 - implement all game rules. left:

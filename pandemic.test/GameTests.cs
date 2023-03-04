@@ -2814,14 +2814,13 @@ namespace pandemic.test
 
         [Test]
         [Timeout(1000)]
-        [Repeat(10)]
+        [Repeat(100)]
         public void Fuzz_for_invalid_states()
         {
             var options = NewGameOptionsGenerator.RandomOptions();
 
             // bigger numbers here slow down the test, but check for more improper behaviour
             const int illegalCommandsToTryPerTurn = 10;
-            var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
             var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
@@ -2829,7 +2828,7 @@ namespace pandemic.test
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var legalCommands = commandGenerator.LegalCommands(game).ToList();
+                var legalCommands = game.LegalCommands().ToList();
 
                 if (game.Players.Any(p => p.Hand.Count > 7))
                     legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c.IsSpecialEvent);
@@ -2857,11 +2856,9 @@ namespace pandemic.test
 
                 var previousGameState = game;
 
-                // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
                 // var command = random.Choice(legalCommands);
-
-                var command = agent.BestCommand(game);
+                var command = agent.BestCommand(game, legalCommands);
                 try
                 {
                     (game, var tempEvents) = game.Do(command);
