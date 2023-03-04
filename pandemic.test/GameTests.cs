@@ -2744,6 +2744,24 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_direct_flight()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Chicago") });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new DispatcherDirectFlyPawnCommand(Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()
