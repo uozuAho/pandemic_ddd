@@ -9,6 +9,6 @@ public record DriveFerryCommand(Role Role, string City) : IPlayerCommand
 
     public override string ToString()
     {
-        return $"go to {City}";
+        return $"{Role} drive/ferry to {City}";
     }
 }

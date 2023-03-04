@@ -39,7 +39,7 @@ public partial record PandemicGame
         return (game, events);
     }
 
-    public PandemicGame Do(ICommand command, List<IEvent> events)
+    public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
     {
         var (game, newEvents) = Do(command);
 
@@ -48,7 +48,7 @@ public partial record PandemicGame
         return game;
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) Do(ICommand command)
+    public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
         if (SelfConsistencyCheckingEnabled) ValidateInternalConsistency();
         PreCommandChecks(command);
@@ -67,14 +67,14 @@ public partial record PandemicGame
         return (game, eventList);
     }
 
-    private void PreCommandChecks(ICommand command)
+    private void PreCommandChecks(IPlayerCommand command)
     {
         ThrowIfGameOver(this);
 
         var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
         if (playerWhoMustDiscard != null)
         {
-            if (command is not DiscardPlayerCardCommand && command is IPlayerCommand { IsSpecialEvent: false })
+            if (command is not DiscardPlayerCardCommand && !command.IsSpecialEvent)
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
         }
 
@@ -85,7 +85,7 @@ public partial record PandemicGame
         }
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(ICommand command)
+    private (PandemicGame, IEnumerable<IEvent>) ExecuteCommand(IPlayerCommand command)
     {
         return command switch
         {

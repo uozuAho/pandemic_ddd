@@ -32,6 +32,11 @@ namespace pandemic.Aggregates.Game
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
         private readonly PlayerCommandGenerator _commandGenerator = new();
 
+        public IEnumerable<IPlayerCommand> LegalCommands()
+        {
+            return _commandGenerator.LegalCommands(this);
+        }
+
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
 
         private Random Rng { get; } = new();
@@ -224,10 +229,13 @@ namespace pandemic.Aggregates.Game
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
 
-            foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+            if (Players.Any(p => p.Role == Role.Medic))
             {
-                var medicLocation = PlayerByRole(Role.Medic).Location;
-                Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
+                foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+                {
+                    var medicLocation = PlayerByRole(Role.Medic).Location;
+                    Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
+                }
             }
         }
 

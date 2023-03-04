@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
+using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
@@ -1437,7 +1438,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: current state should be second epidemic, just after infect step
             events.ShouldContain(e => e is EpidemicCityInfected, 2);
@@ -1835,7 +1836,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: epidemic intensified, 2 cards picked up, turn over
             events.ShouldContain(e => e is EpidemicIntensified);
@@ -1869,7 +1870,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -1904,7 +1905,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -2820,14 +2821,14 @@ namespace pandemic.test
 
             // bigger numbers here slow down the test, but check for more improper behaviour
             const int illegalCommandsToTryPerTurn = 10;
-            var commandGenerator = new PlayerCommandGenerator();
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
             var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
+            var agent = new GreedyAgent();
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var legalCommands = commandGenerator.LegalCommands(game).ToList();
+                var legalCommands = game.LegalCommands().ToList();
 
                 if (game.Players.Any(p => p.Hand.Count > 7))
                     legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c.IsSpecialEvent);
@@ -2855,17 +2856,17 @@ namespace pandemic.test
 
                 var previousGameState = game;
 
-                // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
-                var action = random.Choice(legalCommands);
+                // var command = random.Choice(legalCommands);
+                var command = agent.BestCommand(game, legalCommands);
                 try
                 {
-                    (game, var tempEvents) = game.Do(action);
+                    (game, var tempEvents) = game.Do(command);
                     events.AddRange(tempEvents);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Chosen action: {action}");
+                    Console.WriteLine($"Chosen command: {command}");
                     Console.WriteLine(game);
                     Console.WriteLine();
                     Console.WriteLine("Events, in reverse:");

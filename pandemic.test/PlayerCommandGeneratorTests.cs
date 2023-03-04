@@ -279,6 +279,65 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Airlift_any_time_any_player()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(new AirliftCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+
+            commands.Count(c => c is AirliftCommand).ShouldBe(3 * 47); // 3 players, 47 destinations each
+        }
+
+        [Test]
+        public void Dont_use_special_event()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+
+            commands.ShouldContain(c => c is DontUseSpecialEventCommand);
+        }
+
+        [Test]
+        public void Special_events_none_when_chosen_not_to_use_them()
+        {
+            var game = CreateNewGame(new NewGameOptions
+                {
+                    Roles = new[] { Role.Medic, Role.Scientist },
+                    IncludeSpecialEventCards = false
+                }) with
+                {
+                    SelfConsistencyCheckingEnabled = false
+                };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            (game, _) = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role));
+
+            var commands = _generator.LegalCommands(game).ToList();
+            commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
+            commands.ShouldNotContain(c => c.IsSpecialEvent);
+        }
+
+        [Test]
         public void Discard_while_actions_remaining()
         {
             var game = CreateNewGame(new NewGameOptions
