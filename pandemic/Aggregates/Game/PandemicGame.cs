@@ -229,10 +229,13 @@ namespace pandemic.Aggregates.Game
 
             Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
 
-            foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+            if (Players.Any(p => p.Role == Role.Medic))
             {
-                var medicLocation = PlayerByRole(Role.Medic).Location;
-                Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
+                foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+                {
+                    var medicLocation = PlayerByRole(Role.Medic).Location;
+                    Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
+                }
             }
         }
 
