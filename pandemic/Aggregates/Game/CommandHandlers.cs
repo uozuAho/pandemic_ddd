@@ -433,7 +433,10 @@ public partial record PandemicGame
         if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
 
-        return ApplyEvents(new PlayerDirectFlewTo(role, destination));
+        IEnumerable<IEvent> events = new[] { new PlayerDirectFlewTo(role, destination) };
+        if (role == Role.Medic) events = events.Concat(MedicAutoRemoveCubes(destination));
+
+        return ApplyEvents(events);
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShuttleFlightCommand command)

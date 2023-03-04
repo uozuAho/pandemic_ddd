@@ -13,7 +13,6 @@ implemented.
       - auto remove cubes when cured
         - when moving to a city
           - happy
-            - direct
             - charter
             - moved by dispatcher
             - any other move types?
