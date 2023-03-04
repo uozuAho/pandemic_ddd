@@ -18,6 +18,7 @@ implemented.
             - charter
             - moved by dispatcher
             - any other move types?
+          - add to self validation: assert no cured cubes on medic
           - eradicates if last of cubes
         - when cubes would be placed where medic is
           - infection card
@@ -31,6 +32,7 @@ implemented.
       - as an action, take any discarded event card and store it on this card
         - only 1 card can be stored at a time, it's not part of your hand
       - when this event card is played, remove it from the game
+  - anyone can clear all cubes when a disease is cured
 - can a heroic game be won?
   - pandemic strategies
     - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
