@@ -164,7 +164,9 @@ public partial record PandemicGame
         if (!CityByName(cmd.City).HasResearchStation)
             throw new GameRuleViolatedException($"{cmd.City} does not have a research station");
 
-        return ApplyEvents(new DispatcherShuttleFlewPawn(cmd.PlayerToMove, cmd.City));
+        return ApplyEvents(
+            new[] { new DispatcherShuttleFlewPawn(cmd.PlayerToMove, cmd.City) }.Concat(
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherCharterFlyPawnCommand cmd)

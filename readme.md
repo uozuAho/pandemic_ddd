@@ -14,7 +14,6 @@ implemented.
         - when moving to a city
           - happy
             - moved by dispatcher
-              - shuttle
               - pawn to pawn
           - add to self validation: assert no cured cubes on medic
         - when cubes would be placed where medic is
