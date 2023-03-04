@@ -279,6 +279,24 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Airlift_any_time_any_player()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(new AirliftCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+
+            commands.Count(c => c is AirliftCommand).ShouldBe(3 * 47); // 3 players, 47 destinations each
+        }
+
+        [Test]
         public void Dont_use_special_event()
         {
             var game = CreateNewGame(new NewGameOptions
