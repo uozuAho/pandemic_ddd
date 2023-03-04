@@ -11,8 +11,6 @@ implemented.
   - role special abilities
     - medic
       - auto remove cubes when cured
-        - when moving to a city
-          - add to self validation: assert no cured cubes on medic
         - when cubes would be placed where medic is
           - infection card
           - outbreak
