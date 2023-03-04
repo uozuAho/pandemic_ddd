@@ -2,7 +2,7 @@ using pandemic.Values;
 
 namespace pandemic.Commands;
 
-public interface IPlayerCommand : ICommand
+public interface IPlayerCommand
 {
     /// <summary>
     /// The role 'issuing' the command

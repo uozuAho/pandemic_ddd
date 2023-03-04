@@ -6,10 +6,10 @@ namespace pandemic.agents;
 
 public class GreedyAgent
 {
-    public ICommand BestCommand(PandemicGame game)
+    public IPlayerCommand BestCommand(PandemicGame game)
     {
         var bestScore = int.MinValue;
-        ICommand? bestCommand = null;
+        IPlayerCommand? bestCommand = null;
 
         foreach (var command in game.LegalCommands)
         {
