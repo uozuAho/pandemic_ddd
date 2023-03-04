@@ -12,9 +12,6 @@ implemented.
     - medic
       - auto remove cubes when cured
         - when moving to a city
-          - happy
-            - moved by dispatcher
-              - pawn to pawn
           - add to self validation: assert no cured cubes on medic
         - when cubes would be placed where medic is
           - infection card

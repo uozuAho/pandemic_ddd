@@ -2166,7 +2166,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_self_to_other_pawn()
+        public void Dispatcher_moves_self_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
             var medic = game.PlayerByRole(Role.Medic);
@@ -2180,7 +2180,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_other_pawn_to_self()
+        public void Dispatcher_moves_other_pawn_to_self()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
             var medic = game.PlayerByRole(Role.Medic);
@@ -2216,7 +2216,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dispatcher_can_move_other_pawn_to_other_pawn()
+        public void Dispatcher_moves_other_pawn_to_other_pawn()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with
             {
@@ -2758,6 +2758,34 @@ namespace pandemic.test
 
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
             game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_when_cured__dispatcher_move_pawn()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Dispatcher, Role.Medic }
+            });
+            var medic = game.PlayerByRole(Role.Medic);
+            var dispatcher = game.PlayerByRole(Role.Dispatcher);
+            game = game
+                    .Cure(Colour.Yellow)
+                    .RemoveAllCubesFromCities()
+                    .AddCube("Bogota", Colour.Yellow) with
+                {
+                    Players = game.Players
+                        .Replace(medic, medic with { Location = "Paris" })
+                        .Replace(dispatcher, dispatcher with { Location = "Bogota" })
+                };
+            var startingYellowCubes = game.Cubes.NumberOf(Colour.Yellow);
+            var events = new List<IEvent>();
+
+            game = game.Do(new DispatcherMovePawnToOtherPawnCommand(Role.Medic, Role.Dispatcher), events);
+
+            game.CityByName("Bogota").Cubes.NumberOf(Colour.Yellow).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Yellow).ShouldBe(startingYellowCubes + 1);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 

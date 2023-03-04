@@ -228,11 +228,15 @@ public partial record PandemicGame
         if (CurrentPlayer.Role != Role.Dispatcher)
             throw new GameRuleViolatedException("It's not the dispatcher's turn");
 
-        if (PlayerByRole(cmd.PlayerToMove).Location == PlayerByRole(cmd.DestinationRole).Location)
-            throw new GameRuleViolatedException(
-                $"{cmd.PlayerToMove} is already at {PlayerByRole(cmd.DestinationRole).Location}");
+        var destination = PlayerByRole(cmd.DestinationRole).Location;
 
-        return ApplyEvents(new DispatcherMovedPawnToOther(cmd.PlayerToMove, cmd.DestinationRole));
+        if (PlayerByRole(cmd.PlayerToMove).Location == destination)
+            throw new GameRuleViolatedException(
+                $"{cmd.PlayerToMove} is already at {destination}");
+
+        return ApplyEvents(
+            new[] { new DispatcherMovedPawnToOther(cmd.PlayerToMove, cmd.DestinationRole) }.Concat(
+                AnyMedicAutoRemoves(cmd.PlayerToMove, destination)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
