@@ -279,6 +279,24 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Dont_use_special_event()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
+            });
+
+            var commands = _generator.LegalCommands(game);
+
+            commands.ShouldContain(c => c is DontUseSpecialEventCommand);
+        }
+
+        [Test]
         public void Discard_while_actions_remaining()
         {
             var game = CreateNewGame(new NewGameOptions

@@ -1438,7 +1438,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: current state should be second epidemic, just after infect step
             events.ShouldContain(e => e is EpidemicCityInfected, 2);
@@ -1836,7 +1836,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: epidemic intensified, 2 cards picked up, turn over
             events.ShouldContain(e => e is EpidemicIntensified);
@@ -1870,7 +1870,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -1905,7 +1905,7 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(), events);
+            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);

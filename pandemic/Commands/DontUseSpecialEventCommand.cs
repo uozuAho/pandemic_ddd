@@ -1,5 +1,11 @@
-﻿namespace pandemic.Commands;
+﻿using pandemic.Values;
 
-public record DontUseSpecialEventCommand : ICommand;
+namespace pandemic.Commands;
+
+public record DontUseSpecialEventCommand(Role Role) : IPlayerCommand
+{
+    public bool ConsumesAction => false;
+    public bool IsSpecialEvent => false;
+}
 
 public interface ICommand { }

@@ -165,6 +165,8 @@ namespace pandemic.Commands
             {
                 foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
                 {
+                    _buffer[_bufIdx++] = new DontUseSpecialEventCommand(playerWithCard.Role);
+
                     if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
                     else if (card is AirliftCard) SetAirlifts(game, playerWithCard);
