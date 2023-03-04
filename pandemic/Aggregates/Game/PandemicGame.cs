@@ -32,6 +32,8 @@ namespace pandemic.Aggregates.Game
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
         private readonly PlayerCommandGenerator _commandGenerator = new();
 
+        public IEnumerable<ICommand> LegalCommands => _commandGenerator.LegalCommands(this);
+
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
 
         private Random Rng { get; } = new();

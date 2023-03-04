@@ -3,9 +3,9 @@ using pandemic.Aggregates.Game;
 using pandemic.GameData;
 using pandemic.Values;
 
-namespace pandemic.agents.GreedyBfs
+namespace pandemic.agents
 {
-    public class GameEvaluator
+    public static class GameEvaluator
     {
         /// <summary>
         /// Return a value that evaluates how 'good' a state is, ie.

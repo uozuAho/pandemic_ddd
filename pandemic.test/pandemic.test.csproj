@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\pandemic.agents\pandemic.agents.csproj" />
     <ProjectReference Include="..\pandemic\pandemic.csproj" />
     <ProjectReference Include="..\utils\utils.csproj" />
   </ItemGroup>

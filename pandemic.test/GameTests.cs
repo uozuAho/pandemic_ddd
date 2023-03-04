@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
+using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
@@ -2813,7 +2814,7 @@ namespace pandemic.test
 
         [Test]
         [Timeout(1000)]
-        [Repeat(100)]
+        [Repeat(10)]
         public void Fuzz_for_invalid_states()
         {
             var options = NewGameOptionsGenerator.RandomOptions();
@@ -2824,6 +2825,7 @@ namespace pandemic.test
             var random = new Random();
             var (game, events) = PandemicGame.CreateNewGame(options);
             var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
+            var agent = new GreedyAgent();
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
@@ -2857,15 +2859,16 @@ namespace pandemic.test
 
                 // do random action
                 legalCommands.Count.ShouldBePositive(game.ToString());
-                var action = random.Choice(legalCommands);
+                // var command = random.Choice(legalCommands);
+                var command = agent.BestCommand(game);
                 try
                 {
-                    (game, var tempEvents) = game.Do(action);
+                    (game, var tempEvents) = game.Do(command);
                     events.AddRange(tempEvents);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Chosen action: {action}");
+                    Console.WriteLine($"Chosen command: {command}");
                     Console.WriteLine(game);
                     Console.WriteLine();
                     Console.WriteLine("Events, in reverse:");

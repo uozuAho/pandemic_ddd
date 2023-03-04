@@ -7,6 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- use greedy agent for fuzz testing
+  - also use random
 - implement all game rules. left:
   - role special abilities
     - medic
