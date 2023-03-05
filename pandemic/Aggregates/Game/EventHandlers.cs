@@ -79,6 +79,7 @@ public partial record PandemicGame
             OperationsExpertDiscardedToMoveFromStation e => Apply(game, e),
             MedicTreatedDisease e => Apply(game, e),
             MedicAutoRemovedCubes e => Apply(game, e),
+            MedicPreventedInfection => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }

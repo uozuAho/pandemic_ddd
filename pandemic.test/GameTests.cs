@@ -2827,6 +2827,21 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_prevents_infect_when_cured()
+        {
+            var game = DefaultTestGame().Cure(Colour.Blue);
+            game = game with
+            {
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(new InfectionCard("Atlanta", Colour.Blue))
+            };
+            var events = new List<IEvent>();
+
+            game = game.Do(new PassCommand(Role.Medic), events);
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
         [Timeout(1000)]
         [Repeat(100)]
         public void Fuzz_for_invalid_states()

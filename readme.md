@@ -12,8 +12,6 @@ implemented.
     - medic
       - auto remove cubes when cured
         - when cubes would be placed where medic is
-          - infection card
-          - outbreak
           - epidemic
           - anything else?
         - eradicates if last of cubes
