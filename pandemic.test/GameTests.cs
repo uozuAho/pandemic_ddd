@@ -946,7 +946,7 @@ namespace pandemic.test
             // assert: epidemic has occurred
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
@@ -996,7 +996,7 @@ namespace pandemic.test
             // assert: epidemic has occurred
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
@@ -1259,7 +1259,7 @@ namespace pandemic.test
 
             // assert
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
@@ -1434,14 +1434,14 @@ namespace pandemic.test
 
             // assert: current state should be: first epidemic, just after infect step,
             // chance to use resilient population card
-            events.ShouldContain(e => e is EpidemicCityInfected, 1);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted, 1);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
             game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
 
             // assert: current state should be second epidemic, just after infect step
-            events.ShouldContain(e => e is EpidemicCityInfected, 2);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted, 2);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: use resilient population
@@ -1787,7 +1787,7 @@ namespace pandemic.test
 
             // assert: epidemic card drawn, infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
@@ -1831,7 +1831,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldContain(e => e is PlayerCardPickedUp);
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
@@ -2104,7 +2104,7 @@ namespace pandemic.test
 
             // assert: infect stage of epidemic has occurred
             events.ShouldContain(e => e is EpidemicTriggered);
-            events.ShouldContain(e => e is EpidemicCityInfected);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
@@ -2837,6 +2837,25 @@ namespace pandemic.test
             var events = new List<IEvent>();
 
             game = game.Do(new PassCommand(Role.Medic), events);
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
+        public void Medic_prevents_epidemic_infect_when_cured()
+        {
+            var game = DefaultTestGame()
+                .RemoveAllCubesFromCities()
+                .Cure(Colour.Blue);
+
+            game = game with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceAtBottom(new InfectionCard("Atlanta", Colour.Blue))
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
+
+            (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
         }

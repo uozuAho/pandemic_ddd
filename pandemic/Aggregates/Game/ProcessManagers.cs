@@ -44,23 +44,30 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionRateIncreased(), events);
 
             // infect: add 3 cubes to epidemic city
-            if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-
-            for (var i = 0; i < 3; i++)
+            if (game.Players.Any(p => p.Role == Role.Medic)
+                && game.IsCured(epidemicInfectionCard.Colour)
+                && game.PlayerByRole(Role.Medic).Location == epidemicInfectionCard.City)
+                game = game.ApplyEvent(new MedicPreventedInfection(epidemicInfectionCard.City), events);
+            else
             {
-                if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                    game = game.ApplyEvent(
-                        new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-                else
+                if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                    return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
+
+                for (var i = 0; i < 3; i++)
                 {
-                    game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
-                    break;
+                    if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                        game = game.ApplyEvent(
+                            new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+                    else
+                    {
+                        game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
+                        break;
+                    }
                 }
             }
 
             game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
-            game = game.ApplyEvent(new EpidemicCityInfected(), events);
+            game = game.ApplyEvent(new EpidemicInfectStepCompleted(), events);
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.EpidemicIntensify), events);
 
             return game;

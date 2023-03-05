@@ -12,7 +12,6 @@ implemented.
     - medic
       - auto remove cubes when cured
         - when cubes would be placed where medic is
-          - epidemic
           - anything else?
         - eradicates if last of cubes
         - add to self validation: assert disease is eradicated if cured and no cubes
