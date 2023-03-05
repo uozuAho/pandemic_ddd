@@ -11,8 +11,6 @@ implemented.
   - role special abilities
     - medic
       - auto remove cubes when cured
-        - when cubes would be placed where medic is
-          - anything else?
         - eradicates if last of cubes
         - add to self validation: assert disease is eradicated if cured and no cubes
     - before other roles: use random + greedy agents for fuzzing
