@@ -1807,7 +1807,7 @@ namespace pandemic.test
         public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
-        public void Special_event_choose_not_to_use_during_epidemic(PlayerCard eventCard)
+        public void Dont_use_special_event_during_epidemic(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
 
@@ -1847,8 +1847,22 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
+        // 'Don't use event' makes no sense when there's other possible actions
         [TestCaseSource(nameof(AllSpecialEventCards))]
-        public void Special_event_choose_not_to_use_after_turn(PlayerCard eventCard)
+        public void Dont_use_special_during_turn_should_throw(PlayerCard eventCard)
+        {
+            var game = DefaultTestGame();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(eventCard)
+            });
+
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new DontUseSpecialEventCommand(Role.Medic)));
+        }
+
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Dont_use_special_event_after_turn(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
 
@@ -1880,7 +1894,7 @@ namespace pandemic.test
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
-        public void Special_event_other_player_has_event_card_choose_not_to_use_after_turn(PlayerCard eventCard)
+        public void Dont_use_special_event_after_turn_when_other_player_has_event_card(PlayerCard eventCard)
         {
             var game = DefaultTestGame();
 

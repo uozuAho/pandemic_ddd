@@ -288,8 +288,15 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
     {
+        if (!SpecialEventCanBeUsed)
+            throw new GameRuleViolatedException("You've already chosen not the use a special event card");
+
         if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
             throw new GameRuleViolatedException("No player has a special event card");
+
+        if (LegalCommands().Any(c => c is not DontUseSpecialEventCommand && !c.IsSpecialEvent))
+            throw new GameRuleViolatedException(
+                "This command only makes sense when the only options are to play special events");
 
         return ApplyEvents(new ChoseNotToUseSpecialEventCard());
     }

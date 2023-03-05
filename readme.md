@@ -7,8 +7,9 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- fuzz fail: game doesn't throw when using a special event after choosing not to use
-  - fix: should only give option to 'not use special event' when special events are the only options
+- fix 'dont use special event' command
+  - fix generator: should only give option to 'not use special event' when special events are the only options
+  - more failures?
 - use random + greedy agents for fuzzing
 - implement all game rules. left:
   - role special abilities
