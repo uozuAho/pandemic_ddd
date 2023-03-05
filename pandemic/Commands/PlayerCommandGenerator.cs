@@ -42,6 +42,14 @@ namespace pandemic.Commands
                 SetOperationsExpertCommands(game);
             }
 
+            if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
+            {
+                foreach (var group in _buffer.Take(_bufIdx).GroupBy(c => c.Role))
+                {
+                    _buffer[_bufIdx++] = new DontUseSpecialEventCommand(group.Key);
+                }
+            }
+
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
         }
 
@@ -165,9 +173,6 @@ namespace pandemic.Commands
             {
                 foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
                 {
-                    if (!game.APlayerMustDiscard)
-                        _buffer[_bufIdx++] = new DontUseSpecialEventCommand(playerWithCard.Role);
-
                     if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
                     else if (card is AirliftCard) SetAirlifts(game, playerWithCard);

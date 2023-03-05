@@ -7,9 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- fuzz fail: game doesn't throw when using a special event after choosing not to use
-  - fix: should only give option to 'not use special event' when special events are the only options
-- use random + greedy agents for fuzzing
 - implement all game rules. left:
   - role special abilities
     - medic
@@ -21,6 +18,7 @@ implemented.
           - anything else?
         - eradicates if last of cubes
         - add to self validation: assert disease is eradicated if cured and no cubes
+    - before other roles: use random + greedy agents for fuzzing
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards

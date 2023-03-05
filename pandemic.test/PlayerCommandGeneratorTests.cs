@@ -297,7 +297,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Dont_use_special_event()
+        public void Dont_use_special_event_should_not_be_an_option_when_there_are_other_legal_commands()
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -309,13 +309,12 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            var commands = _generator.LegalCommands(game);
-
-            commands.ShouldContain(c => c is DontUseSpecialEventCommand);
+            var commands = _generator.LegalCommands(game).ToList();
+            commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
         }
 
         [Test]
-        public void Special_events_none_when_chosen_not_to_use_them()
+        public void Dont_use_special_event_should_be_an_option_when_all_other_options_are_special_events()
         {
             var game = CreateNewGame(new NewGameOptions
                 {
@@ -323,18 +322,17 @@ namespace pandemic.test
                     IncludeSpecialEventCards = false
                 }) with
                 {
-                    SelfConsistencyCheckingEnabled = false
+                    PhaseOfTurn = TurnPhase.DrawCards
                 };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
+                ActionsRemaining = 0,
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            (game, _) = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role));
-
             var commands = _generator.LegalCommands(game).ToList();
-            commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
-            commands.ShouldNotContain(c => c.IsSpecialEvent);
+            commands.ShouldContain(c => c is DontUseSpecialEventCommand);
+            commands.ShouldAllBe(c => c is DontUseSpecialEventCommand || c.IsSpecialEvent);
         }
 
         [Test]
