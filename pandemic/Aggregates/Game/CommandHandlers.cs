@@ -355,8 +355,13 @@ public partial record PandemicGame
 
         foreach (var colour in ColourExtensions.AllColours)
         {
-            if (IsCured(colour) && city.Cubes.NumberOf(colour) > 0)
+            var cubesAtThisCity = city.Cubes.NumberOf(colour);
+
+            if (IsCured(colour) && cubesAtThisCity > 0)
                 yield return new MedicAutoRemovedCubes(arrivedAtCity, colour);
+
+            if (IsCured(colour) && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity)
+                yield return new DiseaseEradicated(colour);
         }
     }
 

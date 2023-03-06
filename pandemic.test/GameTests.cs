@@ -2829,7 +2829,9 @@ namespace pandemic.test
         [Test]
         public void Medic_prevents_infect_when_cured()
         {
-            var game = DefaultTestGame().Cure(Colour.Blue);
+            var game = DefaultTestGame()
+                .RemoveAllCubesFromCities()
+                .Cure(Colour.Blue);
             game = game with
             {
                 InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(new InfectionCard("Atlanta", Colour.Blue))
@@ -2858,6 +2860,20 @@ namespace pandemic.test
             (game, var events) = game.Do(new PassCommand(Role.Medic));
 
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
+        public void Medic_auto_removes_cubes_eradicates__drive_ferry()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+
+            (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.IsEradicated(Colour.Blue).ShouldBeTrue();
         }
 
         [Test]

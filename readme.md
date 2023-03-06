@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - medic
       - auto remove cubes when cured
-        - eradicates if last of cubes
         - add to self validation: assert disease is eradicated if cured and no cubes
     - before other roles: use random + greedy agents for fuzzing
     - researcher: give any city card to a player in the same city
@@ -44,6 +43,7 @@ implemented.
     - pandemic project doesn't depend on other projects
   - dev log: review https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
     - any learnings since then?
+    - DDD intends to reduce complexity. Did it/I succeed?
 
 # Quick start
 - install dotnet core (tested with v7)
@@ -124,6 +124,10 @@ handle.
 - it's frustrating that it still seems to be taking ages to implement a seemingly simple
   game. Maybe it's not simple? What's taking so long? Each special event seems to take about
   1h to code, even now that I've done the first one (which took ... a week!?)
+  - How long did it take? Any git tools to estimate this? Idea: for every hour there's a commit,
+    at 1 hour to the total. Do same for days.
+- lots of stuff becoming public to aid testing. Check the public API. Can it be reduced?
+
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
