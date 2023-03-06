@@ -237,6 +237,14 @@ namespace pandemic.Aggregates.Game
                     Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
                 }
             }
+
+            foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+            {
+                var numCubesOnCities = Cities.Sum(c => c.Cubes.NumberOf(curedColour));
+
+                if (numCubesOnCities == 0)
+                    Debug.Assert(IsEradicated(curedColour));
+            }
         }
 
         private int TotalCubesInGame()

@@ -9,9 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - role special abilities
-    - medic
-      - auto remove cubes when cured
-        - add to self validation: assert disease is eradicated if cured and no cubes
     - before other roles: use random + greedy agents for fuzzing
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
