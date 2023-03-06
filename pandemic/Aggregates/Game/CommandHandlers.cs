@@ -365,6 +365,24 @@ public partial record PandemicGame
         }
     }
 
+    private IEnumerable<IEvent> AnyMedicAutoRemoves()
+    {
+        if (Players.All(p => p.Role != Role.Medic)) yield break;
+
+        var medicCity = CityByName(PlayerByRole(Role.Medic).Location);
+
+        foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+        {
+            var cubesAtThisCity = medicCity.Cubes.NumberOf(curedColour);
+
+            if (cubesAtThisCity > 0)
+                yield return new MedicAutoRemovedCubes(medicCity.Name, curedColour);
+
+            if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
+                yield return new DiseaseEradicated(curedColour);
+        }
+    }
+
     private (PandemicGame game, IEnumerable<IEvent>) Do(CharterFlightCommand cmd)
     {
         var (role, discardCard, destination) = cmd;
@@ -441,9 +459,13 @@ public partial record PandemicGame
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
             throw new ArgumentException($"given cards contain a card not in player's hand");
 
-        return ApplyEvents(cards
+        var (game, events) = ApplyEvents(cards
             .Select(c => new PlayerCardDiscarded(command.Role, c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+
+        var eventList = events.ToList();
+
+        return game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DirectFlightCommand command)

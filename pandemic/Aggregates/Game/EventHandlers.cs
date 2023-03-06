@@ -22,6 +22,13 @@ public partial record PandemicGame
         return ApplyEvents(events.AsEnumerable());
     }
 
+    private (PandemicGame, IEnumerable<IEvent>) ApplyEvents(IEnumerable<IEvent> eventsToApply, List<IEvent> eventList)
+    {
+        var (game, newEvents) = ApplyEvents(eventsToApply);
+
+        return (game, eventList.Concat(newEvents));
+    }
+
     private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
     {
         events.Add(@event);

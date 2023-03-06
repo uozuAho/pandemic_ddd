@@ -2827,6 +2827,25 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_when_cure_is_discovered()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Dispatcher, Role.Medic } });
+            game = game
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Chicago", "Montreal", "Paris", "Milan")
+            });
+            game = game.SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
+
+            (game, var events) =
+                game.Do(new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards.ToArray()));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
         public void Medic_prevents_infect_when_cured()
         {
             var game = DefaultTestGame()
@@ -2916,9 +2935,16 @@ namespace pandemic.test
                     {
                         // do nothing: we want an exception thrown!
                     }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Chosen illegal command: {illegalCommand}");
+                        Console.WriteLine(game);
+                        Console.WriteLine();
+                        Console.WriteLine("Events, in reverse:");
+                        Console.WriteLine(string.Join('\n', events.Reversed()));
+                        throw;
+                    }
                 }
-
-                var previousGameState = game;
 
                 legalCommands.Count.ShouldBePositive(game.ToString());
                 // var command = random.Choice(legalCommands);

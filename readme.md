@@ -124,6 +124,11 @@ handle.
   - How long did it take? Any git tools to estimate this? Idea: for every hour there's a commit,
     at 1 hour to the total. Do same for days.
 - lots of stuff becoming public to aid testing. Check the public API. Can it be reduced?
+- I've wanted event listeners on a number of occasions. I've avoided it due to thinking that
+  they should only be used for eventual consistency, and would add complexity to the solution.
+  However, they would be very convenient to decouple side effects, eg
+  - when the medic auto-removes cubes when a disease has been cured (lots of commands move the medic)
+  - any more?
 
 
 # References
