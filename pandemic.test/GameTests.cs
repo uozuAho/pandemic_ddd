@@ -2863,6 +2863,30 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_prevents_outbreak_adjacent_infect_when_cured()
+        {
+            var game = DefaultTestGame().Cure(Colour.Blue);
+
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
+                };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
+
+            // act
+            (game, _) = game.Do(new PassCommand(Role.Medic));
+
+            game.OutbreakCounter.ShouldBe(1);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
         public void Medic_prevents_epidemic_infect_when_cured()
         {
             var game = DefaultTestGame()

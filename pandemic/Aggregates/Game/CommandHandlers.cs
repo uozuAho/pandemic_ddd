@@ -719,7 +719,13 @@ public partial record PandemicGame
                 {
                     if (game.Cubes.NumberOf(colour) == 0)
                         return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
-                    game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+
+                    if (game.Players.Any(p => p.Role == Role.Medic)
+                        && game.PlayerByRole(Role.Medic).Location == adj.Name
+                        && game.IsCured(colour))
+                        game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                    else
+                        game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
                 }
             }
         }
