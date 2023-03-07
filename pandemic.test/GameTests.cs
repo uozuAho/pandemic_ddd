@@ -2744,6 +2744,23 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_removes_cubes_when_cured__airlift()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with { Roles = new[] { Role.Researcher, Role.Medic } });
+            game = game
+                .Cure(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue)
+                .SetCurrentPlayerAs(game.CurrentPlayer with { Hand = game.CurrentPlayer.Hand.Add(new AirliftCard()) });
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, var events) = game.Do(new AirliftCommand(Role.Researcher, Role.Medic, "Chicago"));
+
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
+        }
+
+        [Test]
         public void Medic_auto_removes_cubes_when_cured__direct_flight()
         {
             var game = DefaultTestGame();

@@ -305,7 +305,9 @@ public partial record PandemicGame
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
             throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
 
-        return ApplyEvents(new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City));
+        return ApplyEvents(
+            new[] { new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City) }.Concat(
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
