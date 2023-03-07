@@ -168,6 +168,7 @@ namespace pandemic.Commands
         private void SetSpecialEventCommands(PandemicGame game)
         {
             if (!game.SpecialEventCanBeUsed) return;
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) return;
 
             foreach (var playerWithCard in game.Players)
             {

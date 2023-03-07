@@ -1017,6 +1017,43 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Epidemic_after_6_cards_incl_event_in_hand_should_not_need_to_discard()
+        {
+            var game = DefaultTestGame();
+
+            var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
+            var playerHand = drawPile.Top(5).Concat(new[] {new ResilientPopulationCard()}).ToList();
+            drawPile = drawPile.RemoveIfPresent(playerHand);
+            drawPile = drawPile
+                .Remove(drawPile.TopCard)
+                .PlaceOnTop(new EpidemicCard(), drawPile.TopCard);
+
+            game = game.RemoveAllCubesFromCities() with
+            {
+                PlayerDrawPile = drawPile,
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Hand = new PlayerHand(playerHand)
+                }),
+            };
+
+            var events = new List<IEvent>();
+
+            // act: do last action, pick up 2 cards
+            game = game.Do(new PassCommand(game.CurrentPlayer.Role), events);
+
+            // assert: epidemic has occurred, paused before intensify
+            events.ShouldContain(e => e is PlayerCardPickedUp, 2);
+            events.ShouldContain(e => e is EpidemicTriggered);
+            events.ShouldContain(e => e is EpidemicInfectStepCompleted);
+            events.ShouldNotContain(e => e is EpidemicIntensified);
+            events.ShouldNotContain(e => e is TurnEnded);
+            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+            game.APlayerMustDiscard.ShouldBeFalse();
+            game.LegalCommands().ShouldContain(c => c is ResilientPopulationCommand);
+        }
+
+        [Test]
         public void Treat_disease_works()
         {
             var game = DefaultTestGame();
@@ -1806,14 +1843,22 @@ namespace pandemic.test
 
         public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
 
-        [TestCaseSource(nameof(AllSpecialEventCards))]
-        public void Dont_use_special_event_during_epidemic(PlayerCard eventCard)
+        public static object[] AllSpecials_EpidemicFirst = SpecialEventCards.All.Select(card => new object[] { card, true }).ToArray();
+        public static object[] AllSpecials_EpidemicSecond = SpecialEventCards.All.Select(card => new object[] { card, false }).ToArray();
+
+        [TestCaseSource(nameof(AllSpecials_EpidemicFirst))]
+        [TestCaseSource(nameof(AllSpecials_EpidemicSecond))]
+        public void Dont_use_special_event_during_epidemic(PlayerCard eventCard, bool epidemicCardIsFirst)
         {
             var game = DefaultTestGame();
 
             game = game.RemoveAllCubesFromCities() with
             {
-                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(new EpidemicCard()),
+                PlayerDrawPile = epidemicCardIsFirst
+                    ? game.PlayerDrawPile.PlaceOnTop(new EpidemicCard())
+                    : game.PlayerDrawPile
+                        .Remove(game.PlayerDrawPile.TopCard)
+                        .PlaceOnTop(new EpidemicCard(), game.PlayerDrawPile.TopCard)
             };
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -1821,7 +1866,6 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(eventCard)
             });
 
-            var generator = new PlayerCommandGenerator();
             var events = new List<IEvent>();
 
             // act: end turn, draw epidemic card
@@ -1833,7 +1877,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicTriggered);
             events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            game.LegalCommands().ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
@@ -1844,7 +1888,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
             events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            game.LegalCommands().ShouldContain(c => c.IsSpecialEvent);
         }
 
         // 'Don't use event' makes no sense when there's other possible actions
@@ -2949,10 +2993,10 @@ namespace pandemic.test
                     try
                     {
                         game.Do(illegalCommand);
-                        Console.WriteLine(game);
-                        Console.WriteLine();
-                        Console.WriteLine("Events, in reverse:");
-                        Console.WriteLine(string.Join('\n', events.Reversed()));
+                        Log(game);
+                        Log();
+                        Log("Events, in reverse:");
+                        Log(string.Join('\n', events.Reversed()));
                         Assert.Fail($"Expected {illegalCommand} to throw");
                     }
                     catch (GameRuleViolatedException)
@@ -2961,11 +3005,11 @@ namespace pandemic.test
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Chosen illegal command: {illegalCommand}");
-                        Console.WriteLine(game);
-                        Console.WriteLine();
-                        Console.WriteLine("Events, in reverse:");
-                        Console.WriteLine(string.Join('\n', events.Reversed()));
+                        Log($"Chosen illegal command: {illegalCommand}");
+                        Log(game);
+                        Log();
+                        Log("Events, in reverse:");
+                        Log(string.Join('\n', events.Reversed()));
                         throw;
                     }
                 }
@@ -2980,14 +3024,24 @@ namespace pandemic.test
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Chosen command: {command}");
-                    Console.WriteLine(game);
-                    Console.WriteLine();
-                    Console.WriteLine("Events, in reverse:");
-                    Console.WriteLine(string.Join('\n', events.Reversed()));
+                    Log($"Chosen command: {command}");
+                    Log(game);
+                    Log();
+                    Log("Events, in reverse:");
+                    Log(string.Join('\n', events.Reversed()));
                     throw;
                 }
             }
+        }
+
+        private static void Log()
+        {
+            TestContext.WriteLine();
+        }
+
+        private static void Log(object obj)
+        {
+            TestContext.WriteLine(obj.ToString());
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

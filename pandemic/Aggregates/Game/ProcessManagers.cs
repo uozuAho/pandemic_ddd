@@ -35,12 +35,9 @@ public partial record PandemicGame
 
         private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
         {
-            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-            var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
-
-            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
             game = game.ApplyEvent(new InfectionRateIncreased(), events);
 
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
             game = EpidemicInfectCity(game, epidemicInfectionCard, events);
             if (game.IsOver) return game;
 

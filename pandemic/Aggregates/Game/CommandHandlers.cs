@@ -656,8 +656,11 @@ public partial record PandemicGame
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-        if (card is EpidemicCard)
+        if (card is EpidemicCard epidemicCard)
+        {
             game = game.ApplyEvent(new EpidemicTriggered(), events);
+            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
+        }
         else if (game.CardsDrawn == 2)
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.InfectCities), events);
 

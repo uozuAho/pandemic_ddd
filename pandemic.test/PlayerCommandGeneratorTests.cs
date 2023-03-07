@@ -335,6 +335,26 @@ namespace pandemic.test
             commands.ShouldAllBe(c => c is DontUseSpecialEventCommand || c.IsSpecialEvent);
         }
 
+        public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
+
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Special_event_should_not_be_an_option_when_epidemic_is_triggered(PlayerCard card)
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game with { PhaseOfTurn = TurnPhase.Epidemic };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(card)
+            });
+
+            var commands = _generator.LegalCommands(game).ToList();
+            commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
+        }
+
         [Test]
         public void Discard_while_actions_remaining()
         {

@@ -7,6 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
+- todo: rename SpecialEventCanBeUsed, it's misleading
+- fix fuzz failure
 - implement all game rules. left:
   - role special abilities
     - before other roles: use random + greedy agents for fuzzing
