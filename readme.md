@@ -9,15 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - role special abilities
-    - medic
-      - auto remove cubes when cured
-        - when cubes would be placed where medic is
-          - infection card
-          - outbreak
-          - epidemic
-          - anything else?
-        - eradicates if last of cubes
-        - add to self validation: assert disease is eradicated if cured and no cubes
     - before other roles: use random + greedy agents for fuzzing
     - researcher: give any city card to a player in the same city
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
@@ -38,6 +29,7 @@ implemented.
         - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
         - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
 - later
+  - keep/remove Xunit? it reliably captures stack traces and console output, but is slower than nunit
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details
@@ -49,6 +41,7 @@ implemented.
     - pandemic project doesn't depend on other projects
   - dev log: review https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
     - any learnings since then?
+    - DDD intends to reduce complexity. Did it/I succeed?
 
 # Quick start
 - install dotnet core (tested with v7)
@@ -129,6 +122,15 @@ handle.
 - it's frustrating that it still seems to be taking ages to implement a seemingly simple
   game. Maybe it's not simple? What's taking so long? Each special event seems to take about
   1h to code, even now that I've done the first one (which took ... a week!?)
+  - How long did it take? Any git tools to estimate this? Idea: for every hour there's a commit,
+    at 1 hour to the total. Do same for days.
+- lots of stuff becoming public to aid testing. Check the public API. Can it be reduced?
+- I've wanted event listeners on a number of occasions. I've avoided it due to thinking that
+  they should only be used for eventual consistency, and would add complexity to the solution.
+  However, they would be very convenient to decouple side effects, eg
+  - when the medic auto-removes cubes when a disease has been cured (lots of commands move the medic)
+  - any more?
+
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)

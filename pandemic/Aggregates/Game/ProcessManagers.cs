@@ -35,33 +35,49 @@ public partial record PandemicGame
 
         private static PandemicGame Epidemic(PandemicGame game, ICollection<IEvent> events)
         {
-            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
-            var epidemicCard = (EpidemicCard)game.CurrentPlayer.Hand.Single(c => c is EpidemicCard);
-
-            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
-
-            // increase the infection rate
             game = game.ApplyEvent(new InfectionRateIncreased(), events);
 
-            // infect: add 3 cubes to epidemic city
-            if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
-
-            for (var i = 0; i < 3; i++)
-            {
-                if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
-                    game = game.ApplyEvent(
-                        new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
-                else
-                {
-                    game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
-                    break;
-                }
-            }
+            var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
+            game = EpidemicInfectCity(game, epidemicInfectionCard, events);
+            if (game.IsOver) return game;
 
             game = game.ApplyEvent(new EpidemicInfectionCardDiscarded(epidemicInfectionCard), events);
-            game = game.ApplyEvent(new EpidemicCityInfected(), events);
+            game = game.ApplyEvent(new EpidemicInfectStepCompleted(), events);
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.EpidemicIntensify), events);
+
+            return game;
+        }
+
+        private static PandemicGame EpidemicInfectCity(
+            PandemicGame game,
+            InfectionCard epidemicInfectionCard,
+            ICollection<IEvent> events)
+        {
+            if (game.Players.Any(p => p.Role == Role.Medic)
+                && game.IsCured(epidemicInfectionCard.Colour)
+                && game.PlayerByRole(Role.Medic).Location == epidemicInfectionCard.City)
+            {
+                game = game.ApplyEvent(new MedicPreventedInfection(epidemicInfectionCard.City), events);
+            }
+            else
+            {
+                if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                {
+                    return game.ApplyEvent(new GameLost($"Ran out of {epidemicInfectionCard.Colour} cubes"), events);
+                }
+
+                for (var i = 0; i < 3; i++)
+                {
+                    if (game.CityByName(epidemicInfectionCard.City).Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)
+                        game = game.ApplyEvent(
+                            new CubeAddedToCity(epidemicInfectionCard.City, epidemicInfectionCard.Colour), events);
+                    else
+                    {
+                        game = Outbreak(game, epidemicInfectionCard.City, epidemicInfectionCard.Colour, events);
+                        break;
+                    }
+                }
+            }
 
             return game;
         }

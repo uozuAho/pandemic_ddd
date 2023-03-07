@@ -9,5 +9,12 @@ namespace pandemic.Values
         public ICollection<Role> Roles { get; init; } = new List<Role>();
         public Random Rng { get; init; } = new();
         public bool IncludeSpecialEventCards { get; init; } = true;
+
+        public override string ToString()
+        {
+            return $"Difficulty: {Difficulty}, \n" +
+                   $"Roles: {string.Join(", ", Roles)}, \n" +
+                   $"IncludeSpecialEventCards: {IncludeSpecialEventCards}";
+        }
     }
 }

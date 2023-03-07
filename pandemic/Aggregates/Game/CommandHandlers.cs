@@ -288,7 +288,7 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
     {
-        if (!SpecialEventCanBeUsed)
+        if (SpecialEventWasRecentlySkipped)
             throw new GameRuleViolatedException("You've already chosen not the use a special event card");
 
         if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
@@ -355,8 +355,31 @@ public partial record PandemicGame
 
         foreach (var colour in ColourExtensions.AllColours)
         {
-            if (IsCured(colour) && city.Cubes.NumberOf(colour) > 0)
+            var cubesAtThisCity = city.Cubes.NumberOf(colour);
+
+            if (IsCured(colour) && cubesAtThisCity > 0)
                 yield return new MedicAutoRemovedCubes(arrivedAtCity, colour);
+
+            if (IsCured(colour) && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity)
+                yield return new DiseaseEradicated(colour);
+        }
+    }
+
+    private IEnumerable<IEvent> AnyMedicAutoRemoves()
+    {
+        if (Players.All(p => p.Role != Role.Medic)) yield break;
+
+        var medicCity = CityByName(PlayerByRole(Role.Medic).Location);
+
+        foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+        {
+            var cubesAtThisCity = medicCity.Cubes.NumberOf(curedColour);
+
+            if (cubesAtThisCity > 0)
+                yield return new MedicAutoRemovedCubes(medicCity.Name, curedColour);
+
+            if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
+                yield return new DiseaseEradicated(curedColour);
         }
     }
 
@@ -387,6 +410,8 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("Player doesn't have that card");
         if (PlayerByRole(command.Role).Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
+        if (PhaseOfTurn == TurnPhase.DrawCards && CardsDrawn == 1)
+            throw new GameRuleViolatedException("Cards are still being drawn");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
@@ -436,9 +461,13 @@ public partial record PandemicGame
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
             throw new ArgumentException($"given cards contain a card not in player's hand");
 
-        return ApplyEvents(cards
+        var (game, events) = ApplyEvents(cards
             .Select(c => new PlayerCardDiscarded(command.Role, c))
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+
+        var eventList = events.ToList();
+
+        return game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DirectFlightCommand command)
@@ -629,8 +658,11 @@ public partial record PandemicGame
 
         game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
 
-        if (card is EpidemicCard)
+        if (card is EpidemicCard epidemicCard)
+        {
             game = game.ApplyEvent(new EpidemicTriggered(), events);
+            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
+        }
         else if (game.CardsDrawn == 2)
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.InfectCities), events);
 
@@ -649,6 +681,11 @@ public partial record PandemicGame
 
         if (game.IsEradicated(infectionCard.Colour))
             return game;
+
+        if (game.Players.Any(p => p.Role == Role.Medic)
+            && game.PlayerByRole(Role.Medic).Location == infectionCard.City
+            && game.IsCured(infectionCard.Colour))
+            return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
@@ -687,7 +724,13 @@ public partial record PandemicGame
                 {
                     if (game.Cubes.NumberOf(colour) == 0)
                         return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
-                    game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+
+                    if (game.Players.Any(p => p.Role == Role.Medic)
+                        && game.PlayerByRole(Role.Medic).Location == adj.Name
+                        && game.IsCured(colour))
+                        game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                    else
+                        game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
                 }
             }
         }

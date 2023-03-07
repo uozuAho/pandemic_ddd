@@ -22,6 +22,13 @@ public partial record PandemicGame
         return ApplyEvents(events.AsEnumerable());
     }
 
+    private (PandemicGame, IEnumerable<IEvent>) ApplyEvents(IEnumerable<IEvent> eventsToApply, List<IEvent> eventList)
+    {
+        var (game, newEvents) = ApplyEvents(eventsToApply);
+
+        return (game, eventList.Concat(newEvents));
+    }
+
     private PandemicGame ApplyEvent(IEvent @event, ICollection<IEvent> events)
     {
         events.Add(@event);
@@ -55,7 +62,7 @@ public partial record PandemicGame
             ShareKnowledgeGiven s => ApplyShareKnowledgeGiven(game, s),
             ShareKnowledgeTaken s => ApplyShareKnowledgeTaken(game, s),
             EpidemicInfectionCardDiscarded e => Apply(game, e),
-            EpidemicCityInfected e => Apply(game, e),
+            EpidemicInfectStepCompleted e => Apply(game, e),
             EpidemicIntensified e => Apply(game, e),
             InfectionRateIncreased e => Apply(game, e),
             TurnPhaseEnded e => Apply(game, e),
@@ -79,6 +86,7 @@ public partial record PandemicGame
             OperationsExpertDiscardedToMoveFromStation e => Apply(game, e),
             MedicTreatedDisease e => Apply(game, e),
             MedicAutoRemovedCubes e => Apply(game, e),
+            MedicPreventedInfection => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -257,9 +265,9 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicCityInfected evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicInfectStepCompleted evt)
     {
-        return game with { SpecialEventCanBeUsed = true };
+        return game with { SpecialEventWasRecentlySkipped = false };
     }
 
     private static PandemicGame Apply(PandemicGame game, EpidemicTriggered evt)
@@ -338,7 +346,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            SpecialEventCanBeUsed = false
+            SpecialEventWasRecentlySkipped = true
         };
     }
 
@@ -378,7 +386,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = false,
+            SpecialEventWasRecentlySkipped = true,
             Players = game.Players.Replace(player, player with { ActionsRemaining = 0 }),
         };
     }
@@ -507,7 +515,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6,
+            SpecialEventWasRecentlySkipped = !(drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6),
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
@@ -690,7 +698,7 @@ public partial record PandemicGame
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
             CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
             PhaseOfTurn = TurnPhase.DoActions,
-            SpecialEventCanBeUsed = true
+            SpecialEventWasRecentlySkipped = false
         };
     }
 }
