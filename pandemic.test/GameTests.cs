@@ -2586,6 +2586,7 @@ namespace pandemic.test
                 game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Moscow"), events));
         }
 
+        [Repeat(100)]
         [Test]
         public void Operations_expert_moves_from_station_to_anywhere_only_once_per_turn()
         {
