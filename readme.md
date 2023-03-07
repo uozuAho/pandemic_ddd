@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - researcher share knowledge:
       - give any city card to a player in the same city
-        - throws when other player not in same city
         - legal commands
         - all commands
       - other player can take any card on their turn

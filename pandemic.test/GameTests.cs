@@ -3053,6 +3053,23 @@ namespace pandemic.test
                 game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Researcher, "Chicago")));
         }
 
+        [Test]
+        public void Researcher_share_knowledge_throws_when_other_player_not_in_same_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Researcher, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Chicago"),
+                Location = "Chicago"
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago")));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

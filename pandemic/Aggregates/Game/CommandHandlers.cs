@@ -126,6 +126,13 @@ public partial record PandemicGame
         if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
 
+        var researcher = PlayerByRole(Role.Researcher);
+        var playerToGiveTo = PlayerByRole(cmd.PlayerToGiveTo);
+
+        if (researcher.Location != playerToGiveTo.Location)
+            throw new GameRuleViolatedException(
+                $"Researcher and {cmd.PlayerToGiveTo} must be in the same city to share knowledge");
+
         return ApplyEvents(new ResearcherSharedKnowledge(cmd.PlayerToGiveTo, cmd.City));
     }
 
