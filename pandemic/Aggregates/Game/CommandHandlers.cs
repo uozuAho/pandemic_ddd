@@ -725,9 +725,7 @@ public partial record PandemicGame
             && game.IsCured(infectionCard.Colour))
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
-        if (game.Players.Any(p => p.Role == Role.QuarantineSpecialist)
-            && (game.PlayerByRole(Role.QuarantineSpecialist).Location == infectionCard.City
-                || QuarantineSpecialistIsInNeighbouringCity(game, infectionCard.City)))
+        if (game.DoesQuarantineSpecialistPreventInfectionAt(infectionCard.City))
             return game.ApplyEvent(new QuarantineSpecialistPreventedInfection(infectionCard.City), events);
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
@@ -738,13 +736,6 @@ public partial record PandemicGame
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
-    }
-
-    private static bool QuarantineSpecialistIsInNeighbouringCity(PandemicGame game, string city)
-    {
-        var neighbouringCities = game.Board.AdjacentCities[city];
-
-        return neighbouringCities.Any(c => game.PlayerByRole(Role.QuarantineSpecialist).Location == c);
     }
 
     private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
@@ -779,9 +770,7 @@ public partial record PandemicGame
                         && game.PlayerByRole(Role.Medic).Location == adj.Name
                         && game.IsCured(colour))
                         game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
-                    else if (game.Players.Any(p => p.Role == Role.QuarantineSpecialist)
-                        && (game.PlayerByRole(Role.QuarantineSpecialist).Location == adj.Name
-                            || QuarantineSpecialistIsInNeighbouringCity(game, adj.Name)))
+                    else if (game.DoesQuarantineSpecialistPreventInfectionAt(adj.Name))
                         game.ApplyEvent(new QuarantineSpecialistPreventedInfection(adj.Name), events);
                     else
                         game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);

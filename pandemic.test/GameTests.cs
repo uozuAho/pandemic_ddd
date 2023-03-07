@@ -3298,6 +3298,34 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(0);
         }
 
+        [Ignore("Refactor 'quarantine specialist prevents outbreak' method")]
+        [Test]
+        public void Quarantine_specialist_prevents_outbreak_during_chain_reaction()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            var chicago = new InfectionCard("Chicago", Colour.Blue);
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3)
+                    .AddCubes("Chicago", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                        .RemoveIfPresent(chicago),
+                };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Montreal" });
+
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(1); // one outbreak at atlanta, no outbreak at chicago
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
