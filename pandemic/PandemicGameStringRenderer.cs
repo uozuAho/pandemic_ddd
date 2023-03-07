@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text;
 using pandemic.Aggregates.Game;
+using pandemic.Values;
 
 namespace pandemic
 {
@@ -19,7 +20,10 @@ namespace pandemic
                 sb.AppendLine("Game not over");
             }
             sb.AppendLine($"current player: {game.CurrentPlayer.Role}");
-            sb.AppendLine($"turn phase: {game.PhaseOfTurn}");
+            if (game.PhaseOfTurn == TurnPhase.DrawCards)
+                sb.AppendLine($"turn phase: {game.PhaseOfTurn}, {game.CardsDrawn} cards drawn");
+            else
+                sb.AppendLine($"turn phase: {game.PhaseOfTurn}");
             sb.AppendLine($"infection rate: {game.InfectionRate}");
             sb.AppendLine($"outbreak counter: {game.OutbreakCounter}");
             sb.AppendLine($"cube piles: {string.Join(' ', game.Cubes)}");
