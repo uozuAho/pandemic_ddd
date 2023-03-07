@@ -9,8 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - role special abilities
-    - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
-      - outbreaks from chain reaction
     - intermission: fuzz fail: airlift medic doesnt' clear cured cubes
     - scientist: cure with 4 cards
     - contingency planner:

@@ -3298,7 +3298,6 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(0);
         }
 
-        [Ignore("Refactor 'quarantine specialist prevents outbreak' method")]
         [Test]
         public void Quarantine_specialist_prevents_outbreak_during_chain_reaction()
         {

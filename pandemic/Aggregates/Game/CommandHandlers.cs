@@ -748,6 +748,11 @@ public partial record PandemicGame
         {
             var next = toOutbreak.Dequeue();
             outBroken.Add(next);
+            if (game.DoesQuarantineSpecialistPreventInfectionAt(next))
+            {
+                game = game.ApplyEvent(new QuarantineSpecialistPreventedInfection(next), events);
+                continue;
+            }
             game = game.ApplyEvent(new OutbreakOccurred(next), events);
             if (game.OutbreakCounter == 8)
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
