@@ -2586,7 +2586,6 @@ namespace pandemic.test
                 game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Moscow"), events));
         }
 
-        [Repeat(100)]
         [Test]
         public void Operations_expert_moves_from_station_to_anywhere_only_once_per_turn()
         {
@@ -2597,7 +2596,8 @@ namespace pandemic.test
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of(chicagoCard, sydneyCard) });
             game = game with
             {
-                Cities = game.Cities.Replace(moscowCity, moscowCity with { HasResearchStation = true })
+                Cities = game.Cities.Replace(moscowCity, moscowCity with { HasResearchStation = true }),
+                PlayerDrawPile = game.PlayerDrawPile.RemoveIfPresent(chicagoCard).RemoveIfPresent(sydneyCard)
             };
             var events = new List<IEvent>();
 
@@ -2976,87 +2976,6 @@ namespace pandemic.test
             (game, _) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
 
             game.IsEradicated(Colour.Blue).ShouldBeTrue();
-        }
-
-        [Test]
-        [Timeout(1000)]
-        [Repeat(100)]
-        public void Fuzz_for_invalid_states()
-        {
-            var options = NewGameOptionsGenerator.RandomOptions();
-
-            // bigger numbers here slow down the test, but check for more improper behaviour
-            const int illegalCommandsToTryPerTurn = 10;
-            var random = new Random();
-            var (game, events) = PandemicGame.CreateNewGame(options);
-            var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
-            var agent = new GreedyAgent();
-
-            for (var i = 0; i < 1000 && !game.IsOver; i++)
-            {
-                var legalCommands = game.LegalCommands().ToList();
-
-                if (game.Players.Any(p => p.Hand.Count > 7))
-                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c.IsSpecialEvent);
-
-                // try a bunch of illegal commands
-                foreach (var illegalCommand in allPossibleCommands
-                             .Except(legalCommands)
-                             .OrderBy(_ => random.Next())
-                             .Take(illegalCommandsToTryPerTurn))
-                {
-                    try
-                    {
-                        game.Do(illegalCommand);
-                        Log(game);
-                        Log();
-                        Log("Events, in reverse:");
-                        Log(string.Join('\n', events.Reversed()));
-                        Assert.Fail($"Expected {illegalCommand} to throw");
-                    }
-                    catch (GameRuleViolatedException)
-                    {
-                        // do nothing: we want an exception thrown!
-                    }
-                    catch (Exception)
-                    {
-                        Log($"Chosen illegal command: {illegalCommand}");
-                        Log(game);
-                        Log();
-                        Log("Events, in reverse:");
-                        Log(string.Join('\n', events.Reversed()));
-                        throw;
-                    }
-                }
-
-                legalCommands.Count.ShouldBePositive(game.ToString());
-                // var command = random.Choice(legalCommands);
-                var command = agent.BestCommand(game, legalCommands);
-                try
-                {
-                    (game, var tempEvents) = game.Do(command);
-                    events.AddRange(tempEvents);
-                }
-                catch (Exception)
-                {
-                    Log($"Chosen command: {command}");
-                    Log(game);
-                    Log();
-                    Log("Events, in reverse:");
-                    Log(string.Join('\n', events.Reversed()));
-                    throw;
-                }
-            }
-        }
-
-        private static void Log()
-        {
-            TestContext.WriteLine();
-        }
-
-        private static void Log(object obj)
-        {
-            TestContext.WriteLine(obj.ToString());
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

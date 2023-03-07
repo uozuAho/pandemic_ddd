@@ -9,36 +9,29 @@ using utils;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace pandemic.testx;
+namespace pandemic.test.fuzz;
 
-public class UnitTest1
+/// <summary>
+/// Using XUnit for fuzz tests, since it seems to more reliably
+/// capture console output.
+/// </summary>
+public class FuzzTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public UnitTest1(ITestOutputHelper testOutputHelper)
+    public FuzzTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
 
-    /// <summary>
-    /// Fuzzing with Xunit is slower, but at least it captures console output
-    /// </summary>
-    [Fact]
-    public void run_FuzzXunit_30_times()
-    {
-        for (var i = 0; i < 30; i++)
-        {
-            FuzzXunit();
-        }
-    }
-
-    public void FuzzXunit()
+    [Theory]
+    [Repeat(30)]
+    public void Fuzz_test_games()
     {
         var options = NewGameOptionsGenerator.RandomOptions();
 
         _testOutputHelper.WriteLine(options.ToString());
 
-        // bigger numbers here slow down the test, but check for more improper behaviour
         const int illegalCommandsToTryPerTurn = 10;
         var random = new Random();
         var (game, events) = PandemicGame.CreateNewGame(options);
@@ -115,7 +108,7 @@ public class UnitTest1
     /// <summary>
     /// Hacking Xunit to repeat tests
     /// </summary>
-    public class RepeatAttribute : DataAttribute
+    private class RepeatAttribute : DataAttribute
     {
         private readonly int _count;
 
@@ -131,7 +124,7 @@ public class UnitTest1
 
         public override IEnumerable<object[]> GetData(MethodInfo testMethod)
         {
-            return Enumerable.Repeat(new object[0], _count);
+            return Enumerable.Repeat(Array.Empty<object>(), _count);
         }
     }
 }

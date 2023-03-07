@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utils", "utils\utils.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utils.test", "utils.test\utils.test.csproj", "{8B39D1A0-B272-413C-BFA8-EF167A422D52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.testx", "pandemic.testx\pandemic.testx.csproj", "{64B691C1-C888-4CEA-8310-62B13630473B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.test.fuzz", "pandemic.test.fuzz\pandemic.test.fuzz.csproj", "{64B691C1-C888-4CEA-8310-62B13630473B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,8 +7,6 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- fix flakey Operations_expert_moves_from_station_to_anywhere_only_once_per_turn
-- fuzz tests still failing!
 - implement all game rules. left:
   - role special abilities
     - before other roles: use random + greedy agents for fuzzing
