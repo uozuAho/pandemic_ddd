@@ -122,7 +122,32 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ScientistDiscoverCureCommand cmd)
     {
-        return ApplyEvents(new ResearcherCuredDisease(cmd.Cards));
+        var cards = cmd.Cards;
+
+        if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+            throw new GameRuleViolatedException("Can only cure at a city with a research station");
+
+        if (cards.Length != 4)
+            throw new GameRuleViolatedException("Exactly 4 cards must be used to cure");
+
+        var colour = cards.First().City.Colour;
+
+        if (IsCured(colour))
+            throw new GameRuleViolatedException($"{colour} is already cured");
+
+        if (cards.Any(c => c.City.Colour != colour))
+            throw new GameRuleViolatedException("Cure: All cards must be the same colour");
+
+        if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
+            throw new ArgumentException("given cards contain a card not in player's hand");
+
+        var (game, events) = ApplyEvents(cmd.Cards
+            .Select(c => new PlayerCardDiscarded(Role.Scientist, c))
+            .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+
+        var eventList = events.ToList();
+
+        return game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ShareKnowledgeTakeFromResearcherCommand cmd)
@@ -505,7 +530,7 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("Cure: All cards must be the same colour");
 
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
-            throw new ArgumentException($"given cards contain a card not in player's hand");
+            throw new ArgumentException("given cards contain a card not in player's hand");
 
         var (game, events) = ApplyEvents(cards
             .Select(c => new PlayerCardDiscarded(command.Role, c))

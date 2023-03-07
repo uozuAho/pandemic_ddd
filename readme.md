@@ -11,7 +11,13 @@ implemented.
   - role special abilities
     - scientist: cure with 4 cards
       - happy
-      - other cure tests
+      - throw if already cured
+      - can end turn?
+      - win on last action?
+      - last diseaese wins?
+      - throw if not at research station
+      - throw if not enough cards
+      - throw if not all same colour
       - legal commands
       - all commands
     - contingency planner:
