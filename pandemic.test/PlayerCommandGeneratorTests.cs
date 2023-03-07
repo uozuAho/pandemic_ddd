@@ -618,6 +618,19 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ResearcherShareKnowledgeGiveCommand, 4);
         }
 
+        [Test]
+        public void Player_can_take_any_card_from_researcher_in_same_city()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is ShareKnowledgeTakeFromResearcherCommand, 4);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

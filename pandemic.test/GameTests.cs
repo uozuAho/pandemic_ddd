@@ -3123,6 +3123,29 @@ namespace pandemic.test
                 game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago")));
         }
 
+        [Test]
+        public void Researcher_share_knowledge_taker_must_discard_if_more_than_7_cards()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(chicago)
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCards.Shuffle().Take(7))
+            });
+
+            // act
+            (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
+
+            var generator = new PlayerCommandGenerator();
+            generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

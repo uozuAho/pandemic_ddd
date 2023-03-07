@@ -56,19 +56,26 @@ namespace pandemic.Commands
 
         private void SetResearcherCommands(PandemicGame game)
         {
-            if (game.CurrentPlayer.Role != Role.Researcher
-                || game.CurrentPlayer.ActionsRemaining == 0
+            if (game.CurrentPlayer.ActionsRemaining == 0
                 || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            if (!game.Players.Any(p => p.Role == Role.Researcher)) return;
 
             var researcher = game.PlayerByRole(Role.Researcher);
 
             foreach (var card in researcher.Hand.CityCards)
             {
-                foreach (var otherPlayer in game.Players.Where(p =>
-                             p.Role != Role.Researcher && p.Location == researcher.Location))
+                if (game.CurrentPlayer.Role == Role.Researcher)
                 {
-                    _buffer[_bufIdx++] = new ResearcherShareKnowledgeGiveCommand(otherPlayer.Role, card.City.Name);
+                    foreach (var otherPlayer in game.Players.Where(p =>
+                                 p.Role != Role.Researcher && p.Location == researcher.Location))
+                    {
+
+                        _buffer[_bufIdx++] = new ResearcherShareKnowledgeGiveCommand(otherPlayer.Role, card.City.Name);
+                    }
                 }
+                else if (game.CurrentPlayer.Location == researcher.Location)
+                    _buffer[_bufIdx++] = new ShareKnowledgeTakeFromResearcherCommand(game.CurrentPlayer.Role, card.City.Name);
             }
         }
 
