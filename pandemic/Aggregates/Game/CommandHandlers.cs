@@ -779,6 +779,10 @@ public partial record PandemicGame
                         && game.PlayerByRole(Role.Medic).Location == adj.Name
                         && game.IsCured(colour))
                         game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                    else if (game.Players.Any(p => p.Role == Role.QuarantineSpecialist)
+                        && (game.PlayerByRole(Role.QuarantineSpecialist).Location == adj.Name
+                            || QuarantineSpecialistIsInNeighbouringCity(game, adj.Name)))
+                        game.ApplyEvent(new QuarantineSpecialistPreventedInfection(adj.Name), events);
                     else
                         game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
                 }
