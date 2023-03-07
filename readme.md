@@ -10,9 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
-      - outbreaks from infect deck
-        - QS is in current city
-        - QS is in a neighbour
       - outbreaks from epidemic
       - outbreaks from chain reaction
     - scientist: cure with 4 cards
