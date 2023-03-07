@@ -40,6 +40,7 @@ namespace pandemic.Commands
                 SetPassCommands(game);
                 SetDispatcherCommands(game);
                 SetOperationsExpertCommands(game);
+                SetResearcherCommands(game);
             }
 
             if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
@@ -51,6 +52,24 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetResearcherCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.Researcher
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            var researcher = game.PlayerByRole(Role.Researcher);
+
+            foreach (var card in researcher.Hand.CityCards)
+            {
+                foreach (var otherPlayer in game.Players.Where(p =>
+                             p.Role != Role.Researcher && p.Location == researcher.Location))
+                {
+                    _buffer[_bufIdx++] = new ResearcherShareKnowledgeGiveCommand(otherPlayer.Role, card.City.Name);
+                }
+            }
         }
 
         private void SetOperationsExpertCommands(PandemicGame game)
