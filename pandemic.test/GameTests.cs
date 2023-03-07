@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
-using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
@@ -3068,6 +3067,83 @@ namespace pandemic.test
 
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago")));
+        }
+
+        [Test]
+        public void Players_can_take_any_card_from_researcher()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(chicago)
+            });
+
+            (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
+
+            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Researcher_share_knowledge_take_throws_if_researcher_does_not_have_card()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Empty
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago")));
+        }
+
+        [Test]
+        public void Researcher_share_knowledge_take_throws_if_not_in_same_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(chicago),
+                Location = "Chicago"
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago")));
+        }
+
+        [Test]
+        public void Researcher_share_knowledge_taker_must_discard_if_more_than_7_cards()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(chicago)
+            }).SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of(PlayerCards.CityCards.Shuffle().Take(7))
+            });
+
+            // act
+            (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
+
+            var generator = new PlayerCommandGenerator();
+            generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)

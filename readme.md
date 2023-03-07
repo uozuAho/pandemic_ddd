@@ -9,8 +9,6 @@ implemented.
 # todo
 - implement all game rules. left:
   - role special abilities
-    - researcher share knowledge:
-      - other player can take any card on their turn
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards
     - contingency planner:

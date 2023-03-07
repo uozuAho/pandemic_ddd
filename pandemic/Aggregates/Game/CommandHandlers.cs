@@ -114,11 +114,30 @@ public partial record PandemicGame
             OperationsExpertBuildResearchStation cmd => Do(cmd),
             OperationsExpertDiscardToMoveFromStation cmd => Do(cmd),
             ResearcherShareKnowledgeGiveCommand cmd => Do(cmd),
+            ShareKnowledgeTakeFromResearcherCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
     }
 
-    public (PandemicGame, IEnumerable<IEvent>) Do(ResearcherShareKnowledgeGiveCommand cmd)
+    private (PandemicGame, IEnumerable<IEvent>) Do(ShareKnowledgeTakeFromResearcherCommand cmd)
+    {
+        if (cmd.Role == Role.Researcher)
+            throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
+
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+            throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
+
+        var researcher = PlayerByRole(Role.Researcher);
+        var takingPlayer = PlayerByRole(cmd.Role);
+
+        if (researcher.Location != takingPlayer.Location)
+            throw new GameRuleViolatedException(
+                $"Researcher and {cmd.Role} must be in the same city to share knowledge");
+
+        return ApplyEvents(new ResearcherShareKnowledgeTaken(cmd.Role, cmd.City));
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(ResearcherShareKnowledgeGiveCommand cmd)
     {
         if (cmd.PlayerToGiveTo == Role.Researcher)
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");

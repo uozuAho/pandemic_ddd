@@ -88,7 +88,27 @@ public partial record PandemicGame
             MedicAutoRemovedCubes e => Apply(game, e),
             MedicPreventedInfection => game,
             ResearcherSharedKnowledge e => Apply(game, e),
+            ResearcherShareKnowledgeTaken e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ResearcherShareKnowledgeTaken evt)
+    {
+        var researcher = game.PlayerByRole(Role.Researcher);
+        var playerTaking = game.PlayerByRole(evt.Role);
+        var card = researcher.Hand.CityCards.Single(c => c.City.Name == evt.City);
+
+        return game with
+        {
+            Players = game.Players.Replace(researcher, researcher with
+            {
+                Hand = researcher.Hand.Remove(card),
+            }).Replace(playerTaking, playerTaking with
+            {
+                Hand = playerTaking.Hand.Add(card),
+                ActionsRemaining = researcher.ActionsRemaining - 1
+            })
         };
     }
 
