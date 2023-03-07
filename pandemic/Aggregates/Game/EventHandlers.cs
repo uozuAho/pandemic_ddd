@@ -87,6 +87,7 @@ public partial record PandemicGame
             MedicTreatedDisease e => Apply(game, e),
             MedicAutoRemovedCubes e => Apply(game, e),
             MedicPreventedInfection => game,
+            ResearcherSharedKnowledge => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }

@@ -2978,6 +2978,26 @@ namespace pandemic.test
             game.IsEradicated(Colour.Blue).ShouldBeTrue();
         }
 
+        [Test]
+        public void Researcher_can_share_any_card()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Researcher, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Chicago", "Montreal", "Paris", "Milan")
+            });
+            var chicagoCard = game.CurrentPlayer.Hand.CityCards.First(c => c.City.Name == "Chicago");
+
+            (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
+
+            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicagoCard);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicagoCard);
+            game.PlayerByRole(Role.Researcher).ActionsRemaining.ShouldBe(3);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
