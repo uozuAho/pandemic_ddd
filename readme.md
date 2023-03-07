@@ -10,8 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - researcher share knowledge:
-      - give any city card to a player in the same city
-        - all commands
       - other player can take any card on their turn
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards
