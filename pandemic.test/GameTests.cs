@@ -3037,6 +3037,22 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
+        [Test]
+        public void Researcher_share_knowledge_throws_when_share_to_self()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Researcher, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Chicago")
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Researcher, "Chicago")));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
