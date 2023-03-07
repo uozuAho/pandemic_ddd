@@ -11,7 +11,6 @@ implemented.
   - role special abilities
     - researcher share knowledge:
       - other player can take any card on their turn
-        - happy
         - throw if not in hand
         - throw if not in city
         - throw on take from self

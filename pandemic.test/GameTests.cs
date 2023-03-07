@@ -3089,6 +3089,22 @@ namespace pandemic.test
             game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(3);
         }
 
+        [Test]
+        public void Researcher_share_knowledge_take_throws_if_researcher_does_not_have_card()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Empty
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago")));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
