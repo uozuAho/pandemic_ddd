@@ -90,8 +90,14 @@ public partial record PandemicGame
             ResearcherSharedKnowledge e => Apply(game, e),
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
+            ResearcherCuredDisease e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ResearcherCuredDisease evt)
+    {
+        return game;
     }
 
     private static PandemicGame Apply(PandemicGame game, ResearcherShareKnowledgeTaken evt)

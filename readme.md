@@ -10,6 +10,10 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - scientist: cure with 4 cards
+      - happy
+      - other cure tests
+      - legal commands
+      - all commands
     - contingency planner:
       - as an action, take any discarded event card and store it on this card
         - only 1 card can be stored at a time, it's not part of your hand

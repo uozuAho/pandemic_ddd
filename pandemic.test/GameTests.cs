@@ -3342,6 +3342,28 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(1); // one outbreak at atlanta, no outbreak at chicago
         }
 
+        [Test]
+        public void Scientist_cures_with_4_cards()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Dispatcher }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(4))
+            });
+
+            (game, _) = game.Do(
+                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+
+            Assert.IsTrue(game.IsCured(Colour.Black));
+            Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
+            Assert.AreEqual(4, game.PlayerDiscardPile.Count);
+            Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
