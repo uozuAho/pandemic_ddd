@@ -726,7 +726,8 @@ public partial record PandemicGame
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
         if (game.Players.Any(p => p.Role == Role.QuarantineSpecialist)
-            && game.PlayerByRole(Role.QuarantineSpecialist).Location == infectionCard.City)
+            && (game.PlayerByRole(Role.QuarantineSpecialist).Location == infectionCard.City
+                || QuarantineSpecialistIsInNeighbouringCity(game, infectionCard.City)))
             return game.ApplyEvent(new QuarantineSpecialistPreventedInfection(infectionCard.City), events);
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
@@ -737,6 +738,13 @@ public partial record PandemicGame
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.Colour} cubes"), events)
             : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+    }
+
+    private static bool QuarantineSpecialistIsInNeighbouringCity(PandemicGame game, string city)
+    {
+        var neighbouringCities = game.Board.AdjacentCities[city];
+
+        return neighbouringCities.Any(c => game.PlayerByRole(Role.QuarantineSpecialist).Location == c);
     }
 
     private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
