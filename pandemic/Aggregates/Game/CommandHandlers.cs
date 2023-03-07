@@ -725,6 +725,9 @@ public partial record PandemicGame
             && game.IsCured(infectionCard.Colour))
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
+        if (game.DoesQuarantineSpecialistPreventInfectionAt(infectionCard.City))
+            return game.ApplyEvent(new QuarantineSpecialistPreventedInfection(infectionCard.City), events);
+
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
             return Outbreak(game, infectionCard.City, infectionCard.Colour, events);
@@ -745,6 +748,11 @@ public partial record PandemicGame
         {
             var next = toOutbreak.Dequeue();
             outBroken.Add(next);
+            if (game.DoesQuarantineSpecialistPreventInfectionAt(next))
+            {
+                game = game.ApplyEvent(new QuarantineSpecialistPreventedInfection(next), events);
+                continue;
+            }
             game = game.ApplyEvent(new OutbreakOccurred(next), events);
             if (game.OutbreakCounter == 8)
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
@@ -767,6 +775,8 @@ public partial record PandemicGame
                         && game.PlayerByRole(Role.Medic).Location == adj.Name
                         && game.IsCured(colour))
                         game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                    else if (game.DoesQuarantineSpecialistPreventInfectionAt(adj.Name))
+                        game.ApplyEvent(new QuarantineSpecialistPreventedInfection(adj.Name), events);
                     else
                         game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
                 }

@@ -59,6 +59,10 @@ public partial record PandemicGame
             {
                 game = game.ApplyEvent(new MedicPreventedInfection(epidemicInfectionCard.City), events);
             }
+            else if (game.DoesQuarantineSpecialistPreventInfectionAt(epidemicInfectionCard.City))
+            {
+                game = game.ApplyEvent(new QuarantineSpecialistPreventedInfection(epidemicInfectionCard.City), events);
+            }
             else
             {
                 if (game.Cubes.NumberOf(epidemicInfectionCard.Colour) < 3)

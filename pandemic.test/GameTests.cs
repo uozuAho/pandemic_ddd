@@ -3146,6 +3146,185 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
+        [Test]
+        public void Quarantine_specialist_prevents_infection_in_current_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            game = game.RemoveAllCubesFromCities() with
+            {
+                InfectionDrawPile = game.InfectionDrawPile.RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+            };
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.QuarantineSpecialist), events);
+
+            // assert
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
+        public void Quarantine_specialist_prevents_infection_in_adjacent_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" }) with
+                {
+                    InfectionDrawPile = game.InfectionDrawPile.RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                };
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.QuarantineSpecialist), events);
+
+            // assert
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
+        public void Quarantine_specialist_prevents_outbreak_infection_when_in_adjacent_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            game = game
+                    .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Montreal" })
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
+                };
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(1);
+            game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
+        [Test]
+        public void Quarantine_specialist_prevents_outbreaks_when_in_current_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
+                };
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(0);
+            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+                .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
+        }
+
+        [Test]
+        public void Quarantine_specialist_prevents_outbreaks_when_in_adjacent_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            game = game
+                    .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" })
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
+                };
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(0);
+            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+                .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
+        }
+
+        [TestCase("Atlanta")]
+        [TestCase("Chicago")]
+        public void Quarantine_specialist_prevents_outbreak_when_epidemic_causes_outbreak(string quarantineSpecialistLocation)
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+            game = game.RemoveAllCubesFromCities() with
+            {
+                PlayerDrawPile = game.PlayerDrawPile.PlaceOnTop(
+                    PlayerCards.CityCard("Atlanta"),
+                    new EpidemicCard()),
+                InfectionDiscardPile = Deck<InfectionCard>.Empty,
+                InfectionDrawPile = game.InfectionDrawPile.PlaceAtBottom(new InfectionCard("Atlanta", Colour.Blue)),
+                InfectionRateMarkerPosition = 5, // ensure that epidemic city is infected immediately
+            };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = quarantineSpecialistLocation });
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            // assert
+            game.OutbreakCounter.ShouldBe(0);
+        }
+
+        [Test]
+        public void Quarantine_specialist_prevents_outbreak_during_chain_reaction()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            var chicago = new InfectionCard("Chicago", Colour.Blue);
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3)
+                    .AddCubes("Chicago", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+                        .RemoveIfPresent(chicago),
+                };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Montreal" });
+
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(1); // one outbreak at atlanta, no outbreak at chicago
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

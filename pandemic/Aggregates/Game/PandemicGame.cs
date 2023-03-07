@@ -186,6 +186,20 @@ namespace pandemic.Aggregates.Game
             };
         }
 
+        public bool DoesQuarantineSpecialistPreventInfectionAt(string city)
+        {
+            return Players.Any(p => p.Role == Role.QuarantineSpecialist)
+                   && (PlayerByRole(Role.QuarantineSpecialist).Location == city
+                       || QuarantineSpecialistIsInNeighbouringCity(city));
+        }
+
+        private bool QuarantineSpecialistIsInNeighbouringCity(string city)
+        {
+            var neighbouringCities = Board.AdjacentCities[city];
+
+            return neighbouringCities.Any(c => PlayerByRole(Role.QuarantineSpecialist).Location == c);
+        }
+
         public override string ToString()
         {
             return PandemicGameStringRenderer.FullState(this);
