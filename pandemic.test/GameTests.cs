@@ -778,15 +778,10 @@ namespace pandemic.test
         [Test]
         public void Cure_last_disease_wins()
         {
-            var game = DefaultTestGame() with
-            {
-                CuresDiscovered = new List<CureMarker>
-                {
-                    new CureMarker(Colour.Blue, CureMarkerSide.Vial),
-                    new CureMarker(Colour.Red, CureMarkerSide.Vial),
-                    new CureMarker(Colour.Yellow, CureMarkerSide.Vial),
-                }.ToImmutableList()
-            };
+            var game = DefaultTestGame()
+                .Cure(Colour.Blue)
+                .Cure(Colour.Red)
+                .Cure(Colour.Yellow);
 
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with
             {
@@ -3362,6 +3357,97 @@ namespace pandemic.test
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
             Assert.AreEqual(4, game.PlayerDiscardPile.Count);
             Assert.AreEqual(3, game.CurrentPlayer.ActionsRemaining);
+        }
+
+        [Test]
+        public void Scientist_cure_throws_if_already_cured()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Dispatcher }
+            }).Cure(Colour.Black);
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(4))
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+        }
+
+        [Test]
+        public void Scientist_cure_last_disease_wins()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+                {
+                    Roles = new[] { Role.Scientist, Role.Dispatcher }
+                })
+                .Cure(Colour.Blue)
+                .Cure(Colour.Red)
+                .Cure(Colour.Yellow);
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(4)),
+            });
+
+            (game, _) = game.Do(
+                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+
+            Assert.IsTrue(game.IsWon);
+        }
+
+        [Test]
+        public void Scientist_cure_throws_if_not_at_station()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Dispatcher }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Chicago",
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(4))
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+        }
+
+        [Test]
+        public void Scientist_cure_throws_if_not_enough_cards()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Dispatcher }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(3))
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+        }
+
+        [Test]
+        public void Scientist_cure_throws_if_cards_are_not_same_colour()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Dispatcher }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Chicago", "Essen", "Miami")
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
