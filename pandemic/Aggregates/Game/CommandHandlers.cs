@@ -120,6 +120,9 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(ResearcherShareKnowledgeGiveCommand cmd)
     {
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+            throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
+
         return ApplyEvents(new ResearcherSharedKnowledge(cmd.PlayerToGiveTo, cmd.City));
     }
 

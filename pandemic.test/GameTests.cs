@@ -2998,6 +2998,22 @@ namespace pandemic.test
             game.PlayerByRole(Role.Researcher).ActionsRemaining.ShouldBe(3);
         }
 
+        [Test]
+        public void Researcher_share_throws_if_not_in_hand()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Researcher, Role.Scientist }
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Montreal", "Paris", "Milan")
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago")));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

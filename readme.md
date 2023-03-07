@@ -11,8 +11,7 @@ implemented.
   - role special abilities
     - researcher share knowledge:
       - give any city card to a player in the same city
-        - happy
-        - throw if not in hand
+        - other player must discard if over hand limit
         - check other share knowledge tests
         - legal commands
         - all commands
