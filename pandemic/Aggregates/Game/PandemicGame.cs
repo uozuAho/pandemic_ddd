@@ -59,9 +59,10 @@ namespace pandemic.Aggregates.Game
         public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
 
         /// <summary>
-        /// A special event can be used, if any player has one. Toggled off when players choose not to use an event.
+        /// A special event was 'recently' chosen not to be used. Toggles back on when the
+        /// next opportunity to use a special event arises.
         /// </summary>
-        public bool SpecialEventCanBeUsed { get; init; } = true;
+        public bool SpecialEventWasRecentlySkipped { get; init; } = false;
 
         /// <summary>
         /// Number of cards drawn during the current 'draw cards' phase

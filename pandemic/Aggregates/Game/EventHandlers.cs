@@ -267,7 +267,7 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, EpidemicInfectStepCompleted evt)
     {
-        return game with { SpecialEventCanBeUsed = true };
+        return game with { SpecialEventWasRecentlySkipped = false };
     }
 
     private static PandemicGame Apply(PandemicGame game, EpidemicTriggered evt)
@@ -346,7 +346,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            SpecialEventCanBeUsed = false
+            SpecialEventWasRecentlySkipped = true
         };
     }
 
@@ -386,7 +386,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = false,
+            SpecialEventWasRecentlySkipped = true,
             Players = game.Players.Replace(player, player with { ActionsRemaining = 0 }),
         };
     }
@@ -515,7 +515,7 @@ public partial record PandemicGame
 
         return game with
         {
-            SpecialEventCanBeUsed = drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6,
+            SpecialEventWasRecentlySkipped = !(drawnCard is ISpecialEventCard || game.CurrentPlayer.Hand.Count > 6),
             CardsDrawn = game.CardsDrawn + 1,
             PlayerDrawPile = newDrawPile,
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
@@ -698,7 +698,7 @@ public partial record PandemicGame
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
             CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
             PhaseOfTurn = TurnPhase.DoActions,
-            SpecialEventCanBeUsed = true
+            SpecialEventWasRecentlySkipped = false
         };
     }
 }
