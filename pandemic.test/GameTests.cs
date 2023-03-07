@@ -3217,6 +3217,33 @@ namespace pandemic.test
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
         }
 
+        [Test]
+        public void Quarantine_specialist_prevents_outbreaks_when_in_current_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+
+            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            game = game
+                    .RemoveAllCubesFromCities()
+                    .AddCubes("Atlanta", Colour.Blue, 3) with
+                {
+                    InfectionDrawPile =
+                    game.InfectionDrawPile
+                        .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(atlantaInfectionCard),
+                };
+
+            // act
+            (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
+
+            game.OutbreakCounter.ShouldBe(0);
+            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+                .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
