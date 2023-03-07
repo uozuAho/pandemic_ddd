@@ -23,8 +23,15 @@ public class UnitTest1
     /// <summary>
     /// Fuzzing with Xunit is slower, but at least it captures console output
     /// </summary>
-    [Theory]
-    [Repeat(30)]
+    [Fact]
+    public void run_FuzzXunit_30_times()
+    {
+        for (var i = 0; i < 30; i++)
+        {
+            FuzzXunit();
+        }
+    }
+
     public void FuzzXunit()
     {
         var options = NewGameOptionsGenerator.RandomOptions();

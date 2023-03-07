@@ -410,6 +410,8 @@ public partial record PandemicGame
             throw new GameRuleViolatedException("Player doesn't have that card");
         if (PlayerByRole(command.Role).Hand.Count <= 7)
             throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
+        if (PhaseOfTurn == TurnPhase.DrawCards && CardsDrawn == 1)
+            throw new GameRuleViolatedException("Cards are still being drawn");
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 

@@ -414,6 +414,20 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Discard_throws_when_still_drawing_cards()
+        {
+            var game = DefaultTestGame() with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                ActionsRemaining = 0,
+                Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new DiscardPlayerCardCommand(Role.Medic, game.CurrentPlayer.Hand.First())));
+        }
+
+        [Test]
         public void Discard_player_card_goes_to_discard_pile()
         {
             var game = DefaultTestGame();

@@ -7,7 +7,8 @@ Work in progress! A full game is playable, but many game rules are yet to be
 implemented.
 
 # todo
-- fix fuzz failure
+- fix flakey Operations_expert_moves_from_station_to_anywhere_only_once_per_turn
+- fuzz tests still failing!
 - implement all game rules. left:
   - role special abilities
     - before other roles: use random + greedy agents for fuzzing
@@ -30,6 +31,7 @@ implemented.
         - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
         - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
 - later
+  - keep/remove Xunit? it reliably captures stack traces and console output, but is slower than nunit
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details
