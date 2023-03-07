@@ -725,6 +725,10 @@ public partial record PandemicGame
             && game.IsCured(infectionCard.Colour))
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
+        if (game.Players.Any(p => p.Role == Role.QuarantineSpecialist)
+            && game.PlayerByRole(Role.QuarantineSpecialist).Location == infectionCard.City)
+            return game.ApplyEvent(new QuarantineSpecialistPreventedInfection(infectionCard.City), events);
+
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
             return Outbreak(game, infectionCard.City, infectionCard.Colour, events);

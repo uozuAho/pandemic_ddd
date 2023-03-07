@@ -12,7 +12,6 @@ implemented.
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
       - cube placement
         - infect
-          - QS is in current city
           - QS is in a neighbour
         - outbreak neighbours
           - QS is in current city
