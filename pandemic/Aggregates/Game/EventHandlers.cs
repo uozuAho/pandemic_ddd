@@ -95,7 +95,21 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, ResearcherShareKnowledgeTaken evt)
     {
-        return game;
+        var researcher = game.PlayerByRole(Role.Researcher);
+        var playerTaking = game.PlayerByRole(evt.Role);
+        var card = researcher.Hand.CityCards.Single(c => c.City.Name == evt.City);
+
+        return game with
+        {
+            Players = game.Players.Replace(researcher, researcher with
+            {
+                Hand = researcher.Hand.Remove(card),
+            }).Replace(playerTaking, playerTaking with
+            {
+                Hand = playerTaking.Hand.Add(card),
+                ActionsRemaining = researcher.ActionsRemaining - 1
+            })
+        };
     }
 
     private static PandemicGame Apply(PandemicGame game, ResearcherSharedKnowledge evt)
