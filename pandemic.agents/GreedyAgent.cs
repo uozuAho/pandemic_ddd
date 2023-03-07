@@ -5,19 +5,14 @@ using pandemic.Commands;
 
 namespace pandemic.agents;
 
-public class GreedyAgent
+public class GreedyAgent : ILiveAgent
 {
-    public IPlayerCommand BestCommand(PandemicGame game)
-    {
-        return BestCommand(game, game.LegalCommands());
-    }
-
-    public IPlayerCommand BestCommand(PandemicGame game, IEnumerable<IPlayerCommand> commands)
+    public IPlayerCommand NextCommand(PandemicGame game)
     {
         var bestScore = int.MinValue;
         IPlayerCommand? bestCommand = null;
 
-        foreach (var command in commands)
+        foreach (var command in game.LegalCommands())
         {
             var (nextState, _) = game.Do(command);
 

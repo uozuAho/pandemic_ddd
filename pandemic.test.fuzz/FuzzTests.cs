@@ -29,14 +29,15 @@ public class FuzzTests
     public void Fuzz_test_games()
     {
         var options = NewGameOptionsGenerator.RandomOptions();
+        var random = new Random();
+
+        var agent = random.Choice(new ILiveAgent[] { new GreedyAgent(), new RandomAgent() });
 
         _testOutputHelper.WriteLine(options.ToString());
 
         const int illegalCommandsToTryPerTurn = 10;
-        var random = new Random();
         var (game, events) = PandemicGame.CreateNewGame(options);
         var allPossibleCommands = AllPlayerCommandGenerator.AllPossibleCommands(game).ToList();
-        var agent = new GreedyAgent();
 
         for (var i = 0; i < 1000 && !game.IsOver; i++)
         {
@@ -76,8 +77,7 @@ public class FuzzTests
             }
 
             legalCommands.Count.ShouldBePositive(game.ToString());
-            // var command = random.Choice(legalCommands);
-            var command = agent.BestCommand(game, legalCommands);
+            var command = agent.NextCommand(game);
             try
             {
                 (game, var tempEvents) = game.Do(command);
