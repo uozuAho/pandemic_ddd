@@ -61,6 +61,7 @@ public static class AllPlayerCommandGenerator
             foreach (var city in game.Cities)
             {
                 yield return new ResearcherShareKnowledgeGiveCommand(player.Role, city.Name);
+                yield return new ShareKnowledgeTakeFromResearcherCommand(player.Role, city.Name);
             }
         }
     }
