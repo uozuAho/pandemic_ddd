@@ -11,6 +11,13 @@ implemented.
   - role special abilities
     - researcher share knowledge:
       - other player can take any card on their turn
+        - happy
+        - throw if not in hand
+        - throw if not in city
+        - throw on take from self
+        - must dicard if in hand
+        - legal commands
+        - all commands
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
     - scientist: cure with 4 cards
     - contingency planner:

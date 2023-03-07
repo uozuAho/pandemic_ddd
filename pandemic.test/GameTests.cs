@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NUnit.Framework;
-using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
@@ -3068,6 +3067,26 @@ namespace pandemic.test
 
             Should.Throw<GameRuleViolatedException>(() =>
                 game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago")));
+        }
+
+        [Test]
+        public void Players_can_take_any_card_from_researcher()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            });
+            var chicago = PlayerCards.CityCard("Chicago");
+            game = game.SetPlayer(Role.Researcher, game.PlayerByRole(Role.Researcher) with
+            {
+                Hand = PlayerHand.Of(chicago)
+            });
+
+            (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
+
+            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(3);
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
