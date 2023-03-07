@@ -3146,6 +3146,27 @@ namespace pandemic.test
             generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
+        [Test]
+        public void Quarantine_specialist_prevents_infection_in_current_city()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
+            });
+            var atlanta = new InfectionCard("Atlanta", Colour.Blue);
+            game = game.RemoveAllCubesFromCities() with
+            {
+                InfectionDrawPile = game.InfectionDrawPile.RemoveIfPresent(atlanta).PlaceOnTop(atlanta)
+            };
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new PassCommand(Role.QuarantineSpecialist), events);
+
+            // assert
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

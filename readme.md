@@ -10,6 +10,16 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - quarantine specialist: prevent cube placement and outbreaks in current city and neighbours
+      - cube placement
+        - infect
+          - QS is in current city
+          - QS is in a neighbour
+        - outbreak neighbours
+          - QS is in current city
+          - QS is in a neighbour
+      - outbreaks
+        - QS is in current city
+        - QS is in a neighbour
     - scientist: cure with 4 cards
     - contingency planner:
       - as an action, take any discarded event card and store it on this card
