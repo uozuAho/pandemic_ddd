@@ -49,10 +49,26 @@ public static class AllPlayerCommandGenerator
     {
         foreach (var cmd in DispatcherCommands(game)) yield return cmd;
         foreach (var cmd in OperationsExpertCommands(game)) yield return cmd;
+        foreach (var cmd in ResearcherCommands(game)) yield return cmd;
+    }
+
+    private static IEnumerable<IPlayerCommand> ResearcherCommands(PandemicGame game)
+    {
+        if (!game.Players.Any(p => p.Role == Role.Researcher)) yield break;
+
+        foreach (var player in game.Players)
+        {
+            foreach (var city in game.Cities)
+            {
+                yield return new ResearcherShareKnowledgeGiveCommand(player.Role, city.Name);
+            }
+        }
     }
 
     private static IEnumerable<IPlayerCommand> OperationsExpertCommands(PandemicGame game)
     {
+        if (!game.Players.Any(p => p.Role == Role.OperationsExpert)) yield break;
+
         yield return new OperationsExpertBuildResearchStation();
         foreach (var card in PlayerCards.CityCards)
         {
@@ -65,6 +81,8 @@ public static class AllPlayerCommandGenerator
 
     private static IEnumerable<IPlayerCommand> DispatcherCommands(PandemicGame game)
     {
+        if (!game.Players.Any(p => p.Role == Role.Dispatcher)) yield break;
+
         foreach (var player in game.Players)
         {
             foreach (var city in game.Cities)

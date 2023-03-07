@@ -605,6 +605,19 @@ namespace pandemic.test
             commands.ShouldNotContain(c => c is OperationsExpertDiscardToMoveFromStation);
         }
 
+        [Test]
+        public void Researcher_can_give_any_card_to_player_in_same_city()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Researcher, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is ResearcherShareKnowledgeGiveCommand, 4);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
