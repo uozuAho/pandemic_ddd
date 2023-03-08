@@ -3450,6 +3450,196 @@ namespace pandemic.test
                 game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
+        [Test]
+        public void Contingency_planner_can_take_event_card_from_discard_pile_and_use_it()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            game = game with { PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift) };
+
+            // act: take card
+            (game, var events) = game.Do(new ContingencyPlannerTakeEventCardCommand(airlift));
+
+            // assert
+            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBe(airlift);
+            game.CurrentPlayer.Hand.ShouldNotContain(airlift); // this event card is not stored in hand
+            game.PlayerDiscardPile.Cards.ShouldNotContain(airlift);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+
+            // act: use card
+            (game, events) = game.Do(new AirliftCommand(Role.ContingencyPlanner, Role.Dispatcher, "Chicago"));
+
+            // assert
+            game.PlayerByRole(Role.Dispatcher).Location.ShouldBe("Chicago");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(airlift); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(airlift);
+        }
+
+        [Test]
+        public void Contingency_planner_take_event_card_throws_if_not_in_pile()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ContingencyPlannerTakeEventCardCommand(new AirliftCard())));
+        }
+
+        [Test]
+        public void Contingency_planner_take_event_card_throws_if_already_has_one()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            var oneQuietNight = new OneQuietNightCard();
+            game = game with { PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift) };
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = oneQuietNight
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ContingencyPlannerTakeEventCardCommand(airlift)));
+        }
+
+        [Test]
+        public void Contingency_planner_does_not_need_to_discard_with_7_cards_plus_special_event()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Take(7)),
+                StoredEventCard = airlift
+            });
+
+            game.APlayerMustDiscard.ShouldBeFalse();
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_one_quiet_night()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var oneQuietNight = new OneQuietNightCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = oneQuietNight
+            });
+            var events = new List<IEvent>();
+
+            game = game.Do(new OneQuietNightCommand(Role.ContingencyPlanner), events);
+            game = game.Do(new PassCommand(Role.ContingencyPlanner), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(oneQuietNight); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(oneQuietNight);
+            events.ShouldNotContain(e => e is CubeAddedToCity);
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_resilient_population()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var resilientPopulation = new ResilientPopulationCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = resilientPopulation
+            });
+            var events = new List<IEvent>();
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+
+            // act
+            game = game.Do(new ResilientPopulationCommand(Role.ContingencyPlanner, infectionCardToRemove), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(resilientPopulation); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(resilientPopulation);
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_government_grant()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var governmentGrant = new GovernmentGrantCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = governmentGrant
+            });
+            var events = new List<IEvent>();
+
+            // act
+            game = game.Do(new GovernmentGrantCommand(Role.ContingencyPlanner, "Chicago"), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(governmentGrant); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(governmentGrant);
+            game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_event_forecast()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var eventForecastCard = new EventForecastCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = eventForecastCard
+            });
+            var events = new List<IEvent>();
+
+            var infectionCardOrder = game.InfectionDrawPile.Top(6).Reverse().ToImmutableList();
+
+            // act
+            game = game.Do(new EventForecastCommand(Role.ContingencyPlanner, infectionCardOrder), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(eventForecastCard); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(eventForecastCard);
+            game.InfectionDrawPile.Top(6).ShouldBe(infectionCardOrder);
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_stored_event_card_throws_if_card_doesnt_match()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = airlift
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new OneQuietNightCommand(Role.ContingencyPlanner)));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

@@ -51,6 +51,18 @@ public static class AllPlayerCommandGenerator
         foreach (var cmd in OperationsExpertCommands(game)) yield return cmd;
         foreach (var cmd in ResearcherCommands(game)) yield return cmd;
         foreach (var cmd in ScientistCommands(game)) yield return cmd;
+        foreach (var cmd in ContingencyPlannerCommands(game)) yield return cmd;
+    }
+
+    private static IEnumerable<IPlayerCommand> ContingencyPlannerCommands(PandemicGame game)
+    {
+        if (!game.Players.Any(p => p.Role == Role.ContingencyPlanner)) yield break;
+
+        foreach (var card in game.PlayerDiscardPile.Cards.Where(c => c is ISpecialEventCard).Cast<ISpecialEventCard>())
+        {
+            yield return new ContingencyPlannerTakeEventCardCommand(card);
+        }
+        // use of special event card is handled by SpecialEvents
     }
 
     private static IEnumerable<IPlayerCommand> ScientistCommands(PandemicGame game)

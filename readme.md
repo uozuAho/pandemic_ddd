@@ -8,11 +8,6 @@ implemented.
 
 # todo
 - implement all game rules. left:
-  - role special abilities
-    - contingency planner:
-      - as an action, take any discarded event card and store it on this card
-        - only 1 card can be stored at a time, it's not part of your hand
-      - when this event card is played, remove it from the game
   - anyone can clear all cubes when a disease is cured
 - can a heroic game be won?
   - pandemic strategies

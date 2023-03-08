@@ -648,6 +648,49 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ScientistDiscoverCureCommand);
         }
 
+        [Test]
+        public void Contingency_planner_can_take_event_card()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            var airlift = new AirliftCard();
+            game = game with
+            {
+                PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift)
+            };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is ContingencyPlannerTakeEventCardCommand);
+        }
+
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Contingency_planner_can_use_event_card(ISpecialEventCard eventCard)
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = eventCard
+            });
+
+            var commands = _generator.LegalCommands(game);
+            switch (eventCard)
+            {
+                case AirliftCard: commands.ShouldContain(c => c is AirliftCommand); break;
+                case OneQuietNightCard: commands.ShouldContain(c => c is OneQuietNightCommand); break;
+                case EventForecastCard: commands.ShouldContain(c => c is EventForecastCommand); break;
+                case GovernmentGrantCard: commands.ShouldContain(c => c is GovernmentGrantCommand); break;
+                case ResilientPopulationCard: commands.ShouldContain(c => c is ResilientPopulationCommand); break;
+                default: Assert.Fail("doh"); break;
+            }
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

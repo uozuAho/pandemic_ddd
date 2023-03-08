@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using pandemic.Events;
 using pandemic.GameData;
@@ -90,7 +91,28 @@ public partial record PandemicGame
             ResearcherSharedKnowledge e => Apply(game, e),
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
+            ContingencyPlannerTookEventCard e => Apply(game, e),
+            ContingencyPlannerStoredAirliftUsed e => Apply(game, e),
+            ContingencyPlannerUsedStoredOneQuietNight e => Apply(game, e),
+            ContingencyPlannerUsedStoredResilientPopulation e => Apply(game, e),
+            ContingencyPlannerUsedStoredGovernmentGrant e => Apply(game, e),
+            ContingencyPlannerUsedStoredEventForecast e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerTookEventCard evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+
+        return game with
+        {
+            PlayerDiscardPile = game.PlayerDiscardPile.Remove((PlayerCard)evt.Card),
+            Players = game.Players.Replace(planner, planner with
+            {
+                StoredEventCard = evt.Card,
+                ActionsRemaining = planner.ActionsRemaining - 1
+            })
         };
     }
 
@@ -290,7 +312,7 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed evt)
     {
-        return game with { SkipNextInfectPhase = false };
+        return game with { OneQuietNightWillBeUsedNextInfectPhase = false };
     }
 
     private static PandemicGame Apply(PandemicGame game, OneQuietNightUsed evt)
@@ -300,9 +322,23 @@ public partial record PandemicGame
 
         return game with
         {
-            SkipNextInfectPhase = true,
+            OneQuietNightWillBeUsedNextInfectPhase = true,
             Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredOneQuietNight evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var card = (PlayerCard)planner.StoredEventCard;
+
+        return game with
+        {
+            OneQuietNightWillBeUsedNextInfectPhase = true,
+            Players = game.Players.Replace(planner, planner with { StoredEventCard = null}),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(card)
         };
     }
 
@@ -330,6 +366,24 @@ public partial record PandemicGame
                 Hand = player.Hand.Remove(eventCard)
             }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(eventCard)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredResilientPopulation evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var eventCard = (PlayerCard)planner.StoredEventCard;
+
+        return game with
+        {
+            InfectionDiscardPile = game.InfectionDiscardPile.Remove(evt.InfectionCard),
+            InfectionCardsRemovedFromGame = game.InfectionCardsRemovedFromGame.Add(evt.InfectionCard),
+            Players = game.Players.Replace(planner, planner with
+            {
+                StoredEventCard = null
+            }),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(eventCard)
         };
     }
 
@@ -366,6 +420,40 @@ public partial record PandemicGame
         };
     }
 
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerStoredAirliftUsed evt)
+    {
+        var planner = (ContingencyPlanner) game.PlayerByRole(Role.ContingencyPlanner);
+        var card = planner.StoredEventCard;
+        if (card == null) throw new InvalidOperationException();
+        var playerToMove = game.PlayerByRole(evt.PlayerToMove);
+
+        ImmutableList<Player> updatedPlayers;
+        if (planner == playerToMove)
+        {
+            updatedPlayers = game.Players.Replace(planner, planner with
+            {
+                Location = evt.City,
+                StoredEventCard = null
+            });
+        }
+        else
+        {
+            updatedPlayers = game.Players.Replace(planner, planner with
+            {
+                StoredEventCard = null
+            }).Replace(playerToMove, playerToMove with
+            {
+                Location = evt.City
+            });
+        }
+
+        return game with
+        {
+            Players = updatedPlayers,
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add((PlayerCard)card)
+        };
+    }
+
     private static PandemicGame Apply(PandemicGame game, EventForecastUsed evt)
     {
         var eventForecastCard = game.PlayerByRole(evt.Role).Hand.Single(c => c is EventForecastCard);
@@ -380,6 +468,21 @@ public partial record PandemicGame
             }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(eventForecastCard),
             InfectionDrawPile = game.InfectionDrawPile.Remove(cardsToPlace).PlaceOnTop(cardsToPlace)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredEventForecast evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var eventForecastCard = (PlayerCard)planner.StoredEventCard;
+        var cardsToPlace = evt.Cards.ToList();
+
+        return game with
+        {
+            Players = game.Players.Replace(planner, planner with { StoredEventCard = null }),
+            InfectionDrawPile = game.InfectionDrawPile.Remove(cardsToPlace).PlaceOnTop(cardsToPlace),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(eventForecastCard)
         };
     }
 
@@ -403,6 +506,22 @@ public partial record PandemicGame
             Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
             Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredGovernmentGrant evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var card = (PlayerCard)planner.StoredEventCard;
+        var city = game.CityByName(evt.City);
+
+        return game with
+        {
+            ResearchStationPile = game.ResearchStationPile - 1,
+            Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
+            Players = game.Players.Replace(planner, planner with { StoredEventCard = null}),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(card)
         };
     }
 
@@ -582,9 +701,12 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyPlayerAdded(PandemicGame game, PlayerAdded evt)
     {
-        var newPlayer = evt.Role == Role.OperationsExpert
-            ? new OperationsExpert { Location = "Atlanta" }
-            : new Player { Role = evt.Role, Location = "Atlanta" };
+        var newPlayer = evt.Role switch
+        {
+            Role.OperationsExpert => new OperationsExpert { Location = "Atlanta" },
+            Role.ContingencyPlanner => new ContingencyPlanner { Location = "Atlanta" },
+            _ => new Player { Role = evt.Role, Location = "Atlanta" }
+        };
 
         return game with { Players = game.Players.Add(newPlayer) };
     }

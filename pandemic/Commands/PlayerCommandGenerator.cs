@@ -42,6 +42,7 @@ namespace pandemic.Commands
                 SetOperationsExpertCommands(game);
                 SetResearcherCommands(game);
                 SetScientistCommands(game);
+                SetContingencyPlannerTakeCommands(game);
             }
 
             if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
@@ -53,6 +54,21 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetContingencyPlannerTakeCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.ContingencyPlanner
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            if (game.ContingencyPlannerStoredCard != null) return;
+
+            foreach (var card in game.PlayerDiscardPile.Cards
+                         .Where(c => c is ISpecialEventCard).Cast<ISpecialEventCard>())
+            {
+                _buffer[_bufIdx++] = new ContingencyPlannerTakeEventCardCommand(card);
+            }
         }
 
         private void SetScientistCommands(PandemicGame game)
@@ -218,7 +234,15 @@ namespace pandemic.Commands
 
             foreach (var playerWithCard in game.Players)
             {
-                foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
+                var cards = playerWithCard.Hand.Where(c => c is ISpecialEventCard).ToList();
+                if (playerWithCard.Role == Role.ContingencyPlanner)
+                {
+                    var planner = (ContingencyPlanner)playerWithCard;
+                    if (planner.StoredEventCard != null)
+                        cards.Add((PlayerCard)planner.StoredEventCard);
+                }
+
+                foreach (var card in cards)
                 {
                     if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);

@@ -116,8 +116,20 @@ public partial record PandemicGame
             ResearcherShareKnowledgeGiveCommand cmd => Do(cmd),
             ShareKnowledgeTakeFromResearcherCommand cmd => Do(cmd),
             ScientistDiscoverCureCommand cmd => Do(cmd),
+            ContingencyPlannerTakeEventCardCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
+    }
+
+    private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerTakeEventCardCommand cmd)
+    {
+        if (!PlayerDiscardPile.Cards.Contains((PlayerCard)cmd.Card))
+            throw new GameRuleViolatedException("Card must be in discard pile");
+
+        if (((ContingencyPlanner)PlayerByRole(Role.ContingencyPlanner)).StoredEventCard != null)
+            throw new GameRuleViolatedException("Contingency planner already has a stored card");
+
+        return ApplyEvents(new ContingencyPlannerTookEventCard(cmd.Card));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ScientistDiscoverCureCommand cmd)
@@ -311,39 +323,58 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
     {
         var player = PlayerByRole(cmd.Role);
-        if (!player.Hand.Contains(new OneQuietNightCard()))
+        if (!player.Has(new OneQuietNightCard()))
             throw new GameRuleViolatedException($"{player.Role} doesn't have the one quiet night card");
 
-        return ApplyEvents(new OneQuietNightUsed(cmd.Role));
+        IEvent @event;
+        if (player is ContingencyPlanner { StoredEventCard: OneQuietNightCard })
+            @event = new ContingencyPlannerUsedStoredOneQuietNight();
+        else
+            @event = new OneQuietNightUsed(cmd.Role);
+
+        return ApplyEvents(@event);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new ResilientPopulationCard()))
+        if (!PlayerByRole(cmd.Role).Has(new ResilientPopulationCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the resilient population card");
 
         if (!InfectionDiscardPile.Cards.Contains(cmd.Card))
             throw new GameRuleViolatedException($"{cmd.Card} is not in the discard pile");
+
+        if (cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is ResilientPopulationCard)
+            return ApplyEvents(new ContingencyPlannerUsedStoredResilientPopulation(cmd.Card));
 
         return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard()))
+        if (!PlayerByRole(cmd.Role).Has(new AirliftCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
             throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
 
-        return ApplyEvents(
-            new[] { new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+        IEvent airliftEvent;
+
+        if (cmd.Role == Role.ContingencyPlanner && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard)
+        {
+            airliftEvent = new ContingencyPlannerStoredAirliftUsed(cmd.PlayerToMove, cmd.City);
+        }
+        else
+        {
+            airliftEvent = new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City);
+        }
+
+        return ApplyEvents(new[] { airliftEvent }.Concat(AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new EventForecastCard()))
+        if (!PlayerByRole(cmd.Role).Has(new EventForecastCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the event forecast card");
 
         var top6InfectionCards = InfectionDrawPile.Top(6).ToList();
@@ -354,6 +385,10 @@ public partial record PandemicGame
                 $"{string.Join(',', top6InfectionCards.Except(cmd.Cards))}");
         }
 
+        if (cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard is EventForecastCard)
+            return ApplyEvents(new ContingencyPlannerUsedStoredEventForecast(cmd.Cards));
+
         return ApplyEvents(new EventForecastUsed(cmd.Role, cmd.Cards));
     }
 
@@ -362,7 +397,7 @@ public partial record PandemicGame
         if (SpecialEventWasRecentlySkipped)
             throw new GameRuleViolatedException("You've already chosen not the use a special event card");
 
-        if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
+        if (!APlayerHasASpecialEventCard)
             throw new GameRuleViolatedException("No player has a special event card");
 
         if (LegalCommands().Any(c => c is not DontUseSpecialEventCommand && !c.IsSpecialEvent))
@@ -374,15 +409,19 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(GovernmentGrantCommand command)
     {
-        if (ResearchStationPile == 0) throw new GameRuleViolatedException("No research stations left");
-
         var player = PlayerByRole(command.Role);
-        var card = PlayerByRole(command.Role).Hand.SingleOrDefault(c => c is GovernmentGrantCard);
-        if (card is null) throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");
+        if (!player.Has(new GovernmentGrantCard()))
+            throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");
+
+        if (ResearchStationPile == 0) throw new GameRuleViolatedException("No research stations left");
 
         var city = CityByName(command.City);
         if (city.HasResearchStation)
             throw new GameRuleViolatedException("Cannot use government grant on a city with a research station");
+
+        if (command.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner) PlayerByRole(command.Role)).StoredEventCard is GovernmentGrantCard)
+            return ApplyEvents(new ContingencyPlannerUsedStoredGovernmentGrant(command.City));
 
         return ApplyEvents(new GovernmentGrantUsed(command.Role, command.City));
     }

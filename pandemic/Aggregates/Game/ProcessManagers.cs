@@ -95,7 +95,7 @@ public partial record PandemicGame
 
         private static PandemicGame InfectCities(PandemicGame game, ICollection<IEvent> events)
         {
-            if (game.SkipNextInfectPhase)
+            if (game.OneQuietNightWillBeUsedNextInfectPhase)
             {
                 game = game.ApplyEvent(new OneQuietNightPassed(), events);
                 return game.ApplyEvent(new TurnEnded(), events);
