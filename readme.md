@@ -16,8 +16,8 @@ implemented.
           - only 1 card can be stored at a time, it's not part of your hand
         - when this event card is played, remove it from the game
       - test cases
-        - throws if given command does not match stored event card
         - can use all special events
+        - throws if given command does not match stored event card (unskip test)
         - legal commands
         - all commands
         - ensure contingency planner can play event card at right times
