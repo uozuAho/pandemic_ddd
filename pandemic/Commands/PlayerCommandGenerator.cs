@@ -42,7 +42,7 @@ namespace pandemic.Commands
                 SetOperationsExpertCommands(game);
                 SetResearcherCommands(game);
                 SetScientistCommands(game);
-                SetContingencyPlannerCommands(game);
+                SetContingencyPlannerTakeCommands(game);
             }
 
             if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
@@ -56,7 +56,7 @@ namespace pandemic.Commands
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
         }
 
-        private void SetContingencyPlannerCommands(PandemicGame game)
+        private void SetContingencyPlannerTakeCommands(PandemicGame game)
         {
             if (game.CurrentPlayer.Role != Role.ContingencyPlanner
                 || game.CurrentPlayer.ActionsRemaining == 0

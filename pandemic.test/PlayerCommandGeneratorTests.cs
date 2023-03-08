@@ -666,6 +666,26 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ContingencyPlannerTakeEventCardCommand);
         }
 
+        [Ignore("refactor out ContingencyPlannerSpecialEventCommand first")]
+        [Test]
+        public void Contingency_planner_can_use_event_card()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = new AirliftCard()
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c =>
+                c is ContingencyPlannerSpecialEventCommand
+                && ((ContingencyPlannerSpecialEventCommand)c).Command is AirliftCommand);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

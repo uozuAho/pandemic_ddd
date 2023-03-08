@@ -10,10 +10,7 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - contingency planner:
-      - card rules:
-        - as an action, take any discarded event card and store it on this card
-          - only 1 card can be stored at a time, it's not part of your hand
-        - when this event card is played, remove it from the game
+      - refactor out ContingencyPlannerSpecialEventCommand
       - test cases
         - legal commands
           - use
