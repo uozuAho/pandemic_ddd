@@ -148,6 +148,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerTakeEventCardCommand cmd)
     {
+        if (!PlayerDiscardPile.Cards.Contains((PlayerCard)cmd.Card))
+            throw new GameRuleViolatedException("Card must be in discard pile");
+
         return ApplyEvents(new ContingencyPlannerTookEventCard(cmd.Card));
     }
 

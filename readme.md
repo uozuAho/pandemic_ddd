@@ -16,7 +16,6 @@ implemented.
           - only 1 card can be stored at a time, it's not part of your hand
         - when this event card is played, remove it from the game
       - test cases
-        - throw if not in discard pile
         - throw if take 2nd card (can only fit 1 at a time)
         - does not add to hand: does not need to discard if hand = 7
         - throws if given command does not match stored event card

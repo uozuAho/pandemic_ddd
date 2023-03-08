@@ -3481,6 +3481,18 @@ namespace pandemic.test
             game.PlayerDrawPile.Cards.ShouldNotContain(airlift);
         }
 
+        [Test]
+        public void Contingency_planner_take_event_card_throws_if_not_in_pile()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ContingencyPlannerTakeEventCardCommand(new AirliftCard())));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
