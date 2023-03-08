@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using pandemic.Events;
 using pandemic.GameData;
@@ -95,6 +96,7 @@ public partial record PandemicGame
             ContingencyPlannerStoredAirliftUsed e => Apply(game, e),
             ContingencyPlannerUsedStoredOneQuietNight e => Apply(game, e),
             ContingencyPlannerUsedStoredResilientPopulation e => Apply(game, e),
+            ContingencyPlannerUsedStoredGovernmentGrant e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -489,6 +491,22 @@ public partial record PandemicGame
             Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
             Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredGovernmentGrant evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var card = (PlayerCard)planner.StoredEventCard;
+        var city = game.CityByName(evt.City);
+
+        return game with
+        {
+            ResearchStationPile = game.ResearchStationPile - 1,
+            Cities = game.Cities.Replace(city, city with { HasResearchStation = true }),
+            Players = game.Players.Replace(planner, planner with { StoredEventCard = null}),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(card)
         };
     }
 
