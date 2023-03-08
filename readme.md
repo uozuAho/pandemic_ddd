@@ -10,7 +10,6 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - contingency planner:
-      - fix fuzz failures
       - test cases
         - all commands
           - take

@@ -62,6 +62,8 @@ namespace pandemic.Commands
                 || game.CurrentPlayer.ActionsRemaining == 0
                 || game.PhaseOfTurn != TurnPhase.DoActions) return;
 
+            if (game.ContingencyPlannerStoredCard != null) return;
+
             foreach (var card in game.PlayerDiscardPile.Cards
                          .Where(c => c is ISpecialEventCard).Cast<ISpecialEventCard>())
             {

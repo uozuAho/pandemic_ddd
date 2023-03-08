@@ -397,7 +397,7 @@ public partial record PandemicGame
         if (SpecialEventWasRecentlySkipped)
             throw new GameRuleViolatedException("You've already chosen not the use a special event card");
 
-        if (!Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)))
+        if (!APlayerHasASpecialEventCard)
             throw new GameRuleViolatedException("No player has a special event card");
 
         if (LegalCommands().Any(c => c is not DontUseSpecialEventCommand && !c.IsSpecialEvent))

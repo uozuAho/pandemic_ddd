@@ -226,13 +226,17 @@ namespace pandemic.Aggregates.Game
 
             var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
                                    + PlayerDrawPile.Count
-                                   + PlayerDiscardPile.Count;
+                                   + PlayerDiscardPile.Count
+                                   + PlayerCardsRemovedFromGame.Count;
+            if (ContingencyPlannerStoredCard != null) totalPlayerCards++;
             Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
 
             var specialEventCards = Players
                 .SelectMany(p => p.Hand)
                 .Concat(PlayerDrawPile.Cards)
                 .Concat(PlayerDiscardPile.Cards)
+                .Concat(PlayerCardsRemovedFromGame)
+                .Concat(new[] { ContingencyPlannerStoredCard as PlayerCard })
                 .Where(c => c is ISpecialEventCard)
                 .ToList();
 
@@ -263,6 +267,15 @@ namespace pandemic.Aggregates.Game
                     Debug.Assert(IsEradicated(curedColour));
             }
         }
+
+        public ISpecialEventCard? ContingencyPlannerStoredCard => Players
+            .Where(p => p.Role == Role.ContingencyPlanner)
+            .Select(p => (ContingencyPlanner)p)
+            .Select(p => p.StoredEventCard)
+            .FirstOrDefault();
+
+        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)) ||
+                                                    ContingencyPlannerStoredCard != null;
 
         private int TotalCubesInGame()
         {
