@@ -17,7 +17,8 @@ implemented.
       - test cases
         - take event card, use it
           - card is not in draw or discard pile after use
-        - throw if take 2nd card
+        - throw if not in discard pile
+        - throw if take 2nd card (can only fit 1 at a time)
         - does not add to hand: does not need to discard if hand = 7
         - ensure contingency planner can play event card at right times
         - legal commands

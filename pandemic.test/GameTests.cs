@@ -3473,6 +3473,7 @@ namespace pandemic.test
                 new AirliftCommand(Role.ContingencyPlanner, Role.Dispatcher, "Chicago")));
 
             // assert
+            game.PlayerByRole(Role.Dispatcher).Location.ShouldBe("Chicago");
             game.PlayerDiscardPile.Cards.ShouldNotContain(airlift); // card is removed from game
             game.PlayerDrawPile.Cards.ShouldNotContain(airlift);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);

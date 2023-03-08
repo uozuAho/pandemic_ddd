@@ -90,8 +90,23 @@ public partial record PandemicGame
             ResearcherSharedKnowledge e => Apply(game, e),
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
-            ContingencyPlannerTookEventCard => game,
+            ContingencyPlannerTookEventCard e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerTookEventCard evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+
+        return game with
+        {
+            PlayerDiscardPile = game.PlayerDiscardPile.Remove((PlayerCard)evt.Card),
+            Players = game.Players.Replace(planner, planner with
+            {
+                StoredEventCard = evt.Card,
+                ActionsRemaining = planner.ActionsRemaining - 1
+            })
         };
     }
 
@@ -583,9 +598,12 @@ public partial record PandemicGame
 
     private static PandemicGame ApplyPlayerAdded(PandemicGame game, PlayerAdded evt)
     {
-        var newPlayer = evt.Role == Role.OperationsExpert
-            ? new OperationsExpert { Location = "Atlanta" }
-            : new Player { Role = evt.Role, Location = "Atlanta" };
+        var newPlayer = evt.Role switch
+        {
+            Role.OperationsExpert => new OperationsExpert { Location = "Atlanta" },
+            Role.ContingencyPlanner => new ContingencyPlanner { Location = "Atlanta" },
+            _ => new Player { Role = evt.Role, Location = "Atlanta" }
+        };
 
         return game with { Players = game.Players.Add(newPlayer) };
     }
