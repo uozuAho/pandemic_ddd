@@ -631,6 +631,23 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ShareKnowledgeTakeFromResearcherCommand, 4);
         }
 
+        [Test]
+        public void Scientist_can_cure_with_4()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = PlayerHand.Of("Atlanta", "Paris", "Chicago", "Milan")
+            });
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is ScientistDiscoverCureCommand);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);

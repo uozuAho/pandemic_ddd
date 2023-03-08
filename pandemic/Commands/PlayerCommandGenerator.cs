@@ -41,6 +41,7 @@ namespace pandemic.Commands
                 SetDispatcherCommands(game);
                 SetOperationsExpertCommands(game);
                 SetResearcherCommands(game);
+                SetScientistCommands(game);
             }
 
             if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
@@ -52,6 +53,25 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetScientistCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.Scientist
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) return;
+
+            foreach (var cureCards in game.CurrentPlayer.Hand
+                         .CityCards
+                         .GroupBy(c => c.City.Colour)
+                         .Where(g => g.Count() >= 4))
+            {
+                if (!game.IsCured(cureCards.Key))
+                    // todo: yield all combinations if > 4 cards
+                    _buffer[_bufIdx++] = new ScientistDiscoverCureCommand(cureCards.Take(4).ToArray());
+            }
         }
 
         private void SetResearcherCommands(PandemicGame game)
