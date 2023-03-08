@@ -3628,7 +3628,6 @@ namespace pandemic.test
             game.InfectionDrawPile.Top(6).ShouldBe(infectionCardOrder);
         }
 
-        [Ignore("enable once all events implemented")]
         [Test]
         public void Contingency_planner_can_use_stored_event_card_throws_if_card_doesnt_match()
         {
