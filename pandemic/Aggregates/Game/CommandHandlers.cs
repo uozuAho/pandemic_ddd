@@ -399,7 +399,7 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new EventForecastCard()))
+        if (!PlayerByRole(cmd.Role).Has(new EventForecastCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the event forecast card");
 
         var top6InfectionCards = InfectionDrawPile.Top(6).ToList();
@@ -409,6 +409,10 @@ public partial record PandemicGame
                 "Not in the top 6 cards of the infection deck: " +
                 $"{string.Join(',', top6InfectionCards.Except(cmd.Cards))}");
         }
+
+        if (cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard is EventForecastCard)
+            return ApplyEvents(new ContingencyPlannerUsedStoredEventForecast(cmd.Cards));
 
         return ApplyEvents(new EventForecastUsed(cmd.Role, cmd.Cards));
     }

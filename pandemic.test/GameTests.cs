@@ -3602,6 +3602,32 @@ namespace pandemic.test
             game.CityByName("Chicago").HasResearchStation.ShouldBeTrue();
         }
 
+        [Test]
+        public void Contingency_planner_can_use_event_forecast()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var eventForecastCard = new EventForecastCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = eventForecastCard
+            });
+            var events = new List<IEvent>();
+
+            var infectionCardOrder = game.InfectionDrawPile.Top(6).Reverse().ToImmutableList();
+
+            // act
+            game = game.Do(new ContingencyPlannerSpecialEventCommand(
+                new EventForecastCommand(Role.ContingencyPlanner, infectionCardOrder)), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(eventForecastCard); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(eventForecastCard);
+            game.InfectionDrawPile.Top(6).ShouldBe(infectionCardOrder);
+        }
+
         [Ignore("enable once all events implemented")]
         [Test]
         public void Contingency_planner_can_use_stored_event_card_throws_if_card_doesnt_match()
