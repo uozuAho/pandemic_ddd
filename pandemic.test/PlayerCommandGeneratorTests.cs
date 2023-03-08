@@ -666,9 +666,8 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ContingencyPlannerTakeEventCardCommand);
         }
 
-        [Ignore("refactor out ContingencyPlannerSpecialEventCommand first")]
-        [Test]
-        public void Contingency_planner_can_use_event_card()
+        [TestCaseSource(nameof(AllSpecialEventCards))]
+        public void Contingency_planner_can_use_event_card(ISpecialEventCard eventCard)
         {
             var game = CreateNewGame(new NewGameOptions
             {
@@ -677,11 +676,19 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
             {
-                StoredEventCard = new AirliftCard()
+                StoredEventCard = eventCard
             });
 
             var commands = _generator.LegalCommands(game);
-            commands.ShouldContain(c => c is AirliftCommand);
+            switch (eventCard)
+            {
+                case AirliftCard: commands.ShouldContain(c => c is AirliftCommand); break;
+                case OneQuietNightCard: commands.ShouldContain(c => c is OneQuietNightCommand); break;
+                case EventForecastCard: commands.ShouldContain(c => c is EventForecastCommand); break;
+                case GovernmentGrantCard: commands.ShouldContain(c => c is GovernmentGrantCommand); break;
+                case ResilientPopulationCard: commands.ShouldContain(c => c is ResilientPopulationCommand); break;
+                default: Assert.Fail("doh"); break;
+            }
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)

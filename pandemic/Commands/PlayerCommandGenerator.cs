@@ -232,7 +232,15 @@ namespace pandemic.Commands
 
             foreach (var playerWithCard in game.Players)
             {
-                foreach (var card in playerWithCard.Hand.Where(c => c is ISpecialEventCard))
+                var cards = playerWithCard.Hand.Where(c => c is ISpecialEventCard).ToList();
+                if (playerWithCard.Role == Role.ContingencyPlanner)
+                {
+                    var planner = (ContingencyPlanner)playerWithCard;
+                    if (planner.StoredEventCard != null)
+                        cards.Add((PlayerCard)planner.StoredEventCard);
+                }
+
+                foreach (var card in cards)
                 {
                     if (card is GovernmentGrantCard) SetGovernmentGrants(game, playerWithCard);
                     else if (card is EventForecastCard) SetEventForecasts(game, playerWithCard);
