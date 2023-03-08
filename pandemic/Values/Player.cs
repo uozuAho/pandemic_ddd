@@ -21,6 +21,11 @@ namespace pandemic.Values
         }
 
         public static IEqualityComparer<Player> DefaultEqualityComparer = new PlayerComparer();
+
+        public virtual bool Has(PlayerCard card)
+        {
+            return Hand.Contains(card);
+        }
     }
 
     internal class PlayerComparer : IEqualityComparer<Player>

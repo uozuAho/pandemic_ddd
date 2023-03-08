@@ -367,14 +367,7 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
     {
-        var airliftInHand = PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard());
-        if (cmd.Role == Role.ContingencyPlanner)
-        {
-            var planner = (ContingencyPlanner) PlayerByRole(cmd.Role);
-            if (planner.StoredEventCard is not AirliftCard && !airliftInHand)
-                throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
-        }
-        else if (!airliftInHand)
+        if (!PlayerByRole(cmd.Role).Has(new AirliftCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)

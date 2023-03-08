@@ -17,6 +17,7 @@ implemented.
         - when this event card is played, remove it from the game
       - test cases
         - can use all special events
+          - un-ignore tests
         - throws if given command does not match stored event card (unskip test)
         - legal commands
         - all commands

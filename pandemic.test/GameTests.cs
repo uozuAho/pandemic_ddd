@@ -3529,6 +3529,31 @@ namespace pandemic.test
             game.APlayerMustDiscard.ShouldBeFalse();
         }
 
+        [Ignore("finish Has impl")]
+        [Test]
+        public void Contingency_planner_can_use_one_quiet_night()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var oneQuietNight = new OneQuietNightCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = oneQuietNight
+            });
+            var events = new List<IEvent>();
+
+            game = game.Do(new ContingencyPlannerSpecialEventCommand(
+                new OneQuietNightCommand(Role.ContingencyPlanner)), events);
+            game = game.Do(new PassCommand(Role.ContingencyPlanner), events);
+
+            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(oneQuietNight); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(oneQuietNight);
+            events.ShouldNotContain(e => e is CubeAddedToCity);
+        }
+
         [Ignore("enable once all events implemented")]
         [Test]
         public void Contingency_planner_can_use_stored_event_card_throws_if_card_doesnt_match()
