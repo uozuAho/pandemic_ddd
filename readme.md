@@ -11,6 +11,7 @@ implemented.
   - role special abilities
     - contingency planner:
       - refactor out ContingencyPlannerSpecialEventCommand
+        - and ContingencyPlannerUsedStoredCard?
       - test cases
         - legal commands
           - use

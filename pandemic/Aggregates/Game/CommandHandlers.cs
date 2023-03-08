@@ -124,27 +124,9 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerSpecialEventCommand cmd)
     {
-        PlayerCard cmdCard = cmd.Command switch
-        {
-            EventForecastCommand => new EventForecastCard(),
-            AirliftCommand => new AirliftCard(),
-            ResilientPopulationCommand => new ResilientPopulationCard(),
-            OneQuietNightCommand => new OneQuietNightCard(),
-            GovernmentGrantCommand => new GovernmentGrantCard(),
-            _ => throw new GameRuleViolatedException("Command must be a special event")
-        };
-
-        var planner = (ContingencyPlanner) PlayerByRole(Role.ContingencyPlanner);
-        if (planner.StoredEventCard == null)
-            throw new GameRuleViolatedException("Contingency planner doesn't have a stored card");
-
-        if (cmdCard.GetType() != planner.StoredEventCard.GetType())
-            throw new GameRuleViolatedException($"Contingency planner doesn't have the {cmdCard} stored");
-
         var events = new List<IEvent>();
 
-        var game = ApplyEvent(new ContingencyPlannerUsedStoredCard(planner.StoredEventCard), events);
-        game = Do(cmd.Command, events);
+        var game = Do(cmd.Command, events);
 
         return (game, events);
     }
