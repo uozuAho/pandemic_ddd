@@ -3,12 +3,8 @@
 The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%29),
 implemented in C#. Intended for usage by AI agents.
 
-Work in progress! A full game is playable, but many game rules are yet to be
-implemented.
-
 # todo
-- implement all game rules. left:
-  - anyone can clear all cubes when a disease is cured
+- fuzz fail: legal commands contains opex build station when none left
 - can a heroic game be won?
   - pandemic strategies
     - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/

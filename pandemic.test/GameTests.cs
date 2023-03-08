@@ -1062,7 +1062,7 @@ namespace pandemic.test
         }
 
         [Test]
-        public void Treat_disease_works()
+        public void Treat_disease()
         {
             var game = DefaultTestGame();
             var atlanta = game.CityByName("Atlanta");
@@ -1078,6 +1078,26 @@ namespace pandemic.test
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
             game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 1);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
+        [Test]
+        public void Treat_disease_removes_all_cubes_when_cured()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with{Roles = new[]
+            {
+                Role.Researcher, Role.QuarantineSpecialist
+            }});
+            var atlanta = game.CityByName("Atlanta");
+            game = game.Cure(Colour.Blue) with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
+            };
+            var startingBlueCubes = game.Cubes.NumberOf(Colour.Blue);
+
+            (game, _) = game.Do(new TreatDiseaseCommand(game.CurrentPlayer.Role, "Atlanta", Colour.Blue));
+
+            game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
+            game.Cubes.NumberOf(Colour.Blue).ShouldBe(startingBlueCubes + 3);
         }
 
         [Test]

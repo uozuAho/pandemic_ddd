@@ -565,11 +565,17 @@ public partial record PandemicGame
         var player = game.PlayerByRole(evt.Role);
         var city = game.CityByName(evt.City);
 
+        var numCubesToRemove = game.IsCured(evt.Colour) ? city.Cubes.NumberOf(evt.Colour) : 1;
+
+        var newCubes = game.IsCured(evt.Colour)
+            ? city.Cubes.RemoveAll(evt.Colour)
+            : city.Cubes.RemoveCube(evt.Colour);
+
         return game with
         {
-            Players = game.Players.Replace(player, player with{ActionsRemaining = player.ActionsRemaining - 1}),
-            Cities = game.Cities.Replace(city, city.RemoveCube(evt.Colour)),
-            Cubes = game.Cubes.AddCube(evt.Colour),
+            Players = game.Players.Replace(player, player with { ActionsRemaining = player.ActionsRemaining - 1 }),
+            Cities = game.Cities.Replace(city, city with {Cubes = newCubes}),
+            Cubes = game.Cubes.AddCubes(evt.Colour, numCubesToRemove)
         };
     }
 
