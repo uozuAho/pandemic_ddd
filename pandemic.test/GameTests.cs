@@ -3512,6 +3512,23 @@ namespace pandemic.test
                 game.Do(new ContingencyPlannerTakeEventCardCommand(airlift)));
         }
 
+        [Test]
+        public void Contingency_planner_does_not_need_to_discard_with_7_cards_plus_special_event()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                Hand = new PlayerHand(PlayerCards.CityCards.Take(7)),
+                StoredEventCard = airlift
+            });
+
+            game.APlayerMustDiscard.ShouldBeFalse();
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));

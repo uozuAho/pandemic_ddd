@@ -16,12 +16,12 @@ implemented.
           - only 1 card can be stored at a time, it's not part of your hand
         - when this event card is played, remove it from the game
       - test cases
-        - does not add to hand: does not need to discard if hand = 7
         - throws if given command does not match stored event card
-        - ensure contingency planner can play event card at right times
-          - eg between epidemic infect/intensify
+        - can use all special events
         - legal commands
         - all commands
+        - ensure contingency planner can play event card at right times
+          - eg between epidemic infect/intensify
   - anyone can clear all cubes when a disease is cured
 - can a heroic game be won?
   - pandemic strategies
