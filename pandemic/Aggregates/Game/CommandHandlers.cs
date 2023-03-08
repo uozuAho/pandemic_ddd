@@ -124,7 +124,26 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerSpecialEventCommand cmd)
     {
-        return (this, Enumerable.Empty<IEvent>());
+        ISpecialEventCard cmdCard = cmd.Command switch
+        {
+            EventForecastCommand => new EventForecastCard(),
+            AirliftCommand _ => new AirliftCard(),
+            ResilientPopulationCommand _ => new ResilientPopulationCard(),
+            OneQuietNightCommand _ => new OneQuietNightCard(),
+            GovernmentGrantCommand _ => new GovernmentGrantCard(),
+            _ => throw new GameRuleViolatedException("Command must be a special event")
+        };
+
+        var planner = (ContingencyPlanner) PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null)
+            throw new GameRuleViolatedException("Contingency planner doesn't have a stored card");
+
+        var events = new List<IEvent>();
+
+        var game = ApplyEvent(new ContingencyPlannerUsedStoredCard(planner.StoredEventCard), events);
+        game = Do(cmd.Command, events);
+
+        return (game, events);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerTakeEventCardCommand cmd)
@@ -342,15 +361,31 @@ public partial record PandemicGame
 
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard()))
+        var airliftInHand = PlayerByRole(cmd.Role).Hand.Contains(new AirliftCard());
+        if (cmd.Role == Role.ContingencyPlanner)
+        {
+            var planner = (ContingencyPlanner) PlayerByRole(cmd.Role);
+            if (planner.StoredEventCard is not AirliftCard && !airliftInHand)
+                throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
+        }
+        else if (!airliftInHand)
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
             throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
 
-        return ApplyEvents(
-            new[] { new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+        IEvent airliftEvent;
+
+        if (cmd.Role == Role.ContingencyPlanner && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard)
+        {
+            airliftEvent = new ContingencyPlannerStoredAirliftUsed(cmd.PlayerToMove, cmd.City);
+        }
+        else
+        {
+            airliftEvent = new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City);
+        }
+
+        return ApplyEvents(new[] { airliftEvent }.Concat(AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)

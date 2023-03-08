@@ -3464,6 +3464,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new ContingencyPlannerTakeEventCardCommand(airlift));
 
             // assert
+            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBe(airlift);
             game.CurrentPlayer.Hand.ShouldNotContain(airlift); // this event card is not stored in hand
             game.PlayerDiscardPile.Cards.ShouldNotContain(airlift);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
@@ -3474,9 +3475,10 @@ namespace pandemic.test
 
             // assert
             game.PlayerByRole(Role.Dispatcher).Location.ShouldBe("Chicago");
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBeNull();
             game.PlayerDiscardPile.Cards.ShouldNotContain(airlift); // card is removed from game
             game.PlayerDrawPile.Cards.ShouldNotContain(airlift);
-            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
