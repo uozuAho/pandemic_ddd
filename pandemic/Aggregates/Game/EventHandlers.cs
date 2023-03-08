@@ -90,6 +90,7 @@ public partial record PandemicGame
             ResearcherSharedKnowledge e => Apply(game, e),
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
+            ContingencyPlannerTookEventCard => game,
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }

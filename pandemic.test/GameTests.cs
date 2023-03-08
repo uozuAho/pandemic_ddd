@@ -3450,6 +3450,34 @@ namespace pandemic.test
                 game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
         }
 
+        [Test]
+        public void Contingency_planner_can_take_event_card_from_discard_pile_and_use_it()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            game = game with { PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift) };
+
+            // act: take card
+            (game, var events) = game.Do(new ContingencyPlannerTakeEventCardCommand(airlift));
+
+            // assert
+            game.CurrentPlayer.Hand.ShouldNotContain(airlift); // this event card is not stored in hand
+            game.PlayerDiscardPile.Cards.ShouldNotContain(airlift);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+
+            // act: use card
+            (game, events) = game.Do(new ContingencyPlannerSpecialEventCommand(
+                new AirliftCommand(Role.ContingencyPlanner, Role.Dispatcher, "Chicago")));
+
+            // assert
+            game.PlayerDiscardPile.Cards.ShouldNotContain(airlift); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(airlift);
+            game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
