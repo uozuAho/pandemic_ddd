@@ -8,14 +8,6 @@ implemented.
 
 # todo
 - implement all game rules. left:
-  - role special abilities
-    - contingency planner:
-      - test cases
-        - all commands
-          - take
-          - use
-        - ensure contingency planner can play event card at right times
-          - eg between epidemic infect/intensify
   - anyone can clear all cubes when a disease is cured
 - can a heroic game be won?
   - pandemic strategies
