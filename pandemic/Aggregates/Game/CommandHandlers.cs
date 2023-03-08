@@ -151,6 +151,9 @@ public partial record PandemicGame
         if (!PlayerDiscardPile.Cards.Contains((PlayerCard)cmd.Card))
             throw new GameRuleViolatedException("Card must be in discard pile");
 
+        if (((ContingencyPlanner)PlayerByRole(Role.ContingencyPlanner)).StoredEventCard != null)
+            throw new GameRuleViolatedException("Contingency planner already has a stored card");
+
         return ApplyEvents(new ContingencyPlannerTookEventCard(cmd.Card));
     }
 

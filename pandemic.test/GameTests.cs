@@ -3493,6 +3493,25 @@ namespace pandemic.test
                 game.Do(new ContingencyPlannerTakeEventCardCommand(new AirliftCard())));
         }
 
+        [Test]
+        public void Contingency_planner_take_event_card_throws_if_already_has_one()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var airlift = new AirliftCard();
+            var oneQuietNight = new OneQuietNightCard();
+            game = game with { PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift) };
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = oneQuietNight
+            });
+
+            Should.Throw<GameRuleViolatedException>(() =>
+                game.Do(new ContingencyPlannerTakeEventCardCommand(airlift)));
+        }
+
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
             return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
