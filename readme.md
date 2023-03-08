@@ -16,7 +16,10 @@ implemented.
         - when this event card is played, remove it from the game
       - test cases
         - legal commands
+          - use
         - all commands
+          - take
+          - use
         - ensure contingency planner can play event card at right times
           - eg between epidemic infect/intensify
   - anyone can clear all cubes when a disease is cured

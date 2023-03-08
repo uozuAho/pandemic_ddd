@@ -42,6 +42,7 @@ namespace pandemic.Commands
                 SetOperationsExpertCommands(game);
                 SetResearcherCommands(game);
                 SetScientistCommands(game);
+                SetContingencyPlannerCommands(game);
             }
 
             if (_buffer.Take(_bufIdx).All(c => c.IsSpecialEvent))
@@ -53,6 +54,19 @@ namespace pandemic.Commands
             }
 
             return new ArraySegment<IPlayerCommand>(_buffer, 0, _bufIdx);
+        }
+
+        private void SetContingencyPlannerCommands(PandemicGame game)
+        {
+            if (game.CurrentPlayer.Role != Role.ContingencyPlanner
+                || game.CurrentPlayer.ActionsRemaining == 0
+                || game.PhaseOfTurn != TurnPhase.DoActions) return;
+
+            foreach (var card in game.PlayerDiscardPile.Cards
+                         .Where(c => c is ISpecialEventCard).Cast<ISpecialEventCard>())
+            {
+                _buffer[_bufIdx++] = new ContingencyPlannerTakeEventCardCommand(card);
+            }
         }
 
         private void SetScientistCommands(PandemicGame game)

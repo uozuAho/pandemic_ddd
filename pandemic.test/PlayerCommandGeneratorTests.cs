@@ -648,6 +648,24 @@ namespace pandemic.test
             commands.ShouldContain(c => c is ScientistDiscoverCureCommand);
         }
 
+        [Test]
+        public void Contingency_planner_can_take_event_card()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Researcher },
+                IncludeSpecialEventCards = false
+            });
+            var airlift = new AirliftCard();
+            game = game with
+            {
+                PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift)
+            };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldContain(c => c is ContingencyPlannerTakeEventCardCommand);
+        }
+
         private static PandemicGame CreateNewGame(NewGameOptions options)
         {
             var (game, _) = PandemicGame.CreateNewGame(options);
