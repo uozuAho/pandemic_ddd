@@ -681,9 +681,7 @@ namespace pandemic.test
             });
 
             var commands = _generator.LegalCommands(game);
-            commands.ShouldContain(c =>
-                c is ContingencyPlannerSpecialEventCommand
-                && ((ContingencyPlannerSpecialEventCommand)c).Command is AirliftCommand);
+            commands.ShouldContain(c => c is AirliftCommand);
         }
 
         private static PandemicGame CreateNewGame(NewGameOptions options)

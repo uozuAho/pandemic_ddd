@@ -117,18 +117,8 @@ public partial record PandemicGame
             ShareKnowledgeTakeFromResearcherCommand cmd => Do(cmd),
             ScientistDiscoverCureCommand cmd => Do(cmd),
             ContingencyPlannerTakeEventCardCommand cmd => Do(cmd),
-            ContingencyPlannerSpecialEventCommand cmd => Do(cmd),
             _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
         };
-    }
-
-    private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerSpecialEventCommand cmd)
-    {
-        var events = new List<IEvent>();
-
-        var game = Do(cmd.Command, events);
-
-        return (game, events);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerTakeEventCardCommand cmd)

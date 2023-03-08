@@ -3470,8 +3470,7 @@ namespace pandemic.test
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
 
             // act: use card
-            (game, events) = game.Do(new ContingencyPlannerSpecialEventCommand(
-                new AirliftCommand(Role.ContingencyPlanner, Role.Dispatcher, "Chicago")));
+            (game, events) = game.Do(new AirliftCommand(Role.ContingencyPlanner, Role.Dispatcher, "Chicago"));
 
             // assert
             game.PlayerByRole(Role.Dispatcher).Location.ShouldBe("Chicago");
@@ -3543,8 +3542,7 @@ namespace pandemic.test
             });
             var events = new List<IEvent>();
 
-            game = game.Do(new ContingencyPlannerSpecialEventCommand(
-                new OneQuietNightCommand(Role.ContingencyPlanner)), events);
+            game = game.Do(new OneQuietNightCommand(Role.ContingencyPlanner), events);
             game = game.Do(new PassCommand(Role.ContingencyPlanner), events);
 
             ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
@@ -3569,8 +3567,7 @@ namespace pandemic.test
             var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
 
             // act
-            game = game.Do(new ContingencyPlannerSpecialEventCommand(
-                new ResilientPopulationCommand(Role.ContingencyPlanner, infectionCardToRemove)), events);
+            game = game.Do(new ResilientPopulationCommand(Role.ContingencyPlanner, infectionCardToRemove), events);
 
             ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
             game.PlayerDiscardPile.Cards.ShouldNotContain(resilientPopulation); // card is removed from game
@@ -3593,8 +3590,7 @@ namespace pandemic.test
             var events = new List<IEvent>();
 
             // act
-            game = game.Do(new ContingencyPlannerSpecialEventCommand(
-                new GovernmentGrantCommand(Role.ContingencyPlanner, "Chicago")), events);
+            game = game.Do(new GovernmentGrantCommand(Role.ContingencyPlanner, "Chicago"), events);
 
             ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
             game.PlayerDiscardPile.Cards.ShouldNotContain(governmentGrant); // card is removed from game
@@ -3619,8 +3615,7 @@ namespace pandemic.test
             var infectionCardOrder = game.InfectionDrawPile.Top(6).Reverse().ToImmutableList();
 
             // act
-            game = game.Do(new ContingencyPlannerSpecialEventCommand(
-                new EventForecastCommand(Role.ContingencyPlanner, infectionCardOrder)), events);
+            game = game.Do(new EventForecastCommand(Role.ContingencyPlanner, infectionCardOrder), events);
 
             ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
             game.PlayerDiscardPile.Cards.ShouldNotContain(eventForecastCard); // card is removed from game
@@ -3642,8 +3637,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new ContingencyPlannerSpecialEventCommand(
-                    new OneQuietNightCommand(Role.ContingencyPlanner))));
+                game.Do(new OneQuietNightCommand(Role.ContingencyPlanner)));
         }
 
         private static int TotalNumCubesOnCities(PandemicGame game)
