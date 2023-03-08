@@ -76,7 +76,7 @@ namespace pandemic.Aggregates.Game
         /// <summary>
         /// enabled by using the 'one quiet night' special event card
         /// </summary>
-        private bool SkipNextInfectPhase { get; init; }
+        private bool OneQuietNightWillBeUsedNextInfectPhase { get; init; }
 
         private bool PlayerCommandRequired()
         {

@@ -10,14 +10,13 @@ implemented.
 - implement all game rules. left:
   - role special abilities
     - contingency planner:
-      - argh this is a pain to implement. going with: add conditional code to existing command/event handlers where possible
       - card rules:
         - as an action, take any discarded event card and store it on this card
           - only 1 card can be stored at a time, it's not part of your hand
         - when this event card is played, remove it from the game
       - test cases
         - can use all special events
-          - un-ignore tests
+          - un-ignore tests after all implemented
         - throws if given command does not match stored event card (unskip test)
         - legal commands
         - all commands

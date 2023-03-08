@@ -3529,7 +3529,6 @@ namespace pandemic.test
             game.APlayerMustDiscard.ShouldBeFalse();
         }
 
-        [Ignore("finish Has impl")]
         [Test]
         public void Contingency_planner_can_use_one_quiet_night()
         {
@@ -3548,10 +3547,35 @@ namespace pandemic.test
                 new OneQuietNightCommand(Role.ContingencyPlanner)), events);
             game = game.Do(new PassCommand(Role.ContingencyPlanner), events);
 
-            ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBeNull();
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
             game.PlayerDiscardPile.Cards.ShouldNotContain(oneQuietNight); // card is removed from game
             game.PlayerDrawPile.Cards.ShouldNotContain(oneQuietNight);
             events.ShouldNotContain(e => e is CubeAddedToCity);
+        }
+
+        [Test]
+        public void Contingency_planner_can_use_resilient_population()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.ContingencyPlanner, Role.Dispatcher }
+            });
+            var resilientPopulation = new ResilientPopulationCard();
+            game = game.SetCurrentPlayerAs((ContingencyPlanner)game.CurrentPlayer with
+            {
+                StoredEventCard = resilientPopulation
+            });
+            var events = new List<IEvent>();
+            var infectionCardToRemove = game.InfectionDiscardPile.TopCard;
+
+            // act
+            game = game.Do(new ContingencyPlannerSpecialEventCommand(
+                new ResilientPopulationCommand(Role.ContingencyPlanner, infectionCardToRemove)), events);
+
+            ((ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner)).StoredEventCard.ShouldBeNull();
+            game.PlayerDiscardPile.Cards.ShouldNotContain(resilientPopulation); // card is removed from game
+            game.PlayerDrawPile.Cards.ShouldNotContain(resilientPopulation);
+            game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
         }
 
         [Ignore("enable once all events implemented")]

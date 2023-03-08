@@ -93,6 +93,8 @@ public partial record PandemicGame
             ContingencyPlannerTookEventCard e => Apply(game, e),
             ContingencyPlannerUsedStoredCard => game,
             ContingencyPlannerStoredAirliftUsed e => Apply(game, e),
+            ContingencyPlannerUsedStoredOneQuietNight e => Apply(game, e),
+            ContingencyPlannerUsedStoredResilientPopulation e => Apply(game, e),
             _ => throw new ArgumentOutOfRangeException(nameof(@event), @event, null)
         };
     }
@@ -308,7 +310,7 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed evt)
     {
-        return game with { SkipNextInfectPhase = false };
+        return game with { OneQuietNightWillBeUsedNextInfectPhase = false };
     }
 
     private static PandemicGame Apply(PandemicGame game, OneQuietNightUsed evt)
@@ -318,9 +320,23 @@ public partial record PandemicGame
 
         return game with
         {
-            SkipNextInfectPhase = true,
+            OneQuietNightWillBeUsedNextInfectPhase = true,
             Players = game.Players.Replace(player, player with { Hand = player.Hand.Remove(card) }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(card)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredOneQuietNight evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var card = (PlayerCard)planner.StoredEventCard;
+
+        return game with
+        {
+            OneQuietNightWillBeUsedNextInfectPhase = true,
+            Players = game.Players.Replace(planner, planner with { StoredEventCard = null}),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(card)
         };
     }
 
@@ -348,6 +364,24 @@ public partial record PandemicGame
                 Hand = player.Hand.Remove(eventCard)
             }),
             PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(eventCard)
+        };
+    }
+
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredResilientPopulation evt)
+    {
+        var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
+        if (planner.StoredEventCard == null) throw new InvalidOperationException();
+        var eventCard = (PlayerCard)planner.StoredEventCard;
+
+        return game with
+        {
+            InfectionDiscardPile = game.InfectionDiscardPile.Remove(evt.InfectionCard),
+            InfectionCardsRemovedFromGame = game.InfectionCardsRemovedFromGame.Add(evt.InfectionCard),
+            Players = game.Players.Replace(planner, planner with
+            {
+                StoredEventCard = null
+            }),
+            PlayerCardsRemovedFromGame = game.PlayerCardsRemovedFromGame.Add(eventCard)
         };
     }
 

@@ -348,19 +348,29 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
     {
         var player = PlayerByRole(cmd.Role);
-        if (!player.Hand.Contains(new OneQuietNightCard()))
+        if (!player.Has(new OneQuietNightCard()))
             throw new GameRuleViolatedException($"{player.Role} doesn't have the one quiet night card");
 
-        return ApplyEvents(new OneQuietNightUsed(cmd.Role));
+        IEvent @event;
+        if (player is ContingencyPlanner { StoredEventCard: OneQuietNightCard })
+            @event = new ContingencyPlannerUsedStoredOneQuietNight();
+        else
+            @event = new OneQuietNightUsed(cmd.Role);
+
+        return ApplyEvents(@event);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
     {
-        if (!PlayerByRole(cmd.Role).Hand.Contains(new ResilientPopulationCard()))
+        if (!PlayerByRole(cmd.Role).Has(new ResilientPopulationCard()))
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the resilient population card");
 
         if (!InfectionDiscardPile.Cards.Contains(cmd.Card))
             throw new GameRuleViolatedException($"{cmd.Card} is not in the discard pile");
+
+        if (cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is ResilientPopulationCard)
+            return ApplyEvents(new ContingencyPlannerUsedStoredResilientPopulation(cmd.Card));
 
         return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
