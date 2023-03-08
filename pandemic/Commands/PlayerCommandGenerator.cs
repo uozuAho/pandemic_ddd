@@ -124,7 +124,7 @@ namespace pandemic.Commands
             var opex = (OperationsExpert)game.PlayerByRole(Role.OperationsExpert);
             var city = game.CityByName(opex.Location);
 
-            if (!city.HasResearchStation)
+            if (!city.HasResearchStation && game.ResearchStationPile > 0)
                 _buffer[_bufIdx++] = new OperationsExpertBuildResearchStation();
 
             if (city.HasResearchStation && !opex.HasUsedDiscardAndMoveAbilityThisTurn)

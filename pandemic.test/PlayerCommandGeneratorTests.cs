@@ -573,6 +573,23 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Operations_expert_cannot_build_research_station_if_none_left()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.OperationsExpert, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" }) with
+            {
+                ResearchStationPile = 0
+            };
+
+            var commands = _generator.LegalCommands(game);
+            commands.ShouldNotContain(c => c is OperationsExpertBuildResearchStation);
+        }
+
+        [Test]
         public void Operations_expert_move_from_research_station()
         {
             var game = CreateNewGame(new NewGameOptions

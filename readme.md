@@ -4,7 +4,6 @@ The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%2
 implemented in C#. Intended for usage by AI agents.
 
 # todo
-- fuzz fail: legal commands contains opex build station when none left
 - can a heroic game be won?
   - pandemic strategies
     - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
