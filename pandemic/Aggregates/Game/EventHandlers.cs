@@ -92,7 +92,6 @@ public partial record PandemicGame
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
             ContingencyPlannerTookEventCard e => Apply(game, e),
-            ContingencyPlannerUsedStoredCard => game,
             ContingencyPlannerStoredAirliftUsed e => Apply(game, e),
             ContingencyPlannerUsedStoredOneQuietNight e => Apply(game, e),
             ContingencyPlannerUsedStoredResilientPopulation e => Apply(game, e),
