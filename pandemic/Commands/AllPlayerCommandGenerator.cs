@@ -50,6 +50,21 @@ public static class AllPlayerCommandGenerator
         foreach (var cmd in DispatcherCommands(game)) yield return cmd;
         foreach (var cmd in OperationsExpertCommands(game)) yield return cmd;
         foreach (var cmd in ResearcherCommands(game)) yield return cmd;
+        foreach (var cmd in ScientistCommands(game)) yield return cmd;
+    }
+
+    private static IEnumerable<IPlayerCommand> ScientistCommands(PandemicGame game)
+    {
+        if (!game.Players.Any(p => p.Role == Role.Scientist)) yield break;
+
+        var scientist = game.PlayerByRole(Role.Scientist);
+
+        foreach (var cardsToCure in scientist.Hand.CityCards
+                     .GroupBy(c => c.City.Colour)
+                     .Where(g => g.Count() >= 4))
+        {
+            yield return new ScientistDiscoverCureCommand(cardsToCure.Select(g => g).ToArray());
+        }
     }
 
     private static IEnumerable<IPlayerCommand> ResearcherCommands(PandemicGame game)
