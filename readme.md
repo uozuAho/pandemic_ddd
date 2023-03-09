@@ -6,10 +6,9 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - make faster: play more games, search more game states
-    - goal: 100 games/sec (non-search), 5000 states/sec (search)
-    - greedy search: multithreading giving any advantage?
-    - make a command generator that doesn't generate dumb/inefficient commands
-      - eg all possible event forecasts
+    - goal: single threaded: 100 games/sec (non-search), 5000 states/sec (search)
+    - ideas
+      - greedy search: multithreading giving any advantage?
   - strategy
     - play with game evaluator. Try to lose in some other way to outbreaks/cubes
     - check BGA replays: any clear strategy?

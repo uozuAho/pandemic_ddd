@@ -194,18 +194,42 @@ namespace pandemic.Aggregates.Game
         public PandemicGame AddCubes(string city, Colour colour, int numCubes)
         {
             var city_ = CityByName(city);
+            var cityIdx = Board.CityIdx(city);
 
             return this with
             {
-                Cities = Cities.Replace(city_, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
+                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
             };
         }
 
-        public bool DoesQuarantineSpecialistPreventInfectionAt(string city)
+        private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
         {
-            return Players.Any(p => p.Role == Role.QuarantineSpecialist)
-                   && (PlayerByRole(Role.QuarantineSpecialist).Location == city
-                       || QuarantineSpecialistIsInNeighbouringCity(city));
+            for (int i = 0; i < Players.Count; i++)
+            {
+                var player = Players[i];
+                if (player.Role == Role.QuarantineSpecialist)
+                {
+                    if (player.Location == city || QuarantineSpecialistIsInNeighbouringCity(city))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool IsMedicAt(string city)
+        {
+            for (int i = 0; i < Players.Count; i++)
+            {
+                var player = Players[i];
+                if (player.Role == Role.Medic && player.Location == city)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool QuarantineSpecialistIsInNeighbouringCity(string city)

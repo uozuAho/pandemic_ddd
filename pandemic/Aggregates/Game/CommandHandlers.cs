@@ -792,9 +792,7 @@ public partial record PandemicGame
         if (game.IsEradicated(infectionCard.Colour))
             return game;
 
-        if (game.Players.Any(p => p.Role == Role.Medic)
-            && game.PlayerByRole(Role.Medic).Location == infectionCard.City
-            && game.IsCured(infectionCard.Colour))
+        if (game.IsMedicAt(infectionCard.City) && game.IsCured(infectionCard.Colour))
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
         if (game.DoesQuarantineSpecialistPreventInfectionAt(infectionCard.City))
