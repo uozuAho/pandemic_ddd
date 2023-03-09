@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace pandemic.Values
 {
@@ -8,6 +9,11 @@ namespace pandemic.Values
         public CubePile Cubes { get; init; } = CubePile.Empty;
 
         public bool HasResearchStation { get; init; }
+
+        /// <summary>
+        /// Returns the highest number of cubes of any one colour in this city
+        /// </summary>
+        public int MaxNumCubes => Cubes.Counts.Values.Max();
 
         public bool IsSameStateAs(City other)
         {

@@ -52,6 +52,50 @@ namespace pandemic.Commands
             return commands;
         }
 
+        /// <summary>
+        /// Aims to be faster than AllLegalCommands by only generating 'sensible' commands
+        /// </summary>
+        public IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
+        {
+            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
+
+            var commands = new List<IPlayerCommand>();
+
+            commands.AddRange(DiscardCommands(game));
+            commands.AddRange(SensibleSpecialEventCommands(game));
+
+            if (game.APlayerMustDiscard) return commands;
+
+            if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
+            {
+                commands.AddRange(DriveFerryCommands(game));
+                commands.AddRange(BuildResearchStationCommands(game));
+                commands.AddRange(CureCommands(game));
+                commands.AddRange(DirectFlightCommands(game));
+                commands.AddRange(CharterFlightCommands(game));
+                commands.AddRange(ShuttleFlightCommands(game));
+                commands.AddRange(TreatDiseaseCommands(game));
+                commands.AddRange(ShareKnowledgeGiveCommands(game));
+                commands.AddRange(ShareKnowledgeTakeCommands(game));
+                commands.AddRange(PassCommands(game));
+                commands.AddRange(DispatcherCommands(game));
+                commands.AddRange(OperationsExpertCommands(game));
+                commands.AddRange(ResearcherCommands(game));
+                commands.AddRange(ScientistCommands(game));
+                commands.AddRange(ContingencyPlannerTakeCommands(game));
+            }
+
+            if (commands.All(c => c.IsSpecialEvent))
+            {
+                foreach (var group in commands.GroupBy(c => c.Role))
+                {
+                    commands.Add(new DontUseSpecialEventCommand(group.Key));
+                }
+            }
+
+            return commands;
+        }
+
         private static IEnumerable<IPlayerCommand> ContingencyPlannerTakeCommands(PandemicGame game)
         {
             if (game.CurrentPlayer.Role != Role.ContingencyPlanner
@@ -223,7 +267,7 @@ namespace pandemic.Commands
             }
         }
 
-        private IEnumerable<IPlayerCommand> SpecialEventCommands(PandemicGame game)
+        private static IEnumerable<IPlayerCommand> SpecialEventCommands(PandemicGame game)
         {
             if (game.SpecialEventWasRecentlySkipped) yield break;
             if (game.PhaseOfTurn == TurnPhase.Epidemic) yield break;
@@ -244,6 +288,37 @@ namespace pandemic.Commands
                         foreach (var x in GovernmentGrants(game, playerWithCard)) yield return x;
                     else if (card is EventForecastCard)
                         foreach (var x in EventForecasts(game, playerWithCard)) yield return x;
+                    else if (card is AirliftCard)
+                        foreach (var x in Airlifts(game, playerWithCard)) yield return x;
+                    else if (card is ResilientPopulationCard)
+                        foreach (var x in ResilientPopulations(game, playerWithCard)) yield return x;
+                    else if (card is OneQuietNightCard)
+                        foreach (var x in OneQuietNights(game, playerWithCard)) yield return x;
+                }
+            }
+        }
+
+        private static IEnumerable<IPlayerCommand> SensibleSpecialEventCommands(PandemicGame game)
+        {
+            if (game.SpecialEventWasRecentlySkipped) yield break;
+            if (game.PhaseOfTurn == TurnPhase.Epidemic) yield break;
+
+            foreach (var playerWithCard in game.Players)
+            {
+                var cards = playerWithCard.Hand.Where(c => c is ISpecialEventCard).ToList();
+                if (playerWithCard.Role == Role.ContingencyPlanner)
+                {
+                    var planner = (ContingencyPlanner)playerWithCard;
+                    if (planner.StoredEventCard != null)
+                        cards.Add((PlayerCard)planner.StoredEventCard);
+                }
+
+                foreach (var card in cards)
+                {
+                    if (card is GovernmentGrantCard)
+                        foreach (var x in GovernmentGrants(game, playerWithCard)) yield return x;
+                    else if (card is EventForecastCard)
+                        foreach (var x in SensibleEventForecasts(game, playerWithCard)) yield return x;
                     else if (card is AirliftCard)
                         foreach (var x in Airlifts(game, playerWithCard)) yield return x;
                     else if (card is ResilientPopulationCard)
@@ -285,6 +360,15 @@ namespace pandemic.Commands
             {
                 yield return new EventForecastCommand(playerWithCard.Role, perm);
             }
+        }
+
+        private static IEnumerable<IPlayerCommand> SensibleEventForecasts(PandemicGame game, Player playerWithCard)
+        {
+            // todo: write a test for this. Get the order right!
+            var cards = game.InfectionDrawPile.Top(6)
+                .OrderByDescending(card => game.CityByName(card.City).MaxNumCubes);
+
+            yield return new EventForecastCommand(playerWithCard.Role, cards.ToArray());
         }
 
         private static IEnumerable<IPlayerCommand> GovernmentGrants(PandemicGame game, Player playerWithCard)

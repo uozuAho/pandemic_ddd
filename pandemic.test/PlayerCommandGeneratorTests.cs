@@ -261,6 +261,61 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Sensible_event_forecast_generates_one_sensible_command()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new EventForecastCard())
+            });
+            game = game with
+            {
+                InfectionDrawPile = new Deck<InfectionCard>(new[]
+                {
+                    new InfectionCard("Atlanta", Colour.Blue),
+                    new InfectionCard("Chicago", Colour.Blue),
+                    new InfectionCard("Essen", Colour.Blue),
+                    new InfectionCard("London", Colour.Blue),
+                    new InfectionCard("Madrid", Colour.Blue),
+                    new InfectionCard("Milan", Colour.Blue),
+                }),
+                // set cities above with cubes in increasing order
+                Cities = game.Cities
+                    .Replace(game.CityByName("Atlanta"),
+                        game.CityByName("Atlanta") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 1) })
+                    .Replace(game.CityByName("Chicago"),
+                        game.CityByName("Chicago") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 1) })
+                    .Replace(game.CityByName("Essen"),
+                        game.CityByName("Essen") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 2) })
+                    .Replace(game.CityByName("London"),
+                        game.CityByName("London") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 2) })
+                    .Replace(game.CityByName("Madrid"),
+                        game.CityByName("Madrid") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
+                    .Replace(game.CityByName("Milan"),
+                        game.CityByName("Milan") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
+            };
+
+            var commands = _generator.AllSensibleCommands(game).ToList();
+            commands.ShouldContain(c => c is EventForecastCommand, 1);
+            var command = commands.Single(c => c is EventForecastCommand) as EventForecastCommand;
+
+            // later cards are closer to the top of the deck
+            command!.Cards.ShouldBe(new []
+            {
+                new InfectionCard("Madrid", Colour.Blue),
+                new InfectionCard("Milan", Colour.Blue),
+                new InfectionCard("Essen", Colour.Blue),
+                new InfectionCard("London", Colour.Blue),
+                new InfectionCard("Atlanta", Colour.Blue),
+                new InfectionCard("Chicago", Colour.Blue),
+            });
+        }
+
+        [Test]
         public void Airlift()
         {
             var game = CreateNewGame(new NewGameOptions

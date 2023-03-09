@@ -34,6 +34,7 @@ namespace pandemic.Aggregates.Game
 
         public IEnumerable<IPlayerCommand> LegalCommands()
         {
+            // todo: inject generator
             return new PlayerCommandGenerator().AllLegalCommands(this);
         }
 
