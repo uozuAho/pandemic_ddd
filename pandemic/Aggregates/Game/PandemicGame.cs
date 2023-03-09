@@ -34,7 +34,7 @@ namespace pandemic.Aggregates.Game
 
         public IEnumerable<IPlayerCommand> LegalCommands()
         {
-            return new PlayerCommandGenerator().LegalCommands(this);
+            return new PlayerCommandGenerator().AllLegalCommands(this);
         }
 
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
@@ -89,7 +89,7 @@ namespace pandemic.Aggregates.Game
 
         private bool PlayerCommandRequired()
         {
-            return !IsOver && _commandGenerator.LegalCommands(this).Any();
+            return !IsOver && _commandGenerator.AllLegalCommands(this).Any();
         }
 
         public bool IsSameStateAs(PandemicGame other)

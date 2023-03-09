@@ -49,7 +49,7 @@ namespace pandemic
 
         public IEnumerable<IPlayerCommand> LegalActions()
         {
-            return _commandGenerator.LegalCommands(Game);
+            return _commandGenerator.AllLegalCommands(Game);
         }
 
         public void ApplyActionInt(int action)
@@ -59,7 +59,7 @@ namespace pandemic
 
         public IEnumerable<IEvent> ApplyAction(int action)
         {
-            var legalActions = _commandGenerator.LegalCommands(Game).ToList();
+            var legalActions = _commandGenerator.AllLegalCommands(Game).ToList();
             return ApplyAction(legalActions[action]);
         }
 

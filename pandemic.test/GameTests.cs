@@ -402,7 +402,7 @@ namespace pandemic.test
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
-            new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+            new PlayerCommandGenerator().AllLegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
             foreach (var command in AllPlayerCommandGenerator.AllPossibleCommands(game).Where(c => c.ConsumesAction))
             {
@@ -484,7 +484,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
-            new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+            new PlayerCommandGenerator().AllLegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
         }
 
         [Test]
@@ -502,7 +502,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            new PlayerCommandGenerator().LegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
+            new PlayerCommandGenerator().AllLegalCommands(game).ShouldAllBe(move => move is DiscardPlayerCardCommand);
         }
 
         [Test]
@@ -537,7 +537,7 @@ namespace pandemic.test
             var gameStateBeforeShare = game;
             game = game.Do(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist), events);
 
-            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+            commandGenerator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
             game = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")), events);
 
@@ -566,7 +566,7 @@ namespace pandemic.test
             var gameStateBeforeShare = game;
             game = game.Do(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist), events);
 
-            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
+            commandGenerator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
 
             game = game.Do(new DiscardPlayerCardCommand(Role.Medic, PlayerCards.CityCard("Miami")), events);
 
@@ -611,14 +611,14 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(6);
 
-            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+            commandGenerator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
             game = game.Do(new DiscardPlayerCardCommand(Role.Scientist, PlayerCards.CityCard("Miami")), events);
 
             // medic should now have picked up 2 cards, and needs to discard
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
-            commandGenerator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
+            commandGenerator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count,
                 "infection step should not have occurred yet");
 
@@ -1251,7 +1251,7 @@ namespace pandemic.test
             (game, _) = game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
 
             var generator = new PlayerCommandGenerator();
-            generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+            generator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
         [Test]
@@ -1327,7 +1327,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+            new PlayerCommandGenerator().AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
         }
 
         [Test]
@@ -1733,7 +1733,7 @@ namespace pandemic.test
             });
 
             new PlayerCommandGenerator()
-                .LegalCommands(game)
+                .AllLegalCommands(game)
                 .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             (game, _) = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"));
@@ -1788,7 +1788,7 @@ namespace pandemic.test
                 scientist with { Hand = scientist.Hand.Add(new GovernmentGrantCard()) });
 
             new PlayerCommandGenerator()
-                .LegalCommands(game)
+                .AllLegalCommands(game)
                 .ShouldContain(c => c is GovernmentGrantCommand, 47, "one for each city except Atlanta");
 
             (game, _) = game.Do(new GovernmentGrantCommand(Role.Scientist, "Chicago"));
@@ -1816,7 +1816,7 @@ namespace pandemic.test
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.Hand.Count.ShouldBe(8);
-            new PlayerCommandGenerator().LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+            new PlayerCommandGenerator().AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: gov grant
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), eventList);
@@ -1858,7 +1858,7 @@ namespace pandemic.test
             var epidemicCity = game.CityByName(epidemicInfectionCard.City);
             epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            generator.LegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+            generator.AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
             // act: use special event card
             game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
@@ -1953,7 +1953,7 @@ namespace pandemic.test
             // assert: still a chance to use special event before picking up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
@@ -1962,7 +1962,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -1988,7 +1988,7 @@ namespace pandemic.test
             // assert: scientist still a chance to use special event before medic picks up cards
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             events.ShouldNotContain(e => e is PlayerCardPickedUp);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
             game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
@@ -1997,7 +1997,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             events.ShouldContain(e => e is PlayerCardPickedUp, 2);
             events.ShouldContain(e => e is InfectionCardDrawn, 2);
-            generator.LegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+            generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
         }
 
         [Test]
@@ -3065,7 +3065,7 @@ namespace pandemic.test
             (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
 
             var generator = new PlayerCommandGenerator();
-            generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+            generator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
         [Test]
@@ -3175,7 +3175,7 @@ namespace pandemic.test
             (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
 
             var generator = new PlayerCommandGenerator();
-            generator.LegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
+            generator.AllLegalCommands(game).ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
         }
 
         [Test]

@@ -31,7 +31,7 @@ namespace pandemic.console
         {
             if (nodeTracker.TotalNumNodes == NodeLimit) return;
 
-            var legalActions = CommandGenerator.LegalCommands(node.State)
+            var legalActions = CommandGenerator.AllLegalCommands(node.State)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .OrderBy(_ => _rng.Next()).ToList();
 

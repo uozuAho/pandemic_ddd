@@ -26,7 +26,7 @@ namespace pandemic.test
 
             for (var i = 0; i < 1000 && !game.IsOver; i++)
             {
-                var legalActions = commandGenerator.LegalCommands(game).ToList();
+                var legalActions = commandGenerator.AllLegalCommands(game).ToList();
                 if (!legalActions.Any())
                 {
                     Assert.Fail($"No legal actions! State: \n\n{game}\n\n Events:\n{string.Join('\n', events)}");

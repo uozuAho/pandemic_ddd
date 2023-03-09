@@ -20,7 +20,7 @@ public class PandemicSearchProblem
 
     public IEnumerable<IPlayerCommand> GetActions(PandemicGame state)
     {
-        return _commandGenerator.LegalCommands(state);
+        return _commandGenerator.AllLegalCommands(state);
     }
 
     public PandemicGame DoAction(PandemicGame state, IPlayerCommand action)

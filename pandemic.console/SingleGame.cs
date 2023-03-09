@@ -40,7 +40,7 @@ internal class SingleGame
         for (; numActions < 1000 && !game.IsOver; numActions++)
         {
             if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
-            var action = random.Choice(commandGenerator.LegalCommands(game));
+            var action = random.Choice(commandGenerator.AllLegalCommands(game));
             var (updatedGame, newEvents) = game.Do(action);
             game = updatedGame;
             events.AddRange(newEvents);

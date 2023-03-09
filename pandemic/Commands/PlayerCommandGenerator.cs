@@ -11,7 +11,7 @@ namespace pandemic.Commands
 {
     public class PlayerCommandGenerator
     {
-        public IEnumerable<IPlayerCommand> LegalCommands(PandemicGame game)
+        public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
         {
             if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
 

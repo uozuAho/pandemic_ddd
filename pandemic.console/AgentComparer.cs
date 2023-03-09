@@ -22,8 +22,8 @@ namespace pandemic.console
         public static void Run()
         {
             // RunRandomGames();
-            // RunGreedyGames(TimeSpan.FromSeconds(5));
-            RunGreedyBestFirst();
+            RunGreedyGames(TimeSpan.FromSeconds(5));
+            // RunGreedyBestFirst();
             // RunDfs();
             // RunDfsWithHeuristics();
         }
