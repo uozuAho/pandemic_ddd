@@ -31,29 +31,17 @@ namespace pandemic.agents
 
             score += game.Players
                 .Select(p => p.Hand)
-                .Sum(h => 100 * PlayerHandScore(game, h));
+                .Sum(h => PlayerHandScore(game, h));
 
             // bad stuff -----------------------
             // outbreaks are bad
-            score -= game.OutbreakCounter * 1000;
+            score -= game.OutbreakCounter * 100;
 
             // further away from research stations is bad
             // (at least with currently implemented rules)
-            // score -= game.Players
-            //     .Sum(p => StandardGameBoard.DriveFerryDistance(
-            //         p.Location, ClosestResearchStationTo(game, p.Location)));
-
-            // cubes are bad
-            foreach (var city in game.Cities)
-            {
-                for (int i = 1; i < 4; i++)
-                {
-                    foreach (var colour in ColourExtensions.AllColours)
-                    {
-                        score -= city.Cubes.NumberOf(colour) * i * i * 10;
-                    }
-                }
-            }
+            score -= game.Players
+                .Sum(p => StandardGameBoard.DriveFerryDistance(
+                    p.Location, ClosestResearchStationTo(game, p.Location)));
 
             return score;
         }
@@ -83,17 +71,15 @@ namespace pandemic.agents
             var closest = "";
             var closestDistance = int.MaxValue;
 
-            for (int i = 0; i < game.Cities.Count; i++)
+            foreach (var researchCity in game.Cities
+                         .Where(c => c.HasResearchStation)
+                         .Select(c => c.Name))
             {
-                var city1 = game.Cities[i];
-                if (city1.HasResearchStation)
+                var distance = StandardGameBoard.DriveFerryDistance(researchCity, city);
+                if (distance < closestDistance)
                 {
-                    var distance = StandardGameBoard.DriveFerryDistance(city1.Name, city);
-                    if (distance < closestDistance)
-                    {
-                        closestDistance = distance;
-                        closest = city1.Name;
-                    }
+                    closestDistance = distance;
+                    closest = researchCity;
                 }
             }
 
