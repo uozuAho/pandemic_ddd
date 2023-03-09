@@ -71,7 +71,7 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(this);
 
-        var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
+        var playerWhoMustDiscard = PlayerThatNeedsToDiscard();
         if (playerWhoMustDiscard != null)
         {
             if (command is not DiscardPlayerCardCommand && !command.IsSpecialEvent)
