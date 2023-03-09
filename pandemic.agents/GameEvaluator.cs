@@ -71,7 +71,7 @@ namespace pandemic.agents
             var closest = "";
             var closestDistance = int.MaxValue;
 
-            for (var i = 0; i < game.Cities.Count; i++)
+            for (var i = 0; i < game.Cities.Length; i++)
             {
                 var city1 = game.Cities[i];
                 if (!city1.HasResearchStation) continue;

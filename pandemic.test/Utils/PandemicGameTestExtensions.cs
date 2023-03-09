@@ -32,7 +32,7 @@ public static class PandemicGameTestExtensions
     {
         return game with
         {
-            Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableList()
+            Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableArray()
         };
     }
 }

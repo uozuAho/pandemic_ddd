@@ -21,7 +21,7 @@ namespace pandemic.Aggregates.Game
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public ImmutableList<City> Cities { get; init; }
+        public ImmutableArray<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
@@ -137,7 +137,7 @@ namespace pandemic.Aggregates.Game
 
         private PandemicGame(Random rng, ICommandGenerator commandGenerator)
         {
-            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableArray();
 
             var atlanta = CityByName("Atlanta");
             Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});

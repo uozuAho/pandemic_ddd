@@ -371,7 +371,7 @@ namespace pandemic.Commands
             for (int i = 0; i < game.Players.Count; i++)
             {
                 var player = game.Players[i];
-                for (int j = 0; j < game.Cities.Count; j++)
+                for (int j = 0; j < game.Cities.Length; j++)
                 {
                     var city = game.Cities[j];
                     if (city.Name != player.Location)

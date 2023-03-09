@@ -606,7 +606,7 @@ namespace pandemic.test
             });
             game = game with
             {
-                Cities = game.Cities.Select(c => c with { HasResearchStation = true }).ToImmutableList()
+                Cities = game.Cities.Select(c => c with { HasResearchStation = true }).ToImmutableArray()
             };
 
             var commands = _generator.AllLegalCommands(game);
