@@ -106,11 +106,11 @@ namespace pandemic.console
 
         private static void RunGreedyBestFirst()
         {
-            var totalRunTime = TimeSpan.FromSeconds(300);
-            var maxGameTime = TimeSpan.FromSeconds(10);
+            var totalRunTime = TimeSpan.FromSeconds(5);
+            var maxGameTime = TimeSpan.FromSeconds(1);
 
             // increasing threads reduces single thread performance :(
-            var numThreads = Environment.ProcessorCount / 3;
+            var numThreads = Environment.ProcessorCount / 2;
             var tasks = Enumerable.Range(0, numThreads)
                 .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
 

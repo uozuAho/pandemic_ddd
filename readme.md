@@ -8,8 +8,10 @@ implemented in C#. Intended for usage by AI agents.
   - make faster: play more games, search more game states
     - goal: single threaded: 100 games/sec (non-search), 5000 states/sec (search)
     - ideas
-      - greedy search: multithreading giving any advantage?
+      - mutable?
   - strategy
+    - look at what agent is doing
+      - pass is the highest scored action! lol
     - play with game evaluator. Try to lose in some other way to outbreaks/cubes
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks
