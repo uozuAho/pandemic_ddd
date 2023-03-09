@@ -298,7 +298,7 @@ namespace pandemic.Commands
 
             foreach (var playerWithCard in game.Players)
             {
-                var cards = playerWithCard.Hand.Where(c => c is ISpecialEventCard).ToList();
+                var cards = playerWithCard.Hand.SpecialEventCards().ToList();
                 if (playerWithCard.Role == Role.ContingencyPlanner)
                 {
                     var planner = (ContingencyPlanner)playerWithCard;
@@ -329,7 +329,7 @@ namespace pandemic.Commands
 
             foreach (var playerWithCard in game.Players)
             {
-                var cards = playerWithCard.Hand.Where(c => c is ISpecialEventCard).ToList();
+                var cards = playerWithCard.Hand.SpecialEventCards().ToList();
                 if (playerWithCard.Role == Role.ContingencyPlanner)
                 {
                     var planner = (ContingencyPlanner)playerWithCard;
@@ -423,7 +423,7 @@ namespace pandemic.Commands
             {
                 if (player.Hand.Count <= 7) continue;
 
-                foreach (var card in player.Hand)
+                foreach (var card in player.Hand.Cards)
                 {
                     yield return new DiscardPlayerCardCommand(player.Role, card);
                 }

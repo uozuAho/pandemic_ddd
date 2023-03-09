@@ -65,7 +65,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.Location.ShouldBe("Miami");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-            game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Miami"));
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(PlayerCards.CityCard("Miami"));
             game.PlayerDiscardPile.TopCard.ShouldBe(PlayerCards.CityCard("Miami"));
         }
 
@@ -130,7 +130,7 @@ namespace pandemic.test
                 "Bogota"));
 
             game.CurrentPlayer.Location.ShouldBe("Bogota");
-            game.CurrentPlayer.Hand.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(PlayerCards.CityCard("Atlanta"));
             game.PlayerDiscardPile.TopCard.ShouldBe(PlayerCards.CityCard("Atlanta"));
         }
 
@@ -423,7 +423,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new DiscardPlayerCardCommand(Role.Medic, game.CurrentPlayer.Hand.First())));
+                game.Do(new DiscardPlayerCardCommand(Role.Medic, game.CurrentPlayer.Hand.Cards.First())));
         }
 
         [Test]
@@ -444,7 +444,7 @@ namespace pandemic.test
             (game, _) = game.Do(new PassCommand(Role.Medic));
 
             // act
-            var cardToDiscard = game.CurrentPlayer.Hand.First();
+            var cardToDiscard = game.CurrentPlayer.Hand.Cards.First();
             (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, cardToDiscard));
 
             // assert
@@ -463,7 +463,7 @@ namespace pandemic.test
             });
             game = game with { PhaseOfTurn = TurnPhase.InfectCities };
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.Cards.First()));
 
             game.InfectionDrawPile.Count.ShouldBe(initialGame.InfectionDrawPile.Count - 2);
             game.InfectionDiscardPile.Count.ShouldBe(initialGame.InfectionDiscardPile.Count + 2);
@@ -480,7 +480,7 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
+            (game, _) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.Cards.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
@@ -497,7 +497,7 @@ namespace pandemic.test
                 ActionsRemaining = 0
             });
 
-            (game, var events) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.First()));
+            (game, var events) = game.Do(new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.Cards.First()));
 
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
@@ -650,7 +650,7 @@ namespace pandemic.test
             // act
             (game, _) = game.Do(new BuildResearchStationCommand(game.CurrentPlayer.Role, "Chicago"));
 
-            game.CurrentPlayer.Hand.ShouldNotContain(chicagoPlayerCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(chicagoPlayerCard);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.CityByName("Chicago").HasResearchStation.ShouldBe(true);
             game.PlayerDiscardPile.TopCard.ShouldBe(chicagoPlayerCard);
@@ -751,7 +751,7 @@ namespace pandemic.test
             });
 
             (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsCured(Colour.Black));
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
@@ -772,7 +772,7 @@ namespace pandemic.test
             });
 
             AssertEndsTurn(() => game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -791,7 +791,7 @@ namespace pandemic.test
 
             // act
             (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -818,7 +818,7 @@ namespace pandemic.test
 
             // act
             (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -836,7 +836,7 @@ namespace pandemic.test
 
             Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -852,7 +852,7 @@ namespace pandemic.test
 
             Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -875,7 +875,7 @@ namespace pandemic.test
 
             Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -897,7 +897,7 @@ namespace pandemic.test
 
             Assert.Throws<GameRuleViolatedException>(() =>
                 game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -920,7 +920,7 @@ namespace pandemic.test
 
             (game, _) = game.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
 
-            Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Any(c => c is EpidemicCard));
+            Assert.IsFalse(game.PlayerByRole(Role.Medic).Hand.Cards.Any(c => c is EpidemicCard));
             Assert.AreEqual(1, game.PlayerDiscardPile.Cards.Count(c => c is EpidemicCard));
         }
 
@@ -957,7 +957,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is EpidemicCard);
 
             // assert: need to discard
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
@@ -1007,7 +1007,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldContain(e => e is EpidemicIntensified);
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is EpidemicCard);
 
             // assert: need to discard
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(8);
@@ -1056,7 +1056,7 @@ namespace pandemic.test
             events.ShouldContain(e => e is EpidemicInfectStepCompleted);
             events.ShouldNotContain(e => e is EpidemicIntensified);
             events.ShouldNotContain(e => e is TurnEnded);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EpidemicCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is EpidemicCard);
             game.APlayerMustDiscard.ShouldBeFalse();
             game.LegalCommands().ShouldContain(c => c is ResilientPopulationCommand);
         }
@@ -1153,9 +1153,9 @@ namespace pandemic.test
             // act
             (game, _) = game.Do(new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
 
-            game.PlayerByRole(Role.Medic).Hand.ShouldNotContain(atlanta);
+            game.PlayerByRole(Role.Medic).Hand.Cards.ShouldNotContain(atlanta);
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
-            game.PlayerByRole(Role.Scientist).Hand.ShouldContain(atlanta);
+            game.PlayerByRole(Role.Scientist).Hand.Cards.ShouldContain(atlanta);
         }
 
         [Test]
@@ -1272,8 +1272,8 @@ namespace pandemic.test
             // act
             (game, _) = game.Do(new ShareKnowledgeTakeCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist));
 
-            game.PlayerByRole(Role.Medic).Hand.ShouldContain(atlanta);
-            game.PlayerByRole(Role.Scientist).Hand.ShouldNotContain(atlanta);
+            game.PlayerByRole(Role.Medic).Hand.Cards.ShouldContain(atlanta);
+            game.PlayerByRole(Role.Scientist).Hand.Cards.ShouldNotContain(atlanta);
             game.PlayerByRole(Role.Medic).ActionsRemaining.ShouldBe(3);
         }
 
@@ -2020,7 +2020,7 @@ namespace pandemic.test
 
             game.InfectionDrawPile.Top(6).ShouldBe(newInfectionCardOrder);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is EventForecastCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is EventForecastCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<EventForecastCard>();
         }
 
@@ -2064,7 +2064,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.Location.ShouldBe("Paris");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is AirliftCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
         }
 
@@ -2083,7 +2083,7 @@ namespace pandemic.test
 
             game.PlayerByRole(otherPlayer).Location.ShouldBe("Paris");
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is AirliftCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is AirliftCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<AirliftCard>();
         }
 
@@ -2127,7 +2127,7 @@ namespace pandemic.test
             game.InfectionDiscardPile.Cards.ShouldNotContain(infectionCardToRemove);
             game.InfectionDrawPile.Cards.ShouldNotContain(infectionCardToRemove);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
-            game.CurrentPlayer.Hand.ShouldNotContain(c => c is ResilientPopulationCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(c => c is ResilientPopulationCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<ResilientPopulationCard>();
         }
 
@@ -2212,7 +2212,7 @@ namespace pandemic.test
             events.ShouldNotContain(e => e is InfectionCardDrawn);
             game.InfectionDiscardPile.ShouldBe(initial.InfectionDiscardPile);
             game.InfectionDrawPile.ShouldBe(initial.InfectionDrawPile);
-            game.PlayerByRole(playerWithCard).Hand.ShouldNotContain(c => c is OneQuietNightCard);
+            game.PlayerByRole(playerWithCard).Hand.Cards.ShouldNotContain(c => c is OneQuietNightCard);
             game.PlayerDiscardPile.TopCard.ShouldBeOfType<OneQuietNightCard>();
         }
 
@@ -2379,7 +2379,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.PlayerByRole(Role.Medic).Location.ShouldBe("Chicago");
-            game.CurrentPlayer.Hand.ShouldNotContain(chicago);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(chicago);
             game.PlayerDiscardPile.TopCard.ShouldBe(chicago);
         }
 
@@ -2434,7 +2434,7 @@ namespace pandemic.test
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
             game.PlayerByRole(Role.Medic).Location.ShouldBe("Paris");
-            game.CurrentPlayer.Hand.ShouldNotContain(atlanta);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(atlanta);
             game.PlayerDiscardPile.TopCard.ShouldBe(atlanta);
         }
 
@@ -2580,7 +2580,7 @@ namespace pandemic.test
             game = game.Do(new OperationsExpertDiscardToMoveFromStation(chicago, "Paris"), events);
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-            game.CurrentPlayer.Hand.ShouldNotContain(chicago);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(chicago);
             game.PlayerDiscardPile.TopCard.ShouldBe(chicago);
         }
 
@@ -2632,7 +2632,7 @@ namespace pandemic.test
             game = game.Do(new OperationsExpertDiscardToMoveFromStation(sydneyCard, "Paris"), events);
 
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
-            game.CurrentPlayer.Hand.ShouldNotContain(sydneyCard);
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(sydneyCard);
             game.PlayerDiscardPile.TopCard.ShouldBe(sydneyCard);
             game.CurrentPlayer.Location.ShouldBe("Paris");
         }
@@ -3371,7 +3371,7 @@ namespace pandemic.test
             });
 
             (game, _) = game.Do(
-                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsCured(Colour.Black));
             Assert.AreEqual(0, game.CurrentPlayer.Hand.Count);
@@ -3393,7 +3393,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -3413,7 +3413,7 @@ namespace pandemic.test
             });
 
             (game, _) = game.Do(
-                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray()));
+                new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
 
             Assert.IsTrue(game.IsWon);
         }
@@ -3433,7 +3433,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -3450,7 +3450,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -3467,7 +3467,7 @@ namespace pandemic.test
             });
 
             Should.Throw<GameRuleViolatedException>(() =>
-                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cast<PlayerCityCard>().ToArray())));
+                game.Do(new ScientistDiscoverCureCommand(game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray())));
         }
 
         [Test]
@@ -3485,7 +3485,7 @@ namespace pandemic.test
 
             // assert
             ((ContingencyPlanner)game.CurrentPlayer).StoredEventCard.ShouldBe(airlift);
-            game.CurrentPlayer.Hand.ShouldNotContain(airlift); // this event card is not stored in hand
+            game.CurrentPlayer.Hand.Cards.ShouldNotContain(airlift); // this event card is not stored in hand
             game.PlayerDiscardPile.Cards.ShouldNotContain(airlift);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(3);
 

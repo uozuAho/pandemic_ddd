@@ -14,7 +14,7 @@ namespace pandemic.Values
         {
             if (Role != other.Role) return false;
             if (Location != other.Location) return false;
-            if (!Hand.SequenceEqual(other.Hand, PlayerCard.DefaultEqualityComparer)) return false;
+            if (!Hand.Cards.SequenceEqual(other.Hand.Cards, PlayerCard.DefaultEqualityComparer)) return false;
             if (ActionsRemaining != other.ActionsRemaining) return false;
 
             return true;

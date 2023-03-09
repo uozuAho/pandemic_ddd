@@ -7,9 +7,9 @@ using pandemic.GameData;
 
 namespace pandemic.Values
 {
-    public record PlayerHand : IEnumerable<PlayerCard>
+    public record PlayerHand
     {
-        private ImmutableList<PlayerCard> Cards { get; init; } = ImmutableList<PlayerCard>.Empty;
+        private ImmutableArray<PlayerCard> _cards = ImmutableArray<PlayerCard>.Empty;
 
         private PlayerHand()
         {
@@ -17,7 +17,7 @@ namespace pandemic.Values
 
         public PlayerHand(IEnumerable<PlayerCard> cards)
         {
-            Cards = cards.ToImmutableList();
+            _cards = cards.ToImmutableArray();
         }
 
         public static readonly PlayerHand Empty = new ();
@@ -42,23 +42,71 @@ namespace pandemic.Values
             return new PlayerHand(cards);
         }
 
-        public IEnumerator<PlayerCard> GetEnumerator() => Cards.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public int Count => Cards.Count;
+        public IEnumerable<PlayerCard> Cards => _cards;
+
+        public int Count => _cards.Length;
 
         public IEnumerable<PlayerCityCard> CityCards =>
-            Cards.Where(c => c is PlayerCityCard).Cast<PlayerCityCard>();
+            _cards.Where(c => c is PlayerCityCard).Cast<PlayerCityCard>();
 
         public PlayerHand Add(PlayerCard card)
         {
-            return this with { Cards = Cards.Add(card) };
+            return this with { _cards = _cards.Add(card) };
         }
 
         public PlayerHand Remove(PlayerCard card)
         {
-            if (!Cards.Contains(card)) throw new InvalidOperationException($"{card} not in hand");
+            if (!_cards.Contains(card)) throw new InvalidOperationException($"{card} not in hand");
 
-            return this with { Cards = Cards.Remove(card) };
+            return this with { _cards = _cards.Remove(card) };
+        }
+
+        public bool Contains(PlayerCard card)
+        {
+            return _cards.Contains(card);
+        }
+
+        public IEnumerable<PlayerCard> SpecialEventCards()
+        {
+            for (int i = 0; i < _cards.Length; i++)
+            {
+                var card = _cards[i];
+                if (card is ISpecialEventCard specialEventCard)
+                    yield return card;
+            }
+        }
+
+        public PlayerCard Single(Func<PlayerCard, bool> func)
+        {
+            PlayerCard? tempCard = null;
+
+            for (int i = 0; i < _cards.Length; i++)
+            {
+                var card = _cards[i];
+                if (func(card))
+                {
+                    if (tempCard != null)
+                        throw new InvalidOperationException("More than one card matched the predicate");
+                    tempCard = card;
+                }
+            }
+
+            if (tempCard == null)
+                throw new InvalidOperationException("No cards matched the predicate");
+
+            return tempCard;
+        }
+
+        public PlayerCard First(Func<object, bool> func)
+        {
+            for (int i = 0; i < _cards.Length; i++)
+            {
+                var card = _cards[i];
+                if (func(card))
+                    return card;
+            }
+
+            throw new InvalidOperationException("No cards matched the predicate");
         }
     }
 }
