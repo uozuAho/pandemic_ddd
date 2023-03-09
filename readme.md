@@ -4,6 +4,16 @@ The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%2
 implemented in C#. Intended for usage by AI agents.
 
 # todo
+- win one game at any difficulty, any strategy
+  - make faster: play more games, search more game states
+    - goal: 100 games/sec (non-search), 5000 states/sec (search)
+    - greedy search: multithreading giving any advantage?
+    - make a command generator that doesn't generate dumb/inefficient commands
+      - eg all possible event forecasts
+  - strategy
+    - play with game evaluator. Try to lose in some other way to outbreaks/cubes
+    - check BGA replays: any clear strategy?
+    - make game easier: eg. no epidemics, no outbreaks
 - can a heroic game be won?
   - pandemic strategies
     - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
