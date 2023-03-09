@@ -19,10 +19,10 @@ namespace pandemic.console
     {
         public static void Run()
         {
-            RunRandomGames();
+            // RunRandomGames();
             RunGreedyBestFirst();
-            RunDfs();
-            RunDfsWithHeuristics();
+            // RunDfs();
+            // RunDfsWithHeuristics();
         }
 
         private static void RunRandomGames()
@@ -160,7 +160,7 @@ namespace pandemic.console
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
 
-            return game;
+            return game with { SelfConsistencyCheckingEnabled = false };
         }
     }
 }

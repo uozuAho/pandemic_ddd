@@ -282,7 +282,7 @@ namespace pandemic.Commands
             var perms = new Permutations<InfectionCard>(game.InfectionDrawPile.Top(6), new InfectionCardComparer());
             foreach (var perm in perms)
             {
-                _buffer[_bufIdx++] = new EventForecastCommand(playerWithCard.Role, perm.ToImmutableList());
+                _buffer[_bufIdx++] = new EventForecastCommand(playerWithCard.Role, perm);
             }
         }
 

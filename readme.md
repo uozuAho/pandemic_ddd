@@ -15,7 +15,6 @@ implemented in C#. Intended for usage by AI agents.
         - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
         - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
 - later
-  - keep/remove Xunit? it reliably captures stack traces and console output, but is slower than nunit
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details

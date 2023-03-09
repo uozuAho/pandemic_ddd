@@ -1,6 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using pandemic.Values;
 
 namespace pandemic.Events;
 
-internal record ContingencyPlannerUsedStoredEventForecast(ImmutableList<InfectionCard> Cards) : IEvent;
+internal record ContingencyPlannerUsedStoredEventForecast(IReadOnlyList<InfectionCard> Cards) : IEvent;

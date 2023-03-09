@@ -47,7 +47,16 @@ namespace pandemic.Aggregates.Game
         public bool IsWon => CuresDiscovered.Count == 4;
         public bool IsLost => LossReason != "";
         public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
-        public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
+
+        public Player PlayerByRole(Role role)
+        {
+            for (var i = 0; i < Players.Count; i++)
+            {
+                if (Players[i].Role == role) return Players[i];
+            }
+
+            throw new ArgumentException("No player with that role");
+        }
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
         public bool IsCured(Colour colour) =>
