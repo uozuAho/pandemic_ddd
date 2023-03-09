@@ -210,7 +210,11 @@ namespace pandemic.console
 
         private static PandemicGame NewGame()
         {
-            var options = NewGameOptionsGenerator.RandomOptions() with { Difficulty = Difficulty.Introductory };
+            var options = NewGameOptionsGenerator.RandomOptions() with
+            {
+                Difficulty = Difficulty.Introductory,
+                CommandGenerator = new SensibleCommandGenerator()
+            };
 
             var (game, _) = PandemicGame.CreateNewGame(options);
 

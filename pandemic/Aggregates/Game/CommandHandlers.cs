@@ -14,7 +14,7 @@ public partial record PandemicGame
 {
     public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
     {
-        var game = CreateUninitialisedGame(options.Rng);
+        var game = CreateUninitialisedGame(options.Rng, options.CommandGenerator);
         var events = new List<IEvent>();
 
         if (options.Roles.Count is < 2 or > 4)

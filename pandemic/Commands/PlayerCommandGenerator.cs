@@ -9,6 +9,30 @@ using pandemic.Values;
 
 namespace pandemic.Commands
 {
+    public interface ICommandGenerator
+    {
+        IEnumerable<IPlayerCommand> Commands(PandemicGame game);
+    }
+
+    public class AllLegalCommandGenerator : ICommandGenerator
+    {
+        private readonly PlayerCommandGenerator _generator = new PlayerCommandGenerator();
+
+        public IEnumerable<IPlayerCommand> Commands(PandemicGame game)
+        {
+            return _generator.AllLegalCommands(game);
+        }
+    }
+
+    public class SensibleCommandGenerator : ICommandGenerator
+    {
+        private readonly PlayerCommandGenerator _generator = new PlayerCommandGenerator();
+        public IEnumerable<IPlayerCommand> Commands(PandemicGame game)
+        {
+            return _generator.AllSensibleCommands(game);
+        }
+    }
+
     public class PlayerCommandGenerator
     {
         public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)

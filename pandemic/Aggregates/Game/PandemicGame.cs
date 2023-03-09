@@ -30,12 +30,11 @@ namespace pandemic.Aggregates.Game
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
-        private readonly PlayerCommandGenerator _commandGenerator = new();
+        private readonly ICommandGenerator _commandGenerator;
 
         public IEnumerable<IPlayerCommand> LegalCommands()
         {
-            // todo: inject generator
-            return new PlayerCommandGenerator().AllLegalCommands(this);
+            return _commandGenerator.Commands(this);
         }
 
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
@@ -90,7 +89,7 @@ namespace pandemic.Aggregates.Game
 
         private bool PlayerCommandRequired()
         {
-            return !IsOver && _commandGenerator.AllLegalCommands(this).Any();
+            return !IsOver && _commandGenerator.Commands(this).Any();
         }
 
         public bool IsSameStateAs(PandemicGame other)
@@ -136,7 +135,7 @@ namespace pandemic.Aggregates.Game
             };
         }
 
-        private PandemicGame(Random rng)
+        private PandemicGame(Random rng, ICommandGenerator commandGenerator)
         {
             Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
 
@@ -147,9 +146,13 @@ namespace pandemic.Aggregates.Game
                 .Select(c => new PlayerCityCard(c) as PlayerCard));
 
             Rng = rng;
+            _commandGenerator = commandGenerator;
         }
 
-        public static PandemicGame CreateUninitialisedGame(Random? rng = null) => new (rng ?? new Random());
+        public static PandemicGame CreateUninitialisedGame(Random? rng = null, ICommandGenerator? commandGenerator = null)
+        {
+            return new(rng ?? new Random(), commandGenerator ?? new AllLegalCommandGenerator());
+        }
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events)
         {
