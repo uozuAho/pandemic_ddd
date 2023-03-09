@@ -368,11 +368,14 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> Airlifts(PandemicGame game, Player playerWithCard)
         {
-            foreach (var playerToAirlift in game.Players)
+            for (int i = 0; i < game.Players.Count; i++)
             {
-                foreach (var city in game.Cities.Where(c => c.Name != playerToAirlift.Location))
+                var player = game.Players[i];
+                for (int j = 0; j < game.Cities.Count; j++)
                 {
-                    yield return new AirliftCommand(playerWithCard.Role, playerToAirlift.Role, city.Name);
+                    var city = game.Cities[j];
+                    if (city.Name != player.Location)
+                        yield return new AirliftCommand(playerWithCard.Role, player.Role, city.Name);
                 }
             }
         }

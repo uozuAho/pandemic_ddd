@@ -71,15 +71,16 @@ namespace pandemic.agents
             var closest = "";
             var closestDistance = int.MaxValue;
 
-            foreach (var researchCity in game.Cities
-                         .Where(c => c.HasResearchStation)
-                         .Select(c => c.Name))
+            for (var i = 0; i < game.Cities.Count; i++)
             {
-                var distance = StandardGameBoard.DriveFerryDistance(researchCity, city);
+                var city1 = game.Cities[i];
+                if (!city1.HasResearchStation) continue;
+
+                var distance = StandardGameBoard.DriveFerryDistance(city1.Name, city);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closest = researchCity;
+                    closest = city1.Name;
                 }
             }
 
