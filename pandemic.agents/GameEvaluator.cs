@@ -12,7 +12,7 @@ namespace pandemic.agents
         /// how likely a win is from this state. Higher values are
         /// better.
         /// </summary>
-        public static int Evaluate(PandemicGame game)
+        public static int Score(PandemicGame game)
         {
             if (game.IsWon) return int.MaxValue;
             if (game.IsLost) return int.MinValue;

@@ -124,7 +124,7 @@ namespace pandemic.console
 
         private static string NodeLabel(PandemicGame state)
         {
-            var nodeValue = GameEvaluator.Evaluate(state);
+            var nodeValue = GameEvaluator.Score(state);
             var cured = string.Join(",", state.CuresDiscovered.Select(c => c.Colour));
             var players = string.Join("\\n", state.Players.Select(PlayerText));
             var researchStations = string.Join(",", state.Cities.Where(c => c.HasResearchStation)

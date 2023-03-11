@@ -59,8 +59,8 @@ namespace pandemic.agents.test
             var gameClose = game with { Players = game.Players.Add(new Player { Location = "Chicago" }) };
             var gameFar = game with { Players = game.Players.Add(new Player { Location = "Paris" }) };
 
-            var closeScore = GameEvaluator.Evaluate(gameClose);
-            var farScore = GameEvaluator.Evaluate(gameFar);
+            var closeScore = GameEvaluator.Score(gameClose);
+            var farScore = GameEvaluator.Score(gameFar);
 
             closeScore.ShouldBeGreaterThan(farScore);
         }
@@ -85,8 +85,8 @@ namespace pandemic.agents.test
             var atChicago = game with { Players = game.Players.Add(player with { Location = "Chicago" }) };
             var atParis = game with { Players = game.Players.Add(player with { Location = "Paris" }) };
 
-            var scoreAtChicago = GameEvaluator.Evaluate(atChicago);
-            var scoreAtParis = GameEvaluator.Evaluate(atParis);
+            var scoreAtChicago = GameEvaluator.Score(atChicago);
+            var scoreAtParis = GameEvaluator.Score(atParis);
 
             scoreAtParis.ShouldBeGreaterThan(scoreAtChicago);
         }
