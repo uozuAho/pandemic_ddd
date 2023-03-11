@@ -352,6 +352,42 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Government_grant()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+
+            var commands = _generator.AllLegalCommands(game);
+
+            commands.Count(c => c is GovernmentGrantCommand).ShouldBe(47);
+        }
+
+        [Test]
+        public void Government_grant_none_when_no_stations_left()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist },
+                IncludeSpecialEventCards = false
+            });
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
+            });
+            game = game with { ResearchStationPile = 0 };
+
+            var commands = _generator.AllLegalCommands(game);
+            commands.ShouldNotContain(c => c is GovernmentGrantCommand);
+        }
+
+        [Test]
         public void Dont_use_special_event_should_not_be_an_option_when_there_are_other_legal_commands()
         {
             var game = CreateNewGame(new NewGameOptions

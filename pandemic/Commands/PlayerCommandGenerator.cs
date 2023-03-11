@@ -399,6 +399,8 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> GovernmentGrants(PandemicGame game, Player playerWithCard)
         {
+            if (game.ResearchStationPile == 0) yield break;
+
             foreach (var city in game.Cities.Where(c => !c.HasResearchStation))
             {
                 yield return new GovernmentGrantCommand(playerWithCard.Role, city.Name);
