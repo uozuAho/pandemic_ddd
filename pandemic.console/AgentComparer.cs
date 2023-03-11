@@ -47,7 +47,7 @@ namespace pandemic.console
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+                var searchProblem = new PandemicSearchProblem(game);
 
                 while (!game.IsOver)
                 {
@@ -133,7 +133,7 @@ namespace pandemic.console
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+                var searchProblem = new PandemicSearchProblem(game);
                 var searcher = new GreedyBestFirstSearch(searchProblem);
 
                 var gameTimer = Stopwatch.StartNew();

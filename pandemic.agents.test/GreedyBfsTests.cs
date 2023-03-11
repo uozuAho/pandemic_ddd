@@ -17,7 +17,7 @@ namespace pandemic.agents.test
         public void Does_step()
         {
             var game = ANewGame();
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var problem = new PandemicSearchProblem(game);
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -35,7 +35,7 @@ namespace pandemic.agents.test
                     Hand = PlayerHand.Of("Atlanta", "Chicago", "New York", "Montreal", "Paris")
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var problem = new PandemicSearchProblem(game);
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -62,7 +62,7 @@ namespace pandemic.agents.test
                     })
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var problem = new PandemicSearchProblem(game);
 
             var bfs = new GreedyBestFirstSearch(problem);
 
@@ -102,7 +102,7 @@ namespace pandemic.agents.test
                     ActionsRemaining = 0
                 })
             };
-            var problem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var problem = new PandemicSearchProblem(game);
 
             var bfs = new GreedyBestFirstSearch(problem);
 
