@@ -977,7 +977,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_after_7_cards_in_hand__epidemic_is_second_card()
         {
-            var game = DefaultTestGame();
+            var game = DefaultTestGame().RemoveAllCubesFromCities();
 
             var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
             var playerHand = drawPile.Top(7).ToList();
