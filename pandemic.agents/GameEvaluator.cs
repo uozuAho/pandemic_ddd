@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
@@ -16,12 +18,11 @@ namespace pandemic.agents
         {
             if (game.IsWon) return int.MaxValue;
             if (game.IsLost) return int.MinValue;
-            // todo: impossible to win = min value
 
             var score = 0;
 
             // diseases cured is great
-            score += game.CuresDiscovered.Count * 1000;
+            score += game.CuresDiscovered.Count * 100000;
 
             // research stations are good
             // even better: spread out (do later,,, maybe)
@@ -29,57 +30,102 @@ namespace pandemic.agents
                 .Where(c => c.HasResearchStation)
                 .Sum(_ => 100);
 
-            score += game.Players
-                .Select(p => p.Hand)
-                .Sum(h => PlayerHandScore(game, h));
-
-            // bad stuff -----------------------
             // outbreaks are bad
             score -= game.OutbreakCounter * 100;
 
-            // todo: maybe use this when enough cards to cure
-            // further away from research stations is bad
-            // (at least with currently implemented rules)
-            // score -= game.Players
-            //     .Sum(p => StandardGameBoard.DriveFerryDistance(
-            //         p.Location, ClosestResearchStationTo(game, p.Location)));
+            score += CubesOnCitiesScore(game);
+            score += game.Players.Select(p => PlayerScore(game, p)).Sum();
 
-            if (!game.APlayerHasEnoughToCure)
+            return score;
+        }
+
+        private static int PlayerScore(PandemicGame game, Player player)
+        {
+            var score = 0;
+
+            score += PlayerHandScore(game, player.Hand);
+
+            if (player.HasEnoughToCure())
             {
-                // cubes
-                for (int i = 0; i < game.Cities.Length; i++)
-                {
-                    var city = game.Cities[i];
-                    foreach (var colour in ColourExtensions.AllColours)
-                    {
-                        var cubes = city.Cubes.NumberOf(colour);
-                        if (cubes == 0) continue;
-
-                        // cubes in city
-                        score -= cubes * cubes * 10;
-
-                        // player distance from cubes
-                        foreach (var player in game.Players)
-                        {
-                            var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
-                            score -= cubes * cubes * distance * 5;
-                        }
-                    }
-                }
+                var (city, distance) = ClosestResearchStationTo(game, player.Location);
+                score -= distance * 5;
             }
             else
             {
-                for (int i = 0; i < game.Cities.Length; i++)
-                {
-                    var city = game.Cities[i];
-                    if (!city.HasResearchStation) continue;
+                score += DistanceFromCubesScore(game, player);
+            }
 
-                    // player distance from station
+            return score;
+        }
+
+        /// <summary>
+        /// Higher score = players further away from cubes
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        private static int PlayerDistanceFromCubesScore(PandemicGame game)
+        {
+            var score = 0;
+
+            for (int i = 0; i < game.Cities.Length; i++)
+            {
+                var city = game.Cities[i];
+                foreach (var colour in ColourExtensions.AllColours)
+                {
+                    var cubes = city.Cubes.NumberOf(colour);
+                    if (cubes == 0) continue;
+
                     foreach (var player in game.Players)
                     {
                         var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
-                        score -= distance * 5;
+                        score -= cubes * cubes * distance * 5;
                     }
+                }
+            }
+
+            return score;
+        }
+
+        // maybe: shouldn't be penalised for being far from one 3-cube city while being close to another
+        /// <summary>
+        /// Higher score = players closer to cubes
+        /// </summary>
+        private static int DistanceFromCubesScore(PandemicGame game, Player player)
+        {
+            var score = 0;
+
+            for (int i = 0; i < game.Cities.Length; i++)
+            {
+                var city = game.Cities[i];
+                foreach (var colour in ColourExtensions.AllColours)
+                {
+                    var cubes = city.Cubes.NumberOf(colour);
+                    if (cubes == 0) continue;
+
+                    var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
+                    score -= cubes * cubes * distance;
+                }
+            }
+
+            return score;
+        }
+
+        /// <summary>
+        /// Higher score = fewer cubes on cities
+        /// </summary>
+        private static int CubesOnCitiesScore(PandemicGame game)
+        {
+            var score = 0;
+
+            for (int i = 0; i < game.Cities.Length; i++)
+            {
+                var city = game.Cities[i];
+                foreach (var colour in ColourExtensions.AllColours)
+                {
+                    var cubes = city.Cubes.NumberOf(colour);
+                    if (cubes == 0) continue;
+
+                    score -= cubes * cubes * 10;
                 }
             }
 
@@ -106,26 +152,28 @@ namespace pandemic.agents
                 .Sum(n => n * (n - 1) / 2);
         }
 
-        // todo: perf: just do bfs. Worst case perf is same as this impl
-        private static string ClosestResearchStationTo(PandemicGame game, string city)
+        private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
         {
-            var closest = "";
-            var closestDistance = int.MaxValue;
+            if (game.CityByName(city).HasResearchStation) return (city, 0);
 
-            for (var i = 0; i < game.Cities.Length; i++)
+            // this currently just uses drive ferry distance, not shuttle, airlift etc.
+            var searched = new HashSet<string>();
+            var queue = new Queue<(string city, int distance)>();
+            queue.Enqueue((city, 0));
+
+            while (queue.Count > 0)
             {
-                var city1 = game.Cities[i];
-                if (!city1.HasResearchStation) continue;
-
-                var distance = StandardGameBoard.DriveFerryDistance(city1.Name, city);
-                if (distance < closestDistance)
+                var (currentCity, distance) = queue.Dequeue();
+                if (game.CityByName(currentCity).HasResearchStation) return (currentCity, distance);
+                searched.Add(currentCity);
+                foreach (var adj in game.Board.AdjacentCities[currentCity])
                 {
-                    closestDistance = distance;
-                    closest = city1.Name;
+                    if (!searched.Contains(adj))
+                        queue.Enqueue((adj, distance + 1));
                 }
             }
 
-            return closest;
+            throw new InvalidOperationException("shouldn't get here");
         }
     }
 }
