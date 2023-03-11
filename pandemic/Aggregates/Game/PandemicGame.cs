@@ -188,12 +188,23 @@ namespace pandemic.Aggregates.Game
 
         public PandemicGame Cure(Colour colour)
         {
-            if (CuresDiscovered.Any(c => c.Colour == colour))
+            if (IsCured(colour))
                 throw new InvalidOperationException($"{colour} is already cured");
 
             return this with
             {
                 CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial))
+            };
+        }
+
+        public PandemicGame Eradicate(Colour colour)
+        {
+            if (IsEradicated(colour))
+                throw new InvalidOperationException($"{colour} is already eradicated");
+
+            return this with
+            {
+                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Sunset))
             };
         }
 

@@ -4,11 +4,6 @@ The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%2
 implemented in C#. Intended for usage by AI agents.
 
 # todo
-- fuzz fail: disease not eradicated. steps:
-  - medic cures blue (at atlanta?)
-  - drive to chicago, autoremove
-  - drive to montreal, autoremove, eradicated
-  - drive to new york, autoremove, eradicated (UNEXPECTED)
 - win one game at any difficulty, any strategy
   - strategy
     - inline todos

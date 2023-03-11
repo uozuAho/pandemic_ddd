@@ -3010,6 +3010,21 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Medic_auto_remove_does_not_double_eradicate()
+        {
+            var game = DefaultTestGame();
+            game = game
+                .Eradicate(Colour.Blue)
+                .RemoveAllCubesFromCities()
+                .AddCube("Chicago", Colour.Blue);
+
+            (game, var events) = game.Do(new DriveFerryCommand(game.CurrentPlayer.Role, "Chicago"));
+
+            game.IsEradicated(Colour.Blue).ShouldBeTrue();
+            events.ShouldNotContain(e => e is DiseaseEradicated);
+        }
+
+        [Test]
         public void Researcher_can_share_any_card()
         {
             var game = DefaultTestGame(DefaultTestGameOptions() with
