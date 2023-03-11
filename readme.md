@@ -6,10 +6,10 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
-    - inline todos
-    - look at what agent is doing
-      - not much treating disease, lots of moving back/forth between same cities
-    - play with game evaluator. Try to lose in some other way to outbreaks/cubes
+    - evaulator tests
+      - move towards cities with lots of cubes
+      - when enough cards to cure, move towards research stations
+    - check greedy agent moves. Balancing cure & clear cubes?
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks
   - make faster: play more games, search more game states

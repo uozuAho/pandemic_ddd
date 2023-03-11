@@ -45,8 +45,25 @@ namespace pandemic.agents
             //         p.Location, ClosestResearchStationTo(game, p.Location)));
 
             // cubes
-            var totalCubesOnBoard = 96 - game.Cubes.Counts.Sum(c => c.Value);
-            score -= totalCubesOnBoard * 10;
+            for (int i = 0; i < game.Cities.Length; i++)
+            {
+                var city = game.Cities[i];
+                foreach (var colour in ColourExtensions.AllColours)
+                {
+                    var cubes = city.Cubes.NumberOf(colour);
+                    if (cubes == 0) continue;
+
+                    // cubes in city
+                    score -= cubes * cubes * 10;
+
+                    // player distance from cubes
+                    foreach (var player in game.Players)
+                    {
+                        var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
+                        score -= cubes * cubes * distance * 5;
+                    }
+                }
+            }
 
             return score;
         }
