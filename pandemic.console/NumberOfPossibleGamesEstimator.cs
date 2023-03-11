@@ -52,7 +52,7 @@ internal class NumberOfPossibleGamesEstimator
         {
             if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
 
-            var legalActions = commandGenerator.LegalCommands(game).ToList();
+            var legalActions = commandGenerator.AllLegalCommands(game).ToList();
             stats.AddLegalActionCount(legalActions.Count);
 
             var action = random.Choice(legalActions);

@@ -6,7 +6,6 @@ using System.Text;
 using pandemic.agents;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
-using pandemic.Commands;
 using pandemic.drawing;
 using pandemic.Values;
 using utils;
@@ -23,7 +22,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var searchProblem = new PandemicSearchProblem(game);
             var searcher = new GreedyBestFirstSearch(searchProblem);
 
             Console.WriteLine("Searching...");
@@ -88,7 +87,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+            var searchProblem = new PandemicSearchProblem(game);
             var searcher = new GreedyBestFirstSearch(searchProblem);
 
             Console.WriteLine("Searching...");

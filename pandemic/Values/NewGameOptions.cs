@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using pandemic.Commands;
 
 namespace pandemic.Values
 {
@@ -9,6 +10,7 @@ namespace pandemic.Values
         public ICollection<Role> Roles { get; init; } = new List<Role>();
         public Random Rng { get; init; } = new();
         public bool IncludeSpecialEventCards { get; init; } = true;
+        public ICommandGenerator CommandGenerator { get; init; } = new AllLegalCommandGenerator();
 
         public override string ToString()
         {

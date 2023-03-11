@@ -33,7 +33,7 @@ namespace pandemic.console
             if (nodeTracker.TotalNumNodes == NodeLimit) return;
             if (!DfsWithHeuristicsAgent.CanWin(node.State)) return;
 
-            var legalActions = CommandGenerator.LegalCommands(node.State)
+            var legalActions = CommandGenerator.AllLegalCommands(node.State)
                 .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .ThenBy(_ => _rng.Next()).ToList();

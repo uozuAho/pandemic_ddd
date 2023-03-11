@@ -1,25 +1,26 @@
 using System;
 using System.Collections.Generic;
+using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
-using utils;
 
 namespace pandemic.console;
 
 internal class SingleGame
 {
-    public static void PlayGameAndPrintPlaythrough()
+    public static void PlayGameAndPrintPlaythrough(ILiveAgent agent)
     {
         var gameOptions = new NewGameOptions
         {
-            Difficulty = Difficulty.Normal,
-            Roles = new[] { Role.Medic, Role.Scientist }
+            Difficulty = Difficulty.Introductory,
+            Roles = new[] { Role.Medic, Role.Dispatcher },
+            CommandGenerator = new SensibleCommandGenerator()
         };
         var (game, events) = PandemicGame.CreateNewGame(gameOptions);
 
-        var (endState, events2) = SingleGame.PlayRandomGame(game);
+        var (endState, events2) = PlayGame(game, agent);
         events.AddRange(events2);
 
         Console.WriteLine("events:");
@@ -30,20 +31,16 @@ internal class SingleGame
         PrintState(endState);
     }
 
-    public static (PandemicGame, IEnumerable<IEvent>) PlayRandomGame(PandemicGame game)
+    public static (PandemicGame, IEnumerable<IEvent>) PlayGame(PandemicGame game, ILiveAgent agent)
     {
         var numActions = 0;
-        var random = new Random();
-        var commandGenerator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         for (; numActions < 1000 && !game.IsOver; numActions++)
         {
             if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
-            var action = random.Choice(commandGenerator.LegalCommands(game));
-            var (updatedGame, newEvents) = game.Do(action);
-            game = updatedGame;
-            events.AddRange(newEvents);
+            var command = agent.NextCommand(game);
+            game = game.Do(command, events);
         }
 
         return (game, events);

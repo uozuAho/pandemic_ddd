@@ -14,7 +14,7 @@ public partial record PandemicGame
 {
     public static (PandemicGame, List<IEvent>) CreateNewGame(NewGameOptions options)
     {
-        var game = CreateUninitialisedGame(options.Rng);
+        var game = CreateUninitialisedGame(options.Rng, options.CommandGenerator);
         var events = new List<IEvent>();
 
         if (options.Roles.Count is < 2 or > 4)
@@ -71,7 +71,7 @@ public partial record PandemicGame
     {
         ThrowIfGameOver(this);
 
-        var playerWhoMustDiscard = Players.SingleOrDefault(p => p.Hand.Count > 7);
+        var playerWhoMustDiscard = PlayerThatNeedsToDiscard();
         if (playerWhoMustDiscard != null)
         {
             if (command is not DiscardPlayerCardCommand && !command.IsSpecialEvent)
@@ -470,7 +470,9 @@ public partial record PandemicGame
             if (IsCured(colour) && cubesAtThisCity > 0)
                 yield return new MedicAutoRemovedCubes(arrivedAtCity, colour);
 
-            if (IsCured(colour) && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity)
+            if (IsCured(colour)
+                && !IsEradicated(colour)
+                && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity)
                 yield return new DiseaseEradicated(colour);
         }
     }
@@ -792,9 +794,7 @@ public partial record PandemicGame
         if (game.IsEradicated(infectionCard.Colour))
             return game;
 
-        if (game.Players.Any(p => p.Role == Role.Medic)
-            && game.PlayerByRole(Role.Medic).Location == infectionCard.City
-            && game.IsCured(infectionCard.Colour))
+        if (game.IsMedicAt(infectionCard.City) && game.IsCured(infectionCard.Colour))
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
 
         if (game.DoesQuarantineSpecialistPreventInfectionAt(infectionCard.City))

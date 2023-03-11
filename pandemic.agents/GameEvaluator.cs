@@ -37,11 +37,16 @@ namespace pandemic.agents
             // outbreaks are bad
             score -= game.OutbreakCounter * 100;
 
+            // todo: maybe use this when enough cards to cure
             // further away from research stations is bad
             // (at least with currently implemented rules)
-            score -= game.Players
-                .Sum(p => StandardGameBoard.DriveFerryDistance(
-                    p.Location, ClosestResearchStationTo(game, p.Location)));
+            // score -= game.Players
+            //     .Sum(p => StandardGameBoard.DriveFerryDistance(
+            //         p.Location, ClosestResearchStationTo(game, p.Location)));
+
+            // cubes
+            var totalCubesOnBoard = 96 - game.Cubes.Counts.Sum(c => c.Value);
+            score -= totalCubesOnBoard * 10;
 
             return score;
         }
@@ -66,20 +71,22 @@ namespace pandemic.agents
                 .Sum(n => n * (n - 1) / 2);
         }
 
+        // todo: perf: just do bfs. Worst case perf is same as this impl
         private static string ClosestResearchStationTo(PandemicGame game, string city)
         {
             var closest = "";
             var closestDistance = int.MaxValue;
 
-            foreach (var researchCity in game.Cities
-                         .Where(c => c.HasResearchStation)
-                         .Select(c => c.Name))
+            for (var i = 0; i < game.Cities.Length; i++)
             {
-                var distance = StandardGameBoard.DriveFerryDistance(researchCity, city);
+                var city1 = game.Cities[i];
+                if (!city1.HasResearchStation) continue;
+
+                var distance = StandardGameBoard.DriveFerryDistance(city1.Name, city);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closest = researchCity;
+                    closest = city1.Name;
                 }
             }
 

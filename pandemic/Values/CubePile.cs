@@ -41,7 +41,12 @@ public record CubePile
 
     public CubePile RemoveCube(Colour colour)
     {
-        return new CubePile(Counts.SetItem(colour, Counts[colour] - 1));
+        return RemoveCubes(colour, 1);
+    }
+
+    public CubePile RemoveCubes(Colour colour, int numCubes)
+    {
+        return new CubePile(Counts.SetItem(colour, Counts[colour] - numCubes));
     }
 
     public CubePile RemoveAll(Colour colour)

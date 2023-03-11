@@ -27,7 +27,7 @@ class RandomPlaythroughDrawer
 
         while (!game.IsOver)
         {
-            var actions = commandGenerator.LegalCommands(game).ToList();
+            var actions = commandGenerator.AllLegalCommands(game).ToList();
             var selectedAction = random.Choice(actions);
 
             foreach (var action in actions)

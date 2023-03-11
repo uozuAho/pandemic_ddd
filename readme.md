@@ -4,6 +4,18 @@ The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%2
 implemented in C#. Intended for usage by AI agents.
 
 # todo
+- win one game at any difficulty, any strategy
+  - strategy
+    - inline todos
+    - look at what agent is doing
+      - not much treating disease, lots of moving back/forth between same cities
+    - play with game evaluator. Try to lose in some other way to outbreaks/cubes
+    - check BGA replays: any clear strategy?
+    - make game easier: eg. no epidemics, no outbreaks
+  - make faster: play more games, search more game states
+    - goal: single threaded: 100 games/sec (non-search), 5000 states/sec (search)
+    - ideas
+      - mutable?
 - can a heroic game be won?
   - pandemic strategies
     - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
@@ -15,19 +27,9 @@ implemented in C#. Intended for usage by AI agents.
         - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
         - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
 - later
-  - keep/remove Xunit? it reliably captures stack traces and console output, but is slower than nunit
   - make pandemic game correct by construction? make all properties get-only
     - hide command and event handlers if not hidden already. pandemic public api should make sense
       in terms of game rules, no internal details
-  - fitness funcs
-    - all ICommands must be generated in legal & all command generator tests
-      - just use test coverage?
-    - only events modify state
-    - events don't contain conditional logic (?)
-    - pandemic project doesn't depend on other projects
-  - dev log: review https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
-    - any learnings since then?
-    - DDD intends to reduce complexity. Did it/I succeed?
 
 # Quick start
 - install dotnet core (tested with v7)
@@ -83,39 +85,6 @@ handle.
 
 ## Alternate implementations
 - https://github.com/alexzherdev/pandemic
-
-## Dev log / learnings
-- initial start: https://iamwoz.com/blog/20210924_learning_ddd_by_implementing_pandemic
-- fuzz testing is great! it has turned up so many bugs that I hadn't covered with simple unit tests
-  - although it does encourage me to be lazy and assume it will catch any cases I can't be bothered writing
-- dunno if 'process managers' are helping. Some commands cause other commands. Eg.
-  end of turn can cause a lot of commands and events: epidemics, outbreak chain reactions
-  etc. What to do? Just keep this complexity in the command handlers themselves?
-  Or, don't call commands from other commands, and instead handle multi-command
-  reactions with process managers?
-- even though I'm not using event sourcing or even the events emitted by commands,
-  they have been very useful to debug complex bugs. Having the entire event history of
-  a game makes it easy to see where things have gone wrong. This would be laborious to
-  step through in the debugger.
-- using the rule to only modify aggregates via events has ensured that all game state
-  changes are captured. It's a bit of a pain to add a command + handler + event + handler,
-  but I think it's been worth it for the above point alone
-- unexplored parts of DDD
-  - aggregate design. The entire game state needs to be consistent at all times, so there's
-    been no need/opportunity to create smaller aggregates
-  - eventual consistency: same reason as above
-  - strategic design
-- it's frustrating that it still seems to be taking ages to implement a seemingly simple
-  game. Maybe it's not simple? What's taking so long? Each special event seems to take about
-  1h to code, even now that I've done the first one (which took ... a week!?)
-  - How long did it take? Any git tools to estimate this? Idea: for every hour there's a commit,
-    at 1 hour to the total. Do same for days.
-- lots of stuff becoming public to aid testing. Check the public API. Can it be reduced?
-- I've wanted event listeners on a number of occasions. I've avoided it due to thinking that
-  they should only be used for eventual consistency, and would add complexity to the solution.
-  However, they would be very convenient to decouple side effects, eg
-  - when the medic auto-removes cubes when a disease has been cured (lots of commands move the medic)
-  - any more?
 
 
 # References

@@ -21,7 +21,7 @@ namespace pandemic.Aggregates.Game
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
         public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
-        public ImmutableList<City> Cities { get; init; }
+        public ImmutableArray<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
@@ -30,11 +30,11 @@ namespace pandemic.Aggregates.Game
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
 
         public readonly StandardGameBoard Board = StandardGameBoard.Instance();
-        private readonly PlayerCommandGenerator _commandGenerator = new();
+        private readonly ICommandGenerator _commandGenerator;
 
         public IEnumerable<IPlayerCommand> LegalCommands()
         {
-            return new PlayerCommandGenerator().LegalCommands(this);
+            return _commandGenerator.Commands(this);
         }
 
         public bool SelfConsistencyCheckingEnabled { get; init; } = true;
@@ -47,7 +47,16 @@ namespace pandemic.Aggregates.Game
         public bool IsWon => CuresDiscovered.Count == 4;
         public bool IsLost => LossReason != "";
         public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
-        public Player PlayerByRole(Role role) => Players.Single(p => p.Role == role);
+
+        public Player PlayerByRole(Role role)
+        {
+            for (var i = 0; i < Players.Count; i++)
+            {
+                if (Players[i].Role == role) return Players[i];
+            }
+
+            throw new ArgumentException("No player with that role");
+        }
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
         public bool IsCured(Colour colour) =>
@@ -56,7 +65,18 @@ namespace pandemic.Aggregates.Game
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
 
-        public bool APlayerMustDiscard => Players.Any(p => p.Hand.Count > 7);
+        public bool APlayerMustDiscard => PlayerThatNeedsToDiscard() != null;
+
+        public Player? PlayerThatNeedsToDiscard()
+        {
+            for (int i = 0; i < Players.Count; i++)
+            {
+                var player = Players[i];
+                if (player.Hand.Count > 7) return player;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// A special event was 'recently' chosen not to be used. Toggles back on when the
@@ -80,7 +100,7 @@ namespace pandemic.Aggregates.Game
 
         private bool PlayerCommandRequired()
         {
-            return !IsOver && _commandGenerator.LegalCommands(this).Any();
+            return !IsOver && _commandGenerator.Commands(this).Any();
         }
 
         public bool IsSameStateAs(PandemicGame other)
@@ -126,9 +146,9 @@ namespace pandemic.Aggregates.Game
             };
         }
 
-        private PandemicGame(Random rng)
+        private PandemicGame(Random rng, ICommandGenerator commandGenerator)
         {
-            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableList();
+            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableArray();
 
             var atlanta = CityByName("Atlanta");
             Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
@@ -137,9 +157,13 @@ namespace pandemic.Aggregates.Game
                 .Select(c => new PlayerCityCard(c) as PlayerCard));
 
             Rng = rng;
+            _commandGenerator = commandGenerator;
         }
 
-        public static PandemicGame CreateUninitialisedGame(Random? rng = null) => new (rng ?? new Random());
+        public static PandemicGame CreateUninitialisedGame(Random? rng = null, ICommandGenerator? commandGenerator = null)
+        {
+            return new(rng ?? new Random(), commandGenerator ?? new AllLegalCommandGenerator());
+        }
 
         public static PandemicGame FromEvents(IEnumerable<IEvent> events)
         {
@@ -164,12 +188,23 @@ namespace pandemic.Aggregates.Game
 
         public PandemicGame Cure(Colour colour)
         {
-            if (CuresDiscovered.Any(c => c.Colour == colour))
+            if (IsCured(colour))
                 throw new InvalidOperationException($"{colour} is already cured");
 
             return this with
             {
                 CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial))
+            };
+        }
+
+        public PandemicGame Eradicate(Colour colour)
+        {
+            if (IsEradicated(colour))
+                throw new InvalidOperationException($"{colour} is already eradicated");
+
+            return this with
+            {
+                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Sunset))
             };
         }
 
@@ -181,18 +216,42 @@ namespace pandemic.Aggregates.Game
         public PandemicGame AddCubes(string city, Colour colour, int numCubes)
         {
             var city_ = CityByName(city);
+            var cityIdx = Board.CityIdx(city);
 
             return this with
             {
-                Cities = Cities.Replace(city_, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
+                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
             };
         }
 
-        public bool DoesQuarantineSpecialistPreventInfectionAt(string city)
+        private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
         {
-            return Players.Any(p => p.Role == Role.QuarantineSpecialist)
-                   && (PlayerByRole(Role.QuarantineSpecialist).Location == city
-                       || QuarantineSpecialistIsInNeighbouringCity(city));
+            for (int i = 0; i < Players.Count; i++)
+            {
+                var player = Players[i];
+                if (player.Role == Role.QuarantineSpecialist)
+                {
+                    if (player.Location == city || QuarantineSpecialistIsInNeighbouringCity(city))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool IsMedicAt(string city)
+        {
+            for (int i = 0; i < Players.Count; i++)
+            {
+                var player = Players[i];
+                if (player.Role == Role.Medic && player.Location == city)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool QuarantineSpecialistIsInNeighbouringCity(string city)
@@ -232,7 +291,7 @@ namespace pandemic.Aggregates.Game
             Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
 
             var specialEventCards = Players
-                .SelectMany(p => p.Hand)
+                .SelectMany(p => p.Hand.Cards)
                 .Concat(PlayerDrawPile.Cards)
                 .Concat(PlayerDiscardPile.Cards)
                 .Concat(PlayerCardsRemovedFromGame)
@@ -274,7 +333,7 @@ namespace pandemic.Aggregates.Game
             .Select(p => p.StoredEventCard)
             .FirstOrDefault();
 
-        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Any(c => c is ISpecialEventCard)) ||
+        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Cards.Any(c => c is ISpecialEventCard)) ||
                                                     ContingencyPlannerStoredCard != null;
 
         private int TotalCubesInGame()

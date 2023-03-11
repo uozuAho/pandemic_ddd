@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\pandemic.agents\pandemic.agents.csproj" />
     <ProjectReference Include="..\pandemic.drawing\pandemic.drawing.csproj" />
+    <ProjectReference Include="..\pandemic.test\pandemic.test.csproj" />
     <ProjectReference Include="..\pandemic\pandemic.csproj" />
   </ItemGroup>
 

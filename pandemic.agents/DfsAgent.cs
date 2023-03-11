@@ -53,7 +53,7 @@ namespace pandemic.agents
             if (node.State.IsLost)
                 diagnostics.Loss(node.State.LossReason);
 
-            var legalActions = _commandGenerator.LegalCommands(node.State)
+            var legalActions = _commandGenerator.AllLegalCommands(node.State)
                 // shuffle, otherwise we're at the mercy of the order of the move generator
                 .OrderBy(_ => _rng.Next()).ToList();
 

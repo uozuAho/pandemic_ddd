@@ -57,7 +57,7 @@ namespace pandemic.test
             // players
             Assert.AreEqual(options.Roles.Count, game.Players.Count);
             Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
-            Assert.That(game.Players.All(p => p.Hand.All(c => c is not EpidemicCard)));
+            Assert.That(game.Players.All(p => p.Hand.Cards.All(c => c is not EpidemicCard)));
         }
 
         private static void AssertEpidemicCardsAreDistributed(Deck<PlayerCard> drawPile, Difficulty difficulty)

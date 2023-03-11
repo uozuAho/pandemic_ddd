@@ -7,8 +7,10 @@ using pandemic.agents;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
+using pandemic.test.Utils;
 using pandemic.Values;
 using utils;
+using SearchNode = pandemic.agents.GreedyBfs.SearchNode;
 
 namespace pandemic.console
 {
@@ -19,10 +21,14 @@ namespace pandemic.console
     {
         public static void Run()
         {
-            RunRandomGames();
-            RunGreedyBestFirst();
-            RunDfs();
-            RunDfsWithHeuristics();
+            // RunRandomGames();
+            // RunGreedyGames(TimeSpan.FromSeconds(5));
+            RunGreedyBestFirst(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(1),
+                1);
+            // RunDfs();
+            // RunDfsWithHeuristics();
         }
 
         private static void RunRandomGames()
@@ -41,7 +47,7 @@ namespace pandemic.console
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+                var searchProblem = new PandemicSearchProblem(game);
 
                 while (!game.IsOver)
                 {
@@ -59,14 +65,50 @@ namespace pandemic.console
             Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
         }
 
-        private static void RunGreedyBestFirst()
+        /// <summary>
+        /// Use the greedy agent to play games by picking the 'best' command
+        /// on a turn by turn basis (no search).
+        /// </summary>
+        private static void RunGreedyGames(TimeSpan timeLimit)
         {
-            var totalRunTime = TimeSpan.FromSeconds(5);
-            // seems to find a win in under 1s, or never
-            var maxGameTime = TimeSpan.FromSeconds(1);
+            Console.WriteLine("Running greedy games...");
 
-            // increasing threads reduces single thread performance :(
-            var numThreads = Environment.ProcessorCount / 3;
+            var timer = Stopwatch.StartNew();
+            var totalGames = 0;
+            var wins = 0;
+            var losses = new Dictionary<string, int>();
+
+            while (timer.Elapsed < timeLimit)
+            {
+                var game = NewGame();
+                var agent = new GreedyAgent();
+                while (!game.IsOver)
+                {
+                    (game, _) = game.Do(agent.NextCommand(game));
+                }
+
+                if (game.IsWon) wins++;
+                else
+                {
+                    var lossReason = game.LossReason;
+                    if (!losses.ContainsKey(lossReason)) losses[lossReason] = 0;
+                    losses[lossReason]++;
+                }
+
+                totalGames++;
+            }
+
+            Console.WriteLine($"Total games: {totalGames}");
+            Console.WriteLine($"Wins: {wins}");
+            Console.WriteLine("Losses:");
+            foreach (var (reason, count) in losses)
+            {
+                Console.WriteLine($"{reason} ({count})");
+            }
+        }
+
+        private static void RunGreedyBestFirst(TimeSpan totalRunTime, TimeSpan maxGameTime, int numThreads)
+        {
             var tasks = Enumerable.Range(0, numThreads)
                 .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
 
@@ -85,19 +127,24 @@ namespace pandemic.console
 
             Console.WriteLine("Running greedy best first...");
 
+            SearchNode? bestNode = null;
+            SearchNode? worstNode = null;
             while (totalTimer.Elapsed < totalRunTime)
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game, new PlayerCommandGenerator());
+                var searchProblem = new PandemicSearchProblem(game);
                 var searcher = new GreedyBestFirstSearch(searchProblem);
 
                 var gameTimer = Stopwatch.StartNew();
 
                 while (!searcher.IsFinished)
                 {
-                    searcher.Step();
+                    var node = searcher.Step();
                     statesVisited++;
+
+                    if (worstNode == null || node.Score < worstNode.Score) worstNode = node;
+                    if (bestNode == null || node.Score > bestNode.Score) bestNode = node;
 
                     if (gameTimer.Elapsed > maxGameTime)
                     {
@@ -112,11 +159,18 @@ namespace pandemic.console
                 }
             }
 
+            Console.WriteLine("========================================");
             Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
-            Console.WriteLine("Win times:");
+            Console.WriteLine("Best");
+            Console.WriteLine(bestNode.State);
+            Console.WriteLine();
+            Console.WriteLine("------------------");
+            Console.WriteLine("Worst");
+            Console.WriteLine(worstNode.State);
+            Console.WriteLine("  Win times:");
             foreach (var time in winTimes)
             {
-                Console.WriteLine(time);
+                Console.WriteLine($"  {time}");
             }
         }
 
@@ -154,13 +208,15 @@ namespace pandemic.console
 
         private static PandemicGame NewGame()
         {
-            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            var options = NewGameOptionsGenerator.RandomOptions() with
             {
                 Difficulty = Difficulty.Introductory,
-                Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
-            });
+                CommandGenerator = new SensibleCommandGenerator()
+            };
 
-            return game;
+            var (game, _) = PandemicGame.CreateNewGame(options);
+
+            return game with { SelfConsistencyCheckingEnabled = false };
         }
     }
 }
