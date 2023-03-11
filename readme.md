@@ -11,7 +11,7 @@ implemented in C#. Intended for usage by AI agents.
       - mutable?
   - strategy
     - look at what agent is doing
-      - pass is the highest scored action! lol
+      - not much treating disease
     - play with game evaluator. Try to lose in some other way to outbreaks/cubes
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks

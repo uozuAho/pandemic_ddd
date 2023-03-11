@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using pandemic.agents;
 using pandemic.Aggregates.Game;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -14,7 +15,8 @@ internal class SingleGame
         var gameOptions = new NewGameOptions
         {
             Difficulty = Difficulty.Introductory,
-            Roles = new[] { Role.Medic, Role.Dispatcher }
+            Roles = new[] { Role.Medic, Role.Dispatcher },
+            CommandGenerator = new SensibleCommandGenerator()
         };
         var (game, events) = PandemicGame.CreateNewGame(gameOptions);
 

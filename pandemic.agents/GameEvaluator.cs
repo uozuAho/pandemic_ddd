@@ -37,11 +37,12 @@ namespace pandemic.agents
             // outbreaks are bad
             score -= game.OutbreakCounter * 100;
 
+            // todo: maybe use this when enough cards to cure
             // further away from research stations is bad
             // (at least with currently implemented rules)
-            score -= game.Players
-                .Sum(p => StandardGameBoard.DriveFerryDistance(
-                    p.Location, ClosestResearchStationTo(game, p.Location)));
+            // score -= game.Players
+            //     .Sum(p => StandardGameBoard.DriveFerryDistance(
+            //         p.Location, ClosestResearchStationTo(game, p.Location)));
 
             return score;
         }

@@ -101,7 +101,6 @@ namespace pandemic.Commands
                 commands.AddRange(TreatDiseaseCommands(game));
                 commands.AddRange(ShareKnowledgeGiveCommands(game));
                 commands.AddRange(ShareKnowledgeTakeCommands(game));
-                commands.AddRange(PassCommands(game));
                 commands.AddRange(DispatcherCommands(game));
                 commands.AddRange(OperationsExpertCommands(game));
                 commands.AddRange(ResearcherCommands(game));

@@ -22,8 +22,11 @@ namespace pandemic.console
         public static void Run()
         {
             // RunRandomGames();
-            RunGreedyGames(TimeSpan.FromSeconds(5));
-            // RunGreedyBestFirst();
+            // RunGreedyGames(TimeSpan.FromSeconds(5));
+            RunGreedyBestFirst(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(1),
+                1);
             // RunDfs();
             // RunDfsWithHeuristics();
         }
@@ -104,13 +107,8 @@ namespace pandemic.console
             }
         }
 
-        private static void RunGreedyBestFirst()
+        private static void RunGreedyBestFirst(TimeSpan totalRunTime, TimeSpan maxGameTime, int numThreads)
         {
-            var totalRunTime = TimeSpan.FromSeconds(5);
-            var maxGameTime = TimeSpan.FromSeconds(1);
-
-            // increasing threads reduces single thread performance :(
-            var numThreads = Environment.ProcessorCount / 2;
             var tasks = Enumerable.Range(0, numThreads)
                 .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
 
@@ -163,12 +161,12 @@ namespace pandemic.console
 
             Console.WriteLine("========================================");
             Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
-            // Console.WriteLine("Best");
-            // Console.WriteLine(bestNode.State);
-            // Console.WriteLine();
-            // Console.WriteLine("------------------");
-            // Console.WriteLine("Worst");
-            // Console.WriteLine(worstNode.State);
+            Console.WriteLine("Best");
+            Console.WriteLine(bestNode.State);
+            Console.WriteLine();
+            Console.WriteLine("------------------");
+            Console.WriteLine("Worst");
+            Console.WriteLine(worstNode.State);
             Console.WriteLine("  Win times:");
             foreach (var time in winTimes)
             {
