@@ -6,9 +6,10 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
-    - evaulator tests
-      - move towards cities with lots of cubes
-      - when enough cards to cure, move towards research stations
+    - refactor Evaluate: extract methods
+    - fix search node comparer: don't use score, compare game attributes individually, eg. more diseases cured is (always?) better
+      - see the failing greedy bfs test
+    - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
     - check greedy agent moves. Balancing cure & clear cubes?
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks

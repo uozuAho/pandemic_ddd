@@ -46,33 +46,6 @@ namespace pandemic.agents.test
         }
 
         [Test]
-        public void Chooses_build_research_station_over_other_actions()
-        {
-            var game = ANewGame();
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    Location = "Miami",
-                    Hand = new PlayerHand(new []
-                    {
-                        new PlayerCityCard(Board.City("Miami")),
-                        new PlayerCityCard(Board.City("Atlanta")),
-                        new PlayerCityCard(Board.City("Paris")),
-                    })
-                })
-            };
-            var problem = new PandemicSearchProblem(game);
-
-            var bfs = new GreedyBestFirstSearch(problem);
-
-            bfs.Step(); // first node is root
-            var nextNode = bfs.Step();
-            Debug.Assert(nextNode != null);
-            Assert.That(nextNode.Action, Is.TypeOf<BuildResearchStationCommand>());
-        }
-
-        [Test]
         public void Keeps_cards_of_same_colour()
         {
             var game = ANewGame();

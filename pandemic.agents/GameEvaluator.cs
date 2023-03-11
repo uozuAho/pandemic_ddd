@@ -44,23 +44,41 @@ namespace pandemic.agents
             //     .Sum(p => StandardGameBoard.DriveFerryDistance(
             //         p.Location, ClosestResearchStationTo(game, p.Location)));
 
-            // cubes
-            for (int i = 0; i < game.Cities.Length; i++)
+            if (!game.APlayerHasEnoughToCure)
             {
-                var city = game.Cities[i];
-                foreach (var colour in ColourExtensions.AllColours)
+                // cubes
+                for (int i = 0; i < game.Cities.Length; i++)
                 {
-                    var cubes = city.Cubes.NumberOf(colour);
-                    if (cubes == 0) continue;
+                    var city = game.Cities[i];
+                    foreach (var colour in ColourExtensions.AllColours)
+                    {
+                        var cubes = city.Cubes.NumberOf(colour);
+                        if (cubes == 0) continue;
 
-                    // cubes in city
-                    score -= cubes * cubes * 10;
+                        // cubes in city
+                        score -= cubes * cubes * 10;
 
-                    // player distance from cubes
+                        // player distance from cubes
+                        foreach (var player in game.Players)
+                        {
+                            var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
+                            score -= cubes * cubes * distance * 5;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < game.Cities.Length; i++)
+                {
+                    var city = game.Cities[i];
+                    if (!city.HasResearchStation) continue;
+
+                    // player distance from station
                     foreach (var player in game.Players)
                     {
                         var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
-                        score -= cubes * cubes * distance * 5;
+                        score -= distance * 5;
                     }
                 }
             }

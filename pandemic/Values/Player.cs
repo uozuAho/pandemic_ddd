@@ -26,6 +26,12 @@ namespace pandemic.Values
         {
             return Hand.Contains(card);
         }
+
+        // todo: make this work for all players (eg. scientist/researcher needs only 4)
+        public bool HasEnoughToCure()
+        {
+            return Hand.CityCards.GroupBy(c => c.City.Colour).Any(g => g.Count() >= 5);
+        }
     }
 
     internal class PlayerComparer : IEqualityComparer<Player>

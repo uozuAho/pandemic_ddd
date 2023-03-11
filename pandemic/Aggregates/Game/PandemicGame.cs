@@ -336,6 +336,8 @@ namespace pandemic.Aggregates.Game
         private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Cards.Any(c => c is ISpecialEventCard)) ||
                                                     ContingencyPlannerStoredCard != null;
 
+        public bool APlayerHasEnoughToCure => Players.Any(p => p.HasEnoughToCure());
+
         private int TotalCubesInGame()
         {
             var totalCubes = 0;
