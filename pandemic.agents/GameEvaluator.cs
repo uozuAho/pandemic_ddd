@@ -44,6 +44,10 @@ namespace pandemic.agents
             //     .Sum(p => StandardGameBoard.DriveFerryDistance(
             //         p.Location, ClosestResearchStationTo(game, p.Location)));
 
+            // cubes
+            var totalCubesOnBoard = 96 - game.Cubes.Counts.Sum(c => c.Value);
+            score -= totalCubesOnBoard * 10;
+
             return score;
         }
 
@@ -67,6 +71,7 @@ namespace pandemic.agents
                 .Sum(n => n * (n - 1) / 2);
         }
 
+        // todo: perf: just do bfs. Worst case perf is same as this impl
         private static string ClosestResearchStationTo(PandemicGame game, string city)
         {
             var closest = "";
