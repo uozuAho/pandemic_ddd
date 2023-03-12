@@ -132,24 +132,22 @@ namespace pandemic.agents
             return score;
         }
 
-        public static int PlayerHandScore(PandemicGame pandemicGame, PlayerHand hand)
+        public static int PlayerHandScore(PandemicGame game, PlayerHand hand)
         {
             // more cards of same colour = good, where colour is not cured
-            //
-            // each extra card of the same colour gains more points:
-            // 1 blue = 0
-            // 2 blue = 1 (0 + 1)
-            // 3 blue = 3 (0 + 1 + 2)
-            // 4 blue = 6 (0 + 1 + 2 + 3)
-            // = n(n-1)/2
+            // each extra card of the same colour gains more points
 
-            var cured = pandemicGame.CuresDiscovered.Select(c => c.Colour);
+            return + hand.CityCards
+                       .GroupBy(c => c.City.Colour)
+                       .Where(g => !game.IsCured(g.Key))
+                       .Select(g => g.Count())
+                       .Sum(n => n * n)
 
-            return hand.CityCards
-                .GroupBy(c => c.City.Colour)
-                .Where(g => !cured.Contains(g.Key))
-                .Select(g => g.Count())
-                .Sum(n => n * (n - 1) / 2);
+                   - hand.CityCards
+                       .GroupBy(c => c.City.Colour)
+                       .Where(g => game.IsCured(g.Key))
+                       .Select(g => g.Count())
+                       .Sum(n => n * n);
         }
 
         private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)

@@ -210,6 +210,7 @@ namespace pandemic.console
         {
             var options = NewGameOptionsGenerator.RandomOptions() with
             {
+                Roles = new[] { Role.Medic, Role.Dispatcher },
                 Difficulty = Difficulty.Introductory,
                 CommandGenerator = new SensibleCommandGenerator()
             };

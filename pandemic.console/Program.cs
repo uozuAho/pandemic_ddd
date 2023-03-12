@@ -12,7 +12,7 @@ namespace pandemic.console
     {
         static void Main(string[] args)
         {
-            SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
+            // SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
             // NumberOfPossibleGamesEstimator.Estimate();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
@@ -22,7 +22,7 @@ namespace pandemic.console
             // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
             // BfsRunner.Run();
             // BfsRunner.Draw(500);
-            // AgentComparer.Run();
+            AgentComparer.Run();
         }
 
         private static void PlayInfiniteMctsGames()
