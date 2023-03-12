@@ -36,6 +36,20 @@ namespace pandemic.agents
             score += CubesOnCitiesScore(game);
             score += game.Players.Select(p => PlayerScore(game, p)).Sum();
 
+            foreach (var cardsOfColour in game.PlayerDiscardPile.Cards
+                         .Where(c => c is PlayerCityCard)
+                         .Cast<PlayerCityCard>()
+                         .GroupBy(c => c.City.Colour))
+            {
+                var colour = cardsOfColour.Key;
+                var numCards = cardsOfColour.Count();
+                if (!game.IsCured(colour))
+                {
+                    if (numCards > 7) score -= 1000000; // cannot cure!
+                    score -= numCards * numCards * 10;
+                }
+            }
+
             return score;
         }
 
@@ -141,13 +155,13 @@ namespace pandemic.agents
                        .GroupBy(c => c.City.Colour)
                        .Where(g => !game.IsCured(g.Key))
                        .Select(g => g.Count())
-                       .Sum(n => n * n)
+                       .Sum(n => n * n * 10)
 
                    - hand.CityCards
                        .GroupBy(c => c.City.Colour)
                        .Where(g => game.IsCured(g.Key))
                        .Select(g => g.Count())
-                       .Sum(n => n * n);
+                       .Sum(n => n * n * 10);
         }
 
         private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)

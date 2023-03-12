@@ -25,7 +25,7 @@ namespace pandemic.console
             // RunGreedyGames(TimeSpan.FromSeconds(5));
             RunGreedyBestFirst(
                 TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(5),
                 1);
             // RunDfs();
             // RunDfsWithHeuristics();
@@ -109,10 +109,12 @@ namespace pandemic.console
 
         private static void RunGreedyBestFirst(TimeSpan totalRunTime, TimeSpan maxGameTime, int numThreads)
         {
-            var tasks = Enumerable.Range(0, numThreads)
-                .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
+            RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime);
 
-            Task.WaitAll(tasks.ToArray());
+            // var tasks = Enumerable.Range(0, numThreads)
+            //     .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
+            //
+            // Task.WaitAll(tasks.ToArray());
         }
 
         private static void RunGreedyBestFirstSingleThread(
@@ -164,14 +166,20 @@ namespace pandemic.console
             Console.WriteLine("Best");
             Console.WriteLine(bestNode.State);
             Console.WriteLine();
-            Console.WriteLine("------------------");
-            Console.WriteLine("Worst");
-            Console.WriteLine(worstNode.State);
-            Console.WriteLine("  Win times:");
-            foreach (var time in winTimes)
+            Console.WriteLine("Actions in reverse order:");
+            while (bestNode.Parent != null)
             {
-                Console.WriteLine($"  {time}");
+                Console.WriteLine(bestNode.Action);
+                bestNode = bestNode.Parent;
             }
+            // Console.WriteLine("------------------");
+            // Console.WriteLine("Worst");
+            // Console.WriteLine(worstNode.State);
+            // Console.WriteLine("  Win times:");
+            // foreach (var time in winTimes)
+            // {
+            //     Console.WriteLine($"  {time}");
+            // }
         }
 
         private static void RunDfs()
