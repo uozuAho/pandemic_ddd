@@ -547,7 +547,7 @@ public partial record PandemicGame
         var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
         return ApplyEvents(
-            new ResearchStationBuilt(city),
+            new ResearchStationBuilt(command.Role, city),
             new PlayerCardDiscarded(command.Role, playerCard)
         );
     }
@@ -768,7 +768,7 @@ public partial record PandemicGame
 
         var card = game.PlayerDrawPile.TopCard;
 
-        game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
+        game = game.ApplyEvent(new PlayerCardPickedUp(game.CurrentPlayer.Role, card), events);
 
         if (card is EpidemicCard epidemicCard)
         {
