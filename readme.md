@@ -7,7 +7,6 @@ implemented in C#. Intended for usage by AI agents.
 - win one game at any difficulty, any strategy
   - strategy
     - discourage research stations close to others
-    - medic closer to cubes is better
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks

@@ -66,7 +66,9 @@ namespace pandemic.agents
             }
             else
             {
-                score += DistanceFromCubesScore(game, player);
+                var cubeScore = DistanceFromCubesScore(game, player);
+                if (player.Role == Role.Medic) cubeScore *= 2;
+                score += cubeScore;
             }
 
             return score;
