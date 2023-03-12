@@ -107,5 +107,10 @@ namespace pandemic.Values
 
             throw new InvalidOperationException("No cards matched the predicate");
         }
+
+        public override string ToString()
+        {
+            return string.Join(", ", _cards);
+        }
     }
 }

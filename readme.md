@@ -6,8 +6,11 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
+    - game replay: show player hands
+    - game replay: short/pretty print events
+    - evaluate: city cards useless after cured
+    - medic closer to cubes is better
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
-    - check greedy agent moves. Balancing cure & clear cubes?
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks
   - make faster: play more games, search more game states
