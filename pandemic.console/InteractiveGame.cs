@@ -2,6 +2,7 @@
 using System.Linq;
 using pandemic.agents;
 using pandemic.Aggregates.Game;
+using pandemic.Commands;
 
 namespace pandemic.console;
 
@@ -82,7 +83,9 @@ public class InteractiveGame
 
         for (var i = 0; i < commands.Count; i++)
         {
-            Console.WriteLine($"{i}: {commands[i]}");
+            var (nextState, _) = game.Do(commands[i]);
+            var score = GameEvaluator.Score(nextState);
+            Console.WriteLine($"{i}: (score: {score}): {commands[i]}");
         }
 
         return game;
