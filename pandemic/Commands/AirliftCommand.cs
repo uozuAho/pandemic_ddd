@@ -6,4 +6,9 @@ public record AirliftCommand(Role Role, Role PlayerToMove, string City) : IPlaye
 {
     public bool ConsumesAction => false;
     public bool IsSpecialEvent => true;
+
+    public override string ToString()
+    {
+        return $"{Role}: airlift {PlayerToMove} to {City}";
+    }
 }

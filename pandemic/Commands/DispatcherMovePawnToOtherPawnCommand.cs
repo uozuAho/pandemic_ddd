@@ -8,4 +8,9 @@ public record DispatcherMovePawnToOtherPawnCommand(Role PlayerToMove, Role Desti
 
     public bool ConsumesAction => true;
     public bool IsSpecialEvent => false;
+
+    public override string ToString()
+    {
+        return $"{Role}: move {PlayerToMove} to {DestinationRole}";
+    }
 }
