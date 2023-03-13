@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using pandemic.agents;
 using pandemic.Aggregates.Game;
 
 namespace pandemic.console;
@@ -71,7 +72,13 @@ public class InteractiveGame
 
     private static PandemicGame AvailableCommands(PandemicGame game)
     {
+        var agent = new GreedyAgent();
         var commands = game.LegalCommands().ToList();
+
+        var greedyCommand = agent.NextCommand(game);
+        var greedyIdx = commands.IndexOf(greedyCommand);
+
+        Console.WriteLine($"Greedy choice: {greedyIdx}: {greedyCommand}");
 
         for (var i = 0; i < commands.Count; i++)
         {

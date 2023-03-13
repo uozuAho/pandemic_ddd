@@ -5,7 +5,11 @@ implemented in C#. Intended for usage by AI agents.
 
 # todo
 - win one game at any difficulty, any strategy
+  - interactive game
+    - pretty print commands (shorter)
   - strategy
+    - (maybe) don't double count player distance from cubes, eg. if medic is on a city with 3 cubes,
+      don't incentivise moving other pawns to that city
     - discourage research stations close to others
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
     - check BGA replays: any clear strategy?
