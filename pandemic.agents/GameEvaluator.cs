@@ -21,20 +21,25 @@ namespace pandemic.agents
 
             var score = 0;
 
-            // diseases cured is great
             score += game.CuresDiscovered.Count * 100000;
 
-            // research stations are good
-            // even better: spread out (do later,,, maybe)
+            // maybe: spread research stations out
             score += game.Cities
                 .Where(c => c.HasResearchStation)
                 .Sum(_ => 100);
 
-            // outbreaks are bad
             score -= game.OutbreakCounter * 100;
-
             score += CubesOnCitiesScore(game);
+            score += PlayerDistanceFromCubesScore(game);
             score += game.Players.Select(p => PlayerScore(game, p)).Sum();
+            score += PenaliseDiscards(game);
+
+            return score;
+        }
+
+        private static int PenaliseDiscards(PandemicGame game)
+        {
+            var score = 0;
 
             foreach (var cardsOfColour in game.PlayerDiscardPile.Cards
                          .Where(c => c is PlayerCityCard)
@@ -64,21 +69,10 @@ namespace pandemic.agents
                 var (city, distance) = ClosestResearchStationTo(game, player.Location);
                 score -= distance * 5;
             }
-            else
-            {
-                var cubeScore = DistanceFromCubesScore(game, player);
-                if (player.Role == Role.Medic) cubeScore *= 2;
-                score += cubeScore;
-            }
 
             return score;
         }
 
-        /// <summary>
-        /// Higher score = players further away from cubes
-        /// </summary>
-        /// <param name="game"></param>
-        /// <returns></returns>
         private static int PlayerDistanceFromCubesScore(PandemicGame game)
         {
             var score = 0;
@@ -86,40 +80,22 @@ namespace pandemic.agents
             for (int i = 0; i < game.Cities.Length; i++)
             {
                 var city = game.Cities[i];
+                Player? closestPlayer = null;
                 foreach (var colour in ColourExtensions.AllColours)
                 {
-                    var cubes = city.Cubes.NumberOf(colour);
-                    if (cubes == 0) continue;
+                    var numCubes = city.Cubes.NumberOf(colour);
+                    if (numCubes == 0) continue;
 
-                    foreach (var player in game.Players)
-                    {
-                        var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
-                        score -= cubes * cubes * distance * 5;
-                    }
-                }
-            }
+                    closestPlayer ??= game.Players
+                        .Where(p => !p.HasEnoughToCure())
+                        .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
 
-            return score;
-        }
+                    if (closestPlayer == null) continue;
+                    var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
+                    var tempScore = numCubes * numCubes * distance;
+                    if (closestPlayer.Role == Role.Medic) tempScore *= 2;
 
-        // maybe: shouldn't be penalised for being far from one 3-cube city while being close to another
-        /// <summary>
-        /// Higher score = players closer to cubes
-        /// </summary>
-        private static int DistanceFromCubesScore(PandemicGame game, Player player)
-        {
-            var score = 0;
-
-            for (int i = 0; i < game.Cities.Length; i++)
-            {
-                var city = game.Cities[i];
-                foreach (var colour in ColourExtensions.AllColours)
-                {
-                    var cubes = city.Cubes.NumberOf(colour);
-                    if (cubes == 0) continue;
-
-                    var distance = StandardGameBoard.DriveFerryDistance(player.Location, city.Name);
-                    score -= cubes * cubes * distance;
+                    score -= tempScore;
                 }
             }
 

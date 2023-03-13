@@ -6,9 +6,9 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
-    - (maybe) don't double count player distance from cubes, eg. if medic is on a city with 3 cubes,
-      don't incentivise moving other pawns to that city
     - discourage research stations close to others
+    - encourage using special events
+    - prioritise treating higher cube cities
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks
@@ -85,7 +85,6 @@ handle.
 
 ## Alternate implementations
 - https://github.com/alexzherdev/pandemic
-
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
