@@ -760,6 +760,27 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Cure_disease_does_not_alter_other_diseases()
+        {
+            var game = DefaultTestGame()
+                .RemoveAllCubesFromCities()
+                .AddCube("Algiers", Colour.Black)
+                .Eradicate(Colour.Red);
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Atlanta",
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+            });
+
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
+
+            game.IsEradicated(Colour.Red).ShouldBeTrue();
+            game.IsCured(Colour.Black).ShouldBeTrue();
+            game.IsEradicated(Colour.Black).ShouldBeFalse();
+        }
+
+        [Test]
         public void Cure_can_end_turn()
         {
             var game = DefaultTestGame();

@@ -220,7 +220,8 @@ namespace pandemic.Aggregates.Game
 
             return this with
             {
-                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
+                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) }),
+                Cubes = Cubes.RemoveCubes(colour, numCubes)
             };
         }
 

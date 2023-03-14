@@ -492,10 +492,12 @@ public partial record PandemicGame
             var cubesAtThisCity = medicCity.Cubes.NumberOf(curedColour);
 
             if (cubesAtThisCity > 0)
+            {
                 yield return new MedicAutoRemovedCubes(medicCity.Name, curedColour);
 
-            if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
-                yield return new DiseaseEradicated(curedColour);
+                if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
+                    yield return new DiseaseEradicated(curedColour);
+            }
         }
     }
 
