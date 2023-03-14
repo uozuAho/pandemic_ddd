@@ -6,7 +6,6 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
-    - discourage research stations close to others
     - encourage using special events
     - prioritise treating higher cube cities
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)

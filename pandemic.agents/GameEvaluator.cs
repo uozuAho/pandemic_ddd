@@ -22,17 +22,28 @@ namespace pandemic.agents
             var score = 0;
 
             score += game.CuresDiscovered.Count * 100000;
-
-            // maybe: spread research stations out
-            score += game.Cities
-                .Where(c => c.HasResearchStation)
-                .Sum(_ => 100);
-
+            score += ResearchStationScore(game);
             score -= game.OutbreakCounter * 100;
             score += CubesOnCitiesScore(game);
             score += PlayerDistanceFromCubesScore(game);
             score += game.Players.Select(p => PlayerScore(game, p)).Sum();
             score += PenaliseDiscards(game);
+
+            return score;
+        }
+
+        private static int ResearchStationScore(PandemicGame game)
+        {
+            var score = 0;
+
+            // best chosen by me
+            // rationale: spread them around highly-connected/remote cities
+            var best = new[] { "Hong Kong", "Bogota", "Paris", "Kinshasa", "Karachi" };
+            foreach (var city in best)
+            {
+                var (closestCity, distance) = ClosestResearchStationTo(game, city);
+                score += 100 / (distance + 1);
+            }
 
             return score;
         }

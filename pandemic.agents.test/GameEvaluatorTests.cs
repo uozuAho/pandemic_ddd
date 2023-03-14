@@ -140,5 +140,30 @@ namespace pandemic.agents.test
 
             scoreAtParis.ShouldBeGreaterThan(scoreAtChicago);
         }
+
+        [Test]
+        public void Prefer_spread_research_stations()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlanta = game.CityByName("Atlanta");
+            var chicago = game.CityByName("Chicago");
+            var istanbul = game.CityByName("Istanbul");
+
+            var closeStations = game with
+            {
+                Cities = game.Cities
+                    .Replace(atlanta, atlanta with { HasResearchStation = true })
+                    .Replace(chicago, chicago with { HasResearchStation = true })
+            };
+
+            var spreadStations = game with
+            {
+                Cities = game.Cities
+                    .Replace(atlanta, atlanta with { HasResearchStation = true })
+                    .Replace(istanbul, istanbul with { HasResearchStation = true })
+            };
+
+            GameEvaluator.Score(spreadStations).ShouldBeGreaterThan(GameEvaluator.Score(closeStations));
+        }
     }
 }
