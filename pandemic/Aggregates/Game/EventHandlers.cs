@@ -536,7 +536,7 @@ public partial record PandemicGame
 
         return game with
         {
-            CuresDiscovered = game.CuresDiscovered.Replace(cureMarker, cureMarker.Flip())
+            CuresDiscovered = game.CuresDiscovered.Replace(cureMarker, cureMarker.AsEradicated())
         };
     }
 
