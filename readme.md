@@ -6,8 +6,8 @@ implemented in C#. Intended for usage by AI agents.
 # todo
 - win one game at any difficulty, any strategy
   - strategy
-    - encourage using special events
-    - prioritise treating higher cube cities
+    - add test: player prefers to go to city with 3 cubes, even if it's further away?
+    - encourage using special events?
     - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
     - check BGA replays: any clear strategy?
     - make game easier: eg. no epidemics, no outbreaks

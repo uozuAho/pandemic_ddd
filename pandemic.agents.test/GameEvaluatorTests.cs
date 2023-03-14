@@ -54,8 +54,10 @@ namespace pandemic.agents.test
             closeScore.ShouldBeGreaterThan(farScore);
         }
 
-        [Test]
-        public void Spread_players_to_cubes()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void Spread_players_to_cubes(int numCubes)
         {
             var game = PandemicGame.CreateUninitialisedGame();
             var atlanta = game.CityByName("Chicago");
@@ -63,8 +65,8 @@ namespace pandemic.agents.test
             game = game with
             {
                 Cities = game.Cities
-                    .Replace(atlanta, atlanta.AddCube(Colour.Blue))
-                    .Replace(stPeter, stPeter.AddCube(Colour.Blue))
+                    .Replace(atlanta, atlanta.AddCubes(Colour.Blue, numCubes))
+                    .Replace(stPeter, stPeter.AddCubes(Colour.Blue, numCubes))
             };
             StandardGameBoard.DriveFerryDistance("Chicago", "St. Petersburg").ShouldBe(5);
 
@@ -113,6 +115,39 @@ namespace pandemic.agents.test
                 .OrderByDescending(g => GameEvaluator.Score(g.Item2))
                 .Select(g => g.Item1)
                 .ShouldBe(new[] { "A", "B", "C", "D", "E" });
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void Prefers_player_close_to_a_city_with_cubes(int numCubes)
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlanta = game.CityByName("Chicago");
+            var stPeter = game.CityByName("St. Petersburg");
+            game = game with
+            {
+                Cities = game.Cities
+                    .Replace(atlanta, atlanta.AddCubes(Colour.Blue, numCubes))
+                    .Replace(stPeter, stPeter.AddCubes(Colour.Blue, numCubes))
+            };
+
+            // expected rank of player positions, best to worst:
+            //    X                       X  <-- cities with cubes
+            // A: o                          <-- o = player position
+            // B:       o
+            // C:              o
+            var gameA = game with { Players = game.Players.Add(new Player { Location = "Chicago" }) };
+            var gameB = game with { Players = game.Players.Add(new Player { Location = "Montreal" }) };
+            var gameC = game with { Players = game.Players.Add(new Player { Location = "New York" }) };
+
+            var orderedGames = new[] { ("A", gameA), ("B", gameB), ("C", gameC) };
+            var shuffledGames = orderedGames.Shuffle();
+
+            shuffledGames
+                .OrderByDescending(g => GameEvaluator.Score(g.Item2))
+                .Select(g => g.Item1)
+                .ShouldBe(new[] { "A", "B", "C" });
         }
 
         [Test]

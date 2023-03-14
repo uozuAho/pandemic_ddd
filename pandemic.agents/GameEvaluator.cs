@@ -19,17 +19,15 @@ namespace pandemic.agents
             if (game.IsWon) return int.MaxValue;
             if (game.IsLost) return int.MinValue;
 
-            var score = 0;
+            var cureScore = game.CuresDiscovered.Count * 100000;
+            var stationScore = ResearchStationScore(game);
+            var outbreakScore = -game.OutbreakCounter * 100;
+            var cubeScore = CubesOnCitiesScore(game);
+            var cubeDistanceScore = PlayerDistanceFromCubesScore(game);
+            var playerScore = game.Players.Select(p => PlayerScore(game, p)).Sum();
+            var discardScore = PenaliseDiscards(game);
 
-            score += game.CuresDiscovered.Count * 100000;
-            score += ResearchStationScore(game);
-            score -= game.OutbreakCounter * 100;
-            score += CubesOnCitiesScore(game);
-            score += PlayerDistanceFromCubesScore(game);
-            score += game.Players.Select(p => PlayerScore(game, p)).Sum();
-            score += PenaliseDiscards(game);
-
-            return score;
+            return cureScore + stationScore + outbreakScore + cubeScore + cubeDistanceScore + playerScore + discardScore;
         }
 
         private static int ResearchStationScore(PandemicGame game)
@@ -86,28 +84,52 @@ namespace pandemic.agents
 
         private static int PlayerDistanceFromCubesScore(PandemicGame game)
         {
+            /*
+             * pseudocode:
+             *
+             * for each city in order of max number of cubes:
+             *    while there's still players that haven't been assigned a city:
+             *        find the closest player that cannot cure
+             *        assign that player to that city
+             *        score the distance to that player
+             */
+            var players = game.Players.ToList();
+            var cities = game.Cities;
+
+            var cities3 = new List<City>();
+            var cities2 = new List<City>();
+            var cities1 = new List<City>();
+
+            for (int i = 0; i < cities.Length; i++)
+            {
+                var city = cities[i];
+                switch (city.MaxNumCubes)
+                {
+                    case 0: continue;
+                    case 1: cities1.Add(city); break;
+                    case 2: cities2.Add(city); break;
+                    case 3: cities3.Add(city); break;
+                }
+            }
+
+            var citiesToBlah = new Queue<City>(cities3.Concat(cities2).Concat(cities1));
             var score = 0;
 
-            for (int i = 0; i < game.Cities.Length; i++)
+            while (citiesToBlah.Count > 0 && players.Count > 0)
             {
-                var city = game.Cities[i];
-                Player? closestPlayer = null;
-                foreach (var colour in ColourExtensions.AllColours)
-                {
-                    var numCubes = city.Cubes.NumberOf(colour);
-                    if (numCubes == 0) continue;
+                var city = citiesToBlah.Dequeue();
+                var closestPlayer = players
+                    .Where(p => !p.HasEnoughToCure())
+                    .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
 
-                    closestPlayer ??= game.Players
-                        .Where(p => !p.HasEnoughToCure())
-                        .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
+                if (closestPlayer == null) break;
 
-                    if (closestPlayer == null) continue;
-                    var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
-                    var tempScore = numCubes * numCubes * distance;
-                    if (closestPlayer.Role == Role.Medic) tempScore *= 2;
+                var numCubes = city.MaxNumCubes;
+                var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
 
-                    score -= tempScore;
-                }
+                players.Remove(closestPlayer);
+
+                score -= numCubes * numCubes * distance;
             }
 
             return score;
@@ -128,7 +150,7 @@ namespace pandemic.agents
                     var cubes = city.Cubes.NumberOf(colour);
                     if (cubes == 0) continue;
 
-                    score -= cubes * cubes * 10;
+                    score -= cubes * cubes * cubes * 10;
                 }
             }
 
