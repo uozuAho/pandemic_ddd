@@ -1579,6 +1579,26 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Cure_eradicates_when_zero_cubes()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            }).RemoveAllCubesFromCities();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Atlanta",
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+            });
+
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
+
+            Assert.IsTrue(game.IsEradicated(Colour.Black));
+        }
+
+        [Test]
         public void Outbreak_infects_adjacent_cities()
         {
             var game = DefaultTestGame();

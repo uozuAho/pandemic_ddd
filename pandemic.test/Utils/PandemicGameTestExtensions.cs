@@ -32,7 +32,12 @@ public static class PandemicGameTestExtensions
     {
         return game with
         {
-            Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableArray()
+            Cities = game.Cities.Select(c => c with { Cubes = CubePile.Empty }).ToImmutableArray(),
+            Cubes = CubePile.Empty
+                .AddCubes(Colour.Black, 24)
+                .AddCubes(Colour.Blue, 24)
+                .AddCubes(Colour.Red, 24)
+                .AddCubes(Colour.Yellow, 24)
         };
     }
 }
