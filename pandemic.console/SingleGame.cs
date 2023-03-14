@@ -31,7 +31,7 @@ internal class SingleGame
         PrintState(endState);
     }
 
-    public static (PandemicGame, IEnumerable<IEvent>) PlayGame(PandemicGame game, ILiveAgent agent)
+    private static (PandemicGame, IEnumerable<IEvent>) PlayGame(PandemicGame game, ILiveAgent agent)
     {
         var numActions = 0;
         var events = new List<IEvent>();

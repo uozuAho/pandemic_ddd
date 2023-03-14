@@ -15,7 +15,8 @@ namespace pandemic.console
         {
             // SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
             // AgentComparer.Run();
-            PlayInteractiveGame();
+            WinLossStats.PlayGamesAndPrintWinLossStats(new GreedyAgent(), TimeSpan.FromSeconds(10));
+            // PlayInteractiveGame();
 
             // NumberOfPossibleGamesEstimator.Estimate();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());

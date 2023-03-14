@@ -5,12 +5,13 @@ implemented in C#. Intended for usage by AI agents.
 
 # todo
 - win one game at any difficulty, any strategy
+  - get win/loss stats for different game options
+    - tally roles and their win/loss rates
+  - do DFS with greedy move selector
+  - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
   - strategy
-    - add test: player prefers to go to city with 3 cubes, even if it's further away?
-    - encourage using special events?
-    - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
+    - watch replays: why mostly running out of player cards?
     - check BGA replays: any clear strategy?
-    - make game easier: eg. no epidemics, no outbreaks
   - make faster: play more games, search more game states
     - goal: single threaded: 100 games/sec (non-search), 5000 states/sec (search)
     - ideas
