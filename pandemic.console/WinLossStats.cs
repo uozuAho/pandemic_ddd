@@ -18,7 +18,8 @@ public class WinLossStats
         PlayGamesAndPrintWinLossStats(agent, timeLimit, () =>
         {
             var random = new Random();
-            var numPlayers = random.Choice(new[] {2, 3, 4});
+            // var numPlayers = random.Choice(new[] {2, 3, 4});
+            var numPlayers = 4;
             return new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
@@ -48,12 +49,46 @@ public class WinLossStats
             else losingOptions.Add(options);
         }
 
-        var wins = winningOptions.Count;
-        var losses = losingOptions.Count;
-        var winsByNumPlayers = winningOptions.GroupBy(o => o.Roles.Count).ToDictionary(g => g.Key, g => g.Count());
+        PrintWinLossStats(winningOptions, losingOptions, timeLimit);
+    }
 
-        Console.WriteLine($"{wins + losses} games played. {wins} wins, {losses} losses");
-        Console.WriteLine($"Wins by number of players: {string.Join(", ", winsByNumPlayers.Select(kvp => $"{kvp.Key} players: {kvp.Value}"))}");
+    private static void PrintWinLossStats(
+        List<NewGameOptions> winningOptions,
+        List<NewGameOptions> losingOptions,
+        TimeSpan timeLimit)
+    {
+        var teamStats = new Dictionary<string, int[]>();
+        string RolesToString(IEnumerable<Role> roles) => string
+            .Join(", ", roles.Select(r => r.ToString()[0]).Order())
+            .PadRight(10);
+
+        foreach (var options in winningOptions)
+        {
+            var roles = RolesToString(options.Roles);
+            if (!teamStats.ContainsKey(roles))
+                teamStats[roles] = new[] {1, 0};
+            else
+                teamStats[roles][0]++;
+        }
+        foreach (var options in losingOptions)
+        {
+            var roles = RolesToString(options.Roles);
+            if (!teamStats.ContainsKey(roles))
+                teamStats[roles] = new[] {0, 1};
+            else
+                teamStats[roles][1]++;
+        }
+
+        var totalGames = winningOptions.Count + losingOptions.Count;
+        var gamesPerSecond = totalGames / timeLimit.TotalSeconds;
+        Console.WriteLine($"Played {totalGames} games in {timeLimit.TotalSeconds} seconds ({gamesPerSecond:0.0} games/s)");
+
+        foreach (var stats in teamStats.OrderBy(s => s.Key.Count(c => c == ',')))
+        {
+            var (roles, winloss) = stats;
+            var winPercentage = 100 * winloss[0] / (double) (winloss[0] + winloss[1]);
+            Console.WriteLine($"{roles}: {winloss[0]} wins, {winloss[1]} losses ({winPercentage:0.0}%)");
+        }
     }
 
     private static (PandemicGame, IEnumerable<IEvent>) PlayGame(PandemicGame game, ILiveAgent agent)
