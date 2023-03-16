@@ -62,6 +62,42 @@ the app needs some performance improvements to make search-based agents more via
 Also, I think there is quite a bit of luck involved in winning a game, so searching
 is futile for unwinnable games.
 
+`PlayGamesAndPrintWinLossStats` prints out statistics similar to https://forum.boardgamearena.com/viewtopic.php?t=25373
+
+Greedy agent performance for 2 player games:
+
+Role stats:
+Medic: 29 wins, 233 losses (11.1%)
+OperationsExpert: 25 wins, 228 losses (9.9%)
+Researcher: 24 wins, 235 losses (9.3%)
+QuarantineSpecialist: 21 wins, 237 losses (8.1%)
+Scientist: 20 wins, 257 losses (7.2%)
+ContingencyPlanner: 12 wins, 271 losses (4.2%)
+Dispatcher: 11 wins, 259 losses (4.1%)
+
+Team stats:
+M, R      : 11 wins, 33 losses (25.0%)
+M, O      : 8 wins, 30 losses (21.1%)
+Q, R      : 6 wins, 32 losses (15.8%)
+O, S      : 6 wins, 41 losses (12.8%)
+O, Q      : 5 wins, 41 losses (10.9%)
+C, S      : 4 wins, 42 losses (8.7%)
+D, M      : 4 wins, 45 losses (8.2%)
+R, S      : 4 wins, 46 losses (8.0%)
+C, Q      : 4 wins, 48 losses (7.7%)
+M, S      : 3 wins, 42 losses (6.7%)
+C, O      : 3 wins, 48 losses (5.9%)
+D, O      : 2 wins, 36 losses (5.3%)
+D, Q      : 2 wins, 36 losses (5.3%)
+Q, S      : 2 wins, 40 losses (4.8%)
+M, Q      : 2 wins, 40 losses (4.8%)
+D, R      : 2 wins, 49 losses (3.9%)
+O, R      : 1 wins, 32 losses (3.0%)
+C, M      : 1 wins, 43 losses (2.3%)
+D, S      : 1 wins, 46 losses (2.1%)
+C, D      : 0 wins, 47 losses (0.0%)
+C, R      : 0 wins, 43 losses (0.0%)
+
 ## Alternate implementations
 - https://github.com/alexzherdev/pandemic
 

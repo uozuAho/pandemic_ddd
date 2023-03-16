@@ -366,7 +366,7 @@ public partial record PandemicGame
 
         if (cmd.Role == Role.ContingencyPlanner && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard)
         {
-            airliftEvent = new ContingencyPlannerStoredAirliftUsed(cmd.PlayerToMove, cmd.City);
+            airliftEvent = new ContingencyPlannerUsedStoredAirlift(cmd.PlayerToMove, cmd.City);
         }
         else
         {

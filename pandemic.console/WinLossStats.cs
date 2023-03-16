@@ -19,7 +19,7 @@ public class WinLossStats
         {
             var random = new Random();
             // var numPlayers = random.Choice(new[] {2, 3, 4});
-            var numPlayers = 4;
+            var numPlayers = 2;
             return new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
@@ -58,6 +58,7 @@ public class WinLossStats
         TimeSpan timeLimit)
     {
         var teamStats = new Dictionary<string, int[]>();
+        var roleStats = new Dictionary<Role, int[]>();
         string RolesToString(IEnumerable<Role> roles) => string
             .Join(", ", roles.Select(r => r.ToString()[0]).Order())
             .PadRight(10);
@@ -69,6 +70,14 @@ public class WinLossStats
                 teamStats[roles] = new[] {1, 0};
             else
                 teamStats[roles][0]++;
+
+            foreach (var role in options.Roles)
+            {
+                if (!roleStats.ContainsKey(role))
+                    roleStats[role] = new[] {1, 0};
+                else
+                    roleStats[role][0]++;
+            }
         }
         foreach (var options in losingOptions)
         {
@@ -77,13 +86,34 @@ public class WinLossStats
                 teamStats[roles] = new[] {0, 1};
             else
                 teamStats[roles][1]++;
+
+            foreach (var role in options.Roles)
+            {
+                if (!roleStats.ContainsKey(role))
+                    roleStats[role] = new[] {0, 1};
+                else
+                    roleStats[role][1]++;
+            }
         }
 
         var totalGames = winningOptions.Count + losingOptions.Count;
         var gamesPerSecond = totalGames / timeLimit.TotalSeconds;
         Console.WriteLine($"Played {totalGames} games in {timeLimit.TotalSeconds} seconds ({gamesPerSecond:0.0} games/s)");
 
-        foreach (var stats in teamStats.OrderBy(s => s.Key.Count(c => c == ',')))
+        Console.WriteLine();
+        Console.WriteLine("Role stats:");
+        foreach (var stats in roleStats.OrderByDescending(s => s.Value[0] / (s.Value[0] + (double) s.Value[1])))
+        {
+            var (role, winloss) = stats;
+            var winPercentage = 100 * winloss[0] / (double) (winloss[0] + winloss[1]);
+            Console.WriteLine($"{role}: {winloss[0]} wins, {winloss[1]} losses ({winPercentage:0.0}%)");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Team stats:");
+        foreach (var stats in teamStats
+                     .OrderBy(s => s.Key.Count(c => c == ','))
+                     .ThenByDescending(s => s.Value[0] / (s.Value[0] + (double) s.Value[1])))
         {
             var (roles, winloss) = stats;
             var winPercentage = 100 * winloss[0] / (double) (winloss[0] + winloss[1]);
