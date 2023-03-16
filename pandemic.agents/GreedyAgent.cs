@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 
@@ -16,7 +15,7 @@ public class GreedyAgent : ILiveAgent
         {
             var (nextState, _) = game.Do(command);
 
-            var stateScore = GameEvaluator.Evaluate(nextState);
+            var stateScore = GameEvaluator.Score(nextState);
             if (stateScore < bestScore) continue;
 
             bestScore = stateScore;

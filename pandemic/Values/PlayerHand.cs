@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -107,6 +106,11 @@ namespace pandemic.Values
             }
 
             throw new InvalidOperationException("No cards matched the predicate");
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", _cards);
         }
     }
 }

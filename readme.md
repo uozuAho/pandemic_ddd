@@ -3,34 +3,6 @@
 The [Pandemic board game](https://en.wikipedia.org/wiki/Pandemic_%28board_game%29),
 implemented in C#. Intended for usage by AI agents.
 
-# todo
-- win one game at any difficulty, any strategy
-  - strategy
-    - inline todos
-    - look at what agent is doing
-      - not much treating disease, lots of moving back/forth between same cities
-    - play with game evaluator. Try to lose in some other way to outbreaks/cubes
-    - check BGA replays: any clear strategy?
-    - make game easier: eg. no epidemics, no outbreaks
-  - make faster: play more games, search more game states
-    - goal: single threaded: 100 games/sec (non-search), 5000 states/sec (search)
-    - ideas
-      - mutable?
-- can a heroic game be won?
-  - pandemic strategies
-    - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
-    - indicates 6 is possible, some strats: https://boardgamegeek.com/thread/2356305/questions-pandemic-base-game-heroic-mode
-        - clear cubes early game, while building hands
-        - more players: easier to clear cubes, harder to cure. Inverse for fewer players
-    - read more:
-        - BGA has replays! stats here: https://forum.boardgamearena.com/viewtopic.php?t=25373
-        - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
-        - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
-- later
-  - make pandemic game correct by construction? make all properties get-only
-    - hide command and event handlers if not hidden already. pandemic public api should make sense
-      in terms of game rules, no internal details
-
 # Quick start
 - install dotnet core (tested with v7)
 
@@ -46,24 +18,20 @@ dotnet run
 # What's in this project
 - pandemic: core game logic. Immutable & DDD-like.
 - pandemic.agents: agents that can play games
-- pandemic.console: scratchpad console app
+- pandemic.console: scratchpad console app. Uncomment stuff in Program.cs to run it.
 - pandemic.drawing: draw game trees (graphviz dot output)
+- utils: C# language/library utils
 
 Check tag `just-before-remove-unused-network-code` for a network game server implementation.
 
 # Notes
-- I estimate about 9 x 10^85 possible games of pandemic. This is based on a
-  simple calculation of average branching factor and game length. See
-  `NumberOfPossibleGamesEstimator`
-- mutable2 branch: mutable pandemic aggregate gives 4x speedup in mcts
-- it has been shown that determining whether a game is winnable is NP-complete:
-  https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
-  found via: https://github.com/captn3m0/boardgame-research#pandemic
-
-
 ## Are all games winnable?
 This would be good to know. If not all games are winnable, then there's no point
 trying to make a bot that can win every game.
+
+It has been shown that determining whether a game is winnable is NP-complete:
+https://www.jstage.jst.go.jp/article/ipsjjip/20/3/20_723/_article. Article
+found via: https://github.com/captn3m0/boardgame-research#pandemic
 
 Here are some thoughts. Using a simplified game, where there are only city
 cards, infection cards, and no special abilities:
@@ -83,10 +51,74 @@ to not discard too many of any one colour. This may increase the odds of
 winning, but makes analysing 'winnability' too tedious for my attention span to
 handle.
 
+## Agent performance
+Uncomment `WinLossStats.PlayGamesAndPrintWinLossStats` to get these stats. So far,
+the best performance I've got is from playing many games with `GreedyAgent`s. This
+agent picks the 'best' move based on a `GameEvaluator`, which is just a scorer I
+wrote to indicate how 'good' a game state is.
+
+Other agents like greedy best-first, DFS run forever without finding a win. I think
+the app needs some performance improvements to make search-based agents more viable.
+Also, I think there is quite a bit of luck involved in winning a game, so searching
+is futile for unwinnable games.
+
+`PlayGamesAndPrintWinLossStats` prints out statistics similar to https://forum.boardgamearena.com/viewtopic.php?t=25373
+
+Greedy agent performance for 2 player games:
+
+Role stats:
+Medic: 29 wins, 233 losses (11.1%)
+OperationsExpert: 25 wins, 228 losses (9.9%)
+Researcher: 24 wins, 235 losses (9.3%)
+QuarantineSpecialist: 21 wins, 237 losses (8.1%)
+Scientist: 20 wins, 257 losses (7.2%)
+ContingencyPlanner: 12 wins, 271 losses (4.2%)
+Dispatcher: 11 wins, 259 losses (4.1%)
+
+Team stats:
+M, R      : 11 wins, 33 losses (25.0%)
+M, O      : 8 wins, 30 losses (21.1%)
+Q, R      : 6 wins, 32 losses (15.8%)
+O, S      : 6 wins, 41 losses (12.8%)
+O, Q      : 5 wins, 41 losses (10.9%)
+C, S      : 4 wins, 42 losses (8.7%)
+D, M      : 4 wins, 45 losses (8.2%)
+R, S      : 4 wins, 46 losses (8.0%)
+C, Q      : 4 wins, 48 losses (7.7%)
+M, S      : 3 wins, 42 losses (6.7%)
+C, O      : 3 wins, 48 losses (5.9%)
+D, O      : 2 wins, 36 losses (5.3%)
+D, Q      : 2 wins, 36 losses (5.3%)
+Q, S      : 2 wins, 40 losses (4.8%)
+M, Q      : 2 wins, 40 losses (4.8%)
+D, R      : 2 wins, 49 losses (3.9%)
+O, R      : 1 wins, 32 losses (3.0%)
+C, M      : 1 wins, 43 losses (2.3%)
+D, S      : 1 wins, 46 losses (2.1%)
+C, D      : 0 wins, 47 losses (0.0%)
+C, R      : 0 wins, 43 losses (0.0%)
+
 ## Alternate implementations
 - https://github.com/alexzherdev/pandemic
-
 
 # References
 - [Game rules](https://www.ultraboardgames.com/pandemic/game-rules.php)
     - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
+
+# todo
+- improve win rates on heroic difficulty
+    - greedy agent can win ~1/1000 random 2 player heroic games :)
+    - try DFS with greedy move selector
+    - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
+    - pandemic strategies
+        - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
+        - indicates 6 is possible, some strats: https://boardgamegeek.com/thread/2356305/questions-pandemic-base-game-heroic-mode
+            - clear cubes early game, while building hands
+            - more players: easier to clear cubes, harder to cure. Inverse for fewer players
+        - read more:
+            - BGA has replays! stats here: https://forum.boardgamearena.com/viewtopic.php?t=25373
+            - https://diceboardcards.wordpress.com/2013/08/16/how-to-win-pandemic-on-hard-mode-heroic-a-review/
+            - https://boardgames.stackexchange.com/questions/2372/what-are-good-general-strategies-for-pandemic
+- make pandemic game correct by construction? make all properties get-only
+    - hide command and event handlers if not hidden already. pandemic public api should make sense
+      in terms of game rules, no internal details

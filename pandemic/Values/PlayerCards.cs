@@ -4,17 +4,45 @@ using pandemic.GameData;
 
 namespace pandemic.Values;
 
-public record PlayerCityCard(CityData City) : PlayerCard;
+public record PlayerCityCard(CityData City) : PlayerCard
+{
+    public override string ToString()
+    {
+        return $"{City.Name} ({City.Colour})";
+    }
+}
 
-public record EpidemicCard : PlayerCard;
+public record EpidemicCard : PlayerCard
+{
+    public override string ToString()
+    {
+        return "Epidemic";
+    }
+}
 
 public interface ISpecialEventCard { }
 
-public record GovernmentGrantCard : PlayerCard, ISpecialEventCard;
-public record EventForecastCard : PlayerCard, ISpecialEventCard;
-public record AirliftCard : PlayerCard, ISpecialEventCard;
-public record ResilientPopulationCard : PlayerCard, ISpecialEventCard;
-public record OneQuietNightCard : PlayerCard, ISpecialEventCard;
+public record GovernmentGrantCard : PlayerCard, ISpecialEventCard
+{
+    public override string ToString() { return "Government grant"; }
+}
+public record EventForecastCard : PlayerCard, ISpecialEventCard
+{
+    public override string ToString() { return "Event forecast"; }
+}
+
+public record AirliftCard : PlayerCard, ISpecialEventCard
+{
+    public override string ToString() { return "Airlift"; }
+}
+public record ResilientPopulationCard : PlayerCard, ISpecialEventCard
+{
+    public override string ToString() { return "Resilient population"; }
+}
+public record OneQuietNightCard : PlayerCard, ISpecialEventCard
+{
+    public override string ToString() { return "One quiet night"; }
+}
 
 public static class SpecialEventCards
 {

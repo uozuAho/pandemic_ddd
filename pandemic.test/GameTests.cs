@@ -760,6 +760,27 @@ namespace pandemic.test
         }
 
         [Test]
+        public void Cure_disease_does_not_alter_other_diseases()
+        {
+            var game = DefaultTestGame()
+                .RemoveAllCubesFromCities()
+                .AddCube("Algiers", Colour.Black)
+                .Eradicate(Colour.Red);
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Atlanta",
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+            });
+
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
+
+            game.IsEradicated(Colour.Red).ShouldBeTrue();
+            game.IsCured(Colour.Black).ShouldBeTrue();
+            game.IsEradicated(Colour.Black).ShouldBeFalse();
+        }
+
+        [Test]
         public void Cure_can_end_turn()
         {
             var game = DefaultTestGame();
@@ -977,7 +998,7 @@ namespace pandemic.test
         [Test]
         public void Epidemic_after_7_cards_in_hand__epidemic_is_second_card()
         {
-            var game = DefaultTestGame();
+            var game = DefaultTestGame().RemoveAllCubesFromCities();
 
             var drawPile = new Deck<PlayerCard>(PlayerCards.CityCards);
             var playerHand = drawPile.Top(7).ToList();
@@ -1576,6 +1597,26 @@ namespace pandemic.test
             game.InfectionDiscardPile.Cards.ShouldContain(c => c.Colour == Colour.Blue);
             game.Cities.ShouldNotContain(c => c.Cubes.NumberOf(Colour.Blue) > 0,
                 "Expected: blue infection cards have been drawn, but have no effect because blue is eradicated");
+        }
+
+        [Test]
+        public void Cure_eradicates_when_zero_cubes()
+        {
+            var game = DefaultTestGame(DefaultTestGameOptions() with
+            {
+                Roles = new[] { Role.Scientist, Role.Researcher }
+            }).RemoveAllCubesFromCities();
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with
+            {
+                Location = "Atlanta",
+                Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+            });
+
+            (game, _) = game.Do(new DiscoverCureCommand(game.CurrentPlayer.Role,
+                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()));
+
+            Assert.IsTrue(game.IsEradicated(Colour.Black));
         }
 
         [Test]

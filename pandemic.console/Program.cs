@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using pandemic.agents;
 using pandemic.Aggregates.Game;
+using pandemic.Commands;
 using pandemic.Events;
 using pandemic.Values;
 
@@ -13,6 +14,10 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
+            // AgentComparer.Run();
+            WinLossStats.PlayGamesAndPrintWinLossStats(new GreedyAgent(), TimeSpan.FromSeconds(5));
+            // PlayInteractiveGame();
+
             // NumberOfPossibleGamesEstimator.Estimate();
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsAgent());
             // WinFinder.FindWinWithSolver(CreateNewGame(), new DfsWithHeuristicsAgent());
@@ -22,7 +27,17 @@ namespace pandemic.console
             // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
             // BfsRunner.Run();
             // BfsRunner.Draw(500);
-            AgentComparer.Run();
+        }
+
+        private static void PlayInteractiveGame()
+        {
+            var (game, events) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Dispatcher },
+                CommandGenerator = new SensibleCommandGenerator()
+            });
+            InteractiveGame.Play(game);
         }
 
         private static void PlayInfiniteMctsGames()

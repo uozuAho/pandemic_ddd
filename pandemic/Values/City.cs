@@ -24,7 +24,12 @@ namespace pandemic.Values
 
         public City AddCube(Colour colour)
         {
-            return this with { Cubes = Cubes.AddCube(colour) };
+            return AddCubes(colour, 1);
+        }
+
+        public City AddCubes(Colour colour, int numCubes)
+        {
+            return this with { Cubes = Cubes.AddCubes(colour, numCubes) };
         }
 
         public City RemoveCube(Colour colour)

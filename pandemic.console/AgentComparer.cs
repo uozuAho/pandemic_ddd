@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using pandemic.agents;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
@@ -22,11 +20,11 @@ namespace pandemic.console
         public static void Run()
         {
             // RunRandomGames();
-            // RunGreedyGames(TimeSpan.FromSeconds(5));
-            RunGreedyBestFirst(
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(1),
-                1);
+            RunGreedyGames(TimeSpan.FromSeconds(5));
+            // RunGreedyBestFirst(
+            //     TimeSpan.FromSeconds(5),
+            //     TimeSpan.FromSeconds(5),
+            //     1);
             // RunDfs();
             // RunDfsWithHeuristics();
         }
@@ -109,10 +107,12 @@ namespace pandemic.console
 
         private static void RunGreedyBestFirst(TimeSpan totalRunTime, TimeSpan maxGameTime, int numThreads)
         {
-            var tasks = Enumerable.Range(0, numThreads)
-                .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
+            RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime);
 
-            Task.WaitAll(tasks.ToArray());
+            // var tasks = Enumerable.Range(0, numThreads)
+            //     .Select(_ => Task.Run(() => RunGreedyBestFirstSingleThread(totalRunTime, maxGameTime)));
+            //
+            // Task.WaitAll(tasks.ToArray());
         }
 
         private static void RunGreedyBestFirstSingleThread(
@@ -123,8 +123,6 @@ namespace pandemic.console
             var numGames = 0;
             var numWins = 0;
             var statesVisited = 0;
-            var winTimes = new List<TimeSpan>();
-
             Console.WriteLine("Running greedy best first...");
 
             SearchNode? bestNode = null;
@@ -155,23 +153,10 @@ namespace pandemic.console
                 if (searcher.CurrentState.IsWon)
                 {
                     numWins++;
-                    winTimes.Add(gameTimer.Elapsed);
                 }
             }
 
-            Console.WriteLine("========================================");
             Console.WriteLine($"{numGames} games played. {numWins} wins. {statesVisited} states explored.");
-            Console.WriteLine("Best");
-            Console.WriteLine(bestNode.State);
-            Console.WriteLine();
-            Console.WriteLine("------------------");
-            Console.WriteLine("Worst");
-            Console.WriteLine(worstNode.State);
-            Console.WriteLine("  Win times:");
-            foreach (var time in winTimes)
-            {
-                Console.WriteLine($"  {time}");
-            }
         }
 
         private static void RunDfs()
@@ -210,6 +195,7 @@ namespace pandemic.console
         {
             var options = NewGameOptionsGenerator.RandomOptions() with
             {
+                Roles = new[] { Role.Medic, Role.Dispatcher },
                 Difficulty = Difficulty.Introductory,
                 CommandGenerator = new SensibleCommandGenerator()
             };

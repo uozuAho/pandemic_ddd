@@ -220,7 +220,8 @@ namespace pandemic.Aggregates.Game
 
             return this with
             {
-                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) })
+                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) }),
+                Cubes = Cubes.RemoveCubes(colour, numCubes)
             };
         }
 
@@ -335,6 +336,8 @@ namespace pandemic.Aggregates.Game
 
         private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Cards.Any(c => c is ISpecialEventCard)) ||
                                                     ContingencyPlannerStoredCard != null;
+
+        public bool APlayerHasEnoughToCure => Players.Any(p => p.HasEnoughToCure());
 
         private int TotalCubesInGame()
         {

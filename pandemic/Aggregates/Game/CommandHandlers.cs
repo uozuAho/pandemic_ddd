@@ -158,8 +158,12 @@ public partial record PandemicGame
             .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
 
         var eventList = events.ToList();
+        (game, _) = game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
 
-        return game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
+        if (game.Cubes.NumberOf(colour) == 24)
+            game = game.ApplyEvent(new DiseaseEradicated(colour), eventList);
+
+        return (game, eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ShareKnowledgeTakeFromResearcherCommand cmd)
@@ -362,7 +366,7 @@ public partial record PandemicGame
 
         if (cmd.Role == Role.ContingencyPlanner && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard)
         {
-            airliftEvent = new ContingencyPlannerStoredAirliftUsed(cmd.PlayerToMove, cmd.City);
+            airliftEvent = new ContingencyPlannerUsedStoredAirlift(cmd.PlayerToMove, cmd.City);
         }
         else
         {
@@ -488,10 +492,12 @@ public partial record PandemicGame
             var cubesAtThisCity = medicCity.Cubes.NumberOf(curedColour);
 
             if (cubesAtThisCity > 0)
+            {
                 yield return new MedicAutoRemovedCubes(medicCity.Name, curedColour);
 
-            if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
-                yield return new DiseaseEradicated(curedColour);
+                if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
+                    yield return new DiseaseEradicated(curedColour);
+            }
         }
     }
 
@@ -547,7 +553,7 @@ public partial record PandemicGame
         var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
 
         return ApplyEvents(
-            new ResearchStationBuilt(city),
+            new ResearchStationBuilt(command.Role, city),
             new PlayerCardDiscarded(command.Role, playerCard)
         );
     }
@@ -579,7 +585,12 @@ public partial record PandemicGame
 
         var eventList = events.ToList();
 
-        return game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
+        (game, _) = game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
+
+        if (game.Cubes.NumberOf(colour) == 24)
+            game = game.ApplyEvent(new DiseaseEradicated(colour), eventList);
+
+        return (game, eventList);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DirectFlightCommand command)
@@ -768,7 +779,7 @@ public partial record PandemicGame
 
         var card = game.PlayerDrawPile.TopCard;
 
-        game = game.ApplyEvent(new PlayerCardPickedUp(card), events);
+        game = game.ApplyEvent(new PlayerCardPickedUp(game.CurrentPlayer.Role, card), events);
 
         if (card is EpidemicCard epidemicCard)
         {

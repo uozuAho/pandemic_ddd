@@ -92,7 +92,7 @@ public partial record PandemicGame
             ResearcherShareKnowledgeTaken e => Apply(game, e),
             QuarantineSpecialistPreventedInfection => game,
             ContingencyPlannerTookEventCard e => Apply(game, e),
-            ContingencyPlannerStoredAirliftUsed e => Apply(game, e),
+            ContingencyPlannerUsedStoredAirlift e => Apply(game, e),
             ContingencyPlannerUsedStoredOneQuietNight e => Apply(game, e),
             ContingencyPlannerUsedStoredResilientPopulation e => Apply(game, e),
             ContingencyPlannerUsedStoredGovernmentGrant e => Apply(game, e),
@@ -420,7 +420,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerStoredAirliftUsed evt)
+    private static PandemicGame Apply(PandemicGame game, ContingencyPlannerUsedStoredAirlift evt)
     {
         var planner = (ContingencyPlanner) game.PlayerByRole(Role.ContingencyPlanner);
         var card = planner.StoredEventCard;
@@ -536,7 +536,7 @@ public partial record PandemicGame
 
         return game with
         {
-            CuresDiscovered = game.CuresDiscovered.Replace(cureMarker, cureMarker.Flip())
+            CuresDiscovered = game.CuresDiscovered.Replace(cureMarker, cureMarker.AsEradicated())
         };
     }
 

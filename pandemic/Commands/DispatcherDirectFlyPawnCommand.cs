@@ -7,4 +7,9 @@ public record DispatcherDirectFlyPawnCommand(Role PlayerToMove, string City) : I
     public Role Role => Role.Dispatcher;
     public bool ConsumesAction => true;
     public bool IsSpecialEvent => false;
+
+    public override string ToString()
+    {
+        return $"{Role}: direct fly {PlayerToMove} to {City}";
+    }
 }

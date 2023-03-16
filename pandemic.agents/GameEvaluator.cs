@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
@@ -12,85 +14,189 @@ namespace pandemic.agents
         /// how likely a win is from this state. Higher values are
         /// better.
         /// </summary>
-        public static int Evaluate(PandemicGame game)
+        public static int Score(PandemicGame game)
         {
             if (game.IsWon) return int.MaxValue;
             if (game.IsLost) return int.MinValue;
-            // todo: impossible to win = min value
 
+            var cureScore = game.CuresDiscovered.Count * 100000;
+            var stationScore = ResearchStationScore(game);
+            var outbreakScore = -game.OutbreakCounter * 100;
+            var cubeScore = CubesOnCitiesScore(game);
+            var cubeDistanceScore = PlayerDistanceFromCubesScore(game);
+            var playerScore = game.Players.Select(p => PlayerScore(game, p)).Sum();
+            var discardScore = PenaliseDiscards(game);
+
+            return cureScore + stationScore + outbreakScore + cubeScore + cubeDistanceScore + playerScore + discardScore;
+        }
+
+        private static int ResearchStationScore(PandemicGame game)
+        {
             var score = 0;
 
-            // diseases cured is great
-            score += game.CuresDiscovered.Count * 1000;
-
-            // research stations are good
-            // even better: spread out (do later,,, maybe)
-            score += game.Cities
-                .Where(c => c.HasResearchStation)
-                .Sum(_ => 100);
-
-            score += game.Players
-                .Select(p => p.Hand)
-                .Sum(h => PlayerHandScore(game, h));
-
-            // bad stuff -----------------------
-            // outbreaks are bad
-            score -= game.OutbreakCounter * 100;
-
-            // todo: maybe use this when enough cards to cure
-            // further away from research stations is bad
-            // (at least with currently implemented rules)
-            // score -= game.Players
-            //     .Sum(p => StandardGameBoard.DriveFerryDistance(
-            //         p.Location, ClosestResearchStationTo(game, p.Location)));
-
-            // cubes
-            var totalCubesOnBoard = 96 - game.Cubes.Counts.Sum(c => c.Value);
-            score -= totalCubesOnBoard * 10;
+            // best chosen by me
+            // rationale: spread them around highly-connected/remote cities
+            var best = new[] { "Hong Kong", "Bogota", "Paris", "Kinshasa", "Karachi" };
+            foreach (var city in best)
+            {
+                var (closestCity, distance) = ClosestResearchStationTo(game, city);
+                score += 100 / (distance + 1);
+            }
 
             return score;
         }
 
-        public static int PlayerHandScore(PandemicGame pandemicGame, PlayerHand hand)
+        private static int PenaliseDiscards(PandemicGame game)
         {
-            // more cards of same colour = good, where colour is not cured
-            //
-            // each extra card of the same colour gains more points:
-            // 1 blue = 0
-            // 2 blue = 1 (0 + 1)
-            // 3 blue = 3 (0 + 1 + 2)
-            // 4 blue = 6 (0 + 1 + 2 + 3)
-            // = n(n-1)/2
+            var score = 0;
 
-            var cured = pandemicGame.CuresDiscovered.Select(c => c.Colour);
-
-            return hand.CityCards
-                .GroupBy(c => c.City.Colour)
-                .Where(g => !cured.Contains(g.Key))
-                .Select(g => g.Count())
-                .Sum(n => n * (n - 1) / 2);
-        }
-
-        // todo: perf: just do bfs. Worst case perf is same as this impl
-        private static string ClosestResearchStationTo(PandemicGame game, string city)
-        {
-            var closest = "";
-            var closestDistance = int.MaxValue;
-
-            for (var i = 0; i < game.Cities.Length; i++)
+            foreach (var cardsOfColour in game.PlayerDiscardPile.Cards
+                         .Where(c => c is PlayerCityCard)
+                         .Cast<PlayerCityCard>()
+                         .GroupBy(c => c.City.Colour))
             {
-                var city1 = game.Cities[i];
-                if (!city1.HasResearchStation) continue;
-
-                var distance = StandardGameBoard.DriveFerryDistance(city1.Name, city);
-                if (distance < closestDistance)
+                var colour = cardsOfColour.Key;
+                var numCards = cardsOfColour.Count();
+                if (!game.IsCured(colour))
                 {
-                    closestDistance = distance;
-                    closest = city1.Name;
+                    if (numCards > 7) score -= 1000000; // cannot cure!
+                    score -= numCards * numCards * 10;
                 }
             }
 
-            return closest;
+            return score;
+        }
+
+        private static int PlayerScore(PandemicGame game, Player player)
+        {
+            var score = 0;
+
+            score += PlayerHandScore(game, player.Hand);
+
+            if (player.HasEnoughToCure())
+            {
+                var (city, distance) = ClosestResearchStationTo(game, player.Location);
+                score -= distance * 5;
+            }
+
+            return score;
+        }
+
+        private static int PlayerDistanceFromCubesScore(PandemicGame game)
+        {
+            /*
+             * pseudocode:
+             *
+             * for each city in order of max number of cubes:
+             *    while there's still players that haven't been assigned a city:
+             *        find the closest player that cannot cure
+             *        assign that player to that city
+             *        score the distance to that player
+             */
+            var players = game.Players.ToList();
+            var cities = game.Cities;
+
+            var cities3 = new List<City>();
+            var cities2 = new List<City>();
+            var cities1 = new List<City>();
+
+            for (int i = 0; i < cities.Length; i++)
+            {
+                var city = cities[i];
+                switch (city.MaxNumCubes)
+                {
+                    case 0: continue;
+                    case 1: cities1.Add(city); break;
+                    case 2: cities2.Add(city); break;
+                    case 3: cities3.Add(city); break;
+                }
+            }
+
+            var citiesToBlah = new Queue<City>(cities3.Concat(cities2).Concat(cities1));
+            var score = 0;
+
+            while (citiesToBlah.Count > 0 && players.Count > 0)
+            {
+                var city = citiesToBlah.Dequeue();
+                var closestPlayer = players
+                    .Where(p => !p.HasEnoughToCure())
+                    .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
+
+                if (closestPlayer == null) break;
+
+                var numCubes = city.MaxNumCubes;
+                var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
+
+                players.Remove(closestPlayer);
+
+                score -= numCubes * numCubes * distance;
+            }
+
+            return score;
+        }
+
+        /// <summary>
+        /// Higher score = fewer cubes on cities
+        /// </summary>
+        private static int CubesOnCitiesScore(PandemicGame game)
+        {
+            var score = 0;
+
+            for (int i = 0; i < game.Cities.Length; i++)
+            {
+                var city = game.Cities[i];
+                foreach (var colour in ColourExtensions.AllColours)
+                {
+                    var cubes = city.Cubes.NumberOf(colour);
+                    if (cubes == 0) continue;
+
+                    score -= cubes * cubes * cubes * 10;
+                }
+            }
+
+            return score;
+        }
+
+        public static int PlayerHandScore(PandemicGame game, PlayerHand hand)
+        {
+            // more cards of same colour = good, where colour is not cured
+            // each extra card of the same colour gains more points
+
+            return + hand.CityCards
+                       .GroupBy(c => c.City.Colour)
+                       .Where(g => !game.IsCured(g.Key))
+                       .Select(g => g.Count())
+                       .Sum(n => n * n * 10)
+
+                   - hand.CityCards
+                       .GroupBy(c => c.City.Colour)
+                       .Where(g => game.IsCured(g.Key))
+                       .Select(g => g.Count())
+                       .Sum(n => n * n * 10);
+        }
+
+        private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
+        {
+            if (game.CityByName(city).HasResearchStation) return (city, 0);
+
+            // this currently just uses drive ferry distance, not shuttle, airlift etc.
+            var searched = new HashSet<string>();
+            var queue = new Queue<(string city, int distance)>();
+            queue.Enqueue((city, 0));
+
+            while (queue.Count > 0)
+            {
+                var (currentCity, distance) = queue.Dequeue();
+                if (game.CityByName(currentCity).HasResearchStation) return (currentCity, distance);
+                searched.Add(currentCity);
+                foreach (var adj in game.Board.AdjacentCities[currentCity])
+                {
+                    if (!searched.Contains(adj))
+                        queue.Enqueue((adj, distance + 1));
+                }
+            }
+
+            throw new InvalidOperationException("shouldn't get here");
         }
     }
 }

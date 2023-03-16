@@ -8,4 +8,9 @@ public record DispatcherDriveFerryPawnCommand(Role PlayerToMove, string City) : 
 
     public bool ConsumesAction => true;
     public bool IsSpecialEvent => false;
+
+    public override string ToString()
+    {
+        return $"{Role}: drive {PlayerToMove} to {City}";
+    }
 }

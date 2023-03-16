@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace pandemic.Values;
+﻿namespace pandemic.Values;
 
 public enum CureMarkerSide
 {
@@ -17,15 +15,8 @@ public enum CureMarkerSide
 
 public record CureMarker(Colour Colour, CureMarkerSide ShowingSide)
 {
-    public CureMarker Flip()
+    public CureMarker AsEradicated()
     {
-        var newShowingSide = ShowingSide switch
-        {
-            CureMarkerSide.Vial => CureMarkerSide.Sunset,
-            CureMarkerSide.Sunset => CureMarkerSide.Vial,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        return this with { ShowingSide = newShowingSide };
+        return this with { ShowingSide = CureMarkerSide.Sunset };
     }
 }
