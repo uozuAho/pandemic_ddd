@@ -106,8 +106,6 @@ C, R      : 0 wins, 43 losses (0.0%)
     - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
 
 # todo
-- perf
-  - config: seed random to get more consistent results
 - improve win rates on heroic difficulty
     - greedy agent can win ~1/1000 random 2 player heroic games :)
     - try DFS with greedy move selector

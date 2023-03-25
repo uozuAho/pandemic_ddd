@@ -11,30 +11,30 @@ namespace pandemic.perftest;
 
 public static class GameRunner
 {
-    public static RunStats RunRandomGames(TimeSpan totalRunTime)
+    public static RunStats RunRandomGames(RunConfig config)
     {
         var agent = new RandomAgent();
-        return RunLiveAgentGames(agent, totalRunTime);
+        return RunLiveAgentGames(agent, config);
     }
 
-    public static RunStats RunGreedyGames(TimeSpan totalRunTime)
+    public static RunStats RunGreedyGames(RunConfig config)
     {
         var agent = new GreedyAgent();
-        return RunLiveAgentGames(agent, totalRunTime);
+        return RunLiveAgentGames(agent, config);
     }
 
-    public static RunStats RunGreedyBfsGames(TimeSpan totalRunTime)
+    public static RunStats RunGreedyBfsGames(RunConfig config)
     {
         var totalTimer = Stopwatch.StartNew();
         var numGames = 0;
         var commandsExecuted = 0;
 
-        while (totalTimer.Elapsed < totalRunTime)
+        while (totalTimer.Elapsed < config.TotalRunTime)
         {
-            var game = NewGame();
+            var game = NewGame(config);
             var search = new GreedyBestFirstSearch(game);
 
-            while (!game.IsOver && totalTimer.Elapsed < totalRunTime)
+            while (!game.IsOver && totalTimer.Elapsed < config.TotalRunTime)
             {
                 var searchNode = search.Step();
                 commandsExecuted++;
@@ -47,17 +47,17 @@ public static class GameRunner
         return new RunStats(numGames, commandsExecuted);
     }
 
-    private static RunStats RunLiveAgentGames(ILiveAgent agent, TimeSpan totalRunTime)
+    private static RunStats RunLiveAgentGames(ILiveAgent agent, RunConfig config)
     {
         var totalTimer = Stopwatch.StartNew();
         var numGames = 0;
         var commandsExecuted = 0;
 
-        while (totalTimer.Elapsed < totalRunTime)
+        while (totalTimer.Elapsed < config.TotalRunTime)
         {
-            var game = NewGame();
+            var game = NewGame(config);
 
-            while (!game.IsOver && totalTimer.Elapsed < totalRunTime)
+            while (!game.IsOver && totalTimer.Elapsed < config.TotalRunTime)
             {
                 var command = agent.NextCommand(game);
                 (game, _) = game.Do(command);
@@ -69,13 +69,14 @@ public static class GameRunner
         return new RunStats(numGames, commandsExecuted);
     }
 
-    private static PandemicGame NewGame()
+    private static PandemicGame NewGame(RunConfig config)
     {
         var options = NewGameOptionsGenerator.RandomOptions() with
         {
             Roles = new[] { Role.Medic, Role.Dispatcher },
             Difficulty = Difficulty.Introductory,
-            CommandGenerator = new SensibleCommandGenerator()
+            CommandGenerator = new SensibleCommandGenerator(),
+            Rng = config.Rng
         };
 
         var (game, _) = PandemicGame.CreateNewGame(options);
