@@ -20,11 +20,11 @@ namespace pandemic.console
         public static void Run()
         {
             // RunRandomGames();
-            RunGreedyGames(TimeSpan.FromSeconds(5));
-            // RunGreedyBestFirst(
-            //     TimeSpan.FromSeconds(5),
-            //     TimeSpan.FromSeconds(5),
-            //     1);
+            // RunGreedyGames(TimeSpan.FromSeconds(5));
+            RunGreedyBestFirst(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(5),
+                1);
             // RunDfs();
             // RunDfsWithHeuristics();
         }
@@ -45,13 +45,12 @@ namespace pandemic.console
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game);
 
                 while (!game.IsOver)
                 {
                     statesVisited++;
-                    var action = random.Choice(searchProblem.GetActions(game));
-                    game = searchProblem.DoAction(game, action);
+                    var action = random.Choice(game.LegalCommands());
+                    (game, _) = game.Do(action);
                 }
 
                 if (game.IsWon)
@@ -131,8 +130,7 @@ namespace pandemic.console
             {
                 numGames++;
                 var game = NewGame();
-                var searchProblem = new PandemicSearchProblem(game);
-                var searcher = new GreedyBestFirstSearch(searchProblem);
+                var searcher = new GreedyBestFirstSearch(game);
 
                 var gameTimer = Stopwatch.StartNew();
 

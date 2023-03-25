@@ -32,7 +32,7 @@ public static class GameRunner
         while (totalTimer.Elapsed < totalRunTime)
         {
             var game = NewGame();
-            var search = new GreedyBestFirstSearch2(game);
+            var search = new GreedyBestFirstSearch(game);
 
             while (!game.IsOver && totalTimer.Elapsed < totalRunTime)
             {

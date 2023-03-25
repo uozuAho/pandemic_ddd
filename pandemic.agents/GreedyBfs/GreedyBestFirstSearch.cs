@@ -26,21 +26,19 @@ namespace pandemic.agents.GreedyBfs
 
         public MinPriorityFrontier Frontier;
 
-        private readonly PandemicSearchProblem _problem;
         private readonly Dictionary<PandemicGame, SearchNode> _explored;
 
-        public GreedyBestFirstSearch(PandemicSearchProblem problem)
+        public GreedyBestFirstSearch(PandemicGame game)
         {
-            _problem = problem;
-            CurrentState = problem.InitialState;
+            CurrentState = game;
             _explored = new Dictionary<PandemicGame, SearchNode>();
 
             IsFinished = false;
 
             var nodeComparer = new SearchNodeComparer(CompareStates);
             Frontier = new MinPriorityFrontier(nodeComparer);
-            var root = new SearchNode(problem.InitialState, null, default, 0,
-                GameEvaluator.Score(problem.InitialState));
+            var root = new SearchNode(game, null, default, 0,
+                GameEvaluator.Score(game));
             Frontier.Push(root);
         }
 
@@ -62,16 +60,16 @@ namespace pandemic.agents.GreedyBfs
 
             _explored[node.State] = node;
             CurrentState = node.State;
-            var actions = _problem.GetActions(node.State);
-            foreach (var action in actions)
+            var commands = CurrentState.LegalCommands();
+            foreach (var command in commands)
             {
-                var childState = _problem.DoAction(node.State, action);
-                var childCost = node.PathCost + _problem.PathCost(node.State, action);
-                var child = new SearchNode(childState, node, action, childCost, GameEvaluator.Score(childState));
+                var (childState, _) = CurrentState.Do(command);
+                var childCost = node.PathCost;
+                var child = new SearchNode(childState, node, command, childCost, GameEvaluator.Score(childState));
 
                 if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState)) continue;
 
-                if (_problem.IsGoal(childState))
+                if (CurrentState.IsWon)
                 {
                     CurrentState = childState;
                     IsFinished = true;

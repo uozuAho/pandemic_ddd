@@ -107,7 +107,6 @@ C, R      : 0 wins, 43 losses (0.0%)
 
 # todo
 - perf
-  - get rid of GreedyBestFirstSearch2, PandemicSearchProblem
   - config: seed random to get more consistent results
 - improve win rates on heroic difficulty
     - greedy agent can win ~1/1000 random 2 player heroic games :)
