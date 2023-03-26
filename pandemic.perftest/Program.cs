@@ -1,27 +1,45 @@
 ﻿using pandemic.perftest;
 
-// Console.WriteLine("Running random games...");
-// var stats = GameRunner.RunRandomGames(new RunConfig
-// {
-//     TotalRunTime = TimeSpan.FromSeconds(2),
-//     Rng = new Random(1234)
-// });
-// Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+public class Program
+{
+    public static int Main(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            RunSamples(TimeSpan.FromSeconds(4));
+        }
+        if (args is ["bench"])
+        {
+            Benchmarks.RunAll();
+        }
 
-// Console.WriteLine("Running greedy games...");
-// var stats = GameRunner.RunGreedyGames(new RunConfig
-// {
-//     TotalRunTime = TimeSpan.FromSeconds(2),
-//     Rng = new Random(1234)
-// });
-// Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+        return 0;
+    }
 
-// Console.WriteLine("Running greedy BFS...");
-// var stats = GameRunner.RunGreedyBfsGames(new RunConfig
-// {
-//     TotalRunTime = TimeSpan.FromSeconds(2),
-//     Rng = new Random(1234)
-// });
-// Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+    private static void RunSamples(TimeSpan forThisLong)
+    {
+        Console.WriteLine("Running random games...");
+        var stats = GameRunner.RunRandomGames(new RunConfig
+        {
+            TotalRunTime = forThisLong,
+            Rng = new Random(1234)
+        });
+        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
 
-GreedyBenchmark.Run();
+        Console.WriteLine("Running greedy games...");
+        stats = GameRunner.RunGreedyGames(new RunConfig
+        {
+            TotalRunTime = forThisLong,
+            Rng = new Random(1234)
+        });
+        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+
+        Console.WriteLine("Running greedy BFS...");
+        stats = GameRunner.RunGreedyBfsGames(new RunConfig
+        {
+            TotalRunTime = forThisLong,
+            Rng = new Random(1234)
+        });
+        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+    }
+}

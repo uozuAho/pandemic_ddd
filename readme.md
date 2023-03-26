@@ -107,9 +107,7 @@ C, R      : 0 wins, 43 losses (0.0%)
 
 # todo
 - perf
-  - make benchmarks easy to run, understand, log for future comparison
-  - make benchmarks repeatable - build config, set random seed, no validation, release build
-  - make ~2sec test runs easy to run & understand, also make it clear that they are not good benchmarks
+  - make samples print games/sec & steps/sec
 - improve win rates on heroic difficulty
     - greedy agent can win ~1/1000 random 2 player heroic games :)
     - try DFS with greedy move selector
