@@ -8,8 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\pandemic.test\pandemic.test.csproj" />
+      <ProjectReference Include="..\pandemic.agents\pandemic.agents.csproj" />
       <ProjectReference Include="..\pandemic\pandemic.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
     </ItemGroup>
 
 </Project>

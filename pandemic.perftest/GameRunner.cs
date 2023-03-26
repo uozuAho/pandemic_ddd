@@ -3,9 +3,7 @@ using pandemic.agents;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
-using pandemic.test.Utils;
 using pandemic.Values;
-using utils;
 
 namespace pandemic.perftest;
 
@@ -71,7 +69,7 @@ public static class GameRunner
 
     private static PandemicGame NewGame(RunConfig config)
     {
-        var options = NewGameOptionsGenerator.RandomOptions() with
+        var options = new NewGameOptions
         {
             Roles = new[] { Role.Medic, Role.Dispatcher },
             Difficulty = Difficulty.Introductory,
