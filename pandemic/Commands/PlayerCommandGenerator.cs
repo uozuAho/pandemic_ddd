@@ -391,7 +391,7 @@ namespace pandemic.Commands
         private static IEnumerable<IPlayerCommand> SensibleEventForecasts(PandemicGame game, Player playerWithCard)
         {
             var cards = game.InfectionDrawPile.Top(6)
-                .OrderByDescending(card => game.CityByName(card.City).MaxNumCubes);
+                .OrderByDescending(card => game.CityByName(card.City).MaxNumCubes());
 
             yield return new EventForecastCommand(playerWithCard.Role, cards.ToArray());
         }

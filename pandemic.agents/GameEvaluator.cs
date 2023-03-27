@@ -103,7 +103,7 @@ namespace pandemic.agents
             for (int i = 0; i < cities.Length; i++)
             {
                 var city = cities[i];
-                switch (city.MaxNumCubes)
+                switch (city.MaxNumCubes())
                 {
                     case 0: continue;
                     case 1: cities1.Add(city); break;
@@ -124,7 +124,7 @@ namespace pandemic.agents
 
                 if (closestPlayer == null) break;
 
-                var numCubes = city.MaxNumCubes;
+                var numCubes = city.MaxNumCubes();
                 var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
 
                 players.Remove(closestPlayer);

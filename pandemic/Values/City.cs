@@ -13,7 +13,18 @@ namespace pandemic.Values
         /// <summary>
         /// Returns the highest number of cubes of any one colour in this city
         /// </summary>
-        public int MaxNumCubes => Cubes.Counts.Values.Max();
+        public int MaxNumCubes()
+        {
+            var max = 0;
+            if (Cubes.NumberOf(Colour.Black) > max) max = Cubes.NumberOf(Colour.Black);
+            if (max == 3) return max;
+            if (Cubes.NumberOf(Colour.Blue) > max) max = Cubes.NumberOf(Colour.Blue);
+            if (max == 3) return max;
+            if (Cubes.NumberOf(Colour.Red) > max) max = Cubes.NumberOf(Colour.Red);
+            if (max == 3) return max;
+            if (Cubes.NumberOf(Colour.Yellow) > max) max = Cubes.NumberOf(Colour.Yellow);
+            return max;
+        }
 
         public bool IsSameStateAs(City other)
         {
