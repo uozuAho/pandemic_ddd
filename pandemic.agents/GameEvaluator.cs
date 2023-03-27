@@ -159,20 +159,34 @@ namespace pandemic.agents
 
         public static int PlayerHandScore(PandemicGame game, PlayerHand hand)
         {
-            // more cards of same colour = good, where colour is not cured
-            // each extra card of the same colour gains more points
+            var cards = hand.Cards.ToArray();
+            var redCount = 0;
+            var blueCount = 0;
+            var yellowCount = 0;
+            var blackCount = 0;
 
-            return + hand.CityCards
-                       .GroupBy(c => c.City.Colour)
-                       .Where(g => !game.IsCured(g.Key))
-                       .Select(g => g.Count())
-                       .Sum(n => n * n * 10)
+            // perf:
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var i = 0; i < cards.Length; i++)
+            {
+                var card = cards[i];
+                if (card is not PlayerCityCard cityCard) continue;
 
-                   - hand.CityCards
-                       .GroupBy(c => c.City.Colour)
-                       .Where(g => game.IsCured(g.Key))
-                       .Select(g => g.Count())
-                       .Sum(n => n * n * 10);
+                switch (cityCard.City.Colour)
+                {
+                    case Colour.Black: blackCount++; break;
+                    case Colour.Blue: blueCount++; break;
+                    case Colour.Red: redCount++; break;
+                    case Colour.Yellow: yellowCount++; break;
+                }
+            }
+
+            var redScore = redCount * redCount * (game.IsCured(Colour.Red) ? -10 : 10);
+            var blueScore = blueCount * blueCount * (game.IsCured(Colour.Blue) ? -10 : 10);
+            var yellowScore = yellowCount * yellowCount * (game.IsCured(Colour.Yellow) ? -10 : 10);
+            var blackScore = blackCount * blackCount * (game.IsCured(Colour.Black) ? -10 : 10);
+
+            return redScore + blueScore + yellowScore + blackScore;
         }
 
         private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
