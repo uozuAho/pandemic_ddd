@@ -179,20 +179,35 @@ namespace pandemic.agents
         {
             if (game.CityByName(city).HasResearchStation) return (city, 0);
 
-            // this currently just uses drive ferry distance, not shuttle, airlift etc.
-            var searched = new HashSet<string>();
-            var queue = new Queue<(string city, int distance)>();
-            queue.Enqueue((city, 0));
+            // This currently just uses drive ferry distance, not shuttle, airlift etc.
+            // Using primitive queue + city indexes for perf.
+            var distances = new int[game.Cities.Length];
+            var queue = new int[game.Cities.Length];
+            var queueHead = 0;
+            var queueTail = 0;
+            var startCityIdx = game.Board.CityIdx(city);
+            queue[queueTail++] = game.Board.CityIdx(city);
+            distances[startCityIdx] = 0;
 
-            while (queue.Count > 0)
+            while (queueHead < game.Cities.Length)
             {
-                var (currentCity, distance) = queue.Dequeue();
-                if (game.CityByName(currentCity).HasResearchStation) return (currentCity, distance);
-                searched.Add(currentCity);
-                foreach (var adj in game.Board.AdjacentCities[currentCity])
+                var currentCityIdx = queue[queueHead++];
+                var distance = distances[currentCityIdx];
+                var cityName = game.Cities[currentCityIdx].Name;
+                if (game.Cities[currentCityIdx].HasResearchStation)
+                    return (cityName, distance);
+                distances[currentCityIdx] = distance;
+                var neighbours = game.Board.AdjacentCities[cityName];
+
+                // ReSharper disable once ForCanBeConvertedToForeach
+                // why? perf
+                for (var i = 0; i < neighbours.Count; i++)
                 {
-                    if (!searched.Contains(adj))
-                        queue.Enqueue((adj, distance + 1));
+                    var neighbourIdx = game.Board.CityIdx(neighbours[i]);
+                    if (neighbourIdx == startCityIdx) continue;
+                    if (distances[neighbourIdx] != 0) continue;
+                    distances[neighbourIdx] = distance + 1;
+                    queue[queueTail++] = neighbourIdx;
                 }
             }
 
