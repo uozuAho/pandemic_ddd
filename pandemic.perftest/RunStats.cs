@@ -1,3 +1,3 @@
 ﻿namespace pandemic.perftest;
 
-public record RunStats(int GamesPlayed, int CommandsExecuted);
+public record RunStats(int GamesPlayed, int CommandsExecuted, TimeSpan TotalRunTime);

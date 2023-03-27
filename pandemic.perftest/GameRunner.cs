@@ -42,7 +42,7 @@ public static class GameRunner
             numGames++;
         }
 
-        return new RunStats(numGames, commandsExecuted);
+        return new RunStats(numGames, commandsExecuted, config.TotalRunTime);
     }
 
     private static RunStats RunLiveAgentGames(ILiveAgent agent, RunConfig config)
@@ -64,7 +64,7 @@ public static class GameRunner
             numGames++;
         }
 
-        return new RunStats(numGames, commandsExecuted);
+        return new RunStats(numGames, commandsExecuted, config.TotalRunTime);
     }
 
     private static PandemicGame NewGame(RunConfig config)

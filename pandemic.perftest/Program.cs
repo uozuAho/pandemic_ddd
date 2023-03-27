@@ -18,28 +18,37 @@ public class Program
 
     private static void RunSamples(TimeSpan forThisLong)
     {
-        Console.WriteLine("Running random games...");
-        var stats = GameRunner.RunRandomGames(new RunConfig
-        {
-            TotalRunTime = forThisLong,
-            Rng = new Random(1234)
-        });
-        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+        // Console.WriteLine("Running random games...");
+        // var stats = GameRunner.RunRandomGames(new RunConfig
+        // {
+        //     TotalRunTime = forThisLong,
+        //     Rng = new Random(1234)
+        // });
+        // PrintStats(stats);
 
         Console.WriteLine("Running greedy games...");
-        stats = GameRunner.RunGreedyGames(new RunConfig
+        var stats = GameRunner.RunGreedyGames(new RunConfig
         {
             TotalRunTime = forThisLong,
             Rng = new Random(1234)
         });
-        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+        PrintStats(stats);
 
-        Console.WriteLine("Running greedy BFS...");
-        stats = GameRunner.RunGreedyBfsGames(new RunConfig
-        {
-            TotalRunTime = forThisLong,
-            Rng = new Random(1234)
-        });
-        Console.WriteLine($"Games played: {stats.GamesPlayed}, commands executed: {stats.CommandsExecuted}");
+        // Console.WriteLine("Running greedy BFS...");
+        // stats = GameRunner.RunGreedyBfsGames(new RunConfig
+        // {
+        //     TotalRunTime = forThisLong,
+        //     Rng = new Random(1234)
+        // });
+        // PrintStats(stats);
+    }
+
+    private static void PrintStats(RunStats stats)
+    {
+        var gamesPerSecond = stats.GamesPlayed / stats.TotalRunTime.TotalSeconds;
+        var commandsPerSecond = stats.CommandsExecuted / stats.TotalRunTime.TotalSeconds;
+
+        Console.WriteLine($"Games played: {stats.GamesPlayed} ({gamesPerSecond}/sec), " +
+                          $"commands executed: {stats.CommandsExecuted} ({commandsPerSecond}/sec)");
     }
 }
