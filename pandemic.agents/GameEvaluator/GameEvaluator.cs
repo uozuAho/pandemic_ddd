@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
 using pandemic.Values;
 
-namespace pandemic.agents
+namespace pandemic.agents.GameEvaluator
 {
     public static class GameEvaluator
     {

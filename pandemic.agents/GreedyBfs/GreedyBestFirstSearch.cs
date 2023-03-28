@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using pandemic.agents.GameEvaluator;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 
@@ -38,7 +39,7 @@ namespace pandemic.agents.GreedyBfs
             var nodeComparer = new SearchNodeComparer(CompareStates);
             Frontier = new MinPriorityFrontier(nodeComparer);
             var root = new SearchNode(game, null, default, 0,
-                GameEvaluator.Score(game));
+                GameEvaluator.GameEvaluator.Score(game));
             Frontier.Push(root);
         }
 
@@ -65,7 +66,7 @@ namespace pandemic.agents.GreedyBfs
             {
                 var (childState, _) = CurrentState.Do(command);
                 var childCost = node.PathCost;
-                var child = new SearchNode(childState, node, command, childCost, GameEvaluator.Score(childState));
+                var child = new SearchNode(childState, node, command, childCost, GameEvaluator.GameEvaluator.Score(childState));
 
                 if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState)) continue;
 

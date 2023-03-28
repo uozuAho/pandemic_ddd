@@ -17,7 +17,7 @@ namespace pandemic.agents.test
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(board.City("Atlanta")), 3));
 
-            GameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand).ShouldBePositive();
+            GameEvaluator.GameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand).ShouldBePositive();
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace pandemic.agents.test
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(board.City("Atlanta")), 5));
 
-            GameEvaluator.PlayerHandScore(game, hand).ShouldBeNegative();
+            GameEvaluator.GameEvaluator.PlayerHandScore(game, hand).ShouldBeNegative();
         }
     }
 
@@ -48,8 +48,8 @@ namespace pandemic.agents.test
             var gameClose = game with { Players = game.Players.Add(new Player { Location = "Chicago" }) };
             var gameFar = game with { Players = game.Players.Add(new Player { Location = "Paris" }) };
 
-            var closeScore = GameEvaluator.Score(gameClose);
-            var farScore = GameEvaluator.Score(gameFar);
+            var closeScore = GameEvaluator.GameEvaluator.Score(gameClose);
+            var farScore = GameEvaluator.GameEvaluator.Score(gameFar);
 
             closeScore.ShouldBeGreaterThan(farScore);
         }
@@ -112,7 +112,7 @@ namespace pandemic.agents.test
             var shuffledGames = orderedGames.Shuffle();
 
             shuffledGames
-                .OrderByDescending(g => GameEvaluator.Score(g.Item2))
+                .OrderByDescending(g => GameEvaluator.GameEvaluator.Score(g.Item2))
                 .Select(g => g.Item1)
                 .ShouldBe(new[] { "A", "B", "C", "D", "E" });
         }
@@ -145,7 +145,7 @@ namespace pandemic.agents.test
             var shuffledGames = orderedGames.Shuffle();
 
             shuffledGames
-                .OrderByDescending(g => GameEvaluator.Score(g.Item2))
+                .OrderByDescending(g => GameEvaluator.GameEvaluator.Score(g.Item2))
                 .Select(g => g.Item1)
                 .ShouldBe(new[] { "A", "B", "C" });
         }
@@ -170,8 +170,8 @@ namespace pandemic.agents.test
             var atChicago = game with { Players = game.Players.Add(player with { Location = "Chicago" }) };
             var atParis = game with { Players = game.Players.Add(player with { Location = "Paris" }) };
 
-            var scoreAtChicago = GameEvaluator.Score(atChicago);
-            var scoreAtParis = GameEvaluator.Score(atParis);
+            var scoreAtChicago = GameEvaluator.GameEvaluator.Score(atChicago);
+            var scoreAtParis = GameEvaluator.GameEvaluator.Score(atParis);
 
             scoreAtParis.ShouldBeGreaterThan(scoreAtChicago);
         }
@@ -198,7 +198,7 @@ namespace pandemic.agents.test
                     .Replace(istanbul, istanbul with { HasResearchStation = true })
             };
 
-            GameEvaluator.Score(spreadStations).ShouldBeGreaterThan(GameEvaluator.Score(closeStations));
+            GameEvaluator.GameEvaluator.Score(spreadStations).ShouldBeGreaterThan(GameEvaluator.GameEvaluator.Score(closeStations));
         }
     }
 }

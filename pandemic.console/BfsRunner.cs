@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using pandemic.agents;
+using pandemic.agents.GameEvaluator;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
 using pandemic.drawing;
