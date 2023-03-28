@@ -23,17 +23,17 @@ public static class Benchmarks
 
 public class LiveAgentBenchmarks
 {
-    [Benchmark]
-    public void PlayOneRandomAgentGame()
-    {
-        var agent = new RandomAgent();
-        var game = BenchmarkUtils.NewGame();
-        while (!game.IsOver)
-        {
-            var command = agent.NextCommand(game);
-            (game, _) = game.Do(command);
-        }
-    }
+    // [Benchmark]
+    // public void PlayOneRandomAgentGame()
+    // {
+    //     var agent = new RandomAgent();
+    //     var game = BenchmarkUtils.NewGame();
+    //     while (!game.IsOver)
+    //     {
+    //         var command = agent.NextCommand(game);
+    //         (game, _) = game.Do(command);
+    //     }
+    // }
 
     [Benchmark]
     public void PlayOneGreedyAgentGame()
