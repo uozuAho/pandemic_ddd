@@ -27,10 +27,39 @@ namespace pandemic.Values
             return Hand.Contains(card);
         }
 
-        // todo: make this work for all players (eg. scientist/researcher needs only 4)
         public bool HasEnoughToCure()
         {
-            return Hand.CityCards.GroupBy(c => c.City.Colour).Any(g => g.Count() >= 5);
+            var black = 0;
+            var blue = 0;
+            var red = 0;
+            var yellow = 0;
+
+            foreach (var card in Hand.CityCards)
+            {
+                switch (card.City.Colour)
+                {
+                    case Colour.Black:
+                        black++;
+                        break;
+                    case Colour.Blue:
+                        blue++;
+                        break;
+                    case Colour.Red:
+                        red++;
+                        break;
+                    case Colour.Yellow:
+                        yellow++;
+                        break;
+                }
+            }
+
+            var neededToCure = Role == Role.Scientist ? 4 : 5;
+
+            return
+                black >= neededToCure
+                || blue >= neededToCure
+                || red >= neededToCure
+                || yellow >= neededToCure;
         }
     }
 
