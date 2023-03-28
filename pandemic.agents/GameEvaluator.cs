@@ -124,33 +124,14 @@ namespace pandemic.agents
              *        assign that player to that city
              *        score the distance to that player
              */
-            var players = game.Players.ToList();
-            var cities = game.Cities;
-
-            var cities3 = new List<City>();
-            var cities2 = new List<City>();
-            var cities1 = new List<City>();
-
-            for (int i = 0; i < cities.Length; i++)
-            {
-                var city = cities[i];
-                switch (city.MaxNumCubes())
-                {
-                    case 0: continue;
-                    case 1: cities1.Add(city); break;
-                    case 2: cities2.Add(city); break;
-                    case 3: cities3.Add(city); break;
-                }
-            }
-
-            var citiesToBlah = new Queue<City>(cities3.Concat(cities2).Concat(cities1));
+            var players = game.Players.Where(p => !p.HasEnoughToCure()).ToList();
+            SetCitiesDescendingByMaxCubes(game);
             var score = 0;
 
-            while (citiesToBlah.Count > 0 && players.Count > 0)
+            while (_queueHead < _queueTail && players.Count > 0)
             {
-                var city = citiesToBlah.Dequeue();
+                var city = CityQueue[_queueHead++];
                 var closestPlayer = players
-                    .Where(p => !p.HasEnoughToCure())
                     .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
 
                 if (closestPlayer == null) break;
@@ -164,6 +145,48 @@ namespace pandemic.agents
             }
 
             return score;
+        }
+
+        [ThreadStatic] private static readonly City[] CityQueue;
+        [ThreadStatic] private static int _queueHead;
+        [ThreadStatic] private static int _queueTail;
+        [ThreadStatic] private static readonly City[] Cities3;
+        [ThreadStatic] private static readonly City[] Cities2;
+        [ThreadStatic] private static readonly City[] Cities1;
+
+        private static void SetCitiesDescendingByMaxCubes(PandemicGame game)
+        {
+            var cities = game.Cities;
+            var city3Idx = 0;
+            var city2Idx = 0;
+            var city1Idx = 0;
+
+            for (var i = 0; i < cities.Length; i++)
+            {
+                var city = cities[i];
+                switch (city.MaxNumCubes())
+                {
+                    case 0: continue;
+                    case 1:
+                        Cities1[city1Idx++] = city;
+                        break;
+                    case 2:
+                        Cities2[city2Idx++] = city;
+                        break;
+                    case 3:
+                        Cities3[city3Idx++] = city;
+                        break;
+                }
+            }
+
+            _queueHead = 0;
+            _queueTail = 0;
+            Array.Copy(Cities3, 0, CityQueue, _queueTail, city3Idx);
+            _queueTail += city3Idx;
+            Array.Copy(Cities2, 0, CityQueue, _queueTail, city2Idx);
+            _queueTail += city2Idx;
+            Array.Copy(Cities1, 0, CityQueue, _queueTail, city1Idx);
+            _queueTail += city1Idx;
         }
 
         /// <summary>
@@ -226,6 +249,12 @@ namespace pandemic.agents
         static GameEvaluator()
         {
             _distances = new int[48];
+            _queueTail = 0;
+            _queueHead = 0;
+            Cities1 = new City[48];
+            Cities2 = new City[48];
+            Cities3 = new City[48];
+            CityQueue = new City[48];
             _queue = new int[48];
         }
 
