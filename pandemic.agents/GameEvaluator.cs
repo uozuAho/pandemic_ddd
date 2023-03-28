@@ -220,28 +220,38 @@ namespace pandemic.agents
             return redScore + blueScore + yellowScore + blackScore;
         }
 
+        [ThreadStatic] private static int[] _distances;
+        [ThreadStatic] private static int[] _queue;
+
+        static GameEvaluator()
+        {
+            _distances = new int[48];
+            _queue = new int[48];
+        }
+
+        // This currently just uses drive ferry distance, not shuttle, airlift etc.
+        // Using primitive queue + city indexes for perf.
         private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
         {
             if (game.CityByName(city).HasResearchStation) return (city, 0);
 
-            // This currently just uses drive ferry distance, not shuttle, airlift etc.
-            // Using primitive queue + city indexes for perf.
-            var distances = new int[game.Cities.Length];
-            var queue = new int[game.Cities.Length];
+            Array.Clear(_distances, 0, _distances.Length);
+            Array.Clear(_queue, 0, _queue.Length);
+
             var queueHead = 0;
             var queueTail = 0;
             var startCityIdx = game.Board.CityIdx(city);
-            queue[queueTail++] = game.Board.CityIdx(city);
-            distances[startCityIdx] = 0;
+            _queue[queueTail++] = game.Board.CityIdx(city);
+            _distances[startCityIdx] = 0;
 
             while (queueHead < game.Cities.Length)
             {
-                var currentCityIdx = queue[queueHead++];
-                var distance = distances[currentCityIdx];
+                var currentCityIdx = _queue[queueHead++];
+                var distance = _distances[currentCityIdx];
                 var cityName = game.Cities[currentCityIdx].Name;
                 if (game.Cities[currentCityIdx].HasResearchStation)
                     return (cityName, distance);
-                distances[currentCityIdx] = distance;
+                _distances[currentCityIdx] = distance;
                 var neighbours = game.Board.AdjacentCities[cityName];
 
                 // ReSharper disable once ForCanBeConvertedToForeach
@@ -250,9 +260,9 @@ namespace pandemic.agents
                 {
                     var neighbourIdx = game.Board.CityIdx(neighbours[i]);
                     if (neighbourIdx == startCityIdx) continue;
-                    if (distances[neighbourIdx] != 0) continue;
-                    distances[neighbourIdx] = distance + 1;
-                    queue[queueTail++] = neighbourIdx;
+                    if (_distances[neighbourIdx] != 0) continue;
+                    _distances[neighbourIdx] = distance + 1;
+                    _queue[queueTail++] = neighbourIdx;
                 }
             }
 
