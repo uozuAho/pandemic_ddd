@@ -59,8 +59,19 @@ namespace pandemic.Aggregates.Game
         }
         public City CityByName(string city) => Cities[Board.CityIdx(city)];
 
-        public bool IsCured(Colour colour) =>
-            CuresDiscovered.SingleOrDefault(c => c.Colour == colour) is not null;
+        public bool IsCured(Colour colour)
+        {
+            // perf:
+            // ReSharper disable once ForCanBeConvertedToForeach
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (var i = 0; i < CuresDiscovered.Count; i++)
+            {
+                var cure = CuresDiscovered[i];
+                if (cure.Colour == colour) return true;
+            }
+
+            return false;
+        }
 
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
