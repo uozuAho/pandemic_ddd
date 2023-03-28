@@ -171,7 +171,7 @@ public partial record PandemicGame
         if (cmd.Role == Role.Researcher)
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
 
-        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
 
         var researcher = PlayerByRole(Role.Researcher);
@@ -189,7 +189,7 @@ public partial record PandemicGame
         if (cmd.PlayerToGiveTo == Role.Researcher)
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
 
-        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
 
         var researcher = PlayerByRole(Role.Researcher);
@@ -261,7 +261,7 @@ public partial record PandemicGame
 
         var dispatcher = PlayerByRole(Role.Dispatcher);
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
-        var card = dispatcher.Hand.CityCards.SingleOrDefault(c => c.City.Name == playerToMove.Location);
+        var card = dispatcher.Hand.CityCards().SingleOrDefault(c => c.City.Name == playerToMove.Location);
 
         if (card == null)
             throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
@@ -279,7 +279,7 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
-        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Dispatcher doesn't have the {cmd.City} card");
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
@@ -545,12 +545,12 @@ public partial record PandemicGame
         if (CurrentPlayer.Location != city)
             throw new GameRuleViolatedException($"Player must be in {city} to build research station");
         // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
-        if (!CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == city))
+        if (!CurrentPlayer.Hand.CityCards().Any(c => c.City.Name == city))
             throw new GameRuleViolatedException($"Current player does not have {city} in hand");
         if (CityByName(city).HasResearchStation)
             throw new GameRuleViolatedException($"{city} already has a research station");
 
-        var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
+        var playerCard = CurrentPlayer.Hand.CityCards().Single(c => c.City.Name == city);
 
         return ApplyEvents(
             new ResearchStationBuilt(command.Role, city),
@@ -654,7 +654,7 @@ public partial record PandemicGame
 
         if (giver == receiver) throw new GameRuleViolatedException("Cannot share with self!");
 
-        if (!giver.Hand.CityCards.Any(c => c.City.Name == command.City))
+        if (!giver.Hand.CityCards().Any(c => c.City.Name == command.City))
             throw new GameRuleViolatedException("Player must have the card to share");
 
         if (giver.Location != command.City)
@@ -674,7 +674,7 @@ public partial record PandemicGame
 
         if (taker == takeFromPlayer) throw new GameRuleViolatedException("Cannot share with self!");
 
-        if (!takeFromPlayer.Hand.CityCards.Any(c => c.City.Name == command.City))
+        if (!takeFromPlayer.Hand.CityCards().Any(c => c.City.Name == command.City))
             throw new GameRuleViolatedException("Player must have the card to share");
 
         if (taker.Location != command.City)

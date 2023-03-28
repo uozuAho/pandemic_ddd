@@ -45,8 +45,17 @@ namespace pandemic.Values
 
         public int Count => _cards.Length;
 
-        public IEnumerable<PlayerCityCard> CityCards =>
-            _cards.Where(c => c is PlayerCityCard).Cast<PlayerCityCard>();
+        public IEnumerable<PlayerCityCard> CityCards()
+        {
+            // perf:
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var i = 0; i < _cards.Length; i++)
+            {
+                var card = _cards[i];
+                if (card is PlayerCityCard cityCard)
+                    yield return cityCard;
+            }
+        }
 
         public PlayerHand Add(PlayerCard card)
         {

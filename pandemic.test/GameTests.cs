@@ -448,7 +448,7 @@ namespace pandemic.test
             (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, cardToDiscard));
 
             // assert
-            game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
+            game.CurrentPlayer.Hand.CityCards().ShouldNotContain(cardToDiscard);
             game.PlayerDiscardPile.Cards.ShouldContain(cardToDiscard);
         }
 
@@ -627,10 +627,10 @@ namespace pandemic.test
             events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             game.CurrentPlayer.Hand.Count.ShouldBe(7);
-            game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
+            game.CurrentPlayer.Hand.CityCards().ShouldContain(cardToShare);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
-            game.PlayerByRole(Role.Medic).Hand.CityCards.ShouldNotContain(cardToShare);
+            game.PlayerByRole(Role.Medic).Hand.CityCards().ShouldNotContain(cardToShare);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count - 2);
         }
 
@@ -986,7 +986,7 @@ namespace pandemic.test
 
             // act: discard
             game = game.Do(
-                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards().First()),
                 events);
 
             // assert: turn is over
@@ -1036,7 +1036,7 @@ namespace pandemic.test
 
             // act: discard
             game = game.Do(
-                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards().First()),
                 events);
 
             // assert: turn is over
@@ -2971,7 +2971,7 @@ namespace pandemic.test
             game = game.SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
 
             (game, var events) =
-                game.Do(new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards.ToArray()));
+                game.Do(new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards().ToArray()));
 
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
         }
@@ -3080,8 +3080,8 @@ namespace pandemic.test
 
             (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
 
-            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
-            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).Hand.CityCards().ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards().ShouldNotContain(chicago);
             game.PlayerByRole(Role.Researcher).ActionsRemaining.ShouldBe(3);
         }
 
@@ -3172,8 +3172,8 @@ namespace pandemic.test
 
             (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
 
-            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
-            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).Hand.CityCards().ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards().ShouldNotContain(chicago);
             game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(3);
         }
 

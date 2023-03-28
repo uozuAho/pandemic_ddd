@@ -142,8 +142,7 @@ namespace pandemic.Commands
 
             if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
 
-            foreach (var cureCards in game.CurrentPlayer.Hand
-                         .CityCards
+            foreach (var cureCards in game.CurrentPlayer.Hand.CityCards()
                          .GroupBy(c => c.City.Colour)
                          .Where(g => g.Count() >= 4))
             {
@@ -162,7 +161,7 @@ namespace pandemic.Commands
 
             var researcher = game.PlayerByRole(Role.Researcher);
 
-            foreach (var card in researcher.Hand.CityCards)
+            foreach (var card in researcher.Hand.CityCards())
             {
                 if (game.CurrentPlayer.Role == Role.Researcher)
                 {
@@ -192,7 +191,7 @@ namespace pandemic.Commands
 
             if (city.HasResearchStation && !opex.HasUsedDiscardAndMoveAbilityThisTurn)
             {
-                foreach (var card in opex.Hand.CityCards)
+                foreach (var card in opex.Hand.CityCards())
                 {
                     foreach (var city2 in game.Cities.Where(c => c.Name != opex.Location))
                     {
@@ -237,7 +236,7 @@ namespace pandemic.Commands
             {
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards)
+                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards())
                 {
                     if (otherPlayer.Location != card.City.Name) continue;
 
@@ -255,7 +254,7 @@ namespace pandemic.Commands
             {
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards)
+                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards())
                 {
                     if (otherPlayer.Location != card.City.Name)
                         yield return new DispatcherDirectFlyPawnCommand(otherPlayer.Role, card.City.Name);
@@ -440,7 +439,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DirectFlightCommands(PandemicGame game)
         {
-            foreach (var cityCard in game.CurrentPlayer.Hand.CityCards)
+            foreach (var cityCard in game.CurrentPlayer.Hand.CityCards())
             {
                 if (game.CurrentPlayer.Location != cityCard.City.Name)
                     yield return new DirectFlightCommand(game.CurrentPlayer.Role, cityCard.City.Name);
@@ -451,8 +450,7 @@ namespace pandemic.Commands
         {
             if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
 
-            foreach (var cureCards in game.CurrentPlayer.Hand
-                .CityCards
+            foreach (var cureCards in game.CurrentPlayer.Hand.CityCards()
                 .GroupBy(c => c.City.Colour)
                 .Where(g => g.Count() >= 5))
             {
@@ -472,7 +470,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> CharterFlightCommands(PandemicGame game)
         {
-            if (game.CurrentPlayer.Hand.CityCards.All(c => c.City.Name != game.CurrentPlayer.Location)) yield break;
+            if (game.CurrentPlayer.Hand.CityCards().All(c => c.City.Name != game.CurrentPlayer.Location)) yield break;
 
             foreach (var city in game
                          .Cities
@@ -519,7 +517,7 @@ namespace pandemic.Commands
             foreach (var otherPlayer in game.Players.Where(p =>
                          p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
             {
-                foreach (var _ in game.CurrentPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                foreach (var _ in game.CurrentPlayer.Hand.CityCards().Where(c => c.City.Name == game.CurrentPlayer.Location))
                 {
                     yield return new ShareKnowledgeGiveCommand(
                         game.CurrentPlayer.Role,
@@ -534,7 +532,7 @@ namespace pandemic.Commands
             foreach (var otherPlayer in game.Players.Where(p =>
                          p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
             {
-                foreach (var _ in otherPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                foreach (var _ in otherPlayer.Hand.CityCards().Where(c => c.City.Name == game.CurrentPlayer.Location))
                 {
                     yield return new ShareKnowledgeTakeCommand(
                         game.CurrentPlayer.Role,
@@ -549,7 +547,7 @@ namespace pandemic.Commands
             if (game.CityByName(game.CurrentPlayer.Location).HasResearchStation)
                 return false;
 
-            return game.CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == game.CurrentPlayer.Location);
+            return game.CurrentPlayer.Hand.CityCards().Any(c => c.City.Name == game.CurrentPlayer.Location);
         }
     }
 

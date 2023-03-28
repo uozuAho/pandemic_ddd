@@ -34,7 +34,7 @@ namespace pandemic.Values
             var red = 0;
             var yellow = 0;
 
-            foreach (var card in Hand.CityCards)
+            foreach (var card in Hand.CityCards())
             {
                 switch (card.City.Colour)
                 {

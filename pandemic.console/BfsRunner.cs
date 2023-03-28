@@ -139,7 +139,7 @@ namespace pandemic.console
 
         private static string PlayerText(Player player)
         {
-            var counts = string.Join(",", player.Hand.CityCards
+            var counts = string.Join(",", player.Hand.CityCards()
                 .GroupBy(c => c.City.Colour)
                 .Select(g => $"{g.Key.ToString().First()}:{g.Count()}"));
 
