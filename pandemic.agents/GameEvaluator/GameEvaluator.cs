@@ -38,7 +38,7 @@ namespace pandemic.agents.GameEvaluator
             var best = new[] { "Hong Kong", "Bogota", "Paris", "Kinshasa", "Karachi" };
             foreach (var city in best)
             {
-                var (closestCity, distance) = ClosestResearchStationTo(game, city);
+                var (closestCity, distance) = ResearchStationDistance.ClosestResearchStationTo(game, city);
                 score += 100 / (distance + 1);
             }
 
@@ -105,7 +105,7 @@ namespace pandemic.agents.GameEvaluator
 
             if (player.HasEnoughToCure())
             {
-                var (city, distance) = ClosestResearchStationTo(game, player.Location);
+                var (city, distance) = ResearchStationDistance.ClosestResearchStationTo(game, player.Location);
                 score -= distance * 5;
             }
 
@@ -242,59 +242,14 @@ namespace pandemic.agents.GameEvaluator
             return redScore + blueScore + yellowScore + blackScore;
         }
 
-        [ThreadStatic] private static int[] _distances;
-        [ThreadStatic] private static int[] _queue;
-
         static GameEvaluator()
         {
-            _distances = new int[48];
             _queueTail = 0;
             _queueHead = 0;
             Cities1 = new City[48];
             Cities2 = new City[48];
             Cities3 = new City[48];
             CityQueue = new City[48];
-            _queue = new int[48];
-        }
-
-        // This currently just uses drive ferry distance, not shuttle, airlift etc.
-        // Using primitive queue + city indexes for perf.
-        private static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
-        {
-            if (game.CityByName(city).HasResearchStation) return (city, 0);
-
-            Array.Clear(_distances, 0, _distances.Length);
-            Array.Clear(_queue, 0, _queue.Length);
-
-            var queueHead = 0;
-            var queueTail = 0;
-            var startCityIdx = game.Board.CityIdx(city);
-            _queue[queueTail++] = game.Board.CityIdx(city);
-            _distances[startCityIdx] = 0;
-
-            while (queueHead < game.Cities.Length)
-            {
-                var currentCityIdx = _queue[queueHead++];
-                var distance = _distances[currentCityIdx];
-                var cityName = game.Cities[currentCityIdx].Name;
-                if (game.Cities[currentCityIdx].HasResearchStation)
-                    return (cityName, distance);
-                _distances[currentCityIdx] = distance;
-                var neighbours = game.Board.AdjacentCities[cityName];
-
-                // ReSharper disable once ForCanBeConvertedToForeach
-                // why? perf
-                for (var i = 0; i < neighbours.Count; i++)
-                {
-                    var neighbourIdx = game.Board.CityIdx(neighbours[i]);
-                    if (neighbourIdx == startCityIdx) continue;
-                    if (_distances[neighbourIdx] != 0) continue;
-                    _distances[neighbourIdx] = distance + 1;
-                    _queue[queueTail++] = neighbourIdx;
-                }
-            }
-
-            throw new InvalidOperationException("shouldn't get here");
         }
     }
 }
