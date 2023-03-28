@@ -50,18 +50,49 @@ namespace pandemic.agents
         {
             var score = 0;
 
-            foreach (var cardsOfColour in game.PlayerDiscardPile.Cards
-                         .Where(c => c is PlayerCityCard)
-                         .Cast<PlayerCityCard>()
-                         .GroupBy(c => c.City.Colour))
+            var red = 0;
+            var blue = 0;
+            var yellow = 0;
+            var black = 0;
+
+            foreach (var card in game.PlayerDiscardPile.Cards)
             {
-                var colour = cardsOfColour.Key;
-                var numCards = cardsOfColour.Count();
-                if (!game.IsCured(colour))
+                if (card is PlayerCityCard cityCard)
                 {
-                    if (numCards > 7) score -= 1000000; // cannot cure!
-                    score -= numCards * numCards * 10;
+                    switch (cityCard.City.Colour)
+                    {
+                        case Colour.Red: red++; break;
+                        case Colour.Blue: blue++; break;
+                        case Colour.Yellow: yellow++; break;
+                        case Colour.Black: black++; break;
+                    }
                 }
+            }
+
+            const int cannotCurePenalty = 1000000;
+
+            if (!game.IsCured(Colour.Red))
+            {
+                if (red > 7) score -= cannotCurePenalty;
+                score -= red * red * 10;
+            }
+
+            if (!game.IsCured(Colour.Blue))
+            {
+                if (blue > 7) score -= cannotCurePenalty;
+                score -= blue * blue * 10;
+            }
+
+            if (!game.IsCured(Colour.Yellow))
+            {
+                if (yellow > 7) score -= cannotCurePenalty;
+                score -= yellow * yellow * 10;
+            }
+
+            if (!game.IsCured(Colour.Black))
+            {
+                if (black > 7) score -= cannotCurePenalty;
+                score -= black * black * 10;
             }
 
             return score;
