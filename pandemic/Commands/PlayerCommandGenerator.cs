@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Combinatorics.Collections;
 using pandemic.Aggregates.Game;
@@ -37,43 +36,50 @@ namespace pandemic.Commands
     {
         public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
         {
-            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
+            if (game.IsOver) yield break;
+            var numCmds = 0;
+            var numEventCmds = 0;
 
-            var commands = new List<IPlayerCommand>();
+            foreach (var c in DiscardCommands(game)) { numCmds++; yield return c; }
+            foreach (var c in SpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
 
-            commands.AddRange(DiscardCommands(game));
-            commands.AddRange(SpecialEventCommands(game));
-
-            if (game.APlayerMustDiscard) return commands;
+            if (game.APlayerMustDiscard) yield break;
 
             if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
             {
-                commands.AddRange(DriveFerryCommands(game));
-                commands.AddRange(BuildResearchStationCommands(game));
-                commands.AddRange(CureCommands(game));
-                commands.AddRange(DirectFlightCommands(game));
-                commands.AddRange(CharterFlightCommands(game));
-                commands.AddRange(ShuttleFlightCommands(game));
-                commands.AddRange(TreatDiseaseCommands(game));
-                commands.AddRange(ShareKnowledgeGiveCommands(game));
-                commands.AddRange(ShareKnowledgeTakeCommands(game));
-                commands.AddRange(PassCommands(game));
-                commands.AddRange(DispatcherCommands(game));
-                commands.AddRange(OperationsExpertCommands(game));
-                commands.AddRange(ResearcherCommands(game));
-                commands.AddRange(ScientistCommands(game));
-                commands.AddRange(ContingencyPlannerTakeCommands(game));
+                foreach (var c in DriveFerryCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in BuildResearchStationCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in CureCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in DirectFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in CharterFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShuttleFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in TreatDiseaseCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShareKnowledgeGiveCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShareKnowledgeTakeCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in PassCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in DispatcherCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in OperationsExpertCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ResearcherCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ScientistCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ContingencyPlannerTakeCommands(game)) { numCmds++; yield return c; }
             }
 
-            if (commands.All(c => c.IsSpecialEvent))
+            if (numCmds > 0 && numCmds == numEventCmds)
             {
-                foreach (var group in commands.GroupBy(c => c.Role))
+                for (var i = 0; i < game.Players.Length; i++)
                 {
-                    commands.Add(new DontUseSpecialEventCommand(group.Key));
+                    var player = game.Players[i];
+                    for (var j = 0; j < player.Hand.Cards.Length; j++)
+                    {
+                        var card = player.Hand.Cards[j];
+                        if (card is ISpecialEventCard)
+                        {
+                            yield return new DontUseSpecialEventCommand(player.Role);
+                            break;
+                        }
+                    }
                 }
             }
-
-            return commands;
         }
 
         /// <summary>
