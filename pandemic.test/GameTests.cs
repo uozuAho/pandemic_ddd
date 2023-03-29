@@ -1524,7 +1524,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: current state should be second epidemic, just after infect step
             events.ShouldContain(e => e is EpidemicInfectStepCompleted, 2);
@@ -1949,7 +1949,7 @@ namespace pandemic.test
             game.LegalCommands().ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: epidemic intensified, 2 cards picked up, turn over
             events.ShouldContain(e => e is EpidemicIntensified);
@@ -1971,7 +1971,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(eventCard)
             });
 
-            Should.Throw<GameRuleViolatedException>(() => game.Do(new DontUseSpecialEventCommand(Role.Medic)));
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new DontUseSpecialEventCommand()));
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -1997,7 +1997,7 @@ namespace pandemic.test
             generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -2032,7 +2032,7 @@ namespace pandemic.test
             generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);

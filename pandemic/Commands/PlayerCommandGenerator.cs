@@ -66,19 +66,7 @@ namespace pandemic.Commands
 
             if (numCmds > 0 && numCmds == numEventCmds)
             {
-                for (var i = 0; i < game.Players.Length; i++)
-                {
-                    var player = game.Players[i];
-                    for (var j = 0; j < player.Hand.Cards.Length; j++)
-                    {
-                        var card = player.Hand.Cards[j];
-                        if (card is ISpecialEventCard)
-                        {
-                            yield return new DontUseSpecialEventCommand(player.Role);
-                            break;
-                        }
-                    }
-                }
+                yield return new DontUseSpecialEventCommand();
             }
         }
 
@@ -116,10 +104,7 @@ namespace pandemic.Commands
 
             if (commands.All(c => c.IsSpecialEvent))
             {
-                foreach (var group in commands.GroupBy(c => c.Role))
-                {
-                    commands.Add(new DontUseSpecialEventCommand(group.Key));
-                }
+                commands.Add(new DontUseSpecialEventCommand());
             }
 
             return commands;
