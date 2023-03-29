@@ -3341,6 +3341,7 @@ namespace pandemic.test
             });
 
             var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
+            var sydneyInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Sydney"));
             game = game
                     .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" })
                     .RemoveAllCubesFromCities()
@@ -3349,6 +3350,7 @@ namespace pandemic.test
                     InfectionDrawPile =
                     game.InfectionDrawPile
                         .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(sydneyInfectionCard) // ensure an adjacent city is not infected
                         .PlaceOnTop(atlantaInfectionCard),
                 };
 
