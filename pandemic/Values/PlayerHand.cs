@@ -8,7 +8,7 @@ namespace pandemic.Values
 {
     public record PlayerHand
     {
-        private ImmutableArray<PlayerCard> _cards = ImmutableArray<PlayerCard>.Empty;
+        public ImmutableArray<PlayerCard> Cards = ImmutableArray<PlayerCard>.Empty;
 
         private PlayerHand()
         {
@@ -16,7 +16,7 @@ namespace pandemic.Values
 
         public PlayerHand(IEnumerable<PlayerCard> cards)
         {
-            _cards = cards.ToImmutableArray();
+            Cards = cards.ToImmutableArray();
         }
 
         public static readonly PlayerHand Empty = new ();
@@ -41,17 +41,15 @@ namespace pandemic.Values
             return new PlayerHand(cards);
         }
 
-        public IEnumerable<PlayerCard> Cards => _cards;
-
-        public int Count => _cards.Length;
+        public int Count => Cards.Length;
 
         public IEnumerable<PlayerCityCard> CityCards()
         {
             // perf:
             // ReSharper disable once ForCanBeConvertedToForeach
-            for (var i = 0; i < _cards.Length; i++)
+            for (var i = 0; i < Cards.Length; i++)
             {
-                var card = _cards[i];
+                var card = Cards[i];
                 if (card is PlayerCityCard cityCard)
                     yield return cityCard;
             }
@@ -59,26 +57,26 @@ namespace pandemic.Values
 
         public PlayerHand Add(PlayerCard card)
         {
-            return this with { _cards = _cards.Add(card) };
+            return this with { Cards = Cards.Add(card) };
         }
 
         public PlayerHand Remove(PlayerCard card)
         {
-            if (!_cards.Contains(card)) throw new InvalidOperationException($"{card} not in hand");
+            if (!Cards.Contains(card)) throw new InvalidOperationException($"{card} not in hand");
 
-            return this with { _cards = _cards.Remove(card) };
+            return this with { Cards = Cards.Remove(card) };
         }
 
         public bool Contains(PlayerCard card)
         {
-            return _cards.Contains(card);
+            return Cards.Contains(card);
         }
 
         public IEnumerable<PlayerCard> SpecialEventCards()
         {
-            for (int i = 0; i < _cards.Length; i++)
+            for (int i = 0; i < Cards.Length; i++)
             {
-                var card = _cards[i];
+                var card = Cards[i];
                 if (card is ISpecialEventCard specialEventCard)
                     yield return card;
             }
@@ -88,9 +86,9 @@ namespace pandemic.Values
         {
             PlayerCard? tempCard = null;
 
-            for (int i = 0; i < _cards.Length; i++)
+            for (int i = 0; i < Cards.Length; i++)
             {
-                var card = _cards[i];
+                var card = Cards[i];
                 if (func(card))
                 {
                     if (tempCard != null)
@@ -107,9 +105,9 @@ namespace pandemic.Values
 
         public PlayerCard First(Func<object, bool> func)
         {
-            for (int i = 0; i < _cards.Length; i++)
+            for (int i = 0; i < Cards.Length; i++)
             {
-                var card = _cards[i];
+                var card = Cards[i];
                 if (func(card))
                     return card;
             }
@@ -119,7 +117,7 @@ namespace pandemic.Values
 
         public override string ToString()
         {
-            return string.Join(", ", _cards);
+            return string.Join(", ", Cards);
         }
     }
 }
