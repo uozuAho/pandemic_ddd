@@ -250,14 +250,18 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherDirectFlightCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Count; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards())
+                var dispatcherHand = game.PlayerByRole(Role.Dispatcher).Hand;
+
+                for (var j = 0; j < dispatcherHand.Count; j++)
                 {
-                    if (otherPlayer.Location != card.City.Name)
-                        yield return new DispatcherDirectFlyPawnCommand(otherPlayer.Role, card.City.Name);
+                    var card = dispatcherHand.Cards[j];
+                    if (card is PlayerCityCard cityCard && otherPlayer.Location != cityCard.City.Name)
+                        yield return new DispatcherDirectFlyPawnCommand(otherPlayer.Role, cityCard.City.Name);
                 }
             }
         }
