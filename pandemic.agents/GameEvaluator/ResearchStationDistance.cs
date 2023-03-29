@@ -1,5 +1,6 @@
 ﻿using System;
 using pandemic.Aggregates.Game;
+using pandemic.GameData;
 
 namespace pandemic.agents.GameEvaluator;
 
@@ -25,25 +26,28 @@ internal static class ResearchStationDistance
 
         var queueHead = 0;
         var queueTail = 0;
-        var startCityIdx = game.Board.CityIdx(city);
-        _queue[queueTail++] = game.Board.CityIdx(city);
+        var startCityIdx = StandardGameBoard.CityIdx(city);
+        _queue[queueTail++] = startCityIdx;
         _distances[startCityIdx] = 0;
 
         while (queueHead < game.Cities.Length)
         {
             var currentCityIdx = _queue[queueHead++];
             var distance = _distances[currentCityIdx];
-            var cityName = game.Cities[currentCityIdx].Name;
             if (game.Cities[currentCityIdx].HasResearchStation)
+            {
+                var cityName = game.Cities[currentCityIdx].Name;
                 return (cityName, distance);
+            }
+
             _distances[currentCityIdx] = distance;
-            var neighbours = game.Board.AdjacentCities[cityName];
+            var neighbours = StandardGameBoard.AdjacentCityIdxs(currentCityIdx);
 
             // ReSharper disable once ForCanBeConvertedToForeach
             // why? perf
-            for (var i = 0; i < neighbours.Count; i++)
+            for (var i = 0; i < neighbours.Length; i++)
             {
-                var neighbourIdx = game.Board.CityIdx(neighbours[i]);
+                var neighbourIdx = neighbours[i];
                 if (neighbourIdx == startCityIdx) continue;
                 if (_distances[neighbourIdx] != 0) continue;
                 _distances[neighbourIdx] = distance + 1;

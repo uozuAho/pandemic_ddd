@@ -24,7 +24,7 @@ namespace pandemic.test
         public void Build_research_station()
         {
             var game = PandemicGame.CreateUninitialisedGame();
-            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
 
             game = game with
             {
@@ -42,7 +42,7 @@ namespace pandemic.test
         public void Build_research_station_skip_when_one_already_exists()
         {
             var game = PandemicGame.CreateUninitialisedGame();
-            var atlantaPlayerCard = new PlayerCityCard(game.Board.City("Atlanta"));
+            var atlantaPlayerCard = new PlayerCityCard(StandardGameBoard.City("Atlanta"));
 
             game = game with
             {
@@ -61,7 +61,7 @@ namespace pandemic.test
         public void Build_research_station_no_commands_if_none_left()
         {
             var game = PandemicGame.CreateUninitialisedGame();
-            var chicagoPlayerCard = new PlayerCityCard(game.Board.City("Chicago"));
+            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
 
             game = game with
             {

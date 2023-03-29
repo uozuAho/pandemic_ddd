@@ -106,6 +106,9 @@ C, R      : 0 wins, 43 losses (0.0%)
     - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
 
 # todo
+- perf
+  - push pre perf tag, write in readme
+  - create static instances of all player cards?
 - improve win rates on heroic difficulty
     - greedy agent can win ~1/1000 random 2 player heroic games :)
     - try DFS with greedy move selector

@@ -56,19 +56,19 @@ namespace pandemic.agents.test
                     Hand = new PlayerHand(new[]
                     {
                         // 4 yellows
-                        new PlayerCityCard(Board.City("Miami")),
-                        new PlayerCityCard(Board.City("Mexico City")),
-                        new PlayerCityCard(Board.City("Los Angeles")),
-                        new PlayerCityCard(Board.City("Lagos")),
+                        new PlayerCityCard(StandardGameBoard.City("Miami")),
+                        new PlayerCityCard(StandardGameBoard.City("Mexico City")),
+                        new PlayerCityCard(StandardGameBoard.City("Los Angeles")),
+                        new PlayerCityCard(StandardGameBoard.City("Lagos")),
 
                         // 2 others
-                        new PlayerCityCard(Board.City("Jakarta")),
-                        new PlayerCityCard(Board.City("Cairo")),
+                        new PlayerCityCard(StandardGameBoard.City("Jakarta")),
+                        new PlayerCityCard(StandardGameBoard.City("Cairo")),
 
                         // 3 blues
-                        new PlayerCityCard(Board.City("Paris")),
-                        new PlayerCityCard(Board.City("Atlanta")),
-                        new PlayerCityCard(Board.City("Chicago")),
+                        new PlayerCityCard(StandardGameBoard.City("Paris")),
+                        new PlayerCityCard(StandardGameBoard.City("Atlanta")),
+                        new PlayerCityCard(StandardGameBoard.City("Chicago")),
                     }),
                     ActionsRemaining = 0
                 })

@@ -300,7 +300,7 @@ public partial record PandemicGame
 
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
-        if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
+        if (!StandardGameBoard.IsAdjacent(playerToMove.Location, cmd.City))
             throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
 
         return ApplyEvents(
@@ -449,9 +449,9 @@ public partial record PandemicGame
 
         var player = PlayerByRole(role);
 
-        if (!Board.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
+        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
 
-        if (!Board.IsAdjacent(player.Location, destination))
+        if (!StandardGameBoard.IsAdjacent(player.Location, destination))
         {
             throw new GameRuleViolatedException(
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
@@ -505,7 +505,7 @@ public partial record PandemicGame
     {
         var (role, discardCard, destination) = cmd;
 
-        if (!Board.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
+        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
         if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException($"You can't charter fly to your current location");
@@ -714,7 +714,7 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var unshuffledCities = Board.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
+        var unshuffledCities = StandardGameBoard.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
 
         return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
     }
@@ -726,7 +726,7 @@ public partial record PandemicGame
 
     private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events, bool includeSpecialEventCards)
     {
-        var playerCards = Board.Cities
+        var playerCards = StandardGameBoard.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
             .Concat(includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>())
             .OrderBy(_ => Rng.Next())
@@ -840,7 +840,7 @@ public partial record PandemicGame
             if (game.OutbreakCounter == 8)
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
 
-            var adjacent = game.Board.AdjacentCities[next].Select(game.CityByName).ToList();
+            var adjacent = StandardGameBoard.AdjacentCities[next].Select(game.CityByName).ToList();
 
             foreach (var adj in adjacent)
             {

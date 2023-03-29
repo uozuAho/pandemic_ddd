@@ -268,7 +268,7 @@ namespace pandemic.Commands
             {
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var adjacentCity in game.Board.AdjacentCities[otherPlayer.Location])
+                foreach (var adjacentCity in StandardGameBoard.AdjacentCities[otherPlayer.Location])
                 {
                     yield return new DispatcherDriveFerryPawnCommand(otherPlayer.Role, adjacentCity);
                 }
@@ -431,7 +431,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DriveFerryCommands(PandemicGame game)
         {
-            foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
+            foreach (var city in StandardGameBoard.AdjacentCities[game.CurrentPlayer.Location])
             {
                 yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
             }

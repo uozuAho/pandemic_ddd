@@ -15,7 +15,7 @@ namespace pandemic.agents.test
         {
             var board = StandardGameBoard.Instance();
             var hand = new PlayerHand(Enumerable
-                .Repeat(new PlayerCityCard(board.City("Atlanta")), 3));
+                .Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 3));
 
             GameEvaluator.GameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand).ShouldBePositive();
         }
@@ -26,7 +26,7 @@ namespace pandemic.agents.test
             var board = StandardGameBoard.Instance();
             var game = PandemicGame.CreateUninitialisedGame().Cure(Colour.Blue);
             var hand = new PlayerHand(Enumerable
-                .Repeat(new PlayerCityCard(board.City("Atlanta")), 5));
+                .Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 5));
 
             GameEvaluator.GameEvaluator.PlayerHandScore(game, hand).ShouldBeNegative();
         }

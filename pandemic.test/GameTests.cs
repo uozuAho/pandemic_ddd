@@ -1624,7 +1624,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -1641,7 +1641,7 @@ namespace pandemic.test
 
             game.OutbreakCounter.ShouldBe(1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
-            var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
+            var adjacentCities = StandardGameBoard.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
             adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
@@ -1655,7 +1655,7 @@ namespace pandemic.test
             {
                 OutbreakCounter = 7,
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(StandardGameBoard.City("Atlanta"))),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
                     Cubes = CubePile.Empty
@@ -1720,9 +1720,9 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(2);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
-            game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(a => game.CityByName(a))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
-            game.Board.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
+            StandardGameBoard.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
@@ -2998,7 +2998,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame().Cure(Colour.Blue);
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -3286,7 +3286,7 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Montreal" })
                     .RemoveAllCubesFromCities()
@@ -3313,7 +3313,7 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -3328,7 +3328,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
 
             game.OutbreakCounter.ShouldBe(0);
-            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
         }
 
@@ -3340,7 +3340,7 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" })
                     .RemoveAllCubesFromCities()
@@ -3356,7 +3356,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
 
             game.OutbreakCounter.ShouldBe(0);
-            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
         }
 
