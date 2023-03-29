@@ -34,22 +34,25 @@ namespace pandemic.Values
             var red = 0;
             var yellow = 0;
 
-            foreach (var card in Hand.CityCards())
+            foreach (var card in Hand.Cards)
             {
-                switch (card.City.Colour)
+                if (card is PlayerCityCard cityCard)
                 {
-                    case Colour.Black:
-                        black++;
-                        break;
-                    case Colour.Blue:
-                        blue++;
-                        break;
-                    case Colour.Red:
-                        red++;
-                        break;
-                    case Colour.Yellow:
-                        yellow++;
-                        break;
+                    switch (cityCard.City.Colour)
+                    {
+                        case Colour.Black:
+                            black++;
+                            break;
+                        case Colour.Blue:
+                            blue++;
+                            break;
+                        case Colour.Red:
+                            red++;
+                            break;
+                        case Colour.Yellow:
+                            yellow++;
+                            break;
+                    }
                 }
             }
 
