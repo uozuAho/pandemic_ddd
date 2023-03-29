@@ -5,7 +5,7 @@ using pandemic.Values;
 
 namespace pandemic.GameData
 {
-    public class StandardGameBoard
+    public static class StandardGameBoard
     {
         public const int NumberOfCities = 48;
         public static readonly int[] InfectionRates = { 2, 2, 2, 3, 3, 4, 4 };
@@ -18,9 +18,6 @@ namespace pandemic.GameData
         public static int[] AdjacentCityIdxs(int cityIdx) => AdjacencyIdxsLookup[cityIdx];
         public static bool IsAdjacent(string city1, string city2) => AdjacentCities[city1].Contains(city2);
         public static int DriveFerryDistance(string city1, string city2) => DistanceLookup[(city1, city2)];
-        public static StandardGameBoard Instance() => _instance;
-
-        private StandardGameBoard() {}
 
         private static readonly CityData[] _cities = {
             new("Algiers", Colour.Black),
@@ -259,7 +256,5 @@ namespace pandemic.GameData
 
             return lookup;
         }
-
-        private static readonly StandardGameBoard _instance = new();
     }
 }

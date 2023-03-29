@@ -5,8 +5,6 @@ namespace pandemic.test
 {
     internal class StandardGameBoardTests
     {
-        private readonly StandardGameBoard _board = StandardGameBoard.Instance();
-
         [TestCase("Atlanta", "Washington", 1)]
         [TestCase("Washington", "Atlanta", 1)]
         [TestCase("Atlanta", "New York", 2)]

@@ -13,7 +13,6 @@ namespace pandemic.agents.test
         [Test]
         public void Cards_of_same_colour_are_positive()
         {
-            var board = StandardGameBoard.Instance();
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 3));
 
@@ -23,7 +22,6 @@ namespace pandemic.agents.test
         [Test]
         public void Cards_of_cured_colour_are_worth_negative()
         {
-            var board = StandardGameBoard.Instance();
             var game = PandemicGame.CreateUninitialisedGame().Cure(Colour.Blue);
             var hand = new PlayerHand(Enumerable
                 .Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 5));
