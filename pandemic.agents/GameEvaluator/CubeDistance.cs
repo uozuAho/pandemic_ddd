@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.GameData;
@@ -14,6 +15,7 @@ internal static class CubeDistance
     [ThreadStatic] private static readonly City[] Cities3;
     [ThreadStatic] private static readonly City[] Cities2;
     [ThreadStatic] private static readonly City[] Cities1;
+    [ThreadStatic] private static readonly List<Player> Players;
 
     static CubeDistance()
     {
@@ -21,6 +23,7 @@ internal static class CubeDistance
         Cities3 = new City[48];
         Cities2 = new City[48];
         Cities1 = new City[48];
+        Players = new List<Player>(4);
     }
 
     public static int PlayerDistanceFromCubesScore(PandemicGame game)
@@ -34,14 +37,20 @@ internal static class CubeDistance
              *        assign that player to that city
              *        score the distance to that player
              */
-        var players = game.Players.Where(p => !p.HasEnoughToCure()).ToList();
+        Players.Clear();
+        for (var i = 0; i < game.Players.Length; i++)
+        {
+            var player = game.Players[i];
+            if (!player.HasEnoughToCure())
+                Players.Add(player);
+        }
         SetCitiesDescendingByMaxCubes(game);
         var score = 0;
 
-        while (_queueHead < _queueTail && players.Count > 0)
+        while (_queueHead < _queueTail && Players.Count > 0)
         {
             var city = CityQueue[_queueHead++];
-            var closestPlayer = players
+            var closestPlayer = Players
                 .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
 
             if (closestPlayer == null) break;
@@ -49,7 +58,7 @@ internal static class CubeDistance
             var numCubes = city.MaxNumCubes();
             var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
 
-            players.Remove(closestPlayer);
+            Players.Remove(closestPlayer);
 
             score -= numCubes * numCubes * distance;
         }
