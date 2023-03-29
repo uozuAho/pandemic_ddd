@@ -232,17 +232,23 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherCharterFlightCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Count; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards())
+                var dispatcherHand = game.PlayerByRole(Role.Dispatcher).Hand;
+                for (var j = 0; j < dispatcherHand.Count; j++)
                 {
-                    if (otherPlayer.Location != card.City.Name) continue;
-
-                    foreach (var city in game.Cities.Where(city => city.Name != otherPlayer.Location))
+                    var card = dispatcherHand.Cards[j];
+                    if (card is PlayerCityCard cityCard && otherPlayer.Location == cityCard.City.Name)
                     {
-                        yield return new DispatcherCharterFlyPawnCommand(otherPlayer.Role, city.Name);
+                        for (var k = 0; k < game.Cities.Length; k++)
+                        {
+                            var city = game.Cities[k];
+                            if (city.Name != otherPlayer.Location)
+                                yield return new DispatcherCharterFlyPawnCommand(otherPlayer.Role, city.Name);
+                        }
                     }
                 }
             }
@@ -268,8 +274,9 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherDriveFerryCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Count; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
                 foreach (var adjacentCity in StandardGameBoard.AdjacentCities[otherPlayer.Location])
@@ -281,11 +288,12 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherMovePawnToOtherPawns(PandemicGame game)
         {
-            foreach (var player1 in game.Players)
+            for (var i = 0; i < game.Players.Count; i++)
             {
-                foreach (var player2 in game.Players)
+                var player1 = game.Players[i];
+                for (var j = 0; j < game.Players.Count; j++)
                 {
-                    if (player1 == player2) continue;
+                    var player2 = game.Players[j];
                     if (player1.Location == player2.Location) continue;
 
                     yield return new DispatcherMovePawnToOtherPawnCommand(player1.Role, player2.Role);
