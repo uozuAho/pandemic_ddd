@@ -20,7 +20,7 @@ namespace pandemic.Aggregates.Game
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
-        public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
+        public ImmutableArray<Player> Players { get; init; } = ImmutableArray<Player>.Empty;
         public ImmutableArray<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
@@ -49,7 +49,7 @@ namespace pandemic.Aggregates.Game
 
         public Player PlayerByRole(Role role)
         {
-            for (var i = 0; i < Players.Count; i++)
+            for (var i = 0; i < Players.Length; i++)
             {
                 if (Players[i].Role == role) return Players[i];
             }
@@ -79,7 +79,7 @@ namespace pandemic.Aggregates.Game
 
         public Player? PlayerThatNeedsToDiscard()
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Hand.Count > 7) return player;
@@ -237,7 +237,7 @@ namespace pandemic.Aggregates.Game
 
         private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Role == Role.QuarantineSpecialist)
@@ -253,7 +253,7 @@ namespace pandemic.Aggregates.Game
 
         private bool IsMedicAt(string city)
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Role == Role.Medic && player.Location == city)

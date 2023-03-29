@@ -55,7 +55,7 @@ namespace pandemic.test
             Assert.That(game.Cities.Count(c => c.MaxNumCubes() == 1), Is.EqualTo(3));
 
             // players
-            Assert.AreEqual(options.Roles.Count, game.Players.Count);
+            Assert.AreEqual(options.Roles.Count, game.Players.Length);
             Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
             Assert.That(game.Players.All(p => p.Hand.Cards.All(c => c is not EpidemicCard)));
         }

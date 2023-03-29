@@ -232,7 +232,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherCharterFlightCommands(PandemicGame game)
         {
-            for (var i = 0; i < game.Players.Count; i++)
+            for (var i = 0; i < game.Players.Length; i++)
             {
                 var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
@@ -256,7 +256,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherDirectFlightCommands(PandemicGame game)
         {
-            for (var i = 0; i < game.Players.Count; i++)
+            for (var i = 0; i < game.Players.Length; i++)
             {
                 var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
@@ -274,7 +274,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherDriveFerryCommands(PandemicGame game)
         {
-            for (var i = 0; i < game.Players.Count; i++)
+            for (var i = 0; i < game.Players.Length; i++)
             {
                 var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
@@ -288,10 +288,10 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherMovePawnToOtherPawns(PandemicGame game)
         {
-            for (var i = 0; i < game.Players.Count; i++)
+            for (var i = 0; i < game.Players.Length; i++)
             {
                 var player1 = game.Players[i];
-                for (var j = 0; j < game.Players.Count; j++)
+                for (var j = 0; j < game.Players.Length; j++)
                 {
                     var player2 = game.Players[j];
                     if (player1.Location == player2.Location) continue;
@@ -378,7 +378,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> Airlifts(PandemicGame game, Player playerWithCard)
         {
-            for (int i = 0; i < game.Players.Count; i++)
+            for (int i = 0; i < game.Players.Length; i++)
             {
                 var player = game.Players[i];
                 for (int j = 0; j < game.Cities.Length; j++)

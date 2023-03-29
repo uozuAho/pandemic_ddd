@@ -28,7 +28,7 @@ namespace pandemic.test
 
             game = game with
             {
-                Players = ImmutableList.Create(new Player
+                Players = ImmutableArray.Create(new Player
                 {
                     Location = "Chicago",
                     Hand = new PlayerHand(new[] { chicagoPlayerCard })
@@ -46,7 +46,7 @@ namespace pandemic.test
 
             game = game with
             {
-                Players = ImmutableList.Create(new Player
+                Players = ImmutableArray.Create(new Player
                 {
                     // atlanta starts with a research station
                     Location = "Atlanta",
@@ -66,7 +66,7 @@ namespace pandemic.test
             game = game with
             {
                 ResearchStationPile = 0,
-                Players = ImmutableList.Create(new Player
+                Players = ImmutableArray.Create(new Player
                 {
                     Location = "Chicago",
                     Hand = new PlayerHand(new[] { chicagoPlayerCard })
@@ -129,7 +129,7 @@ namespace pandemic.test
 
             game = game with
             {
-                Players = ImmutableList.Create(new Player
+                Players = ImmutableArray.Create(new Player
                 {
                     Location = "Chicago",
                     Hand = new PlayerHand(new[] { atlantaCard })
