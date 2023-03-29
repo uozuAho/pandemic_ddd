@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace pandemic.Values;
 
@@ -16,19 +14,10 @@ public record CubePile
 
     private CubePile()
     {
-        Counts = new Dictionary<Colour, int>
-        {
-            { Colour.Black, 0 },
-            { Colour.Blue, 0 },
-            { Colour.Red, 0 },
-            { Colour.Yellow, 0 },
-        }.ToImmutableDictionary();
     }
 
     public CubePile(IImmutableDictionary<Colour, int> cubes)
     {
-        Counts = cubes;
-
         Red = cubes[Colour.Red];
         Blue = cubes[Colour.Blue];
         Black = cubes[Colour.Black];
@@ -43,14 +32,6 @@ public record CubePile
         Blue = blue;
         Black = black;
         Yellow = yellow;
-
-        Counts = new Dictionary<Colour, int>
-        {
-            { Colour.Black, black },
-            { Colour.Blue, blue },
-            { Colour.Red, red },
-            { Colour.Yellow, yellow },
-        }.ToImmutableDictionary();
     }
 
     public bool HasSameCubesAs(CubePile other)
@@ -109,8 +90,6 @@ public record CubePile
         return Red > 0 || Blue > 0 || Black > 0 || Yellow > 0;
     }
 
-    public IImmutableDictionary<Colour, int> Counts { get; }
-
     public int NumberOf(Colour colour)
     {
         return colour switch
@@ -125,6 +104,6 @@ public record CubePile
 
     public override string ToString()
     {
-        return string.Join(" ", Counts.Select(c => $"{c.Key}: {c.Value}"));
+        return "Red: " + Red + ", Blue: " + Blue + ", Black: " + Black + ", Yellow: " + Yellow;
     }
 }
