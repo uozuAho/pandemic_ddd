@@ -281,10 +281,10 @@ namespace pandemic.Aggregates.Game
         {
             Debug.Assert(TotalCubesInGame() == 96);
 
-            foreach (var numCubes in Cubes.Counts)
-            {
-                Debug.Assert(numCubes.Value is >= 0 and <= 24);
-            }
+            Debug.Assert(Cubes.Red is >= 0 and <= 24);
+            Debug.Assert(Cubes.Yellow is >= 0 and <= 24);
+            Debug.Assert(Cubes.Blue is >= 0 and <= 24);
+            Debug.Assert(Cubes.Black is >= 0 and <= 24);
 
             foreach (var city in Cities)
             {

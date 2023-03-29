@@ -501,15 +501,16 @@ namespace pandemic.Commands
         private static IEnumerable<IPlayerCommand> TreatDiseaseCommands(PandemicGame game)
         {
             var currentLocation = game.CurrentPlayer.Location;
-            var nonZeroCubeColours = game
-                .CityByName(currentLocation).Cubes.Counts
-                .Where(kv => kv.Value > 0)
-                .Select(kv => kv.Key);
+            var cubes = game.CityByName(currentLocation).Cubes;
 
-            foreach (var colour in nonZeroCubeColours)
-            {
-                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, colour);
-            }
+            if (cubes.Red > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Red);
+            if (cubes.Yellow > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Yellow);
+            if (cubes.Blue > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Blue);
+            if (cubes.Black > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Black);
         }
 
         private static IEnumerable<IPlayerCommand> ShareKnowledgeGiveCommands(PandemicGame game)

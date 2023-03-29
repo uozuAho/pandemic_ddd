@@ -349,7 +349,7 @@ namespace pandemic.test
                 city.Cubes.NumberOf(infectionCard.Colour).ShouldBe(1);
             }
 
-            game.Cubes.Counts.Values.Sum().ShouldBe(startingState.Cubes.Counts.Values.Sum() - game.InfectionRate);
+            game.Cubes.Total().ShouldBe(startingState.Cubes.Total() - game.InfectionRate);
         }
 
         [Test]
@@ -3718,7 +3718,7 @@ namespace pandemic.test
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
-            return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
+            return game.Cities.Sum(c => c.Cubes.Total());
         }
 
         private static void AssertEndsTurn(Func<(PandemicGame, IEnumerable<IEvent>)> action)

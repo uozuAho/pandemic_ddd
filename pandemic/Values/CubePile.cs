@@ -12,6 +12,8 @@ public record CubePile
     public readonly int Black = 0;
     public readonly int Blue = 0;
 
+    public int Total() => Red + Blue + Black + Yellow;
+
     private CubePile()
     {
         Counts = new Dictionary<Colour, int>
@@ -53,8 +55,9 @@ public record CubePile
 
     public bool HasSameCubesAs(CubePile other)
     {
-        return Counts.SequenceEqual(other.Counts);
+        return Red == other.Red && Blue == other.Blue && Black == other.Black && Yellow == other.Yellow;
     }
+
     public CubePile AddCube(Colour colour)
     {
         return AddCubes(colour, 1);
@@ -91,12 +94,19 @@ public record CubePile
 
     public CubePile RemoveAll(Colour colour)
     {
-        return new CubePile(Counts.SetItem(colour, 0));
+        return colour switch
+        {
+            Colour.Red => new CubePile(0, Blue, Black, Yellow),
+            Colour.Blue => new CubePile(Red, 0, Black, Yellow),
+            Colour.Black => new CubePile(Red, Blue, 0, Yellow),
+            Colour.Yellow => new CubePile(Red, Blue, Black, 0),
+            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null)
+        };
     }
 
     public bool Any()
     {
-        return Counts.Values.Any(v => v > 0);
+        return Red > 0 || Blue > 0 || Black > 0 || Yellow > 0;
     }
 
     public IImmutableDictionary<Colour, int> Counts { get; }
