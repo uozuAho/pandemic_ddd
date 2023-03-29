@@ -36,12 +36,28 @@ namespace pandemic.Commands
     {
         public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
         {
+            return AllCommands(game, false);
+        }
+
+        /// <summary>
+        /// Aims to be faster than AllLegalCommands by only generating 'sensible' commands
+        /// </summary>
+        public IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
+        {
+            return AllCommands(game, true);
+        }
+
+        private IEnumerable<IPlayerCommand> AllCommands(PandemicGame game, bool beSensible)
+        {
             if (game.IsOver) yield break;
             var numCmds = 0;
             var numEventCmds = 0;
 
             foreach (var c in DiscardCommands(game)) { numCmds++; yield return c; }
-            foreach (var c in SpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
+            if (beSensible)
+                foreach (var c in SensibleSpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
+            else
+                foreach (var c in SpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
 
             if (game.APlayerMustDiscard) yield break;
 
@@ -68,46 +84,6 @@ namespace pandemic.Commands
             {
                 yield return new DontUseSpecialEventCommand();
             }
-        }
-
-        /// <summary>
-        /// Aims to be faster than AllLegalCommands by only generating 'sensible' commands
-        /// </summary>
-        public IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
-        {
-            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
-
-            var commands = new List<IPlayerCommand>();
-
-            commands.AddRange(DiscardCommands(game));
-            commands.AddRange(SensibleSpecialEventCommands(game));
-
-            if (game.APlayerMustDiscard) return commands;
-
-            if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
-            {
-                commands.AddRange(DriveFerryCommands(game));
-                commands.AddRange(BuildResearchStationCommands(game));
-                commands.AddRange(CureCommands(game));
-                commands.AddRange(DirectFlightCommands(game));
-                commands.AddRange(CharterFlightCommands(game));
-                commands.AddRange(ShuttleFlightCommands(game));
-                commands.AddRange(TreatDiseaseCommands(game));
-                commands.AddRange(ShareKnowledgeGiveCommands(game));
-                commands.AddRange(ShareKnowledgeTakeCommands(game));
-                commands.AddRange(DispatcherCommands(game));
-                commands.AddRange(OperationsExpertCommands(game));
-                commands.AddRange(ResearcherCommands(game));
-                commands.AddRange(ScientistCommands(game));
-                commands.AddRange(ContingencyPlannerTakeCommands(game));
-            }
-
-            if (commands.All(c => c.IsSpecialEvent))
-            {
-                commands.Add(new DontUseSpecialEventCommand());
-            }
-
-            return commands;
         }
 
         private static IEnumerable<IPlayerCommand> ContingencyPlannerTakeCommands(PandemicGame game)
