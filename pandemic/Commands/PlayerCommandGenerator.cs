@@ -72,7 +72,10 @@ namespace pandemic.Commands
                 foreach (var c in TreatDiseaseCommands(game)) { numCmds++; yield return c; }
                 foreach (var c in ShareKnowledgeGiveCommands(game)) { numCmds++; yield return c; }
                 foreach (var c in ShareKnowledgeTakeCommands(game)) { numCmds++; yield return c; }
-                foreach (var c in PassCommands(game)) { numCmds++; yield return c; }
+                if (!beSensible)
+                {
+                    foreach (var c in PassCommands(game)) { numCmds++; yield return c; }
+                }
                 foreach (var c in DispatcherCommands(game)) { numCmds++; yield return c; }
                 foreach (var c in OperationsExpertCommands(game)) { numCmds++; yield return c; }
                 foreach (var c in ResearcherCommands(game)) { numCmds++; yield return c; }
