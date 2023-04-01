@@ -140,7 +140,7 @@ namespace pandemic.agents.GameEvaluator
 
         public static int PlayerHandScore(PandemicGame game, PlayerHand hand)
         {
-            var cards = hand.Cards.ToArray();
+            var cards = hand.Cards;
             var redCount = 0;
             var blueCount = 0;
             var yellowCount = 0;
