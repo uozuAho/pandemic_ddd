@@ -41,13 +41,15 @@ internal static class ResearchStationDistance
             }
 
             _distances[currentCityIdx] = distance;
-            var neighbours = StandardGameBoard.AdjacentCityIdxs(currentCityIdx);
+            var name = game.Cities[currentCityIdx].Name;
+            var neighbours = StandardGameBoard.AdjacentCities[name];
 
             // ReSharper disable once ForCanBeConvertedToForeach
             // why? perf
-            for (var i = 0; i < neighbours.Length; i++)
+            for (var i = 0; i < neighbours.Count; i++)
             {
-                var neighbourIdx = neighbours[i];
+                var neighbour = neighbours[i];
+                var neighbourIdx = StandardGameBoard.CityIdx(neighbour);
                 if (neighbourIdx == startCityIdx) continue;
                 if (_distances[neighbourIdx] != 0) continue;
                 _distances[neighbourIdx] = distance + 1;
