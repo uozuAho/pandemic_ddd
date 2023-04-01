@@ -23,7 +23,11 @@ namespace pandemic.agents.GameEvaluator
             var outbreakScore = -game.OutbreakCounter * 100;
             var cubeScore = CubesOnCitiesScore(game);
             var cubeDistanceScore = CubeDistance.PlayerDistanceFromCubesScore(game);
-            var playerScore = game.Players.Select(p => PlayerScore(game, p)).Sum();
+            var playerScore = 0;
+            for (var i = 0; i < game.Players.Length; i++)
+            {
+                playerScore += PlayerScore(game, game.Players[i]);
+            }
             var discardScore = PenaliseDiscards(game);
 
             return cureScore + stationScore + outbreakScore + cubeScore + cubeDistanceScore + playerScore + discardScore;
