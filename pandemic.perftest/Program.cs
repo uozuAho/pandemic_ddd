@@ -45,10 +45,13 @@ public class Program
 
     private static void PrintStats(RunStats stats)
     {
+        var seconds = stats.TotalRunTime.TotalSeconds;
         var gamesPerSecond = stats.GamesPlayed / stats.TotalRunTime.TotalSeconds;
+        var msPerGame = stats.TotalRunTime.TotalMilliseconds / stats.GamesPlayed;
         var commandsPerSecond = stats.CommandsExecuted / stats.TotalRunTime.TotalSeconds;
 
-        Console.WriteLine($"Games played: {stats.GamesPlayed} ({gamesPerSecond}/sec), " +
-                          $"commands executed: {stats.CommandsExecuted} ({commandsPerSecond}/sec)");
+        Console.Write($"{stats.GamesPlayed} games played in {seconds:F1}s ");
+        Console.WriteLine($"({gamesPerSecond:F2} games/sec, {msPerGame:F2}ms/game)");
+        Console.WriteLine($"Commands executed: {stats.CommandsExecuted} ({commandsPerSecond:F2}/sec)");
     }
 }
