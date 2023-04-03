@@ -29,7 +29,9 @@ namespace pandemic.Values
 
         public bool HasEnoughToCure()
         {
-            return Hand.CityCards().GroupBy(c => c.City.Colour).Any(g => g.Count() >= 5);
+            var neededToCure = Role == Role.Scientist ? 4 : 5;
+
+            return Hand.CityCards().GroupBy(c => c.City.Colour).Any(g => g.Count() >= neededToCure);
         }
     }
 
