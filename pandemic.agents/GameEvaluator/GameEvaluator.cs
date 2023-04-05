@@ -123,16 +123,18 @@ namespace pandemic.agents.GameEvaluator
         {
             var score = 0;
 
-            for (int i = 0; i < game.Cities.Length; i++)
+            for (var i = 0; i < game.Cities.Length; i++)
             {
                 var city = game.Cities[i];
-                foreach (var colour in ColourExtensions.AllColours)
-                {
-                    var cubes = city.Cubes.NumberOf(colour);
-                    if (cubes == 0) continue;
+                var red = city.Cubes.Red;
+                var blue = city.Cubes.Blue;
+                var yellow = city.Cubes.Yellow;
+                var black = city.Cubes.Black;
 
-                    score -= cubes * cubes * cubes * 10;
-                }
+                score -= red * red * red * 10;
+                score -= blue * blue * blue * 10;
+                score -= yellow * yellow * yellow * 10;
+                score -= black * black * black * 10;
             }
 
             return score;
