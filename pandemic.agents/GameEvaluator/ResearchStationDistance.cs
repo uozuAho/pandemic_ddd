@@ -19,8 +19,6 @@ internal static class ResearchStationDistance
     // Using primitive queue + city indexes for perf.
     public static (string, int) ClosestResearchStationTo(PandemicGame game, string city)
     {
-        if (game.CityByName(city).HasResearchStation) return (city, 0);
-
         Array.Clear(_distances, 0, _distances.Length);
         Array.Clear(_queue, 0, _queue.Length);
 
@@ -30,13 +28,14 @@ internal static class ResearchStationDistance
         _queue[queueTail++] = startCityIdx;
         _distances[startCityIdx] = 0;
 
-        while (queueHead < game.Cities.Length)
+        while (queueHead < StandardGameBoard.NumberOfCities)
         {
             var currentCityIdx = _queue[queueHead++];
+            var currentCity = game.Cities[currentCityIdx];
             var distance = _distances[currentCityIdx];
-            if (game.Cities[currentCityIdx].HasResearchStation)
+            if (currentCity.HasResearchStation)
             {
-                var cityName = game.Cities[currentCityIdx].Name;
+                var cityName = currentCity.Name;
                 return (cityName, distance);
             }
 
