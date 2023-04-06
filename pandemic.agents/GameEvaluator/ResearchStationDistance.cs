@@ -4,7 +4,7 @@ using pandemic.GameData;
 
 namespace pandemic.agents.GameEvaluator;
 
-internal static class ResearchStationDistance
+public static class ResearchStationDistance
 {
     [ThreadStatic] private static int[] _distances;
     [ThreadStatic] private static int[] _queue;

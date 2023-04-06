@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using pandemic.agents;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
 using pandemic.Events;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.console
@@ -14,7 +16,7 @@ namespace pandemic.console
         static void Main(string[] args)
         {
             // SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
-            AgentComparer.Run();
+            // AgentComparer.Run();
             // WinLossStats.PlayGamesAndPrintWinLossStats(new GreedyAgent(), TimeSpan.FromSeconds(5));
             // PlayInteractiveGame();
 
@@ -27,6 +29,7 @@ namespace pandemic.console
             // HeuristicDfsDrawer.DrawSearch(CreateNewGame());
             // BfsRunner.Run();
             // BfsRunner.Draw(500);
+            PrintBestResearchStationLocations();
         }
 
         private static void PlayInteractiveGame()
@@ -38,6 +41,36 @@ namespace pandemic.console
                 CommandGenerator = new SensibleCommandGenerator()
             });
             InteractiveGame.Play(game);
+        }
+
+        /// <summary>
+        /// Hard coded version of ResearchStationScore, for perf
+        /// </summary>
+        private static void PrintBestResearchStationLocations()
+        {
+            var best = new[] { "Hong Kong", "Bogota", "Paris", "Kinshasa", "Karachi" };
+
+            var _1fromBest = best.Select(b =>
+                StandardGameBoard
+                    .Cities.Where(c => StandardGameBoard.DriveFerryDistance(b, c.Name) == 1)
+                    .Select(c => StandardGameBoard.CityIdx(c.Name)).ToList());
+
+            var _2fromBest = best.Select(b =>
+                StandardGameBoard
+                    .Cities.Where(c => StandardGameBoard.DriveFerryDistance(b, c.Name) == 2)
+                    .Select(c => StandardGameBoard.CityIdx(c.Name)).ToList());
+
+            Console.WriteLine($"[{string.Join(",", best.Select(b => $"{StandardGameBoard.CityIdx(b)}"))}]");
+            Console.WriteLine();
+            foreach (var ones in _1fromBest)
+            {
+                Console.WriteLine($"{{{string.Join(",", ones)}}}");
+            }
+            Console.WriteLine();
+            foreach (var twos in _2fromBest)
+            {
+                Console.WriteLine($"{{{string.Join(",", twos)}}}");
+            }
         }
 
         private static void PlayInfiniteMctsGames()
