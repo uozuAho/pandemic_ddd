@@ -10,243 +10,41 @@ using Shouldly;
 
 namespace pandemic.test
 {
-    public class PlayerCommandGeneratorTests
+    public static class Util
     {
-        private PlayerCommandGenerator _generator;
+        public static PandemicGame CreateNewGame(NewGameOptions options)
+        {
+            var (game, _) = PandemicGame.CreateNewGame(options);
+
+            return game;
+        }
+    }
+
+    public class AllCommandGeneratorTests
+    {
+        private AllLegalCommandGenerator _generator;
 
         [SetUp]
         public void Setup()
         {
-            _generator = new PlayerCommandGenerator();
+            _generator = new AllLegalCommandGenerator();
         }
 
         [Test]
-        public void Build_research_station()
+        public void ShouldPass()
         {
-            var game = PandemicGame.CreateUninitialisedGame();
-            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
-
-            game = game with
-            {
-                Players = ImmutableArray.Create(new Player
-                {
-                    Location = "Chicago",
-                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
-                })
-            };
-
-            Assert.IsTrue(_generator.AllLegalCommands(game).Any(c => c is BuildResearchStationCommand));
-        }
-
-        [Test]
-        public void Build_research_station_skip_when_one_already_exists()
-        {
-            var game = PandemicGame.CreateUninitialisedGame();
-            var atlantaPlayerCard = new PlayerCityCard(StandardGameBoard.City("Atlanta"));
-
-            game = game with
-            {
-                Players = ImmutableArray.Create(new Player
-                {
-                    // atlanta starts with a research station
-                    Location = "Atlanta",
-                    Hand = new PlayerHand(new[] {atlantaPlayerCard})
-                })
-            };
-
-            Assert.False(_generator.AllLegalCommands(game).Any(c => c is BuildResearchStationCommand));
-        }
-
-        [Test]
-        public void Build_research_station_no_commands_if_none_left()
-        {
-            var game = PandemicGame.CreateUninitialisedGame();
-            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
-
-            game = game with
-            {
-                ResearchStationPile = 0,
-                Players = ImmutableArray.Create(new Player
-                {
-                    Location = "Chicago",
-                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
-                })
-            };
-
-            Assert.IsFalse(_generator.AllLegalCommands(game).Any(c => c is BuildResearchStationCommand));
-        }
-
-        [Test]
-        public void Discover_cure()
-        {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            {
-                Difficulty = Difficulty.Introductory,
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    Location = "Atlanta",
-                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
-                })
-            };
-
-            Assert.IsTrue(_generator.AllLegalCommands(game).Any(c => c is DiscoverCureCommand));
-        }
-
-        [Test]
-        public void Discover_cure_uses_5_cards()
-        {
-            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-            {
-                Difficulty = Difficulty.Introductory,
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            game = game with
-            {
-                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
-                {
-                    Location = "Atlanta",
-                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(6))
-                })
-            };
-
-            var cureCommand =
-                (DiscoverCureCommand) _generator.AllLegalCommands(game).Single(c => c is DiscoverCureCommand);
-
-            Assert.AreEqual(5, cureCommand.Cards.Length);
-        }
-
-        [Test]
-        public void Direct_fly()
-        {
-            var game = PandemicGame.CreateUninitialisedGame();
-            var atlantaCard = PlayerCards.CityCard("Atlanta");
-
-            game = game with
-            {
-                Players = ImmutableArray.Create(new Player
-                {
-                    Location = "Chicago",
-                    Hand = new PlayerHand(new[] { atlantaCard })
-                })
-            };
-
-            Assert.IsTrue(_generator.AllLegalCommands(game).Any(c => c is DirectFlightCommand));
-        }
-
-        [Test]
-        public void Charter_fly()
-        {
-            var game = CreateNewGame(new NewGameOptions
+            var game = Util.CreateNewGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist }
             });
 
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
-
-            var expectedCharterFlightCommands = game.Cities
-                .Select(c => c.Name)
-                .Except(new[] { "Atlanta" })
-                .Select(cityName => new CharterFlightCommand(game.CurrentPlayer.Role, PlayerCards.CityCard("Atlanta"), cityName))
-                .OrderBy(c => c.Destination);
-
-            // act
-            var generatedCharterFlightCommands = _generator.AllLegalCommands(game)
-                .Where(c => c is CharterFlightCommand)
-                .Cast<CharterFlightCommand>()
-                .OrderBy(c => c.Destination);
-
-            CollectionAssert.AreEqual(expectedCharterFlightCommands, generatedCharterFlightCommands);
-        }
-
-        [Test]
-        public void Shuttle_fly()
-        {
-            var game = CreateNewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            var bogota = game.CityByName("Bogota");
-
-            game = game with
-            {
-                Cities = game.Cities.Replace(bogota, bogota with
-                {
-                    HasResearchStation = true
-                })
-            };
-
-            _generator.AllLegalCommands(game).ShouldContain(new ShuttleFlightCommand(Role.Medic, "Bogota"));
-        }
-
-        [Test]
-        public void Treat_disease()
-        {
-            var game = CreateNewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            var atlanta = game.CityByName("Atlanta");
-
-            game = game with
-            {
-                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
-            };
-
-            _generator.AllLegalCommands(game).ShouldContain(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
-        }
-
-        [Test]
-        public void Share_give_knowledge()
-        {
-            var game = CreateNewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
-
-            _generator.AllLegalCommands(game).ShouldContain(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist));
-        }
-
-        [Test]
-        public void Share_take_knowledge()
-        {
-            var game = CreateNewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
-            {
-                Hand = PlayerHand.Of("Atlanta")
-            });
-
-            _generator.AllLegalCommands(game).ShouldContain(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist));
-        }
-
-        [Test]
-        public void Pass()
-        {
-            var game = CreateNewGame(new NewGameOptions
-            {
-                Roles = new[] { Role.Medic, Role.Scientist }
-            });
-
-            _generator.AllLegalCommands(game).ShouldContain(new PassCommand(Role.Medic));
+            _generator.Commands(game).ShouldContain(new PassCommand(Role.Medic));
         }
 
         [Test]
         public void Event_forecast_generates_all_permutations()
         {
-            var game = CreateNewGame(new NewGameOptions
+            var game = Util.CreateNewGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
                 IncludeSpecialEventCards = false
@@ -256,14 +54,36 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new EventForecastCard())
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is EventForecastCommand, 6*5*4*3*2*1);
+        }
+    }
+
+    public class SensibleCommandGeneratorTests
+    {
+        private SensibleCommandGenerator _generator;
+
+        [SetUp]
+        public void Setup()
+        {
+            _generator = new SensibleCommandGenerator();
+        }
+
+        [Test]
+        public void ShouldNotPass()
+        {
+            var game = Util.CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            _generator.Commands(game).ShouldNotContain(new PassCommand(Role.Medic));
         }
 
         [Test]
         public void Sensible_event_forecast_generates_one_sensible_command()
         {
-            var game = CreateNewGame(new NewGameOptions
+            var game = Util.CreateNewGame(new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
                 IncludeSpecialEventCards = false
@@ -299,7 +119,7 @@ namespace pandemic.test
                         game.CityByName("Milan") with { Cubes = CubePile.Empty.AddCubes(Colour.Blue, 3) })
             };
 
-            var commands = _generator.AllSensibleCommands(game).ToList();
+            var commands = _generator.Commands(game).ToList();
             commands.ShouldContain(c => c is EventForecastCommand, 1);
             var command = commands.Single(c => c is EventForecastCommand) as EventForecastCommand;
 
@@ -313,6 +133,232 @@ namespace pandemic.test
                 new InfectionCard("Atlanta", Colour.Blue),
                 new InfectionCard("Chicago", Colour.Blue),
             });
+        }
+    }
+
+
+    [TestFixture(typeof(AllLegalCommandGenerator))]
+    [TestFixture(typeof(SensibleCommandGenerator))]
+    public class CommandGeneratorTests<T> where T : ICommandGenerator, new()
+    {
+        private ICommandGenerator _generator;
+
+        [SetUp]
+        public void Setup()
+        {
+            _generator = new T();
+        }
+
+        [Test]
+        public void Build_research_station()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
+
+            game = game with
+            {
+                Players = ImmutableArray.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
+                })
+            };
+
+            Assert.IsTrue(_generator.Commands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
+        public void Build_research_station_skip_when_one_already_exists()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlantaPlayerCard = new PlayerCityCard(StandardGameBoard.City("Atlanta"));
+
+            game = game with
+            {
+                Players = ImmutableArray.Create(new Player
+                {
+                    // atlanta starts with a research station
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(new[] {atlantaPlayerCard})
+                })
+            };
+
+            Assert.False(_generator.Commands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
+        public void Build_research_station_no_commands_if_none_left()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var chicagoPlayerCard = new PlayerCityCard(StandardGameBoard.City("Chicago"));
+
+            game = game with
+            {
+                ResearchStationPile = 0,
+                Players = ImmutableArray.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { chicagoPlayerCard })
+                })
+            };
+
+            Assert.IsFalse(_generator.Commands(game).Any(c => c is BuildResearchStationCommand));
+        }
+
+        [Test]
+        public void Discover_cure()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(5))
+                })
+            };
+
+            Assert.IsTrue(_generator.Commands(game).Any(c => c is DiscoverCureCommand));
+        }
+
+        [Test]
+        public void Discover_cure_uses_5_cards()
+        {
+            var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game with
+            {
+                Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with
+                {
+                    Location = "Atlanta",
+                    Hand = new PlayerHand(PlayerCards.CityCards.Where(c => c.City.Colour == Colour.Black).Take(6))
+                })
+            };
+
+            var cureCommand =
+                (DiscoverCureCommand) _generator.Commands(game).Single(c => c is DiscoverCureCommand);
+
+            Assert.AreEqual(5, cureCommand.Cards.Length);
+        }
+
+        [Test]
+        public void Direct_fly()
+        {
+            var game = PandemicGame.CreateUninitialisedGame();
+            var atlantaCard = PlayerCards.CityCard("Atlanta");
+
+            game = game with
+            {
+                Players = ImmutableArray.Create(new Player
+                {
+                    Location = "Chicago",
+                    Hand = new PlayerHand(new[] { atlantaCard })
+                })
+            };
+
+            Assert.IsTrue(_generator.Commands(game).Any(c => c is DirectFlightCommand));
+        }
+
+        [Test]
+        public void Charter_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            var expectedCharterFlightCommands = game.Cities
+                .Select(c => c.Name)
+                .Except(new[] { "Atlanta" })
+                .Select(cityName => new CharterFlightCommand(game.CurrentPlayer.Role, PlayerCards.CityCard("Atlanta"), cityName))
+                .OrderBy(c => c.Destination);
+
+            // act
+            var generatedCharterFlightCommands = _generator.Commands(game)
+                .Where(c => c is CharterFlightCommand)
+                .Cast<CharterFlightCommand>()
+                .OrderBy(c => c.Destination);
+
+            CollectionAssert.AreEqual(expectedCharterFlightCommands, generatedCharterFlightCommands);
+        }
+
+        [Test]
+        public void Shuttle_fly()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var bogota = game.CityByName("Bogota");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(bogota, bogota with
+                {
+                    HasResearchStation = true
+                })
+            };
+
+            _generator.Commands(game).ShouldContain(new ShuttleFlightCommand(Role.Medic, "Bogota"));
+        }
+
+        [Test]
+        public void Treat_disease()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            var atlanta = game.CityByName("Atlanta");
+
+            game = game with
+            {
+                Cities = game.Cities.Replace(atlanta, atlanta with { Cubes = CubePile.Empty.AddCube(Colour.Blue) })
+            };
+
+            _generator.Commands(game).ShouldContain(new TreatDiseaseCommand(Role.Medic, "Atlanta", Colour.Blue));
+        }
+
+        [Test]
+        public void Share_give_knowledge()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
+
+            _generator.Commands(game).ShouldContain(new ShareKnowledgeGiveCommand(Role.Medic, "Atlanta", Role.Scientist));
+        }
+
+        [Test]
+        public void Share_take_knowledge()
+        {
+            var game = CreateNewGame(new NewGameOptions
+            {
+                Roles = new[] { Role.Medic, Role.Scientist }
+            });
+
+            game = game.SetPlayer(Role.Scientist, game.PlayerByRole(Role.Scientist) with
+            {
+                Hand = PlayerHand.Of("Atlanta")
+            });
+
+            _generator.Commands(game).ShouldContain(new ShareKnowledgeTakeCommand(Role.Medic, "Atlanta", Role.Scientist));
         }
 
         [Test]
@@ -328,7 +374,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
 
             commands.Count(c => c is AirliftCommand).ShouldBe(2 * 47); // 2 players, 47 destinations each
         }
@@ -346,7 +392,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of(new AirliftCard())
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
 
             commands.Count(c => c is AirliftCommand).ShouldBe(3 * 47); // 3 players, 47 destinations each
         }
@@ -364,7 +410,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new GovernmentGrantCard())
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
 
             commands.Count(c => c is GovernmentGrantCommand).ShouldBe(47);
         }
@@ -383,7 +429,7 @@ namespace pandemic.test
             });
             game = game with { ResearchStationPile = 0 };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is GovernmentGrantCommand);
         }
 
@@ -400,7 +446,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            var commands = _generator.AllLegalCommands(game).ToList();
+            var commands = _generator.Commands(game).ToList();
             commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
         }
 
@@ -421,7 +467,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(new AirliftCard())
             });
 
-            var commands = _generator.AllLegalCommands(game).ToList();
+            var commands = _generator.Commands(game).ToList();
             commands.ShouldContain(c => c is DontUseSpecialEventCommand);
             commands.ShouldAllBe(c => c is DontUseSpecialEventCommand || c.IsSpecialEvent);
         }
@@ -442,7 +488,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(card)
             });
 
-            var commands = _generator.AllLegalCommands(game).ToList();
+            var commands = _generator.Commands(game).ToList();
             commands.ShouldNotContain(c => c is DontUseSpecialEventCommand);
         }
 
@@ -460,7 +506,7 @@ namespace pandemic.test
                 Hand = new PlayerHand(game.PlayerDrawPile.Top(8))
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand, 8);
         }
 
@@ -482,7 +528,7 @@ namespace pandemic.test
 
             // can discard before starting to draw
             // scenario: share knowledge puts another player over hand limit at the end of a turn
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
         }
 
@@ -502,13 +548,13 @@ namespace pandemic.test
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 1 };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
 
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
 
             // draw cards is done, should now be able to discard
-            commands = _generator.AllLegalCommands(game);
+            commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
         }
 
@@ -527,7 +573,7 @@ namespace pandemic.test
             });
             game = game with { PhaseOfTurn = TurnPhase.DrawCards, CardsDrawn = 2 };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DiscardPlayerCardCommand);
         }
 
@@ -547,7 +593,7 @@ namespace pandemic.test
 
             game = game with { PhaseOfTurn = TurnPhase.Epidemic };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is DiscardPlayerCardCommand);
         }
 
@@ -560,7 +606,7 @@ namespace pandemic.test
                 IncludeSpecialEventCards = false
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is DispatcherMovePawnToOtherPawnCommand);
         }
 
@@ -583,7 +629,7 @@ namespace pandemic.test
                     .Replace(medic, medic with { Location = "Moscow" })
             };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             // 12 possible commands: each of the 4 players can be moved to 3 other locations
             commands.ShouldContain(c => c is DispatcherMovePawnToOtherPawnCommand, 12);
         }
@@ -597,7 +643,7 @@ namespace pandemic.test
                 IncludeSpecialEventCards = false
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DispatcherDriveFerryPawnCommand, 3); // all neighbours of atlanta
         }
 
@@ -611,7 +657,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Hand = PlayerHand.Of("Atlanta") });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DispatcherCharterFlyPawnCommand, 47); // all except current city
         }
 
@@ -628,7 +674,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta", "Paris", "Moscow", "Sydney")
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DispatcherDirectFlyPawnCommand, 3); // all in hand except current city
         }
 
@@ -645,7 +691,7 @@ namespace pandemic.test
                 Cities = game.Cities.Select(c => c with { HasResearchStation = true }).ToImmutableArray()
             };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is DispatcherShuttleFlyPawnCommand, 47); // all except current city
         }
 
@@ -659,7 +705,7 @@ namespace pandemic.test
             });
             game = game.SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is OperationsExpertBuildResearchStation, 1);
         }
 
@@ -676,7 +722,7 @@ namespace pandemic.test
                 ResearchStationPile = 0
             };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is OperationsExpertBuildResearchStation);
         }
 
@@ -691,7 +737,7 @@ namespace pandemic.test
 
             var possibleCommands = game.CurrentPlayer.Hand.Count * 47;
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is OperationsExpertDiscardToMoveFromStation, possibleCommands);
         }
 
@@ -709,7 +755,7 @@ namespace pandemic.test
                 Players = game.Players.Replace(opex, opex with { HasUsedDiscardAndMoveAbilityThisTurn = true })
             };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldNotContain(c => c is OperationsExpertDiscardToMoveFromStation);
         }
 
@@ -722,7 +768,7 @@ namespace pandemic.test
                 IncludeSpecialEventCards = false
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is ResearcherShareKnowledgeGiveCommand, 4);
         }
 
@@ -735,7 +781,7 @@ namespace pandemic.test
                 IncludeSpecialEventCards = false
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is ShareKnowledgeTakeFromResearcherCommand, 4);
         }
 
@@ -752,7 +798,7 @@ namespace pandemic.test
                 Hand = PlayerHand.Of("Atlanta", "Paris", "Chicago", "Milan")
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is ScientistDiscoverCureCommand);
         }
 
@@ -770,7 +816,7 @@ namespace pandemic.test
                 PlayerDiscardPile = game.PlayerDiscardPile.PlaceOnTop(airlift)
             };
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             commands.ShouldContain(c => c is ContingencyPlannerTakeEventCardCommand);
         }
 
@@ -787,7 +833,7 @@ namespace pandemic.test
                 StoredEventCard = eventCard
             });
 
-            var commands = _generator.AllLegalCommands(game);
+            var commands = _generator.Commands(game);
             switch (eventCard)
             {
                 case AirliftCard: commands.ShouldContain(c => c is AirliftCommand); break;
