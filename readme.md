@@ -16,9 +16,10 @@ dotnet run
 ```
 
 # What's in this project
-- pandemic: core game logic. Immutable & DDD-like.
+- pandemic: core game logic. Immutable & DDD-inspired
 - pandemic.agents: agents that can play games
 - pandemic.console: scratchpad console app. Uncomment stuff in Program.cs to run it.
+- pandemic.perftest: repeatable test runs for profiling and benchmarking
 - pandemic.drawing: draw game trees (graphviz dot output)
 - utils: C# language/library utils
 
@@ -51,7 +52,7 @@ to not discard too many of any one colour. This may increase the odds of
 winning, but makes analysing 'winnability' too tedious for my attention span to
 handle.
 
-## Agent performance
+## Agent performance (ie. ability to win)
 Uncomment `WinLossStats.PlayGamesAndPrintWinLossStats` to get these stats. So far,
 the best performance I've got is from playing many games with `GreedyAgent`s. This
 agent picks the 'best' move based on a `GameEvaluator`, which is just a scorer I
@@ -106,13 +107,10 @@ C, R      : 0 wins, 43 losses (0.0%)
     - alternate: https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxzcGlsbGVyZWdsfGd4OjQ2YTMzM2E1NDg4ZGQwNzE
 
 # todo
-- perf
-  - push pre perf tag, write in readme
-  - create static instances of all player cards?
 - improve win rates on heroic difficulty
     - greedy agent can win ~1/1000 random 2 player heroic games :)
-    - try DFS with greedy move selector
-    - make 'hasenoughtocure' work for scientist/researcher (whoever cures with 4)
+    - idea: try DFS with greedy move selector
+    - idea: variable-depth (greedy?) lookahead
     - pandemic strategies
         - easily win on 6, no strat mentioned: https://www.reddit.com/r/boardgames/comments/7zk0dr/how_difficult_is_it_to_win_pandemic_with_6/
         - indicates 6 is possible, some strats: https://boardgamegeek.com/thread/2356305/questions-pandemic-base-game-heroic-mode
