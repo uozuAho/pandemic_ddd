@@ -20,15 +20,13 @@ namespace pandemic
         public bool IsWin => Game.IsWon;
         public bool IsLoss => Game.IsLost;
         public int CurrentPlayerIdx => Game.CurrentPlayerIdx;
-        /// this doesn't conform to spiel state. Use CurrentPlayerIdx for the player idx.
-        public Player CurrentPlayer => Game.CurrentPlayer;
 
         public double[] Returns =>
             IsWin
-            ? Enumerable.Repeat(1.0, Game.Players.Count).ToArray()
+            ? Enumerable.Repeat(1.0, Game.Players.Length).ToArray()
             : IsLoss
-            ? Enumerable.Repeat(-1.0, Game.Players.Count).ToArray()
-            : Enumerable.Repeat(0.0, Game.Players.Count).ToArray();
+            ? Enumerable.Repeat(-1.0, Game.Players.Length).ToArray()
+            : Enumerable.Repeat(0.0, Game.Players.Length).ToArray();
 
         private readonly PlayerCommandGenerator _commandGenerator = new ();
 

@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utils.test", "utils.test\ut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.test.fuzz", "pandemic.test.fuzz\pandemic.test.fuzz.csproj", "{64B691C1-C888-4CEA-8310-62B13630473B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pandemic.perftest", "pandemic.perftest\pandemic.perftest.csproj", "{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,6 +160,18 @@ Global
 		{64B691C1-C888-4CEA-8310-62B13630473B}.Release|x64.Build.0 = Release|Any CPU
 		{64B691C1-C888-4CEA-8310-62B13630473B}.Release|x86.ActiveCfg = Release|Any CPU
 		{64B691C1-C888-4CEA-8310-62B13630473B}.Release|x86.Build.0 = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Debug|x86.Build.0 = Debug|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|x64.Build.0 = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7A09F49-0E3C-4DAB-B00E-F7415184B01A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

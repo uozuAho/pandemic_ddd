@@ -12,7 +12,7 @@ namespace pandemic.GameData
         public static PlayerCityCard CityCard(string name) => _cardLookup[name];
 
         private static readonly IEnumerable<PlayerCityCard> _allCards =
-            StandardGameBoard.Instance().Cities.Select(c => new PlayerCityCard(c)).ToImmutableList();
+            StandardGameBoard.Cities.Select(c => new PlayerCityCard(c)).ToImmutableList();
 
         private static readonly Dictionary<string, PlayerCityCard> _cardLookup =
             _allCards.ToDictionary(c => c.City.Name, c => c);

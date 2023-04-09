@@ -14,13 +14,13 @@ namespace pandemic.Aggregates.Game
     {
         public string LossReason { get; init; } = "";
         public Difficulty Difficulty { get; init; }
-        public int InfectionRate => Board.InfectionRates[InfectionRateMarkerPosition];
+        public int InfectionRate => StandardGameBoard.InfectionRates[InfectionRateMarkerPosition];
         public int OutbreakCounter { get; init; }
         public int InfectionRateMarkerPosition { get; init; }
         public Player CurrentPlayer => Players[CurrentPlayerIdx];
         public int CurrentPlayerIdx { get; init; }
         public int ResearchStationPile { get; init; } = 5;
-        public ImmutableList<Player> Players { get; init; } = ImmutableList<Player>.Empty;
+        public ImmutableArray<Player> Players { get; init; } = ImmutableArray<Player>.Empty;
         public ImmutableArray<City> Cities { get; init; }
         public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
         public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
@@ -29,7 +29,6 @@ namespace pandemic.Aggregates.Game
         public CubePile Cubes { get; init; } =
             new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
 
-        public readonly StandardGameBoard Board = StandardGameBoard.Instance();
         private readonly ICommandGenerator _commandGenerator;
 
         public IEnumerable<IPlayerCommand> LegalCommands()
@@ -50,17 +49,28 @@ namespace pandemic.Aggregates.Game
 
         public Player PlayerByRole(Role role)
         {
-            for (var i = 0; i < Players.Count; i++)
+            for (var i = 0; i < Players.Length; i++)
             {
                 if (Players[i].Role == role) return Players[i];
             }
 
             throw new ArgumentException("No player with that role");
         }
-        public City CityByName(string city) => Cities[Board.CityIdx(city)];
+        public City CityByName(string city) => Cities[StandardGameBoard.CityIdx(city)];
 
-        public bool IsCured(Colour colour) =>
-            CuresDiscovered.SingleOrDefault(c => c.Colour == colour) is not null;
+        public bool IsCured(Colour colour)
+        {
+            // perf:
+            // ReSharper disable once ForCanBeConvertedToForeach
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (var i = 0; i < CuresDiscovered.Count; i++)
+            {
+                var cure = CuresDiscovered[i];
+                if (cure.Colour == colour) return true;
+            }
+
+            return false;
+        }
 
         public bool IsEradicated(Colour colour) =>
             CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
@@ -69,7 +79,7 @@ namespace pandemic.Aggregates.Game
 
         public Player? PlayerThatNeedsToDiscard()
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Hand.Count > 7) return player;
@@ -148,12 +158,12 @@ namespace pandemic.Aggregates.Game
 
         private PandemicGame(Random rng, ICommandGenerator commandGenerator)
         {
-            Cities = Board.Cities.Select(c => new City(c.Name)).ToImmutableArray();
+            Cities = StandardGameBoard.Cities.Select(c => new City(c.Name)).ToImmutableArray();
 
             var atlanta = CityByName("Atlanta");
             Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
 
-            PlayerDrawPile = new Deck<PlayerCard>(Board.Cities
+            PlayerDrawPile = new Deck<PlayerCard>(StandardGameBoard.Cities
                 .Select(c => new PlayerCityCard(c) as PlayerCard));
 
             Rng = rng;
@@ -216,7 +226,7 @@ namespace pandemic.Aggregates.Game
         public PandemicGame AddCubes(string city, Colour colour, int numCubes)
         {
             var city_ = CityByName(city);
-            var cityIdx = Board.CityIdx(city);
+            var cityIdx = StandardGameBoard.CityIdx(city);
 
             return this with
             {
@@ -227,7 +237,7 @@ namespace pandemic.Aggregates.Game
 
         private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Role == Role.QuarantineSpecialist)
@@ -243,7 +253,7 @@ namespace pandemic.Aggregates.Game
 
         private bool IsMedicAt(string city)
         {
-            for (int i = 0; i < Players.Count; i++)
+            for (int i = 0; i < Players.Length; i++)
             {
                 var player = Players[i];
                 if (player.Role == Role.Medic && player.Location == city)
@@ -257,7 +267,7 @@ namespace pandemic.Aggregates.Game
 
         private bool QuarantineSpecialistIsInNeighbouringCity(string city)
         {
-            var neighbouringCities = Board.AdjacentCities[city];
+            var neighbouringCities = StandardGameBoard.AdjacentCities[city];
 
             return neighbouringCities.Any(c => PlayerByRole(Role.QuarantineSpecialist).Location == c);
         }
@@ -271,10 +281,10 @@ namespace pandemic.Aggregates.Game
         {
             Debug.Assert(TotalCubesInGame() == 96);
 
-            foreach (var numCubes in Cubes.Counts)
-            {
-                Debug.Assert(numCubes.Value is >= 0 and <= 24);
-            }
+            Debug.Assert(Cubes.Red is >= 0 and <= 24);
+            Debug.Assert(Cubes.Yellow is >= 0 and <= 24);
+            Debug.Assert(Cubes.Blue is >= 0 and <= 24);
+            Debug.Assert(Cubes.Black is >= 0 and <= 24);
 
             foreach (var city in Cities)
             {

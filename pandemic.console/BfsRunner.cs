@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using pandemic.agents;
+using pandemic.agents.GameEvaluator;
 using pandemic.agents.GreedyBfs;
 using pandemic.Aggregates.Game;
 using pandemic.drawing;
@@ -22,8 +23,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game);
-            var searcher = new GreedyBestFirstSearch(searchProblem);
+            var searcher = new GreedyBestFirstSearch(game);
 
             Console.WriteLine("Searching...");
             var steps = 0;
@@ -87,8 +87,7 @@ namespace pandemic.console
                 Difficulty = Difficulty.Heroic,
                 Roles = new[] { Role.Medic, Role.QuarantineSpecialist }
             });
-            var searchProblem = new PandemicSearchProblem(game);
-            var searcher = new GreedyBestFirstSearch(searchProblem);
+            var searcher = new GreedyBestFirstSearch(game);
 
             Console.WriteLine("Searching...");
             var nodesSearched = new List<SearchNode>();
@@ -141,7 +140,7 @@ namespace pandemic.console
 
         private static string PlayerText(Player player)
         {
-            var counts = string.Join(",", player.Hand.CityCards
+            var counts = string.Join(",", player.Hand.CityCards()
                 .GroupBy(c => c.City.Colour)
                 .Select(g => $"{g.Key.ToString().First()}:{g.Count()}"));
 

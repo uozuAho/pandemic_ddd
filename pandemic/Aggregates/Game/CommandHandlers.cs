@@ -171,7 +171,7 @@ public partial record PandemicGame
         if (cmd.Role == Role.Researcher)
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
 
-        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
 
         var researcher = PlayerByRole(Role.Researcher);
@@ -189,7 +189,7 @@ public partial record PandemicGame
         if (cmd.PlayerToGiveTo == Role.Researcher)
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
 
-        if (!PlayerByRole(Role.Researcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
 
         var researcher = PlayerByRole(Role.Researcher);
@@ -261,7 +261,7 @@ public partial record PandemicGame
 
         var dispatcher = PlayerByRole(Role.Dispatcher);
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
-        var card = dispatcher.Hand.CityCards.SingleOrDefault(c => c.City.Name == playerToMove.Location);
+        var card = dispatcher.Hand.CityCards().SingleOrDefault(c => c.City.Name == playerToMove.Location);
 
         if (card == null)
             throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
@@ -279,7 +279,7 @@ public partial record PandemicGame
         if (cmd.PlayerToMove == Role.Dispatcher)
             throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
 
-        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards.Any(c => c.City.Name == cmd.City))
+        if (!PlayerByRole(Role.Dispatcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
             throw new GameRuleViolatedException($"Dispatcher doesn't have the {cmd.City} card");
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
@@ -300,7 +300,7 @@ public partial record PandemicGame
 
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
-        if (!Board.IsAdjacent(playerToMove.Location, cmd.City))
+        if (!StandardGameBoard.IsAdjacent(playerToMove.Location, cmd.City))
             throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
 
         return ApplyEvents(
@@ -449,9 +449,9 @@ public partial record PandemicGame
 
         var player = PlayerByRole(role);
 
-        if (!Board.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
+        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
 
-        if (!Board.IsAdjacent(player.Location, destination))
+        if (!StandardGameBoard.IsAdjacent(player.Location, destination))
         {
             throw new GameRuleViolatedException(
                 $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
@@ -505,7 +505,7 @@ public partial record PandemicGame
     {
         var (role, discardCard, destination) = cmd;
 
-        if (!Board.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
+        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
         if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
         if (CurrentPlayer.Location == destination)
             throw new GameRuleViolatedException($"You can't charter fly to your current location");
@@ -545,12 +545,12 @@ public partial record PandemicGame
         if (CurrentPlayer.Location != city)
             throw new GameRuleViolatedException($"Player must be in {city} to build research station");
         // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
-        if (!CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == city))
+        if (!CurrentPlayer.Hand.CityCards().Any(c => c.City.Name == city))
             throw new GameRuleViolatedException($"Current player does not have {city} in hand");
         if (CityByName(city).HasResearchStation)
             throw new GameRuleViolatedException($"{city} already has a research station");
 
-        var playerCard = CurrentPlayer.Hand.CityCards.Single(c => c.City.Name == city);
+        var playerCard = CurrentPlayer.Hand.CityCards().Single(c => c.City.Name == city);
 
         return ApplyEvents(
             new ResearchStationBuilt(command.Role, city),
@@ -654,7 +654,7 @@ public partial record PandemicGame
 
         if (giver == receiver) throw new GameRuleViolatedException("Cannot share with self!");
 
-        if (!giver.Hand.CityCards.Any(c => c.City.Name == command.City))
+        if (!giver.Hand.CityCards().Any(c => c.City.Name == command.City))
             throw new GameRuleViolatedException("Player must have the card to share");
 
         if (giver.Location != command.City)
@@ -674,7 +674,7 @@ public partial record PandemicGame
 
         if (taker == takeFromPlayer) throw new GameRuleViolatedException("Cannot share with self!");
 
-        if (!takeFromPlayer.Hand.CityCards.Any(c => c.City.Name == command.City))
+        if (!takeFromPlayer.Hand.CityCards().Any(c => c.City.Name == command.City))
             throw new GameRuleViolatedException("Player must have the card to share");
 
         if (taker.Location != command.City)
@@ -714,7 +714,7 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var unshuffledCities = Board.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
+        var unshuffledCities = StandardGameBoard.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
 
         return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
     }
@@ -726,7 +726,7 @@ public partial record PandemicGame
 
     private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events, bool includeSpecialEventCards)
     {
-        var playerCards = Board.Cities
+        var playerCards = StandardGameBoard.Cities
             .Select(c => new PlayerCityCard(c) as PlayerCard)
             .Concat(includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>())
             .OrderBy(_ => Rng.Next())
@@ -840,7 +840,7 @@ public partial record PandemicGame
             if (game.OutbreakCounter == 8)
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
 
-            var adjacent = game.Board.AdjacentCities[next].Select(game.CityByName).ToList();
+            var adjacent = StandardGameBoard.AdjacentCities[next].Select(game.CityByName).ToList();
 
             foreach (var adj in adjacent)
             {

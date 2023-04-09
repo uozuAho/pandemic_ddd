@@ -45,17 +45,17 @@ namespace pandemic.test
             // initial infection
             Assert.That(game.InfectionDrawPile.Count, Is.EqualTo(StandardGameBoard.NumberOfCities - 9));
             Assert.AreEqual(9, game.InfectionDiscardPile.Count);
-            Assert.That(game.Cubes.Counts.Values.Sum(), Is.EqualTo(
+            Assert.That(game.Cubes.Total(), Is.EqualTo(
                 96
                 - 3 * 3
                 - 3 * 2
                 - 3 * 1));
-            Assert.That(game.Cities.Count(c => c.Cubes.Counts.Any(cc => cc.Value == 3)), Is.EqualTo(3));
-            Assert.That(game.Cities.Count(c => c.Cubes.Counts.Any(cc => cc.Value == 2)), Is.EqualTo(3));
-            Assert.That(game.Cities.Count(c => c.Cubes.Counts.Any(cc => cc.Value == 1)), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.MaxNumCubes() == 3), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.MaxNumCubes() == 2), Is.EqualTo(3));
+            Assert.That(game.Cities.Count(c => c.MaxNumCubes() == 1), Is.EqualTo(3));
 
             // players
-            Assert.AreEqual(options.Roles.Count, game.Players.Count);
+            Assert.AreEqual(options.Roles.Count, game.Players.Length);
             Assert.That(game.Players.All(p => p.Hand.Count == numberOfCardsPerPlayer));
             Assert.That(game.Players.All(p => p.Hand.Cards.All(c => c is not EpidemicCard)));
         }

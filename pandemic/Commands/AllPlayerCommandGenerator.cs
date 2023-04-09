@@ -71,7 +71,7 @@ public static class AllPlayerCommandGenerator
 
         var scientist = game.PlayerByRole(Role.Scientist);
 
-        foreach (var cardsToCure in scientist.Hand.CityCards
+        foreach (var cardsToCure in scientist.Hand.CityCards()
                      .GroupBy(c => c.City.Colour)
                      .Where(g => g.Count() >= 4))
         {
@@ -154,14 +154,14 @@ public static class AllPlayerCommandGenerator
         {
             yield return new PassCommand(player.Role);
 
-            foreach (var cardsToCure in player.Hand.CityCards
+            foreach (var cardsToCure in player.Hand.CityCards()
                          .GroupBy(c => c.City.Colour)
                          .Where(g => g.Count() >= 5))
             {
                 yield return new DiscoverCureCommand(player.Role, cardsToCure.Select(g => g).ToArray());
             }
 
-            foreach (var card in player.Hand.CityCards)
+            foreach (var card in player.Hand.CityCards())
             {
                 foreach (var otherPlayer in game.Players)
                 {

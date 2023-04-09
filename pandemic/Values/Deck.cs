@@ -13,26 +13,31 @@ public class Deck<T>
     /// The deck, in bottom to top order
     /// Index 0 | ---- bottom     top -----X highest index.
     /// </summary>
-    private readonly List<T> _cards;
+    private readonly T[] _cards;
 
-    public int Count => _cards.Count;
+    public int Count => _cards.Length;
 
     /// <summary>
     /// Get the cards in the deck, in bottom to top order. Ie. the first card (index 0) is the bottom of the deck.
     /// </summary>
-    public IEnumerable<T> Cards => _cards.Select(c => c);
-    public T TopCard => _cards.Last();
+    public IEnumerable<T> Cards => _cards;
+    public T TopCard => _cards[^1];
     public static Deck<T> Empty => new();
     public T BottomCard => _cards.First();
 
     private Deck()
     {
-        _cards = new List<T>();
+        _cards = Array.Empty<T>();
     }
 
     public Deck(IEnumerable<T> cards)
     {
-        _cards = cards.Select(c => c).ToList();
+        _cards = cards.ToArray();
+    }
+
+    public Deck(T[] cards)
+    {
+        _cards = cards;
     }
 
     public bool IsSameAs(Deck<T> otherDeck)
@@ -59,7 +64,7 @@ public class Deck<T>
 
     public (Deck<T>, T) Draw()
     {
-        return (new Deck<T>(_cards.Take(_cards.Count - 1)), TopCard);
+        return (new Deck<T>(_cards.Take(_cards.Length - 1)), TopCard);
     }
 
     public (Deck<T>, T) DrawFromBottom()
@@ -69,7 +74,7 @@ public class Deck<T>
 
     public (Deck<T> newDrawPile, IEnumerable<T> cards) Draw(int numCards)
     {
-        return (new Deck<T>(_cards.Take(_cards.Count - numCards)), Top(numCards));
+        return (new Deck<T>(_cards.Take(_cards.Length - numCards)), Top(numCards));
     }
 
     /// <summary>
@@ -78,7 +83,7 @@ public class Deck<T>
     /// </summary>
     public Deck<T> PlaceOnTop(IEnumerable<T> cards)
     {
-        return new Deck<T>(_cards.Concat(cards));
+        return PlaceOnTop(cards.ToArray());
     }
 
     /// <summary>
@@ -87,12 +92,18 @@ public class Deck<T>
     /// </summary>
     public Deck<T> PlaceOnTop(params T[] cards)
     {
+        var newCards = new T[_cards.Length + cards.Length];
+        Array.Copy(_cards, newCards, _cards.Length);
+        Array.Copy(cards, 0, newCards, _cards.Length, cards.Length);
         return new Deck<T>(_cards.Concat(cards));
     }
 
     public Deck<T> PlaceOnTop(T card)
     {
-        return new Deck<T>(_cards.Concat(new[] { card }));
+        var newCards = new T[_cards.Length + 1];
+        Array.Copy(_cards, newCards, _cards.Length);
+        newCards[^1] = card;
+        return new Deck<T>(newCards);
     }
 
     public Deck<T> PlaceAtBottom(T card)

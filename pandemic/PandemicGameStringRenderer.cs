@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using pandemic.Aggregates.Game;
@@ -38,7 +39,7 @@ namespace pandemic
                 sb.AppendLine($"  hand: {string.Join("\n    ", player.Hand)}");
             }
             sb.AppendLine("cities with cubes:");
-            foreach (var city in game.Cities.OrderByDescending(c => c.MaxNumCubes))
+            foreach (var city in game.Cities.OrderByDescending(c => c.MaxNumCubes()))
             {
                 if (city.Cubes.Any())
                 {
@@ -60,7 +61,7 @@ namespace pandemic
             sb.AppendLine($"cured: {string.Join(' ', game.CuresDiscovered.Select(c => c.Colour))}");
             foreach (var player in game.Players)
             {
-                var colourCounts = string.Join(",", player.Hand.CityCards
+                var colourCounts = string.Join(",", player.Hand.CityCards()
                     .GroupBy(c => c.City.Colour)
                     .Select(g => $"{g.Key}:{g.Count()}"));
 

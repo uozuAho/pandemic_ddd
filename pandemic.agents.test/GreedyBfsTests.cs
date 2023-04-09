@@ -11,15 +11,12 @@ namespace pandemic.agents.test
 {
     internal class GreedyBfsTests
     {
-        private static readonly StandardGameBoard Board = StandardGameBoard.Instance();
-
         [Test]
         public void Does_step()
         {
             var game = ANewGame();
-            var problem = new PandemicSearchProblem(game);
 
-            var bfs = new GreedyBestFirstSearch(problem);
+            var bfs = new GreedyBestFirstSearch(game);
 
             bfs.Step();
         }
@@ -35,9 +32,8 @@ namespace pandemic.agents.test
                     Hand = PlayerHand.Of("Atlanta", "Chicago", "New York", "Montreal", "Paris")
                 })
             };
-            var problem = new PandemicSearchProblem(game);
 
-            var bfs = new GreedyBestFirstSearch(problem);
+            var bfs = new GreedyBestFirstSearch(game);
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();
@@ -58,26 +54,24 @@ namespace pandemic.agents.test
                     Hand = new PlayerHand(new[]
                     {
                         // 4 yellows
-                        new PlayerCityCard(Board.City("Miami")),
-                        new PlayerCityCard(Board.City("Mexico City")),
-                        new PlayerCityCard(Board.City("Los Angeles")),
-                        new PlayerCityCard(Board.City("Lagos")),
+                        new PlayerCityCard(StandardGameBoard.City("Miami")),
+                        new PlayerCityCard(StandardGameBoard.City("Mexico City")),
+                        new PlayerCityCard(StandardGameBoard.City("Los Angeles")),
+                        new PlayerCityCard(StandardGameBoard.City("Lagos")),
 
                         // 2 others
-                        new PlayerCityCard(Board.City("Jakarta")),
-                        new PlayerCityCard(Board.City("Cairo")),
+                        new PlayerCityCard(StandardGameBoard.City("Jakarta")),
+                        new PlayerCityCard(StandardGameBoard.City("Cairo")),
 
                         // 3 blues
-                        new PlayerCityCard(Board.City("Paris")),
-                        new PlayerCityCard(Board.City("Atlanta")),
-                        new PlayerCityCard(Board.City("Chicago")),
+                        new PlayerCityCard(StandardGameBoard.City("Paris")),
+                        new PlayerCityCard(StandardGameBoard.City("Atlanta")),
+                        new PlayerCityCard(StandardGameBoard.City("Chicago")),
                     }),
                     ActionsRemaining = 0
                 })
             };
-            var problem = new PandemicSearchProblem(game);
-
-            var bfs = new GreedyBestFirstSearch(problem);
+            var bfs = new GreedyBestFirstSearch(game);
 
             bfs.Step(); // first node is root
             var nextNode = bfs.Step();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using pandemic.Aggregates.Game;
 using pandemic.Commands;
+using pandemic.GameData;
 using pandemic.Values;
 
 namespace pandemic.agents;
@@ -58,7 +59,7 @@ public class CommandPriorityComparer : IComparer<IPlayerCommand>
     private int CompareMulti(BuildResearchStationCommand a, DiscoverCureCommand b) => Less;
     private int CompareMulti(BuildResearchStationCommand a, IPlayerCommand b)
     {
-        if (_game.HasResearchStationOnColour(_game.Board.City(a.City).Colour))
+        if (_game.HasResearchStationOnColour(StandardGameBoard.City(a.City).Colour))
             return Less;
 
         return Greater;
@@ -71,14 +72,14 @@ public class CommandPriorityComparer : IComparer<IPlayerCommand>
 
     private int CompareMulti(DirectFlightCommand a, DriveFerryCommand b)
     {
-        return _game.Board.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
+        return StandardGameBoard.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
     private int CompareMulti(CharterFlightCommand a, IPlayerCommand b) => Same;
 
     private int CompareMulti(CharterFlightCommand a, DriveFerryCommand b)
     {
-        return _game.Board.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
+        return StandardGameBoard.IsAdjacent(a.Destination, _game.CurrentPlayer.Location) ? Less : Same;
     }
 
     private int CompareMulti(ShuttleFlightCommand a, IPlayerCommand b) => Same;
@@ -91,7 +92,7 @@ internal static class PandemicGameExtensions
 {
     public static bool HasResearchStationOnColour(this PandemicGame game, Colour colour)
     {
-        return game.Board.Cities.Where(c => c.Colour == colour)
+        return StandardGameBoard.Cities.Where(c => c.Colour == colour)
             .Any(c => game.CityByName(c.Name).HasResearchStation);
     }
 }

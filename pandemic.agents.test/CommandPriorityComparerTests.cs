@@ -11,8 +11,6 @@ namespace pandemic.agents.test
 {
     internal class CommandPriorityComparerTests
     {
-        private static readonly StandardGameBoard Board = StandardGameBoard.Instance();
-
         [Test]
         public void Gets_basics_right()
         {
@@ -22,7 +20,7 @@ namespace pandemic.agents.test
             var commands = new List<IPlayerCommand>
             {
                 new DiscardPlayerCardCommand(Role.Scientist, new EpidemicCard()),
-                new DiscoverCureCommand(Role.Scientist, new[] { new PlayerCityCard(Board.City("Atlanta")) }),
+                new DiscoverCureCommand(Role.Scientist, new[] { new PlayerCityCard(StandardGameBoard.City("Atlanta")) }),
                 new DirectFlightCommand(Role.Scientist, "Chicago"),
                 new DriveFerryCommand(Role.Scientist, "Chicago"),
                 new BuildResearchStationCommand(Role.Scientist, "Miami"),

@@ -120,7 +120,7 @@ public partial record PandemicGame
     {
         var researcher = game.PlayerByRole(Role.Researcher);
         var playerTaking = game.PlayerByRole(evt.Role);
-        var card = researcher.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var card = researcher.Hand.CityCards().Single(c => c.City.Name == evt.City);
 
         return game with
         {
@@ -139,7 +139,7 @@ public partial record PandemicGame
     {
         var researcher = game.PlayerByRole(Role.Researcher);
         var playerToGiveTo = game.PlayerByRole(evt.PlayerToGiveTo);
-        var card = researcher.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var card = researcher.Hand.CityCards().Single(c => c.City.Name == evt.City);
 
         return game with
         {
@@ -186,7 +186,7 @@ public partial record PandemicGame
     private static PandemicGame Apply(PandemicGame game, OperationsExpertDiscardedToMoveFromStation evt)
     {
         var opex = (OperationsExpert)game.PlayerByRole(Role.OperationsExpert);
-        var card = opex.Hand.CityCards.Single(c => c.City.Name == evt.DiscardedCard);
+        var card = opex.Hand.CityCards().Single(c => c.City.Name == evt.DiscardedCard);
 
         return game with
         {
@@ -235,7 +235,7 @@ public partial record PandemicGame
     {
         var dispatcher = game.PlayerByRole(Role.Dispatcher);
         var playerToMove = game.PlayerByRole(evt.PlayerToMove);
-        var card = dispatcher.Hand.CityCards.Single(c => c.City.Name == playerToMove.Location);
+        var card = dispatcher.Hand.CityCards().Single(c => c.City.Name == playerToMove.Location);
 
         return game with
         {
@@ -255,7 +255,7 @@ public partial record PandemicGame
     private static PandemicGame Apply(PandemicGame game, DispatcherDirectFlewPawn evt)
     {
         var dispatcher = game.PlayerByRole(Role.Dispatcher);
-        var card = dispatcher.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var card = dispatcher.Hand.CityCards().Single(c => c.City.Name == evt.City);
         var playerToMove = game.PlayerByRole(evt.PlayerToMove);
 
         return game with
@@ -393,7 +393,7 @@ public partial record PandemicGame
         var card = playerWithCard.Hand.Single(c => c is AirliftCard);
         var playerToMove = game.PlayerByRole(evt.PlayerToMove);
 
-        ImmutableList<Player> updatedPlayers;
+        ImmutableArray<Player> updatedPlayers;
         if (playerWithCard == playerToMove)
         {
             updatedPlayers = game.Players.Replace(playerWithCard, playerWithCard with
@@ -427,7 +427,7 @@ public partial record PandemicGame
         if (card == null) throw new InvalidOperationException();
         var playerToMove = game.PlayerByRole(evt.PlayerToMove);
 
-        ImmutableList<Player> updatedPlayers;
+        ImmutableArray<Player> updatedPlayers;
         if (planner == playerToMove)
         {
             updatedPlayers = game.Players.Replace(planner, planner with
@@ -729,7 +729,7 @@ public partial record PandemicGame
             ActionsRemaining = movedPlayer.ActionsRemaining - 1
         };
 
-        return pandemicGame with {Players = newPlayers.ToImmutableList()};
+        return pandemicGame with {Players = newPlayers.ToImmutableArray()};
     }
 
     private static PandemicGame ApplyPlayerDirectFlewTo(PandemicGame game, PlayerDirectFlewTo evt)
@@ -783,7 +783,7 @@ public partial record PandemicGame
     private static PandemicGame ApplyShareKnowledgeGiven(PandemicGame game, ShareKnowledgeGiven evt)
     {
         var giver = game.PlayerByRole(evt.Role);
-        var card = giver.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var card = giver.Hand.CityCards().Single(c => c.City.Name == evt.City);
         var receiver = game.PlayerByRole(evt.ReceivingRole);
 
         return game with
@@ -805,7 +805,7 @@ public partial record PandemicGame
     {
         var taker = game.PlayerByRole(evt.Role);
         var takenFromPlayer = game.PlayerByRole(evt.TakenFromRole);
-        var card = takenFromPlayer.Hand.CityCards.Single(c => c.City.Name == evt.City);
+        var card = takenFromPlayer.Hand.CityCards().Single(c => c.City.Name == evt.City);
 
         return game with
         {
@@ -865,7 +865,7 @@ public partial record PandemicGame
         return game with
         {
             Players = game.Players.Replace(game.CurrentPlayer, game.CurrentPlayer with {ActionsRemaining = 4}),
-            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Count,
+            CurrentPlayerIdx = (game.CurrentPlayerIdx + 1) % game.Players.Length,
             PhaseOfTurn = TurnPhase.DoActions,
             SpecialEventWasRecentlySkipped = false
         };

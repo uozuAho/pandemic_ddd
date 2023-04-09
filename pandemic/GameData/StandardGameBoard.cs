@@ -5,9 +5,19 @@ using pandemic.Values;
 
 namespace pandemic.GameData
 {
-    public class StandardGameBoard
+    public static class StandardGameBoard
     {
-        private StandardGameBoard() {}
+        public const int NumberOfCities = 48;
+        public static readonly int[] InfectionRates = { 2, 2, 2, 3, 3, 4, 4 };
+        public static readonly int NumberOfSpecialEventCards = SpecialEventCards.All.Count;
+        public static bool IsCity(string city) => CityLookup.ContainsKey(city);
+        public static CityData City(string name) => CityLookup[name];
+        public static IEnumerable<CityData> Cities => _cities;
+        public static int CityIdx(string name) => CityIdxLookup[name];
+        public static readonly Dictionary<string, List<string>> AdjacentCities;
+        public static int[] AdjacentCityIdxs(int cityIdx) => AdjacencyIdxsLookup[cityIdx];
+        public static bool IsAdjacent(string city1, string city2) => AdjacentCities[city1].Contains(city2);
+        public static int DriveFerryDistance(string city1, string city2) => DistanceLookup[(city1, city2)];
 
         private static readonly CityData[] _cities = {
             new("Algiers", Colour.Black),
@@ -62,141 +72,114 @@ namespace pandemic.GameData
 
         private static readonly List<(string, string)> Edges = new()
         {
-            ("San Francisco", "Chicago"),
-            ("San Francisco", "Tokyo"),
-            ("Chicago", "Montreal"),
-            ("Chicago", "Atlanta"),
-            ("New York", "Montreal"),
-            ("New York", "Washington"),
-            ("New York", "Madrid"),
-            ("New York", "London"),
-            ("Washington", "Montreal"),
-            ("Washington", "Atlanta"),
-            ("Washington", "Miami"),
-            ("Madrid", "London"),
-            ("Madrid", "Paris"),
-            ("London", "Paris"),
-            ("Essen", "London"),
-            ("Essen", "Paris"),
-            ("Essen", "Milan"),
-            ("Essen", "St. Petersburg"),
-            ("Milan", "Paris"),
-            ("St. Petersburg", "Moscow"),
+            ("Algiers", "Cairo"),
+            ("Algiers", "Istanbul"),
             ("Algiers", "Madrid"),
             ("Algiers", "Paris"),
-            ("Algiers", "Istanbul"),
-            ("Algiers", "Cairo"),
-            ("Istanbul", "Milan"),
-            ("Istanbul", "St. Petersburg"),
-            ("Moscow", "Istanbul"),
-            ("Cairo", "Istanbul"),
-            ("Cairo", "Baghdad"),
-            ("Cairo", "Khartoum"),
             ("Baghdad", "Istanbul"),
             ("Baghdad", "Tehran"),
-            ("Tehran", "Moscow"),
-            ("Tehran", "Delhi"),
-            ("Tehran", "Karachi"),
+            ("Bangkok", "Hong Kong"),
+            ("Bangkok", "Jakarta"),
+            ("Beijing", "Seoul"),
+            ("Bogota", "Lima"),
+            ("Buenos Aires", "Bogota"),
+            ("Cairo", "Baghdad"),
+            ("Cairo", "Istanbul"),
+            ("Cairo", "Khartoum"),
+            ("Chennai", "Bangkok"),
+            ("Chennai", "Jakarta"),
+            ("Chennai", "Kolkata"),
+            ("Chicago", "Atlanta"),
+            ("Chicago", "Montreal"),
             ("Delhi", "Chennai"),
             ("Delhi", "Kolkata"),
+            ("Essen", "London"),
+            ("Essen", "Milan"),
+            ("Essen", "Paris"),
+            ("Essen", "St. Petersburg"),
+            ("Ho Chi Minh City", "Bangkok"),
+            ("Ho Chi Minh City", "Hong Kong"),
+            ("Hong Kong", "Shanghai"),
+            ("Hong Kong", "Taipei"),
+            ("Istanbul", "Milan"),
+            ("Istanbul", "St. Petersburg"),
+            ("Jakarta", "Ho Chi Minh City"),
+            ("Jakarta", "Sydney"),
+            ("Johannesburg", "Kinshasa"),
             ("Karachi", "Baghdad"),
             ("Karachi", "Delhi"),
             ("Karachi", "Mumbai"),
-            ("Riyadh", "Cairo"),
-            ("Riyadh", "Baghdad"),
-            ("Riyadh", "Karachi"),
-            ("Mumbai", "Delhi"),
-            ("Mumbai", "Chennai"),
-            ("Chennai", "Kolkata"),
-            ("Chennai", "Bangkok"),
-            ("Chennai", "Jakarta"),
-            ("Kolkata", "Hong Kong"),
+            ("Khartoum", "Johannesburg"),
+            ("Kinshasa", "Khartoum"),
+            ("Kinshasa", "Lagos"),
             ("Kolkata", "Bangkok"),
-            ("Beijing", "Seoul"),
+            ("Kolkata", "Hong Kong"),
+            ("Lagos", "Khartoum"),
+            ("Lima", "Mexico City"),
+            ("Lima", "Santiago"),
+            ("London", "Paris"),
+            ("Los Angeles", "Chicago"),
+            ("Los Angeles", "San Francisco"),
+            ("Los Angeles", "Sydney"),
+            ("Madrid", "London"),
+            ("Madrid", "Paris"),
+            ("Manila", "Ho Chi Minh City"),
+            ("Manila", "Hong Kong"),
+            ("Manila", "San Francisco"),
+            ("Manila", "Taipei"),
+            ("Mexico City", "Bogota"),
+            ("Mexico City", "Chicago"),
+            ("Mexico City", "Los Angeles"),
+            ("Mexico City", "Miami"),
+            ("Miami", "Atlanta"),
+            ("Miami", "Bogota"),
+            ("Milan", "Paris"),
+            ("Moscow", "Istanbul"),
+            ("Mumbai", "Chennai"),
+            ("Mumbai", "Delhi"),
+            ("New York", "London"),
+            ("New York", "Madrid"),
+            ("New York", "Montreal"),
+            ("New York", "Washington"),
+            ("Osaka", "Tokyo"),
+            ("Riyadh", "Baghdad"),
+            ("Riyadh", "Cairo"),
+            ("Riyadh", "Karachi"),
+            ("San Francisco", "Chicago"),
+            ("San Francisco", "Tokyo"),
+            ("Sao Paulo", "Bogota"),
+            ("Sao Paulo", "Buenos Aires"),
+            ("Sao Paulo", "Lagos"),
+            ("Sao Paulo", "Madrid"),
             ("Seoul", "Tokyo"),
-            ("Tokyo", "Shanghai"),
             ("Shanghai", "Beijing"),
             ("Shanghai", "Seoul"),
             ("Shanghai", "Taipei"),
-            ("Hong Kong", "Shanghai"),
-            ("Hong Kong", "Taipei"),
-            ("Taipei", "Osaka"),
-            ("Osaka", "Tokyo"),
-            ("Bangkok", "Hong Kong"),
-            ("Bangkok", "Jakarta"),
-            ("Ho Chi Minh City", "Hong Kong"),
-            ("Ho Chi Minh City", "Bangkok"),
-            ("Manila", "San Francisco"),
-            ("Manila", "Hong Kong"),
-            ("Manila", "Taipei"),
-            ("Manila", "Ho Chi Minh City"),
-            ("Jakarta", "Ho Chi Minh City"),
-            ("Jakarta", "Sydney"),
+            ("St. Petersburg", "Moscow"),
             ("Sydney", "Manila"),
-            ("Khartoum", "Johannesburg"),
-            ("Johannesburg", "Kinshasa"),
-            ("Kinshasa", "Khartoum"),
-            ("Kinshasa", "Lagos"),
-            ("Lagos", "Khartoum"),
-            ("Sao Paulo", "Madrid"),
-            ("Sao Paulo", "Lagos"),
-            ("Sao Paulo", "Buenos Aires"),
-            ("Sao Paulo", "Bogota"),
-            ("Buenos Aires", "Bogota"),
-            ("Lima", "Santiago"),
-            ("Lima", "Mexico City"),
-            ("Bogota", "Lima"),
-            ("Mexico City", "Chicago"),
-            ("Mexico City", "Bogota"),
-            ("Mexico City", "Los Angeles"),
-            ("Mexico City", "Miami"),
-            ("Los Angeles", "San Francisco"),
-            ("Los Angeles", "Chicago"),
-            ("Los Angeles", "Sydney"),
-            ("Miami", "Atlanta"),
-            ("Miami", "Bogota"),
+            ("Taipei", "Osaka"),
+            ("Tehran", "Delhi"),
+            ("Tehran", "Karachi"),
+            ("Tehran", "Moscow"),
+            ("Tokyo", "Shanghai"),
+            ("Washington", "Atlanta"),
+            ("Washington", "Miami"),
+            ("Washington", "Montreal"),
         };
 
-        public static StandardGameBoard Instance()
+        static StandardGameBoard()
         {
-            return _instance;
+            CityLookup = _cities.ToDictionary(c => c.Name, c => c);
+            CityIdxLookup = CreateCityIdxLookup();
+            AdjacentCities = CreateAdjacencyLookup();
+            AdjacencyIdxsLookup = CreateAdjacentIdxLookup();
+            DistanceLookup = BuildDriveFerryDistanceLookup();
         }
 
-        public const int NumberOfCities = 48;
-
-        public readonly int[] InfectionRates = { 2, 2, 2, 3, 3, 4, 4 };
-
-        public bool IsCity(string city)
-        {
-            return CityLookup.ContainsKey(city);
-        }
-
-        public bool IsAdjacent(string city1, string city2)
-        {
-            return AdjacentCities[city1].Contains(city2);
-        }
-
-        public CityData City(string name) => CityLookup[name];
-
-        public IEnumerable<CityData> Cities => _cities;
-
-        public int CityIdx(string name)
-        {
-            return _cityIdxLookup[name];
-        }
-
-        private static Dictionary<string, List<string>> _adjacencyLookup = CreateAdjacencyLookup();
-
-        public Dictionary<string, List<string>> AdjacentCities => _adjacencyLookup;
-
-        public static readonly int NumberOfSpecialEventCards = SpecialEventCards.All.Count;
-
-        private static readonly Dictionary<(string, string), int> _distanceLookup = BuildDriveFerryDistanceLookup();
-
-        public static int DriveFerryDistance(string city1, string city2)
-        {
-            return _distanceLookup[(city1, city2)];
-        }
+        private static readonly Dictionary<string, CityData> CityLookup;
+        private static readonly Dictionary<string, int> CityIdxLookup;
+        private static readonly int[][] AdjacencyIdxsLookup;
+        private static readonly Dictionary<(string, string), int> DistanceLookup;
 
         private static Dictionary<(string, string), int> BuildDriveFerryDistanceLookup()
         {
@@ -226,7 +209,7 @@ namespace pandemic.GameData
                 var (currentCity, distance) = queue.Dequeue();
                 if (currentCity == city2) return distance;
                 searched.Add(currentCity);
-                foreach (var adj in _adjacencyLookup[currentCity])
+                foreach (var adj in AdjacentCities[currentCity])
                 {
                     if (!searched.Contains(adj))
                         queue.Enqueue((adj, distance + 1));
@@ -249,9 +232,18 @@ namespace pandemic.GameData
             return lookup;
         }
 
-        private static readonly Dictionary<string, CityData> CityLookup = _cities.ToDictionary(c => c.Name, c => c);
+        private static int[][] CreateAdjacentIdxLookup()
+        {
+            var lookup = new int[NumberOfCities][];
 
-        private static readonly Dictionary<string, int> _cityIdxLookup = CreateCityIdxLookup();
+            for (var i = 0; i < NumberOfCities; i++)
+            {
+                var city = _cities[i];
+                lookup[i] = AdjacentCities[city.Name].Select(CityIdx).ToArray();
+            }
+
+            return lookup;
+        }
 
         private static Dictionary<string, int> CreateCityIdxLookup()
         {
@@ -264,7 +256,5 @@ namespace pandemic.GameData
 
             return lookup;
         }
-
-        private static readonly StandardGameBoard _instance = new();
     }
 }

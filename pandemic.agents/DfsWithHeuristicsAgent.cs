@@ -89,7 +89,7 @@ namespace pandemic.agents
         private static bool EnoughCardsLeftToCureAll(PandemicGame game)
         {
             var cardsNeededForAllCures = (4 - game.CuresDiscovered.Count) * 5; // ignores special abilities
-            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards.Count()) + game.PlayerDrawPile.Count;
+            var cardsAvailable = game.Players.Sum(p => p.Hand.CityCards().Count()) + game.PlayerDrawPile.Count;
 
             return cardsAvailable >= cardsNeededForAllCures;
         }
@@ -161,7 +161,7 @@ namespace pandemic.agents
         {
             // prefer to keep cards with matching colours. returns, for example:
             // -> [(blue, 1), (red, 2)]
-            var handByNumberOfColoursAscending = game.CurrentPlayer.Hand.CityCards
+            var handByNumberOfColoursAscending = game.CurrentPlayer.Hand.CityCards()
                 .GroupBy(c => c.City.Colour)
                 .OrderBy(g => g.Count())
                 .ToList();

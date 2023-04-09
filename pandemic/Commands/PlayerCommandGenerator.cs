@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Combinatorics.Collections;
 using pandemic.Aggregates.Game;
@@ -37,43 +36,7 @@ namespace pandemic.Commands
     {
         public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
         {
-            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
-
-            var commands = new List<IPlayerCommand>();
-
-            commands.AddRange(DiscardCommands(game));
-            commands.AddRange(SpecialEventCommands(game));
-
-            if (game.APlayerMustDiscard) return commands;
-
-            if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
-            {
-                commands.AddRange(DriveFerryCommands(game));
-                commands.AddRange(BuildResearchStationCommands(game));
-                commands.AddRange(CureCommands(game));
-                commands.AddRange(DirectFlightCommands(game));
-                commands.AddRange(CharterFlightCommands(game));
-                commands.AddRange(ShuttleFlightCommands(game));
-                commands.AddRange(TreatDiseaseCommands(game));
-                commands.AddRange(ShareKnowledgeGiveCommands(game));
-                commands.AddRange(ShareKnowledgeTakeCommands(game));
-                commands.AddRange(PassCommands(game));
-                commands.AddRange(DispatcherCommands(game));
-                commands.AddRange(OperationsExpertCommands(game));
-                commands.AddRange(ResearcherCommands(game));
-                commands.AddRange(ScientistCommands(game));
-                commands.AddRange(ContingencyPlannerTakeCommands(game));
-            }
-
-            if (commands.All(c => c.IsSpecialEvent))
-            {
-                foreach (var group in commands.GroupBy(c => c.Role))
-                {
-                    commands.Add(new DontUseSpecialEventCommand(group.Key));
-                }
-            }
-
-            return commands;
+            return AllCommands(game, false);
         }
 
         /// <summary>
@@ -81,42 +44,49 @@ namespace pandemic.Commands
         /// </summary>
         public IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
         {
-            if (game.IsOver) return Enumerable.Empty<IPlayerCommand>();
+            return AllCommands(game, true);
+        }
 
-            var commands = new List<IPlayerCommand>();
+        private IEnumerable<IPlayerCommand> AllCommands(PandemicGame game, bool beSensible)
+        {
+            if (game.IsOver) yield break;
+            var numCmds = 0;
+            var numEventCmds = 0;
 
-            commands.AddRange(DiscardCommands(game));
-            commands.AddRange(SensibleSpecialEventCommands(game));
+            foreach (var c in DiscardCommands(game)) { numCmds++; yield return c; }
+            if (beSensible)
+                foreach (var c in SensibleSpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
+            else
+                foreach (var c in SpecialEventCommands(game)) { numCmds++; numEventCmds++; yield return c; }
 
-            if (game.APlayerMustDiscard) return commands;
+            if (game.APlayerMustDiscard) yield break;
 
             if (game is { PhaseOfTurn: TurnPhase.DoActions, CurrentPlayer.ActionsRemaining: > 0 })
             {
-                commands.AddRange(DriveFerryCommands(game));
-                commands.AddRange(BuildResearchStationCommands(game));
-                commands.AddRange(CureCommands(game));
-                commands.AddRange(DirectFlightCommands(game));
-                commands.AddRange(CharterFlightCommands(game));
-                commands.AddRange(ShuttleFlightCommands(game));
-                commands.AddRange(TreatDiseaseCommands(game));
-                commands.AddRange(ShareKnowledgeGiveCommands(game));
-                commands.AddRange(ShareKnowledgeTakeCommands(game));
-                commands.AddRange(DispatcherCommands(game));
-                commands.AddRange(OperationsExpertCommands(game));
-                commands.AddRange(ResearcherCommands(game));
-                commands.AddRange(ScientistCommands(game));
-                commands.AddRange(ContingencyPlannerTakeCommands(game));
-            }
-
-            if (commands.All(c => c.IsSpecialEvent))
-            {
-                foreach (var group in commands.GroupBy(c => c.Role))
+                foreach (var c in DriveFerryCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in BuildResearchStationCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in CureCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in DirectFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in CharterFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShuttleFlightCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in TreatDiseaseCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShareKnowledgeGiveCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ShareKnowledgeTakeCommands(game)) { numCmds++; yield return c; }
+                if (!beSensible)
                 {
-                    commands.Add(new DontUseSpecialEventCommand(group.Key));
+                    foreach (var c in PassCommands(game)) { numCmds++; yield return c; }
                 }
+                foreach (var c in DispatcherCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in OperationsExpertCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ResearcherCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ScientistCommands(game)) { numCmds++; yield return c; }
+                foreach (var c in ContingencyPlannerTakeCommands(game)) { numCmds++; yield return c; }
             }
 
-            return commands;
+            if (numCmds > 0 && numCmds == numEventCmds)
+            {
+                yield return new DontUseSpecialEventCommand();
+            }
         }
 
         private static IEnumerable<IPlayerCommand> ContingencyPlannerTakeCommands(PandemicGame game)
@@ -142,8 +112,7 @@ namespace pandemic.Commands
 
             if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
 
-            foreach (var cureCards in game.CurrentPlayer.Hand
-                         .CityCards
+            foreach (var cureCards in game.CurrentPlayer.Hand.CityCards()
                          .GroupBy(c => c.City.Colour)
                          .Where(g => g.Count() >= 4))
             {
@@ -162,7 +131,7 @@ namespace pandemic.Commands
 
             var researcher = game.PlayerByRole(Role.Researcher);
 
-            foreach (var card in researcher.Hand.CityCards)
+            foreach (var card in researcher.Hand.CityCards())
             {
                 if (game.CurrentPlayer.Role == Role.Researcher)
                 {
@@ -192,7 +161,7 @@ namespace pandemic.Commands
 
             if (city.HasResearchStation && !opex.HasUsedDiscardAndMoveAbilityThisTurn)
             {
-                foreach (var card in opex.Hand.CityCards)
+                foreach (var card in opex.Hand.CityCards())
                 {
                     foreach (var city2 in game.Cities.Where(c => c.Name != opex.Location))
                     {
@@ -233,17 +202,23 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherCharterFlightCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Length; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards)
+                var dispatcherHand = game.PlayerByRole(Role.Dispatcher).Hand;
+                for (var j = 0; j < dispatcherHand.Count; j++)
                 {
-                    if (otherPlayer.Location != card.City.Name) continue;
-
-                    foreach (var city in game.Cities.Where(city => city.Name != otherPlayer.Location))
+                    var card = dispatcherHand.Cards[j];
+                    if (card is PlayerCityCard cityCard && otherPlayer.Location == cityCard.City.Name)
                     {
-                        yield return new DispatcherCharterFlyPawnCommand(otherPlayer.Role, city.Name);
+                        for (var k = 0; k < game.Cities.Length; k++)
+                        {
+                            var city = game.Cities[k];
+                            if (city.Name != otherPlayer.Location)
+                                yield return new DispatcherCharterFlyPawnCommand(otherPlayer.Role, city.Name);
+                        }
                     }
                 }
             }
@@ -251,25 +226,30 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherDirectFlightCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Length; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var card in game.PlayerByRole(Role.Dispatcher).Hand.CityCards)
+                var dispatcherHand = game.PlayerByRole(Role.Dispatcher).Hand;
+
+                for (var j = 0; j < dispatcherHand.Count; j++)
                 {
-                    if (otherPlayer.Location != card.City.Name)
-                        yield return new DispatcherDirectFlyPawnCommand(otherPlayer.Role, card.City.Name);
+                    var card = dispatcherHand.Cards[j];
+                    if (card is PlayerCityCard cityCard && otherPlayer.Location != cityCard.City.Name)
+                        yield return new DispatcherDirectFlyPawnCommand(otherPlayer.Role, cityCard.City.Name);
                 }
             }
         }
 
         private static IEnumerable<IPlayerCommand> DispatcherDriveFerryCommands(PandemicGame game)
         {
-            foreach (var otherPlayer in game.Players)
+            for (var i = 0; i < game.Players.Length; i++)
             {
+                var otherPlayer = game.Players[i];
                 if (otherPlayer.Role == Role.Dispatcher) continue;
 
-                foreach (var adjacentCity in game.Board.AdjacentCities[otherPlayer.Location])
+                foreach (var adjacentCity in StandardGameBoard.AdjacentCities[otherPlayer.Location])
                 {
                     yield return new DispatcherDriveFerryPawnCommand(otherPlayer.Role, adjacentCity);
                 }
@@ -278,11 +258,12 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DispatcherMovePawnToOtherPawns(PandemicGame game)
         {
-            foreach (var player1 in game.Players)
+            for (var i = 0; i < game.Players.Length; i++)
             {
-                foreach (var player2 in game.Players)
+                var player1 = game.Players[i];
+                for (var j = 0; j < game.Players.Length; j++)
                 {
-                    if (player1 == player2) continue;
+                    var player2 = game.Players[j];
                     if (player1.Location == player2.Location) continue;
 
                     yield return new DispatcherMovePawnToOtherPawnCommand(player1.Role, player2.Role);
@@ -367,7 +348,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> Airlifts(PandemicGame game, Player playerWithCard)
         {
-            for (int i = 0; i < game.Players.Count; i++)
+            for (int i = 0; i < game.Players.Length; i++)
             {
                 var player = game.Players[i];
                 for (int j = 0; j < game.Cities.Length; j++)
@@ -391,7 +372,7 @@ namespace pandemic.Commands
         private static IEnumerable<IPlayerCommand> SensibleEventForecasts(PandemicGame game, Player playerWithCard)
         {
             var cards = game.InfectionDrawPile.Top(6)
-                .OrderByDescending(card => game.CityByName(card.City).MaxNumCubes);
+                .OrderByDescending(card => game.CityByName(card.City).MaxNumCubes());
 
             yield return new EventForecastCommand(playerWithCard.Role, cards.ToArray());
         }
@@ -432,7 +413,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DriveFerryCommands(PandemicGame game)
         {
-            foreach (var city in game.Board.AdjacentCities[game.CurrentPlayer.Location])
+            foreach (var city in StandardGameBoard.AdjacentCities[game.CurrentPlayer.Location])
             {
                 yield return new DriveFerryCommand(game.CurrentPlayer.Role, city);
             }
@@ -440,7 +421,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> DirectFlightCommands(PandemicGame game)
         {
-            foreach (var cityCard in game.CurrentPlayer.Hand.CityCards)
+            foreach (var cityCard in game.CurrentPlayer.Hand.CityCards())
             {
                 if (game.CurrentPlayer.Location != cityCard.City.Name)
                     yield return new DirectFlightCommand(game.CurrentPlayer.Role, cityCard.City.Name);
@@ -451,8 +432,7 @@ namespace pandemic.Commands
         {
             if (!game.CityByName(game.CurrentPlayer.Location).HasResearchStation) yield break;
 
-            foreach (var cureCards in game.CurrentPlayer.Hand
-                .CityCards
+            foreach (var cureCards in game.CurrentPlayer.Hand.CityCards()
                 .GroupBy(c => c.City.Colour)
                 .Where(g => g.Count() >= 5))
             {
@@ -472,7 +452,7 @@ namespace pandemic.Commands
 
         private static IEnumerable<IPlayerCommand> CharterFlightCommands(PandemicGame game)
         {
-            if (game.CurrentPlayer.Hand.CityCards.All(c => c.City.Name != game.CurrentPlayer.Location)) yield break;
+            if (game.CurrentPlayer.Hand.CityCards().All(c => c.City.Name != game.CurrentPlayer.Location)) yield break;
 
             foreach (var city in game
                          .Cities
@@ -503,15 +483,16 @@ namespace pandemic.Commands
         private static IEnumerable<IPlayerCommand> TreatDiseaseCommands(PandemicGame game)
         {
             var currentLocation = game.CurrentPlayer.Location;
-            var nonZeroCubeColours = game
-                .CityByName(currentLocation).Cubes.Counts
-                .Where(kv => kv.Value > 0)
-                .Select(kv => kv.Key);
+            var cubes = game.CityByName(currentLocation).Cubes;
 
-            foreach (var colour in nonZeroCubeColours)
-            {
-                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, colour);
-            }
+            if (cubes.Red > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Red);
+            if (cubes.Yellow > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Yellow);
+            if (cubes.Blue > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Blue);
+            if (cubes.Black > 0)
+                yield return new TreatDiseaseCommand(game.CurrentPlayer.Role, currentLocation, Colour.Black);
         }
 
         private static IEnumerable<IPlayerCommand> ShareKnowledgeGiveCommands(PandemicGame game)
@@ -519,7 +500,7 @@ namespace pandemic.Commands
             foreach (var otherPlayer in game.Players.Where(p =>
                          p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
             {
-                foreach (var _ in game.CurrentPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                foreach (var _ in game.CurrentPlayer.Hand.CityCards().Where(c => c.City.Name == game.CurrentPlayer.Location))
                 {
                     yield return new ShareKnowledgeGiveCommand(
                         game.CurrentPlayer.Role,
@@ -534,7 +515,7 @@ namespace pandemic.Commands
             foreach (var otherPlayer in game.Players.Where(p =>
                          p != game.CurrentPlayer && p.Location == game.CurrentPlayer.Location))
             {
-                foreach (var _ in otherPlayer.Hand.CityCards.Where(c => c.City.Name == game.CurrentPlayer.Location))
+                foreach (var _ in otherPlayer.Hand.CityCards().Where(c => c.City.Name == game.CurrentPlayer.Location))
                 {
                     yield return new ShareKnowledgeTakeCommand(
                         game.CurrentPlayer.Role,
@@ -549,7 +530,7 @@ namespace pandemic.Commands
             if (game.CityByName(game.CurrentPlayer.Location).HasResearchStation)
                 return false;
 
-            return game.CurrentPlayer.Hand.CityCards.Any(c => c.City.Name == game.CurrentPlayer.Location);
+            return game.CurrentPlayer.Hand.CityCards().Any(c => c.City.Name == game.CurrentPlayer.Location);
         }
     }
 

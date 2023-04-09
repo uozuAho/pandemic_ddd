@@ -349,7 +349,7 @@ namespace pandemic.test
                 city.Cubes.NumberOf(infectionCard.Colour).ShouldBe(1);
             }
 
-            game.Cubes.Counts.Values.Sum().ShouldBe(startingState.Cubes.Counts.Values.Sum() - game.InfectionRate);
+            game.Cubes.Total().ShouldBe(startingState.Cubes.Total() - game.InfectionRate);
         }
 
         [Test]
@@ -448,7 +448,7 @@ namespace pandemic.test
             (game, _) = game.Do(new DiscardPlayerCardCommand(Role.Medic, cardToDiscard));
 
             // assert
-            game.CurrentPlayer.Hand.CityCards.ShouldNotContain(cardToDiscard);
+            game.CurrentPlayer.Hand.CityCards().ShouldNotContain(cardToDiscard);
             game.PlayerDiscardPile.Cards.ShouldContain(cardToDiscard);
         }
 
@@ -627,10 +627,10 @@ namespace pandemic.test
             events.ShouldContain(e => e is TurnEnded);
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
             game.CurrentPlayer.Hand.Count.ShouldBe(7);
-            game.CurrentPlayer.Hand.CityCards.ShouldContain(cardToShare);
+            game.CurrentPlayer.Hand.CityCards().ShouldContain(cardToShare);
             game.CurrentPlayer.ActionsRemaining.ShouldBe(4);
             game.PlayerByRole(Role.Medic).Hand.Count.ShouldBe(7);
-            game.PlayerByRole(Role.Medic).Hand.CityCards.ShouldNotContain(cardToShare);
+            game.PlayerByRole(Role.Medic).Hand.CityCards().ShouldNotContain(cardToShare);
             game.InfectionDrawPile.Count.ShouldBe(gameStateBeforeShare.InfectionDrawPile.Count - 2);
         }
 
@@ -986,7 +986,7 @@ namespace pandemic.test
 
             // act: discard
             game = game.Do(
-                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards().First()),
                 events);
 
             // assert: turn is over
@@ -1036,7 +1036,7 @@ namespace pandemic.test
 
             // act: discard
             game = game.Do(
-                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards.First()),
+                new DiscardPlayerCardCommand(game.CurrentPlayer.Role, game.CurrentPlayer.Hand.CityCards().First()),
                 events);
 
             // assert: turn is over
@@ -1524,7 +1524,7 @@ namespace pandemic.test
             game.CurrentPlayer.Role.ShouldBe(Role.Medic);
 
             // act: don't use it just yet
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: current state should be second epidemic, just after infect step
             events.ShouldContain(e => e is EpidemicInfectStepCompleted, 2);
@@ -1624,7 +1624,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame();
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -1641,7 +1641,7 @@ namespace pandemic.test
 
             game.OutbreakCounter.ShouldBe(1);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
-            var adjacentCities = game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
+            var adjacentCities = StandardGameBoard.AdjacentCities["Atlanta"].Select(a => game.CityByName(a));
             adjacentCities.ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
@@ -1655,7 +1655,7 @@ namespace pandemic.test
             {
                 OutbreakCounter = 7,
                 PlayerDrawPile = new Deck<PlayerCard>(game.PlayerDrawPile.Cards.Where(c => c is not EpidemicCard)),
-                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(game.Board.City("Atlanta"))),
+                InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(InfectionCard.FromCity(StandardGameBoard.City("Atlanta"))),
                 Cities = game.Cities.Replace(atlanta, atlanta with
                 {
                     Cubes = CubePile.Empty
@@ -1720,9 +1720,9 @@ namespace pandemic.test
             game.OutbreakCounter.ShouldBe(2);
             game.CityByName("Atlanta").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(3);
-            game.Board.AdjacentCities["Atlanta"].Select(a => game.CityByName(a))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(a => game.CityByName(a))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
-            game.Board.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
+            StandardGameBoard.AdjacentCities["Chicago"].Select(a => game.CityByName(a))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) >= 1);
         }
 
@@ -1949,7 +1949,7 @@ namespace pandemic.test
             game.LegalCommands().ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: epidemic intensified, 2 cards picked up, turn over
             events.ShouldContain(e => e is EpidemicIntensified);
@@ -1971,7 +1971,7 @@ namespace pandemic.test
                 Hand = game.CurrentPlayer.Hand.Add(eventCard)
             });
 
-            Should.Throw<GameRuleViolatedException>(() => game.Do(new DontUseSpecialEventCommand(Role.Medic)));
+            Should.Throw<GameRuleViolatedException>(() => game.Do(new DontUseSpecialEventCommand()));
         }
 
         [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -1997,7 +1997,7 @@ namespace pandemic.test
             generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert: turn ended
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -2032,7 +2032,7 @@ namespace pandemic.test
             generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
             // act: don't use special event
-            game = game.Do(new DontUseSpecialEventCommand(game.CurrentPlayer.Role), events);
+            game = game.Do(new DontUseSpecialEventCommand(), events);
 
             // assert
             game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
@@ -2971,7 +2971,7 @@ namespace pandemic.test
             game = game.SetPlayer(Role.Medic, game.PlayerByRole(Role.Medic) with { Location = "Chicago" });
 
             (game, var events) =
-                game.Do(new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards.ToArray()));
+                game.Do(new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards().ToArray()));
 
             game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
         }
@@ -2998,7 +2998,7 @@ namespace pandemic.test
         {
             var game = DefaultTestGame().Cure(Colour.Blue);
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -3080,8 +3080,8 @@ namespace pandemic.test
 
             (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
 
-            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
-            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).Hand.CityCards().ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards().ShouldNotContain(chicago);
             game.PlayerByRole(Role.Researcher).ActionsRemaining.ShouldBe(3);
         }
 
@@ -3172,8 +3172,8 @@ namespace pandemic.test
 
             (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
 
-            game.PlayerByRole(Role.Scientist).Hand.CityCards.ShouldContain(chicago);
-            game.PlayerByRole(Role.Researcher).Hand.CityCards.ShouldNotContain(chicago);
+            game.PlayerByRole(Role.Scientist).Hand.CityCards().ShouldContain(chicago);
+            game.PlayerByRole(Role.Researcher).Hand.CityCards().ShouldNotContain(chicago);
             game.PlayerByRole(Role.Scientist).ActionsRemaining.ShouldBe(3);
         }
 
@@ -3286,7 +3286,7 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Montreal" })
                     .RemoveAllCubesFromCities()
@@ -3313,7 +3313,7 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
             game = game
                     .RemoveAllCubesFromCities()
                     .AddCubes("Atlanta", Colour.Blue, 3) with
@@ -3328,7 +3328,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
 
             game.OutbreakCounter.ShouldBe(0);
-            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
         }
 
@@ -3340,7 +3340,8 @@ namespace pandemic.test
                 Roles = new[] { Role.QuarantineSpecialist, Role.Scientist }
             });
 
-            var atlantaInfectionCard = InfectionCard.FromCity(game.Board.City("Atlanta"));
+            var atlantaInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Atlanta"));
+            var sydneyInfectionCard = InfectionCard.FromCity(StandardGameBoard.City("Sydney"));
             game = game
                     .SetCurrentPlayerAs(game.CurrentPlayer with { Location = "Chicago" })
                     .RemoveAllCubesFromCities()
@@ -3349,6 +3350,7 @@ namespace pandemic.test
                     InfectionDrawPile =
                     game.InfectionDrawPile
                         .RemoveIfPresent(atlantaInfectionCard)
+                        .PlaceOnTop(sydneyInfectionCard) // ensure an adjacent city is not infected
                         .PlaceOnTop(atlantaInfectionCard),
                 };
 
@@ -3356,7 +3358,7 @@ namespace pandemic.test
             (game, var events) = game.Do(new PassCommand(Role.QuarantineSpecialist));
 
             game.OutbreakCounter.ShouldBe(0);
-            game.Board.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
+            StandardGameBoard.AdjacentCities["Atlanta"].Select(c => game.CityByName(c))
                 .ShouldAllBe(c => c.Cubes.NumberOf(Colour.Blue) == 0);
         }
 
@@ -3718,7 +3720,7 @@ namespace pandemic.test
 
         private static int TotalNumCubesOnCities(PandemicGame game)
         {
-            return game.Cities.Sum(c => c.Cubes.Counts.Sum(cc => cc.Value));
+            return game.Cities.Sum(c => c.Cubes.Total());
         }
 
         private static void AssertEndsTurn(Func<(PandemicGame, IEnumerable<IEvent>)> action)
