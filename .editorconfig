@@ -9,3 +9,15 @@ indent_size = 4
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped            # less indentation = easier reading
+csharp_using_directive_placement = inside_namespace          # see https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1200.md
+dotnet_style_prefer_conditional_expression_over_return = false   # ... nah
+dotnet_analyzer_diagnostic.category-Style.severity = error   # warnings = error, otherwise you won't fix it
+dotnet_diagnostic.IDE0008.severity = none                    # prefer var over type names. Who doesn't like type inference?
+dotnet_diagnostic.IDE0130.severity = suggestion              # fixes dotnet format crash: https://github.com/dotnet/format/issues/1623
+dotnet_diagnostic.CA2007.severity = none                     # avoid ConfigureAwait everywhere (intended for libraries)
+dotnet_diagnostic.CA5394.severity = none                     # insecure RNG is fine
+dotnet_diagnostic.CS1591.severity = none                     # ignore missing XML docs
+dotnet_diagnostic.VSTHRD100.severity = error                 # never use async void

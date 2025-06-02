@@ -1,0 +1,15 @@
+<Project>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference
+            Include="Microsoft.VisualStudio.Threading.Analyzers"
+            Version="17.14.15"
+            PrivateAssets="all"
+        />
+    </ItemGroup>
+    <PropertyGroup>
+        <AnalysisMode>All</AnalysisMode>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+</Project>
