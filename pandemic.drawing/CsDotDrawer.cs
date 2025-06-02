@@ -1,23 +1,21 @@
+namespace pandemic.drawing;
+
 using csdot;
 using csdot.Attributes.DataTypes;
 using csdot.Attributes.Types;
 using Color = csdot.Attributes.DataTypes.Color;
 
-namespace pandemic.drawing;
-
 public class CsDotDrawer
 {
-    public Graph _graph = new Graph { type = "digraph" };
+    public Graph _graph = new() { type = "digraph" };
 
-    private CsDotDrawer()
-    {
-    }
+    private CsDotDrawer() { }
 
     public static CsDotDrawer FromGraph(DrawerGraph graph)
     {
         var drawer = new CsDotDrawer();
         var nodeId = 0;
-        Dictionary<DrawerNode, IDot> nodeLookup = new();
+        Dictionary<DrawerNode, IDot> nodeLookup = [];
 
         foreach (var node in graph.Nodes)
         {
@@ -54,7 +52,7 @@ public class CsDotDrawer
             node1.Attribute.color.Value = node.Colour.Value switch
             {
                 Colour.Red => Color.SVG.red,
-                _ => throw new ArgumentException()
+                _ => throw new ArgumentException(),
             };
         }
 
@@ -63,26 +61,16 @@ public class CsDotDrawer
 
     private static Edge ToDotEdge(IDot @from, IDot to, DrawerEdge edge)
     {
-        var dotEdge = new Edge(new List<Transition>
+        var dotEdge = new Edge([new(@from, EdgeOp.directed), new(to, EdgeOp.unspecified)])
         {
-            new(@from, EdgeOp.directed),
-            new(to, EdgeOp.unspecified)
-        })
-        {
-            Attribute =
-            {
-                label = new Label
-                {
-                    Value = edge.Label
-                }
-            }
+            Attribute = { label = new Label { Value = edge.Label } },
         };
         if (edge.Colour != null)
         {
             dotEdge.Attribute.color.Value = edge.Colour switch
             {
                 Colour.Red => Color.SVG.red,
-                _ => throw new ArgumentException()
+                _ => throw new ArgumentException(),
             };
         }
 

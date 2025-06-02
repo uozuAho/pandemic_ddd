@@ -1,6 +1,6 @@
-using NUnit.Framework;
-
 namespace pandemic.drawing.test;
+
+using NUnit.Framework;
 
 public class Tests
 {
@@ -11,8 +11,8 @@ public class Tests
 
         var from = graph.CreateNode("a");
         var to = graph.CreateNode("b");
-        var edge = graph.CreateEdge(from, to, "a to b");
+        _ = graph.CreateEdge(from, to, "a to b");
 
-        CsDotDrawer.FromGraph(graph);
+        _ = CsDotDrawer.FromGraph(graph);
     }
 }

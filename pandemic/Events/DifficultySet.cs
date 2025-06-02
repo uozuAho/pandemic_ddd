@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    public record DifficultySet(Difficulty Difficulty) : IEvent;
-}
+using Values;
+
+public record DifficultySet(Difficulty Difficulty) : IEvent;

@@ -1,13 +1,12 @@
-namespace pandemic.Values
+namespace pandemic.Values;
+
+public enum Role
 {
-    public enum Role
-    {
-        Medic,
-        Scientist,
-        QuarantineSpecialist,
-        Researcher,
-        Dispatcher,
-        OperationsExpert,
-        ContingencyPlanner
-    }
+    Medic,
+    Scientist,
+    QuarantineSpecialist,
+    Researcher,
+    Dispatcher,
+    OperationsExpert,
+    ContingencyPlanner,
 }

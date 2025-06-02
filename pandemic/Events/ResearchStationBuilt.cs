@@ -1,12 +1,11 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
+using Values;
+
+public record ResearchStationBuilt(Role Role, string City) : IEvent
 {
-    public record ResearchStationBuilt(Role Role, string City) : IEvent
+    public override string ToString()
     {
-        public override string ToString()
-        {
-            return $"{Role}: built research station in {City}";
-        }
+        return $"{Role}: built research station in {City}";
     }
 }

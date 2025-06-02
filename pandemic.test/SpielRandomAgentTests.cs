@@ -1,49 +1,52 @@
+namespace pandemic.test;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Aggregates.Game;
+using Events;
 using NUnit.Framework;
-using pandemic.Aggregates.Game;
-using pandemic.Events;
-using pandemic.test.Utils;
-using pandemic.Values;
+using Utils;
 
-namespace pandemic.test
+internal class SpielRandomAgentTests
 {
-    class SpielRandomAgentTests
+    [Test]
+    [Repeat(10)]
+    public void PlaysGameToCompletion()
     {
-        [Test]
-        [Repeat(10)]
-        public void PlaysGameToCompletion()
+        var options = NewGameOptionsGenerator.RandomOptions();
+
+        var random = new Random();
+        PandemicGame game;
+        List<IEvent> events;
+        (game, events) = PandemicGame.CreateNewGame(options);
+        var state = new PandemicSpielGameState(game);
+
+        for (var i = 0; i < 1000 && !state.IsTerminal; i++)
         {
-            var options = NewGameOptionsGenerator.RandomOptions();
-
-            var random = new Random();
-            PandemicGame game;
-            List<IEvent> events;
-            (game, events) = PandemicGame.CreateNewGame(options);
-            var state = new PandemicSpielGameState(game);
-
-            for (var i = 0; i < 1000 && !state.IsTerminal; i++)
+            var legalActions = state.LegalActions();
+            if (!legalActions.Any())
             {
-                var legalActions = state.LegalActions();
-                if (!legalActions.Any())
-                {
-                    Assert.Fail($"No legal actions! State: \n\n{state}\n\n Events:\n{string.Join('\n', events)}");
-                }
-                var action = RandomChoice(state.LegalActions(), random);
-                events.AddRange(state.ApplyAction(action));
+                Assert.Fail(
+                    $"No legal actions! State: \n\n{state}\n\n Events:\n{string.Join('\n', events)}"
+                );
             }
-
-            Assert.IsTrue(state.IsTerminal, "Expected to reach terminal state in under 1000 actions");
+            var action = RandomChoice(state.LegalActions(), random);
+            events.AddRange(state.ApplyAction(action));
         }
 
-        private static T RandomChoice<T>(IEnumerable<T> items, Random random)
+        Assert.IsTrue(state.IsTerminal, "Expected to reach terminal state in under 1000 actions");
+    }
+
+    private static T RandomChoice<T>(IEnumerable<T> items, Random random)
+    {
+        var itemList = items.ToList();
+        if (!itemList.Any())
         {
-            var itemList = items.ToList();
-            if (!itemList.Any()) throw new InvalidOperationException("no items to choose from!");
-
-            var idx = random.Next(0, itemList.Count);
-            return itemList[idx];
+            throw new InvalidOperationException("no items to choose from!");
         }
+
+        var idx = random.Next(0, itemList.Count);
+        return itemList[idx];
     }
 }

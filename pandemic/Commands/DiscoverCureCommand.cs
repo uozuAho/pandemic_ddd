@@ -1,9 +1,10 @@
-using System.Linq;
-using pandemic.Values;
-
 namespace pandemic.Commands;
 
-public record DiscoverCureCommand(Role Role, PlayerCityCard[] Cards) : IPlayerCommand
+using System.Collections.Immutable;
+using System.Linq;
+using Values;
+
+public record DiscoverCureCommand(Role Role, ImmutableArray<PlayerCityCard> Cards) : IPlayerCommand
 {
     public bool ConsumesAction => true;
     public bool IsSpecialEvent => false;

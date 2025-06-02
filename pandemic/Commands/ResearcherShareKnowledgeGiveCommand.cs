@@ -1,6 +1,6 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 public record ResearcherShareKnowledgeGiveCommand(Role PlayerToGiveTo, string City) : IPlayerCommand
 {

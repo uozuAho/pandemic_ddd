@@ -1,6 +1,6 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 /// <summary>
 /// Discard a city card to fly directly to that city

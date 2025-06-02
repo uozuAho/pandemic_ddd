@@ -1,23 +1,25 @@
-﻿using System;
-using System.Linq;
-using pandemic.agents;
-using pandemic.agents.GameEvaluator;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-
 namespace pandemic.console;
 
-public class InteractiveGame
+using System;
+using System.Linq;
+using agents;
+using agents.GameEvaluator;
+using Aggregates.Game;
+
+public static class InteractiveGame
 {
     public static void Play(PandemicGame game)
     {
         Console.WriteLine("Running the game!");
-        Help(game);
+        _ = Help(game);
 
         while (!game.IsOver)
         {
             var command = StrToCommand(Console.ReadLine()!);
-            if (command is QuitCommand) break;
+            if (command is QuitCommand)
+            {
+                break;
+            }
 
             game = Execute(game, command);
         }
@@ -31,7 +33,7 @@ public class InteractiveGame
             "q" => new QuitCommand(),
             "s" => new StatusCommand(),
             "c" => new AvailableCommandsCommand(),
-            _ => TryGetGameCommand(input)
+            _ => TryGetGameCommand(input),
         };
     }
 
@@ -54,7 +56,7 @@ public class InteractiveGame
             BadInputCommand => BadInput(game),
             AvailableCommandsCommand => AvailableCommands(game),
             GameCommand c => DoCommand(game, c.CommandNumber),
-            _ => throw new NotImplementedException()
+            _ => throw new NotImplementedException(),
         };
     }
 
@@ -116,12 +118,16 @@ public class InteractiveGame
     }
 }
 
+internal interface ICommand { }
 
+internal record QuitCommand() : ICommand;
 
-interface ICommand { }
-record QuitCommand() : ICommand;
-record HelpCommand() : ICommand;
-record StatusCommand() : ICommand;
-record BadInputCommand() : ICommand;
-record AvailableCommandsCommand : ICommand;
-record GameCommand(int CommandNumber) : ICommand;
+internal record HelpCommand() : ICommand;
+
+internal record StatusCommand() : ICommand;
+
+internal record BadInputCommand() : ICommand;
+
+internal record AvailableCommandsCommand : ICommand;
+
+internal record GameCommand(int CommandNumber) : ICommand;

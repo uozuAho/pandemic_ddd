@@ -1,12 +1,11 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
+using Values;
+
+public record PlayerCardDiscarded(Role Role, PlayerCard Card) : IEvent
 {
-    public record PlayerCardDiscarded(Role Role, PlayerCard Card) : IEvent
+    public override string ToString()
     {
-        public override string ToString()
-        {
-            return $"{Role}: discarded {Card}";
-        }
+        return $"{Role}: discarded {Card}";
     }
 }

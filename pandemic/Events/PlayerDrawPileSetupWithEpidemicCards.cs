@@ -1,7 +1,6 @@
-using System.Collections.Immutable;
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    internal record PlayerDrawPileSetupWithEpidemicCards(ImmutableList<PlayerCard> DrawPile) : IEvent;
-}
+using System.Collections.Immutable;
+using Values;
+
+internal record PlayerDrawPileSetupWithEpidemicCards(ImmutableList<PlayerCard> DrawPile) : IEvent;

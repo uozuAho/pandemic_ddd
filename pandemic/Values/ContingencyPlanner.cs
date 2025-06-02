@@ -1,4 +1,4 @@
-﻿namespace pandemic.Values;
+namespace pandemic.Values;
 
 public record ContingencyPlanner : Player
 {
@@ -7,6 +7,6 @@ public record ContingencyPlanner : Player
 
     public override bool Has(PlayerCard card)
     {
-        return base.Has(card) || StoredEventCard != null && Equals(StoredEventCard, card);
+        return base.Has(card) || (StoredEventCard != null && Equals(StoredEventCard, card));
     }
 }

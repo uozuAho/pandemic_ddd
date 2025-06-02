@@ -1,3 +1,4 @@
-﻿namespace pandemic.Events;
+namespace pandemic.Events;
 
-internal record OperationsExpertDiscardedToMoveFromStation(string DiscardedCard, string Destination) : IEvent;
+internal record OperationsExpertDiscardedToMoveFromStation(string DiscardedCard, string Destination)
+    : IEvent;

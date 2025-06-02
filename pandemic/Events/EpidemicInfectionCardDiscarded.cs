@@ -1,5 +1,5 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Events;
+
+using Values;
 
 internal record EpidemicInfectionCardDiscarded(InfectionCard Card) : IEvent;

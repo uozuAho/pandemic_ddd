@@ -16,7 +16,10 @@ public static class EnumerableExtensions
         return temp;
     }
 
-    public static IEnumerable<IEnumerable<T>> SplitEvenlyInto<T>(this IEnumerable<T> items, int numChunks)
+    public static IEnumerable<IEnumerable<T>> SplitEvenlyInto<T>(
+        this IEnumerable<T> items,
+        int numChunks
+    )
     {
         var itemList = items.ToList();
 
@@ -28,8 +31,6 @@ public static class EnumerableExtensions
         return itemList
             .Take(largeChunkSize * remainder)
             .Chunk(largeChunkSize)
-            .Concat(itemList
-                .Skip(largeChunkSize * remainder)
-                .Chunk(smallChunkSize));
+            .Concat(itemList.Skip(largeChunkSize * remainder).Chunk(smallChunkSize));
     }
 }

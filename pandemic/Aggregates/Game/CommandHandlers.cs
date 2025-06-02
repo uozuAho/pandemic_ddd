@@ -1,14 +1,14 @@
-﻿using System;
+namespace pandemic.Aggregates.Game;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using pandemic.Commands;
-using pandemic.Events;
-using pandemic.GameData;
-using pandemic.Values;
+using Commands;
+using Events;
+using GameData;
 using utils;
-
-namespace pandemic.Aggregates.Game;
+using Values;
 
 public partial record PandemicGame
 {
@@ -18,11 +18,13 @@ public partial record PandemicGame
         var events = new List<IEvent>();
 
         if (options.Roles.Count is < 2 or > 4)
+        {
             throw new GameRuleViolatedException(
-                $"number of players must be between 2-4. Was given {options.Roles.Count}");
+                $"number of players must be between 2-4. Was given {options.Roles.Count}"
+            );
+        }
 
-        game = game
-            .SetDifficulty(options.Difficulty, events)
+        game = game.SetDifficulty(options.Difficulty, events)
             .SetupInfectionDeck(events)
             .ShufflePlayerDrawPileForDealing(events, options.IncludeSpecialEventCards);
 
@@ -39,7 +41,10 @@ public partial record PandemicGame
         return (game, events);
     }
 
+    // todo: fix later
+#pragma warning disable CA1002
     public PandemicGame Do(IPlayerCommand command, List<IEvent> events)
+#pragma warning restore CA1002
     {
         var (game, newEvents) = Do(command);
 
@@ -50,14 +55,20 @@ public partial record PandemicGame
 
     public (PandemicGame, IEnumerable<IEvent>) Do(IPlayerCommand command)
     {
-        if (SelfConsistencyCheckingEnabled) ValidateInternalConsistency();
+        if (SelfConsistencyCheckingEnabled)
+        {
+            ValidateInternalConsistency();
+        }
+
         PreCommandChecks(command);
 
         var (game, events) = ExecuteCommand(command);
 
         var eventList = events.ToList();
         if (CurrentPlayer.ActionsRemaining == 1 && game.CurrentPlayer.ActionsRemaining == 0)
+        {
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.DrawCards), eventList);
+        }
 
         while (!game.IsOver && !game.PlayerCommandRequired())
         {
@@ -75,7 +86,9 @@ public partial record PandemicGame
         if (playerWhoMustDiscard != null)
         {
             if (command is not DiscardPlayerCardCommand && !command.IsSpecialEvent)
+            {
                 ThrowIfPlayerMustDiscard(playerWhoMustDiscard);
+            }
         }
 
         if (command is IPlayerCommand { ConsumesAction: true } cmd)
@@ -117,17 +130,21 @@ public partial record PandemicGame
             ShareKnowledgeTakeFromResearcherCommand cmd => Do(cmd),
             ScientistDiscoverCureCommand cmd => Do(cmd),
             ContingencyPlannerTakeEventCardCommand cmd => Do(cmd),
-            _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}")
+            _ => throw new ArgumentOutOfRangeException($"Unsupported action: {command}"),
         };
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ContingencyPlannerTakeEventCardCommand cmd)
     {
         if (!PlayerDiscardPile.Cards.Contains((PlayerCard)cmd.Card))
+        {
             throw new GameRuleViolatedException("Card must be in discard pile");
+        }
 
         if (((ContingencyPlanner)PlayerByRole(Role.ContingencyPlanner)).StoredEventCard != null)
+        {
             throw new GameRuleViolatedException("Contingency planner already has a stored card");
+        }
 
         return ApplyEvents(new ContingencyPlannerTookEventCard(cmd.Card));
     }
@@ -137,31 +154,44 @@ public partial record PandemicGame
         var cards = cmd.Cards;
 
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+        {
             throw new GameRuleViolatedException("Can only cure at a city with a research station");
+        }
 
         if (cards.Length != 4)
+        {
             throw new GameRuleViolatedException("Exactly 4 cards must be used to cure");
+        }
 
         var colour = cards.First().City.Colour;
 
         if (IsCured(colour))
+        {
             throw new GameRuleViolatedException($"{colour} is already cured");
+        }
 
         if (cards.Any(c => c.City.Colour != colour))
+        {
             throw new GameRuleViolatedException("Cure: All cards must be the same colour");
+        }
 
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
+        {
             throw new ArgumentException("given cards contain a card not in player's hand");
+        }
 
-        var (game, events) = ApplyEvents(cmd.Cards
-            .Select(c => new PlayerCardDiscarded(Role.Scientist, c))
-            .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+        var (game, events) = ApplyEvents(
+            cmd.Cards.Select(c => new PlayerCardDiscarded(Role.Scientist, c))
+                .Concat<IEvent>(new[] { new CureDiscovered(colour) })
+        );
 
         var eventList = events.ToList();
         (game, _) = game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
 
         if (game.Cubes.NumberOf(colour) == 24)
+        {
             game = game.ApplyEvent(new DiseaseEradicated(colour), eventList);
+        }
 
         return (game, eventList);
     }
@@ -169,17 +199,24 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(ShareKnowledgeTakeFromResearcherCommand cmd)
     {
         if (cmd.Role == Role.Researcher)
+        {
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
+        }
 
         if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
+        {
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
+        }
 
         var researcher = PlayerByRole(Role.Researcher);
         var takingPlayer = PlayerByRole(cmd.Role);
 
         if (researcher.Location != takingPlayer.Location)
+        {
             throw new GameRuleViolatedException(
-                $"Researcher and {cmd.Role} must be in the same city to share knowledge");
+                $"Researcher and {cmd.Role} must be in the same city to share knowledge"
+            );
+        }
 
         return ApplyEvents(new ResearcherShareKnowledgeTaken(cmd.Role, cmd.City));
     }
@@ -187,17 +224,24 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(ResearcherShareKnowledgeGiveCommand cmd)
     {
         if (cmd.PlayerToGiveTo == Role.Researcher)
+        {
             throw new GameRuleViolatedException("Researcher can't share knowledge with themselves");
+        }
 
         if (!PlayerByRole(Role.Researcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
+        {
             throw new GameRuleViolatedException($"Researcher doesn't have the {cmd.City} card");
+        }
 
         var researcher = PlayerByRole(Role.Researcher);
         var playerToGiveTo = PlayerByRole(cmd.PlayerToGiveTo);
 
         if (researcher.Location != playerToGiveTo.Location)
+        {
             throw new GameRuleViolatedException(
-                $"Researcher and {cmd.PlayerToGiveTo} must be in the same city to share knowledge");
+                $"Researcher and {cmd.PlayerToGiveTo} must be in the same city to share knowledge"
+            );
+        }
 
         return ApplyEvents(new ResearcherSharedKnowledge(cmd.PlayerToGiveTo, cmd.City));
     }
@@ -208,27 +252,48 @@ public partial record PandemicGame
         var opexCurrentCity = CityByName(opex.Location);
 
         if (opex.HasUsedDiscardAndMoveAbilityThisTurn)
+        {
             throw new GameRuleViolatedException("This ability can only be used once per turn");
+        }
 
         if (opex.Location == cmd.Destination)
-            throw new GameRuleViolatedException($"Operations expert is already at {cmd.Destination}");
+        {
+            throw new GameRuleViolatedException(
+                $"Operations expert is already at {cmd.Destination}"
+            );
+        }
 
         if (!opexCurrentCity.HasResearchStation)
+        {
             throw new GameRuleViolatedException($"{opex.Location} doesn't have a research station");
+        }
 
         if (!opex.Hand.Contains(cmd.Card))
-            throw new GameRuleViolatedException($"Operations expert doesn't have the {cmd.Card.City.Name} card");
+        {
+            throw new GameRuleViolatedException(
+                $"Operations expert doesn't have the {cmd.Card.City.Name} card"
+            );
+        }
 
-        return ApplyEvents(new OperationsExpertDiscardedToMoveFromStation(cmd.Card.City.Name, cmd.Destination));
+        return ApplyEvents(
+            new OperationsExpertDiscardedToMoveFromStation(cmd.Card.City.Name, cmd.Destination)
+        );
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertBuildResearchStation cmd)
+    private (PandemicGame, IEnumerable<IEvent>) Do(OperationsExpertBuildResearchStation _)
     {
         var opex = PlayerByRole(Role.OperationsExpert);
         var city = CityByName(opex.Location);
 
-        if (ResearchStationPile == 0) throw new GameRuleViolatedException("There are no research stations left");
-        if (city.HasResearchStation) throw new GameRuleViolatedException($"{city.Name} already has a research station");
+        if (ResearchStationPile == 0)
+        {
+            throw new GameRuleViolatedException("There are no research stations left");
+        }
+
+        if (city.HasResearchStation)
+        {
+            throw new GameRuleViolatedException($"{city.Name} already has a research station");
+        }
 
         return ApplyEvents(new OperationsExpertBuiltResearchStation(opex.Location));
     }
@@ -236,120 +301,183 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherShuttleFlyPawnCommand cmd)
     {
         if (cmd.PlayerToMove == Role.Dispatcher)
-            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+        {
+            throw new GameRuleViolatedException(
+                "This command is to move other pawns, not the dispatcher"
+            );
+        }
 
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
         if (playerToMove.Location == cmd.City)
+        {
             throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.City}");
+        }
 
         if (!CityByName(playerToMove.Location).HasResearchStation)
-            throw new GameRuleViolatedException($"{playerToMove.Location} does not have a research station");
+        {
+            throw new GameRuleViolatedException(
+                $"{playerToMove.Location} does not have a research station"
+            );
+        }
 
         if (!CityByName(cmd.City).HasResearchStation)
+        {
             throw new GameRuleViolatedException($"{cmd.City} does not have a research station");
+        }
 
         return ApplyEvents(
             new[] { new DispatcherShuttleFlewPawn(cmd.PlayerToMove, cmd.City) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherCharterFlyPawnCommand cmd)
     {
         if (cmd.PlayerToMove == Role.Dispatcher)
-            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+        {
+            throw new GameRuleViolatedException(
+                "This command is to move other pawns, not the dispatcher"
+            );
+        }
 
         var dispatcher = PlayerByRole(Role.Dispatcher);
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
-        var card = dispatcher.Hand.CityCards().SingleOrDefault(c => c.City.Name == playerToMove.Location);
-
-        if (card == null)
-            throw new GameRuleViolatedException($"Dispatcher does not have the {playerToMove.Location} card");
-
+        var card =
+            dispatcher.Hand.CityCards().SingleOrDefault(c => c.City.Name == playerToMove.Location)
+            ?? throw new GameRuleViolatedException(
+                $"Dispatcher does not have the {playerToMove.Location} card"
+            );
         if (playerToMove.Location == cmd.Destination)
-            throw new GameRuleViolatedException($"{playerToMove.Role} is already at {cmd.Destination}");
+        {
+            throw new GameRuleViolatedException(
+                $"{playerToMove.Role} is already at {cmd.Destination}"
+            );
+        }
 
         return ApplyEvents(
             new[] { new DispatcherCharterFlewPawn(cmd.PlayerToMove, cmd.Destination) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.Destination)));
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.Destination)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDirectFlyPawnCommand cmd)
     {
         if (cmd.PlayerToMove == Role.Dispatcher)
-            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+        {
+            throw new GameRuleViolatedException(
+                "This command is to move other pawns, not the dispatcher"
+            );
+        }
 
         if (!PlayerByRole(Role.Dispatcher).Hand.CityCards().Any(c => c.City.Name == cmd.City))
+        {
             throw new GameRuleViolatedException($"Dispatcher doesn't have the {cmd.City} card");
+        }
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
+        {
             throw new GameRuleViolatedException($"{cmd.PlayerToMove} is already at {cmd.City}");
+        }
 
         return ApplyEvents(
             new[] { new DispatcherDirectFlewPawn(cmd.PlayerToMove, cmd.City) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherDriveFerryPawnCommand cmd)
     {
         if (CurrentPlayer.Role != Role.Dispatcher)
+        {
             throw new GameRuleViolatedException("It's not the dispatcher's turn");
+        }
 
         if (cmd.PlayerToMove == Role.Dispatcher)
-            throw new GameRuleViolatedException("This command is to move other pawns, not the dispatcher");
+        {
+            throw new GameRuleViolatedException(
+                "This command is to move other pawns, not the dispatcher"
+            );
+        }
 
         var playerToMove = PlayerByRole(cmd.PlayerToMove);
 
         if (!StandardGameBoard.IsAdjacent(playerToMove.Location, cmd.City))
-            throw new GameRuleViolatedException($"{playerToMove.Location} is not next to {cmd.City}");
+        {
+            throw new GameRuleViolatedException(
+                $"{playerToMove.Location} is not next to {cmd.City}"
+            );
+        }
 
         return ApplyEvents(
             new[] { new DispatcherDroveFerriedPawn(cmd.PlayerToMove, cmd.City) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+                AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DispatcherMovePawnToOtherPawnCommand cmd)
     {
         if (CurrentPlayer.Role != Role.Dispatcher)
+        {
             throw new GameRuleViolatedException("It's not the dispatcher's turn");
+        }
 
         var destination = PlayerByRole(cmd.DestinationRole).Location;
 
         if (PlayerByRole(cmd.PlayerToMove).Location == destination)
-            throw new GameRuleViolatedException(
-                $"{cmd.PlayerToMove} is already at {destination}");
+        {
+            throw new GameRuleViolatedException($"{cmd.PlayerToMove} is already at {destination}");
+        }
 
         return ApplyEvents(
             new[] { new DispatcherMovedPawnToOther(cmd.PlayerToMove, cmd.DestinationRole) }.Concat(
-                AnyMedicAutoRemoves(cmd.PlayerToMove, destination)));
+                AnyMedicAutoRemoves(cmd.PlayerToMove, destination)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(OneQuietNightCommand cmd)
     {
         var player = PlayerByRole(cmd.Role);
         if (!player.Has(new OneQuietNightCard()))
-            throw new GameRuleViolatedException($"{player.Role} doesn't have the one quiet night card");
+        {
+            throw new GameRuleViolatedException(
+                $"{player.Role} doesn't have the one quiet night card"
+            );
+        }
 
-        IEvent @event;
-        if (player is ContingencyPlanner { StoredEventCard: OneQuietNightCard })
-            @event = new ContingencyPlannerUsedStoredOneQuietNight();
-        else
-            @event = new OneQuietNightUsed(cmd.Role);
-
+        IEvent @event = player is ContingencyPlanner { StoredEventCard: OneQuietNightCard }
+            ? new ContingencyPlannerUsedStoredOneQuietNight()
+            : new OneQuietNightUsed(cmd.Role);
         return ApplyEvents(@event);
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(ResilientPopulationCommand cmd)
     {
         if (!PlayerByRole(cmd.Role).Has(new ResilientPopulationCard()))
-            throw new GameRuleViolatedException($"{cmd.Role} doesn't have the resilient population card");
+        {
+            throw new GameRuleViolatedException(
+                $"{cmd.Role} doesn't have the resilient population card"
+            );
+        }
 
         if (!InfectionDiscardPile.Cards.Contains(cmd.Card))
+        {
             throw new GameRuleViolatedException($"{cmd.Card} is not in the discard pile");
+        }
 
-        if (cmd.Role == Role.ContingencyPlanner
-            && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is ResilientPopulationCard)
+        if (
+            cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard
+                is ResilientPopulationCard
+        )
+        {
             return ApplyEvents(new ContingencyPlannerUsedStoredResilientPopulation(cmd.Card));
+        }
 
         return ApplyEvents(new ResilientPopulationUsed(cmd.Role, cmd.Card));
     }
@@ -357,56 +485,72 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(AirliftCommand cmd)
     {
         if (!PlayerByRole(cmd.Role).Has(new AirliftCard()))
+        {
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the airlift card");
+        }
 
         if (PlayerByRole(cmd.PlayerToMove).Location == cmd.City)
+        {
             throw new GameRuleViolatedException($"{cmd.Role} is already at {cmd.City}");
-
-        IEvent airliftEvent;
-
-        if (cmd.Role == Role.ContingencyPlanner && ((ContingencyPlanner) PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard)
-        {
-            airliftEvent = new ContingencyPlannerUsedStoredAirlift(cmd.PlayerToMove, cmd.City);
-        }
-        else
-        {
-            airliftEvent = new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City);
         }
 
-        return ApplyEvents(new[] { airliftEvent }.Concat(AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City)));
+        IEvent airliftEvent =
+            cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard is AirliftCard
+                ? new ContingencyPlannerUsedStoredAirlift(cmd.PlayerToMove, cmd.City)
+                : new AirliftUsed(cmd.Role, cmd.PlayerToMove, cmd.City);
+        return ApplyEvents(
+            new[] { airliftEvent }.Concat(AnyMedicAutoRemoves(cmd.PlayerToMove, cmd.City))
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(EventForecastCommand cmd)
     {
         if (!PlayerByRole(cmd.Role).Has(new EventForecastCard()))
+        {
             throw new GameRuleViolatedException($"{cmd.Role} doesn't have the event forecast card");
+        }
 
         var top6InfectionCards = InfectionDrawPile.Top(6).ToList();
         if (cmd.Cards.Any(c => !top6InfectionCards.Contains(c)))
         {
             throw new GameRuleViolatedException(
-                "Not in the top 6 cards of the infection deck: " +
-                $"{string.Join(',', top6InfectionCards.Except(cmd.Cards))}");
+                "Not in the top 6 cards of the infection deck: "
+                    + $"{string.Join(',', top6InfectionCards.Except(cmd.Cards))}"
+            );
         }
 
-        if (cmd.Role == Role.ContingencyPlanner
-            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard is EventForecastCard)
+        if (
+            cmd.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(cmd.Role)).StoredEventCard is EventForecastCard
+        )
+        {
             return ApplyEvents(new ContingencyPlannerUsedStoredEventForecast(cmd.Cards));
+        }
 
         return ApplyEvents(new EventForecastUsed(cmd.Role, cmd.Cards));
     }
 
-    private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand cmd)
+    private (PandemicGame, IEnumerable<IEvent>) Do(DontUseSpecialEventCommand _)
     {
         if (SpecialEventWasRecentlySkipped)
-            throw new GameRuleViolatedException("You've already chosen not the use a special event card");
+        {
+            throw new GameRuleViolatedException(
+                "You've already chosen not the use a special event card"
+            );
+        }
 
         if (!APlayerHasASpecialEventCard)
+        {
             throw new GameRuleViolatedException("No player has a special event card");
+        }
 
         if (LegalCommands().Any(c => c is not DontUseSpecialEventCommand && !c.IsSpecialEvent))
+        {
             throw new GameRuleViolatedException(
-                "This command only makes sense when the only options are to play special events");
+                "This command only makes sense when the only options are to play special events"
+            );
+        }
 
         return ApplyEvents(new ChoseNotToUseSpecialEventCard());
     }
@@ -415,17 +559,33 @@ public partial record PandemicGame
     {
         var player = PlayerByRole(command.Role);
         if (!player.Has(new GovernmentGrantCard()))
-            throw new GameRuleViolatedException($"{player.Role} doesn't have the government grant card");
+        {
+            throw new GameRuleViolatedException(
+                $"{player.Role} doesn't have the government grant card"
+            );
+        }
 
-        if (ResearchStationPile == 0) throw new GameRuleViolatedException("No research stations left");
+        if (ResearchStationPile == 0)
+        {
+            throw new GameRuleViolatedException("No research stations left");
+        }
 
         var city = CityByName(command.City);
         if (city.HasResearchStation)
-            throw new GameRuleViolatedException("Cannot use government grant on a city with a research station");
+        {
+            throw new GameRuleViolatedException(
+                "Cannot use government grant on a city with a research station"
+            );
+        }
 
-        if (command.Role == Role.ContingencyPlanner
-            && ((ContingencyPlanner) PlayerByRole(command.Role)).StoredEventCard is GovernmentGrantCard)
+        if (
+            command.Role == Role.ContingencyPlanner
+            && ((ContingencyPlanner)PlayerByRole(command.Role)).StoredEventCard
+                is GovernmentGrantCard
+        )
+        {
             return ApplyEvents(new ContingencyPlannerUsedStoredGovernmentGrant(command.City));
+        }
 
         return ApplyEvents(new GovernmentGrantUsed(command.Role, command.City));
     }
@@ -433,14 +593,16 @@ public partial record PandemicGame
     private (PandemicGame, IEnumerable<IEvent>) Do(PassCommand command)
     {
         if (CurrentPlayer.Role != command.Role)
+        {
             throw new GameRuleViolatedException($"It's not {command.Role}'s turn");
+        }
 
         if (PhaseOfTurn != TurnPhase.DoActions)
+        {
             throw new GameRuleViolatedException("You can only pass when you have actions to spend");
+        }
 
-        return ApplyEvents(
-            new PlayerPassed(command.Role),
-            new TurnPhaseEnded(TurnPhase.DrawCards));
+        return ApplyEvents(new PlayerPassed(command.Role), new TurnPhaseEnded(TurnPhase.DrawCards));
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DriveFerryCommand command)
@@ -449,21 +611,31 @@ public partial record PandemicGame
 
         var player = PlayerByRole(role);
 
-        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
+        if (!StandardGameBoard.IsCity(destination))
+        {
+            throw new InvalidActionException($"Invalid city '{destination}'");
+        }
 
         if (!StandardGameBoard.IsAdjacent(player.Location, destination))
         {
             throw new GameRuleViolatedException(
-                $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}");
+                $"Invalid drive/ferry to non-adjacent city: {player.Location} to {destination}"
+            );
         }
 
         return ApplyEvents(
-            new[] { new PlayerDroveFerried(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
+            new[] { new PlayerDroveFerried(role, destination) }.Concat(
+                AnyMedicAutoRemoves(role, destination)
+            )
+        );
     }
 
     private IEnumerable<IEvent> AnyMedicAutoRemoves(Role player, string arrivedAtCity)
     {
-        if (player != Role.Medic) yield break;
+        if (player != Role.Medic)
+        {
+            yield break;
+        }
 
         var city = CityByName(arrivedAtCity);
 
@@ -472,18 +644,27 @@ public partial record PandemicGame
             var cubesAtThisCity = city.Cubes.NumberOf(colour);
 
             if (IsCured(colour) && cubesAtThisCity > 0)
+            {
                 yield return new MedicAutoRemovedCubes(arrivedAtCity, colour);
+            }
 
-            if (IsCured(colour)
+            if (
+                IsCured(colour)
                 && !IsEradicated(colour)
-                && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity)
+                && Cities.Sum(c => c.Cubes.NumberOf(colour)) == cubesAtThisCity
+            )
+            {
                 yield return new DiseaseEradicated(colour);
+            }
         }
     }
 
     private IEnumerable<IEvent> AnyMedicAutoRemoves()
     {
-        if (Players.All(p => p.Role != Role.Medic)) yield break;
+        if (Players.All(p => p.Role != Role.Medic))
+        {
+            yield break;
+        }
 
         var medicCity = CityByName(PlayerByRole(Role.Medic).Location);
 
@@ -496,7 +677,9 @@ public partial record PandemicGame
                 yield return new MedicAutoRemovedCubes(medicCity.Name, curedColour);
 
                 if (Cities.Sum(c => c.Cubes.NumberOf(curedColour)) == cubesAtThisCity)
+                {
                     yield return new DiseaseEradicated(curedColour);
+                }
             }
         }
     }
@@ -505,19 +688,36 @@ public partial record PandemicGame
     {
         var (role, discardCard, destination) = cmd;
 
-        if (!StandardGameBoard.IsCity(destination)) throw new InvalidActionException($"Invalid city '{destination}'");
-        if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn");
+        if (!StandardGameBoard.IsCity(destination))
+        {
+            throw new InvalidActionException($"Invalid city '{destination}'");
+        }
+
+        if (CurrentPlayer.Role != role)
+        {
+            throw new GameRuleViolatedException($"It's not {role}'s turn");
+        }
+
         if (CurrentPlayer.Location == destination)
-            throw new GameRuleViolatedException($"You can't charter fly to your current location");
+        {
+            throw new GameRuleViolatedException("You can't charter fly to your current location");
+        }
 
         if (!PlayerByRole(role).Hand.Contains(discardCard))
+        {
             throw new GameRuleViolatedException("Current player doesn't have required card");
+        }
 
         if (discardCard.City.Name != PlayerByRole(role).Location)
+        {
             throw new GameRuleViolatedException("Discarded card must match current location");
+        }
 
         return ApplyEvents(
-            new[] { new PlayerCharterFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
+            new[] { new PlayerCharterFlewTo(role, destination) }.Concat(
+                AnyMedicAutoRemoves(role, destination)
+            )
+        );
     }
 
     private (PandemicGame, IEnumerable<IEvent>) Do(DiscardPlayerCardCommand command)
@@ -525,11 +725,21 @@ public partial record PandemicGame
         var card = command.Card;
 
         if (!PlayerByRole(command.Role).Hand.Contains(card))
+        {
             throw new GameRuleViolatedException("Player doesn't have that card");
+        }
+
         if (PlayerByRole(command.Role).Hand.Count <= 7)
-            throw new GameRuleViolatedException("You can't discard if you have less than 8 cards in hand ... I think");
+        {
+            throw new GameRuleViolatedException(
+                "You can't discard if you have less than 8 cards in hand ... I think"
+            );
+        }
+
         if (PhaseOfTurn == TurnPhase.DrawCards && CardsDrawn == 1)
+        {
             throw new GameRuleViolatedException("Cards are still being drawn");
+        }
 
         var (game, events) = ApplyEvents(new PlayerCardDiscarded(command.Role, card));
 
@@ -541,14 +751,26 @@ public partial record PandemicGame
         var city = command.City;
 
         if (ResearchStationPile == 0)
+        {
             throw new GameRuleViolatedException("No research stations left");
+        }
+
         if (CurrentPlayer.Location != city)
-            throw new GameRuleViolatedException($"Player must be in {city} to build research station");
+        {
+            throw new GameRuleViolatedException(
+                $"Player must be in {city} to build research station"
+            );
+        }
         // ReSharper disable once SimplifyLinqExpressionUseAll nope, this reads better
         if (!CurrentPlayer.Hand.CityCards().Any(c => c.City.Name == city))
+        {
             throw new GameRuleViolatedException($"Current player does not have {city} in hand");
+        }
+
         if (CityByName(city).HasResearchStation)
+        {
             throw new GameRuleViolatedException($"{city} already has a research station");
+        }
 
         var playerCard = CurrentPlayer.Hand.CityCards().Single(c => c.City.Name == city);
 
@@ -563,32 +785,46 @@ public partial record PandemicGame
         var cards = command.Cards;
 
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+        {
             throw new GameRuleViolatedException("Can only cure at a city with a research station");
+        }
 
         if (cards.Length != 5)
+        {
             throw new GameRuleViolatedException("Exactly 5 cards must be used to cure");
+        }
 
         var colour = cards.First().City.Colour;
 
         if (IsCured(colour))
+        {
             throw new GameRuleViolatedException($"{colour} is already cured");
+        }
 
         if (cards.Any(c => c.City.Colour != colour))
+        {
             throw new GameRuleViolatedException("Cure: All cards must be the same colour");
+        }
 
         if (cards.Any(c => !CurrentPlayer.Hand.Contains(c)))
+        {
             throw new ArgumentException("given cards contain a card not in player's hand");
+        }
 
-        var (game, events) = ApplyEvents(cards
-            .Select(c => new PlayerCardDiscarded(command.Role, c))
-            .Concat<IEvent>(new[] { new CureDiscovered(colour) }));
+        var (game, events) = ApplyEvents(
+            cards
+                .Select(c => new PlayerCardDiscarded(command.Role, c))
+                .Concat<IEvent>(new[] { new CureDiscovered(colour) })
+        );
 
         var eventList = events.ToList();
 
         (game, _) = game.ApplyEvents(game.AnyMedicAutoRemoves(), eventList);
 
         if (game.Cubes.NumberOf(colour) == 24)
+        {
             game = game.ApplyEvent(new DiseaseEradicated(colour), eventList);
+        }
 
         return (game, eventList);
     }
@@ -598,13 +834,20 @@ public partial record PandemicGame
         var (role, destination) = command;
 
         if (!CurrentPlayer.Hand.Contains(PlayerCards.CityCard(destination)))
+        {
             throw new GameRuleViolatedException("Current player doesn't have required card");
+        }
 
         if (CurrentPlayer.Location == destination)
+        {
             throw new GameRuleViolatedException("Cannot direct fly to city you're already in");
+        }
 
         return ApplyEvents(
-            new[] { new PlayerDirectFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
+            new[] { new PlayerDirectFlewTo(role, destination) }.Concat(
+                AnyMedicAutoRemoves(role, destination)
+            )
+        );
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(ShuttleFlightCommand command)
@@ -612,16 +855,25 @@ public partial record PandemicGame
         var (role, destination) = command;
 
         if (destination == CurrentPlayer.Location)
+        {
             throw new GameRuleViolatedException("Destination can't be current location");
+        }
 
         if (!CityByName(destination).HasResearchStation)
+        {
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
+        }
 
         if (!CityByName(CurrentPlayer.Location).HasResearchStation)
+        {
             throw new GameRuleViolatedException($"{destination} doesn't have a research station");
+        }
 
         return ApplyEvents(
-            new[] { new PlayerShuttleFlewTo(role, destination) }.Concat(AnyMedicAutoRemoves(role, destination)));
+            new[] { new PlayerShuttleFlewTo(role, destination) }.Concat(
+                AnyMedicAutoRemoves(role, destination)
+            )
+        );
     }
 
     private (PandemicGame game, IEnumerable<IEvent>) Do(TreatDiseaseCommand command)
@@ -630,18 +882,28 @@ public partial record PandemicGame
         var player = PlayerByRole(role);
 
         if (player.Location != city)
+        {
             throw new GameRuleViolatedException("Can only treat disease in current location");
+        }
 
         if (CityByName(city).Cubes.NumberOf(colour) == 0)
+        {
             throw new GameRuleViolatedException("No disease cubes to remove");
+        }
 
         var events = new List<IEvent>();
-        var game = role == Role.Medic
-            ? ApplyEvent(new MedicTreatedDisease(city, colour), events)
-            : ApplyEvent(new TreatedDisease(role, city, colour), events);
+        var game =
+            role == Role.Medic
+                ? ApplyEvent(new MedicTreatedDisease(city, colour), events)
+                : ApplyEvent(new TreatedDisease(role, city, colour), events);
 
-        if (game.IsCured(command.Colour) && game.Cities.Sum(c => c.Cubes.NumberOf(command.Colour)) == 0)
+        if (
+            game.IsCured(command.Colour)
+            && game.Cities.Sum(c => c.Cubes.NumberOf(command.Colour)) == 0
+        )
+        {
             game = game.ApplyEvent(new DiseaseEradicated(command.Colour), events);
+        }
 
         return (game, events);
     }
@@ -652,16 +914,25 @@ public partial record PandemicGame
         var giver = PlayerByRole(role);
         var receiver = PlayerByRole(receivingRole);
 
-        if (giver == receiver) throw new GameRuleViolatedException("Cannot share with self!");
+        if (giver == receiver)
+        {
+            throw new GameRuleViolatedException("Cannot share with self!");
+        }
 
         if (!giver.Hand.CityCards().Any(c => c.City.Name == command.City))
+        {
             throw new GameRuleViolatedException("Player must have the card to share");
+        }
 
         if (giver.Location != command.City)
+        {
             throw new GameRuleViolatedException("Player must be in the city of the given card");
+        }
 
         if (receiver.Location != giver.Location)
+        {
             throw new GameRuleViolatedException("Both players must be in the same city");
+        }
 
         return ApplyEvents(new ShareKnowledgeGiven(role, city, receivingRole));
     }
@@ -672,16 +943,25 @@ public partial record PandemicGame
         var taker = PlayerByRole(role);
         var takeFromPlayer = PlayerByRole(takeFromRole);
 
-        if (taker == takeFromPlayer) throw new GameRuleViolatedException("Cannot share with self!");
+        if (taker == takeFromPlayer)
+        {
+            throw new GameRuleViolatedException("Cannot share with self!");
+        }
 
         if (!takeFromPlayer.Hand.CityCards().Any(c => c.City.Name == command.City))
+        {
             throw new GameRuleViolatedException("Player must have the card to share");
+        }
 
         if (taker.Location != command.City)
+        {
             throw new GameRuleViolatedException("Player must be in the city of the given card");
+        }
 
         if (takeFromPlayer.Location != taker.Location)
+        {
             throw new GameRuleViolatedException("Both players must be in the same city");
+        }
 
         return ApplyEvents(new ShareKnowledgeTaken(role, city, takeFromRole));
     }
@@ -700,12 +980,10 @@ public partial record PandemicGame
 
     private PandemicGame SetupPlayerDrawPileWithEpidemicCards(ICollection<IEvent> events)
     {
-        var drawPile = PlayerDrawPile.Cards
-            .OrderBy(_ => Rng.Next())
+        var drawPile = PlayerDrawPile
+            .Cards.OrderBy(_ => Rng.Next())
             .SplitEvenlyInto(NumberOfEpidemicCards(Difficulty))
-            .Select(pile => pile
-                .Append(new EpidemicCard())
-                .OrderBy(_ => Rng.Next()))
+            .Select(pile => pile.Append(new EpidemicCard()).OrderBy(_ => Rng.Next()))
             .SelectMany(c => c)
             .ToImmutableList();
 
@@ -714,9 +992,11 @@ public partial record PandemicGame
 
     private PandemicGame SetupInfectionDeck(ICollection<IEvent> events)
     {
-        var unshuffledCities = StandardGameBoard.Cities.Select(InfectionCard.FromCity).OrderBy(_ => Rng.Next());
+        var unshuffledCities = StandardGameBoard
+            .Cities.Select(InfectionCard.FromCity)
+            .OrderBy(_ => Rng.Next());
 
-        return ApplyEvent(new InfectionDeckSetUp(unshuffledCities.ToImmutableList()), events);
+        return ApplyEvent(new InfectionDeckSetUp([.. unshuffledCities]), events);
     }
 
     private PandemicGame AddPlayer(Role role, ICollection<IEvent> events)
@@ -724,11 +1004,16 @@ public partial record PandemicGame
         return ApplyEvent(new PlayerAdded(role), events);
     }
 
-    private PandemicGame ShufflePlayerDrawPileForDealing(ICollection<IEvent> events, bool includeSpecialEventCards)
+    private PandemicGame ShufflePlayerDrawPileForDealing(
+        ICollection<IEvent> events,
+        bool includeSpecialEventCards
+    )
     {
-        var playerCards = StandardGameBoard.Cities
-            .Select(c => new PlayerCityCard(c) as PlayerCard)
-            .Concat(includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>())
+        var playerCards = StandardGameBoard
+            .Cities.Select(c => new PlayerCityCard(c) as PlayerCard)
+            .Concat(
+                includeSpecialEventCards ? SpecialEventCards.All : Enumerable.Empty<PlayerCard>()
+            )
             .OrderBy(_ => Rng.Next())
             .ToImmutableList();
 
@@ -743,7 +1028,10 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 3; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+                game = game.ApplyEvent(
+                    new CubeAddedToCity(infectionCard.City, infectionCard.Colour),
+                    events
+                );
             }
         }
 
@@ -753,7 +1041,10 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 2; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+                game = game.ApplyEvent(
+                    new CubeAddedToCity(infectionCard.City, infectionCard.Colour),
+                    events
+                );
             }
         }
 
@@ -763,7 +1054,10 @@ public partial record PandemicGame
             game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
             for (var j = 0; j < 1; j++)
             {
-                game = game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+                game = game.ApplyEvent(
+                    new CubeAddedToCity(infectionCard.City, infectionCard.Colour),
+                    events
+                );
             }
         }
 
@@ -775,7 +1069,9 @@ public partial record PandemicGame
         ThrowIfGameOver(game);
 
         if (game.PlayerDrawPile.Count == 0)
+        {
             return game.ApplyEvent(new GameLost("No more player cards"), events);
+        }
 
         var card = game.PlayerDrawPile.TopCard;
 
@@ -784,10 +1080,15 @@ public partial record PandemicGame
         if (card is EpidemicCard epidemicCard)
         {
             game = game.ApplyEvent(new EpidemicTriggered(), events);
-            game = game.ApplyEvent(new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard), events);
+            game = game.ApplyEvent(
+                new EpidemicPlayerCardDiscarded(game.CurrentPlayer.Role, epidemicCard),
+                events
+            );
         }
         else if (game.CardsDrawn == 2)
+        {
             game = game.ApplyEvent(new TurnPhaseEnded(TurnPhase.InfectCities), events);
+        }
 
         return game;
     }
@@ -797,19 +1098,30 @@ public partial record PandemicGame
         ThrowIfGameOver(game);
 
         if (game.InfectionDrawPile.Count == 0)
+        {
             return game.ApplyEvent(new GameLost("Ran out of infection cards"), events);
+        }
 
         var infectionCard = game.InfectionDrawPile.TopCard;
         game = game.ApplyEvent(new InfectionCardDrawn(infectionCard), events);
 
         if (game.IsEradicated(infectionCard.Colour))
+        {
             return game;
+        }
 
         if (game.IsMedicAt(infectionCard.City) && game.IsCured(infectionCard.Colour))
+        {
             return game.ApplyEvent(new MedicPreventedInfection(infectionCard.City), events);
+        }
 
         if (game.DoesQuarantineSpecialistPreventInfectionAt(infectionCard.City))
-            return game.ApplyEvent(new QuarantineSpecialistPreventedInfection(infectionCard.City), events);
+        {
+            return game.ApplyEvent(
+                new QuarantineSpecialistPreventedInfection(infectionCard.City),
+                events
+            );
+        }
 
         if (game.CityByName(infectionCard.City).Cubes.NumberOf(infectionCard.Colour) == 3)
         {
@@ -818,10 +1130,18 @@ public partial record PandemicGame
 
         return game.Cubes.NumberOf(infectionCard.Colour) == 0
             ? game.ApplyEvent(new GameLost($"Ran out of {infectionCard.Colour} cubes"), events)
-            : game.ApplyEvent(new CubeAddedToCity(infectionCard.City, infectionCard.Colour), events);
+            : game.ApplyEvent(
+                new CubeAddedToCity(infectionCard.City, infectionCard.Colour),
+                events
+            );
     }
 
-    private static PandemicGame Outbreak(PandemicGame game, string city, Colour colour, ICollection<IEvent> events)
+    private static PandemicGame Outbreak(
+        PandemicGame game,
+        string city,
+        Colour colour,
+        ICollection<IEvent> events
+    )
     {
         var toOutbreak = new Queue<string>();
         var outBroken = new List<string>();
@@ -838,7 +1158,9 @@ public partial record PandemicGame
             }
             game = game.ApplyEvent(new OutbreakOccurred(next), events);
             if (game.OutbreakCounter == 8)
+            {
                 return game.ApplyEvent(new GameLost("8 outbreaks"), events);
+            }
 
             var adjacent = StandardGameBoard.AdjacentCities[next].Select(game.CityByName).ToList();
 
@@ -847,21 +1169,36 @@ public partial record PandemicGame
                 if (adj.Cubes.NumberOf(colour) == 3)
                 {
                     if (!outBroken.Contains(adj.Name))
+                    {
                         toOutbreak.Enqueue(adj.Name);
+                    }
                 }
                 else
                 {
                     if (game.Cubes.NumberOf(colour) == 0)
+                    {
                         return game.ApplyEvent(new GameLost($"Ran out of {colour} cubes"), events);
+                    }
 
-                    if (game.Players.Any(p => p.Role == Role.Medic)
+                    if (
+                        game.Players.Any(p => p.Role == Role.Medic)
                         && game.PlayerByRole(Role.Medic).Location == adj.Name
-                        && game.IsCured(colour))
-                        game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                        && game.IsCured(colour)
+                    )
+                    {
+                        _ = game.ApplyEvent(new MedicPreventedInfection(adj.Name), events);
+                    }
                     else if (game.DoesQuarantineSpecialistPreventInfectionAt(adj.Name))
-                        game.ApplyEvent(new QuarantineSpecialistPreventedInfection(adj.Name), events);
+                    {
+                        _ = game.ApplyEvent(
+                            new QuarantineSpecialistPreventedInfection(adj.Name),
+                            events
+                        );
+                    }
                     else
+                    {
                         game = game.ApplyEvent(new CubeAddedToCity(adj.Name, colour), events);
+                    }
                 }
             }
         }
@@ -871,23 +1208,37 @@ public partial record PandemicGame
 
     private static void ThrowIfGameOver(PandemicGame game)
     {
-        if (game.IsOver) throw new GameRuleViolatedException("Game is over!");
+        if (game.IsOver)
+        {
+            throw new GameRuleViolatedException("Game is over!");
+        }
     }
 
     private void ThrowIfNotRolesTurn(Role role)
     {
-        if (CurrentPlayer.Role != role) throw new GameRuleViolatedException($"It's not {role}'s turn!");
+        if (CurrentPlayer.Role != role)
+        {
+            throw new GameRuleViolatedException($"It's not {role}'s turn!");
+        }
     }
 
     private static void ThrowIfNoActionsRemaining(Player player)
     {
         if (player.ActionsRemaining == 0)
-            throw new GameRuleViolatedException($"Action not allowed: Player {player.Role} has no actions remaining");
+        {
+            throw new GameRuleViolatedException(
+                $"Action not allowed: Player {player.Role} has no actions remaining"
+            );
+        }
     }
 
     private static void ThrowIfPlayerMustDiscard(Player player)
     {
         if (player.Hand.Count > 7)
-            throw new GameRuleViolatedException($"Action not allowed: Player {player.Role} has more than 7 cards in hand");
+        {
+            throw new GameRuleViolatedException(
+                $"Action not allowed: Player {player.Role} has more than 7 cards in hand"
+            );
+        }
     }
 }

@@ -1,95 +1,102 @@
+namespace pandemic.console;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using pandemic.agents;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.drawing;
+using agents;
+using Aggregates.Game;
+using Commands;
+using drawing;
 
-namespace pandemic.console
+public static class HeuristicDfsDrawer
 {
-    public class HeuristicDfsDrawer
+    private const int NodeLimit = 300;
+    private static readonly Random _rng = new();
+    private static readonly PlayerCommandGenerator CommandGenerator = new();
+
+    public static void DrawSearch(PandemicGame game)
     {
-        private const int NodeLimit = 300;
-        private static readonly Random _rng = new();
-        private static readonly PlayerCommandGenerator CommandGenerator = new();
+        var root = new SearchNode(game, null, null);
+        var tracker = new NodeTracker();
 
-        public static void DrawSearch(PandemicGame game)
+        Dfs(root, tracker);
+
+        var graph = new DrawerGraph();
+        var drawerRoot = graph.CreateNode();
+        ExpandGraph(graph, root, drawerRoot);
+
+        CsDotDrawer.FromGraph(graph).SaveToFile("hdfs.dot");
+    }
+
+    private static void Dfs(SearchNode node, NodeTracker nodeTracker)
+    {
+        if (nodeTracker.TotalNumNodes == NodeLimit)
         {
-            var root = new SearchNode(game, null, null);
-            var tracker = new NodeTracker();
-
-            Dfs(root, tracker);
-
-            var graph = new DrawerGraph();
-            var drawerRoot = graph.CreateNode();
-            ExpandGraph(graph, root, drawerRoot);
-
-            CsDotDrawer.FromGraph(graph).SaveToFile("hdfs.dot");
+            return;
         }
 
-        private static void Dfs(SearchNode node, NodeTracker nodeTracker)
+        if (!DfsWithHeuristicsAgent.CanWin(node.State))
         {
-            if (nodeTracker.TotalNumNodes == NodeLimit) return;
-            if (!DfsWithHeuristicsAgent.CanWin(node.State)) return;
-
-            var legalActions = CommandGenerator.AllLegalCommands(node.State)
-                .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
-                // shuffle, otherwise we're at the mercy of the order of the move generator
-                .ThenBy(_ => _rng.Next()).ToList();
-
-            foreach (var action in legalActions)
-            {
-                if (nodeTracker.TotalNumNodes == NodeLimit) return;
-
-                var (childState, _) = node.State.Do(action);
-                var child = new SearchNode(childState, action, node);
-                node.Children.Add(child);
-                nodeTracker.TotalNumNodes++;
-                Dfs(child, nodeTracker);
-            }
+            return;
         }
 
-        private static void ExpandGraph(DrawerGraph graph, SearchNode node, DrawerNode drawerNode)
+        var legalActions = CommandGenerator
+            .AllLegalCommands(node.State)
+            .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
+            // shuffle, otherwise we're at the mercy of the order of the move generator
+            .ThenBy(_ => _rng.Next())
+            .ToList();
+
+        foreach (var action in legalActions)
         {
-            if (node.State.IsLost)
+            if (nodeTracker.TotalNumNodes == NodeLimit)
             {
-                drawerNode.Label = node.State.LossReason;
-            }
-            else if (!DfsWithHeuristicsAgent.CanWin(node.State))
-            {
-                drawerNode.Label = DfsWithHeuristicsAgent.ReasonGameCannotBeWon(node.State);
-            }
-            else
-            {
-                var game = node.State;
-                var cures = string.Join("", game.CuresDiscovered.Select(c => c.Colour));
-                drawerNode.Label = $"deck: {game.PlayerDrawPile.Count}. Cures: {cures}";
+                return;
             }
 
-            foreach (var child in node.Children)
-            {
-                var drawerChild = graph.CreateNode();
-                graph.CreateEdge(drawerNode, drawerChild, child.Command!.ToString());
-                ExpandGraph(graph, child, drawerChild);
-            }
+            var (childState, _) = node.State.Do(action);
+            var child = new SearchNode(childState, action, node);
+            node.Children.Add(child);
+            nodeTracker.TotalNumNodes++;
+            Dfs(child, nodeTracker);
+        }
+    }
+
+    private static void ExpandGraph(DrawerGraph graph, SearchNode node, DrawerNode drawerNode)
+    {
+        if (node.State.IsLost)
+        {
+            drawerNode.Label = node.State.LossReason;
+        }
+        else if (!DfsWithHeuristicsAgent.CanWin(node.State))
+        {
+            drawerNode.Label = DfsWithHeuristicsAgent.ReasonGameCannotBeWon(node.State);
+        }
+        else
+        {
+            var game = node.State;
+            var cures = string.Join("", game.CuresDiscovered.Select(c => c.Colour));
+            drawerNode.Label = $"deck: {game.PlayerDrawPile.Count}. Cures: {cures}";
         }
 
-        /// <summary>
-        /// Action: command that resulted in State
-        /// </summary>
-        private record SearchNode(
-            PandemicGame State,
-            IPlayerCommand? Command,
-            SearchNode? Parent
-        )
+        foreach (var child in node.Children)
         {
-            public readonly List<SearchNode> Children = new();
+            var drawerChild = graph.CreateNode();
+            _ = graph.CreateEdge(drawerNode, drawerChild, child.Command!.ToString());
+            ExpandGraph(graph, child, drawerChild);
         }
+    }
 
-        private class NodeTracker
-        {
-            public int TotalNumNodes { get; set; } = 0;
-        }
+    /// <summary>
+    /// Action: command that resulted in State
+    /// </summary>
+    private record SearchNode(PandemicGame State, IPlayerCommand? Command, SearchNode? Parent)
+    {
+        public readonly List<SearchNode> Children = [];
+    }
+
+    private class NodeTracker
+    {
+        public int TotalNumNodes { get; set; } = 0;
     }
 }

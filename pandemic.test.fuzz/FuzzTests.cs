@@ -1,28 +1,21 @@
-using System.Reflection;
-using pandemic.agents;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.test.Utils;
-using pandemic.Values;
-using Shouldly;
-using utils;
-using Xunit.Abstractions;
-using Xunit.Sdk;
-
 namespace pandemic.test.fuzz;
+
+using agents;
+using Aggregates.Game;
+using Commands;
+using Shouldly;
+using Utils;
+using utils;
+using Values;
+using Xunit.Abstractions;
 
 /// <summary>
 /// Using XUnit for fuzz tests, since it seems to more reliably
 /// capture console output.
 /// </summary>
-public class FuzzTests
+public class FuzzTests(ITestOutputHelper testOutputHelper)
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public FuzzTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
     [Fact]
     public void Fuzz_test_games()
@@ -47,17 +40,23 @@ public class FuzzTests
                 var legalCommands = game.LegalCommands().ToList();
 
                 if (game.Players.Any(p => p.Hand.Count > 7))
-                    legalCommands.ShouldAllBe(c => c is DiscardPlayerCardCommand || c.IsSpecialEvent);
+                {
+                    legalCommands.ShouldAllBe(c =>
+                        c is DiscardPlayerCardCommand || c.IsSpecialEvent
+                    );
+                }
 
                 // try a bunch of illegal commands
-                foreach (var illegalCommand in allPossibleCommands
-                             .Except(legalCommands)
-                             .OrderBy(_ => random.Next())
-                             .Take(illegalCommandsToTryPerTurn))
+                foreach (
+                    var illegalCommand in allPossibleCommands
+                        .Except(legalCommands)
+                        .OrderBy(_ => random.Next())
+                        .Take(illegalCommandsToTryPerTurn)
+                )
                 {
                     try
                     {
-                        game.Do(illegalCommand);
+                        _ = game.Do(illegalCommand);
                         Log(game);
                         Log();
                         Log("Events, in reverse:");

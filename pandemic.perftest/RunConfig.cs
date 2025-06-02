@@ -1,4 +1,4 @@
-﻿namespace pandemic.perftest;
+namespace pandemic.perftest;
 
 public record RunConfig
 {

@@ -1,20 +1,21 @@
-﻿using System;
-using System.Collections.Immutable;
-
 namespace pandemic.Values;
+
+using System;
+using System.Collections.Immutable;
 
 public record CubePile
 {
-    public readonly int Red = 0;
-    public readonly int Yellow = 0;
-    public readonly int Black = 0;
-    public readonly int Blue = 0;
+    public readonly int Red;
+    public readonly int Yellow;
+    public readonly int Black;
+    public readonly int Blue;
 
-    public int Total() => Red + Blue + Black + Yellow;
-
-    private CubePile()
+    public int Total()
     {
+        return Red + Blue + Black + Yellow;
     }
+
+    private CubePile() { }
 
     public CubePile(IImmutableDictionary<Colour, int> cubes)
     {
@@ -36,7 +37,10 @@ public record CubePile
 
     public bool HasSameCubesAs(CubePile other)
     {
-        return Red == other.Red && Blue == other.Blue && Black == other.Black && Yellow == other.Yellow;
+        return Red == other.Red
+            && Blue == other.Blue
+            && Black == other.Black
+            && Yellow == other.Yellow;
     }
 
     public CubePile AddCube(Colour colour)
@@ -52,7 +56,7 @@ public record CubePile
             Colour.Blue => new CubePile(Red, Blue + numCubes, Black, Yellow),
             Colour.Black => new CubePile(Red, Blue, Black + numCubes, Yellow),
             Colour.Yellow => new CubePile(Red, Blue, Black, Yellow + numCubes),
-            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null),
         };
     }
 
@@ -64,7 +68,7 @@ public record CubePile
             Colour.Blue => new CubePile(Red, Blue - numCubes, Black, Yellow),
             Colour.Black => new CubePile(Red, Blue, Black - numCubes, Yellow),
             Colour.Yellow => new CubePile(Red, Blue, Black, Yellow - numCubes),
-            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null),
         };
     }
 
@@ -81,7 +85,7 @@ public record CubePile
             Colour.Blue => new CubePile(Red, 0, Black, Yellow),
             Colour.Black => new CubePile(Red, Blue, 0, Yellow),
             Colour.Yellow => new CubePile(Red, Blue, Black, 0),
-            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null),
         };
     }
 
@@ -98,7 +102,7 @@ public record CubePile
             Colour.Blue => Blue,
             Colour.Black => Black,
             Colour.Yellow => Yellow,
-            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, null),
         };
     }
 

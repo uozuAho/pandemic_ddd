@@ -1,8 +1,8 @@
-﻿using System;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-
 namespace pandemic.agents;
+
+using System;
+using Aggregates.Game;
+using Commands;
 
 public class GreedyAgent : ILiveAgent
 {
@@ -16,14 +16,19 @@ public class GreedyAgent : ILiveAgent
             var (nextState, _) = game.Do(command);
 
             var stateScore = GameEvaluator.GameEvaluator.Score(nextState);
-            if (stateScore < bestScore) continue;
+            if (stateScore < bestScore)
+            {
+                continue;
+            }
 
             bestScore = stateScore;
             bestCommand = command;
         }
 
         if (bestCommand == null)
+        {
             throw new InvalidOperationException();
+        }
 
         return bestCommand;
     }

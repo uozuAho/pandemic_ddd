@@ -2,12 +2,12 @@ namespace pandemic.drawing;
 
 public class DrawerGraph
 {
-    public List<DrawerNode> Nodes = new();
-    public List<DrawerEdge> Edges = new();
+    public List<DrawerNode> Nodes = [];
+    public List<DrawerEdge> Edges = [];
 
     public DrawerNode CreateNode(string label = "")
     {
-        var node = new DrawerNode {Label = label};
+        var node = new DrawerNode { Label = label };
         Nodes.Add(node);
         return node;
     }

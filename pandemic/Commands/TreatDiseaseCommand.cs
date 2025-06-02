@@ -1,6 +1,6 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 public record TreatDiseaseCommand(Role Role, string City, Colour Colour) : IPlayerCommand
 {

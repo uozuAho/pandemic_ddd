@@ -1,12 +1,12 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 /// <summary>
 /// Discard the card matching the city you're in to fly to any city
 /// </summary>
-public record CharterFlightCommand(Role Role, PlayerCityCard DiscardCard, string Destination) :
-    IPlayerCommand
+public record CharterFlightCommand(Role Role, PlayerCityCard DiscardCard, string Destination)
+    : IPlayerCommand
 {
     public override string ToString()
     {

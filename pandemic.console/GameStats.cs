@@ -1,32 +1,40 @@
-using System.Collections.Generic;
-
 namespace pandemic.console;
 
-class GameStats
+using System.Collections.Generic;
+
+internal class GameStats
 {
     /// <summary>
     /// {num actions : count}
     /// </summary>
-    public readonly Dictionary<int, int> ActionsPerGameCounts = new();
+    public readonly Dictionary<int, int> ActionsPerGameCounts = [];
 
     /// <summary>
     /// {num legal actions : count}
     /// </summary>
-    public readonly Dictionary<int, int> LegalActionCounts = new();
+    public readonly Dictionary<int, int> LegalActionCounts = [];
 
     public void AddNumActionsInGame(int numActions)
     {
         if (ActionsPerGameCounts.ContainsKey(numActions))
+        {
             ActionsPerGameCounts[numActions]++;
+        }
         else
+        {
             ActionsPerGameCounts[numActions] = 1;
+        }
     }
 
     public void AddLegalActionCount(int numLegalActions)
     {
         if (LegalActionCounts.ContainsKey(numLegalActions))
+        {
             LegalActionCounts[numLegalActions]++;
+        }
         else
+        {
             LegalActionCounts[numLegalActions] = 1;
+        }
     }
 }

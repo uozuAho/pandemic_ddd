@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    internal record PlayerCardsDealt(Role Role, PlayerCard[] Cards) : IEvent;
-}
+using Values;
+
+internal record PlayerCardsDealt(Role Role, PlayerCard[] Cards) : IEvent;

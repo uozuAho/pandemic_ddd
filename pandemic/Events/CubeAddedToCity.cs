@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    public record CubeAddedToCity(string City, Colour Colour) : IEvent;
-}
+using Values;
+
+public record CubeAddedToCity(string City, Colour Colour) : IEvent;

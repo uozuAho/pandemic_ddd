@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
-using pandemic.agents;
-using pandemic.agents.GreedyBfs;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.Values;
-
 namespace pandemic.perftest;
+
+using System.Diagnostics;
+using agents;
+using agents.GreedyBfs;
+using Aggregates.Game;
+using Commands;
+using Values;
 
 public static class GameRunner
 {
@@ -36,7 +36,11 @@ public static class GameRunner
             {
                 var searchNode = search.Step();
                 commandsExecuted++;
-                if (searchNode == null) break;
+                if (searchNode == null)
+                {
+                    break;
+                }
+
                 game = searchNode.State;
             }
             numGames++;
@@ -74,11 +78,14 @@ public static class GameRunner
             Roles = new[] { Role.Medic, Role.Dispatcher },
             Difficulty = Difficulty.Introductory,
             CommandGenerator = new SensibleCommandGenerator(),
-            Rng = config.Rng
+            Rng = config.Rng,
         };
 
         var (game, _) = PandemicGame.CreateNewGame(options);
 
-        return game with { SelfConsistencyCheckingEnabled = false };
+        return game with
+        {
+            SelfConsistencyCheckingEnabled = false,
+        };
     }
 }

@@ -1,372 +1,464 @@
+namespace pandemic.Aggregates.Game;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using pandemic.Commands;
-using pandemic.Events;
-using pandemic.GameData;
-using pandemic.Values;
+using Commands;
+using Events;
+using GameData;
+using Values;
 
-namespace pandemic.Aggregates.Game
+public partial record PandemicGame
 {
-    public partial record PandemicGame
+    public string LossReason { get; init; } = "";
+    public Difficulty Difficulty { get; init; }
+    public int InfectionRate => StandardGameBoard.InfectionRates[InfectionRateMarkerPosition];
+    public int OutbreakCounter { get; init; }
+    public int InfectionRateMarkerPosition { get; init; }
+    public Player CurrentPlayer => Players[CurrentPlayerIdx];
+    public int CurrentPlayerIdx { get; init; }
+    public int ResearchStationPile { get; init; } = 5;
+    public ImmutableArray<Player> Players { get; init; } = [];
+    public ImmutableArray<City> Cities { get; init; }
+    public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
+    public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
+    public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
+    public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
+    public CubePile Cubes { get; init; } =
+        new(ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
+
+    private readonly ICommandGenerator _commandGenerator;
+
+    public IEnumerable<IPlayerCommand> LegalCommands()
     {
-        public string LossReason { get; init; } = "";
-        public Difficulty Difficulty { get; init; }
-        public int InfectionRate => StandardGameBoard.InfectionRates[InfectionRateMarkerPosition];
-        public int OutbreakCounter { get; init; }
-        public int InfectionRateMarkerPosition { get; init; }
-        public Player CurrentPlayer => Players[CurrentPlayerIdx];
-        public int CurrentPlayerIdx { get; init; }
-        public int ResearchStationPile { get; init; } = 5;
-        public ImmutableArray<Player> Players { get; init; } = ImmutableArray<Player>.Empty;
-        public ImmutableArray<City> Cities { get; init; }
-        public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
-        public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
-        public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
-        public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
-        public CubePile Cubes { get; init; } =
-            new (ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
+        return _commandGenerator.Commands(this);
+    }
 
-        private readonly ICommandGenerator _commandGenerator;
+    public bool SelfConsistencyCheckingEnabled { get; init; } = true;
 
-        public IEnumerable<IPlayerCommand> LegalCommands()
+    private Random Rng { get; } = new();
+
+    public ImmutableList<CureMarker> CuresDiscovered { get; init; } = [];
+
+    public bool IsOver => IsLost || IsWon;
+    public bool IsWon => CuresDiscovered.Count == 4;
+    public bool IsLost => !string.IsNullOrEmpty(LossReason);
+    public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
+
+    public Player PlayerByRole(Role role)
+    {
+        for (var i = 0; i < Players.Length; i++)
         {
-            return _commandGenerator.Commands(this);
+            if (Players[i].Role == role)
+            {
+                return Players[i];
+            }
         }
 
-        public bool SelfConsistencyCheckingEnabled { get; init; } = true;
+        throw new ArgumentException("No player with that role");
+    }
 
-        private Random Rng { get; } = new();
+    public City CityByName(string city)
+    {
+        return Cities[StandardGameBoard.CityIdx(city)];
+    }
 
-        public ImmutableList<CureMarker> CuresDiscovered { get; init; } = ImmutableList<CureMarker>.Empty;
-
-        public bool IsOver => IsLost || IsWon;
-        public bool IsWon => CuresDiscovered.Count == 4;
-        public bool IsLost => LossReason != "";
-        public TurnPhase PhaseOfTurn { get; init; } = TurnPhase.DoActions;
-
-        public Player PlayerByRole(Role role)
+    public bool IsCured(Colour colour)
+    {
+        // perf:
+        // ReSharper disable once ForCanBeConvertedToForeach
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        for (var i = 0; i < CuresDiscovered.Count; i++)
         {
-            for (var i = 0; i < Players.Length; i++)
+            var cure = CuresDiscovered[i];
+            if (cure.Colour == colour)
             {
-                if (Players[i].Role == role) return Players[i];
+                return true;
             }
-
-            throw new ArgumentException("No player with that role");
         }
-        public City CityByName(string city) => Cities[StandardGameBoard.CityIdx(city)];
 
-        public bool IsCured(Colour colour)
+        return false;
+    }
+
+    public bool IsEradicated(Colour colour)
+    {
+        return CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide
+            == CureMarkerSide.Sunset;
+    }
+
+    public bool APlayerMustDiscard => PlayerThatNeedsToDiscard() != null;
+
+    public Player? PlayerThatNeedsToDiscard()
+    {
+        for (int i = 0; i < Players.Length; i++)
         {
-            // perf:
-            // ReSharper disable once ForCanBeConvertedToForeach
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            for (var i = 0; i < CuresDiscovered.Count; i++)
+            var player = Players[i];
+            if (player.Hand.Count > 7)
             {
-                var cure = CuresDiscovered[i];
-                if (cure.Colour == colour) return true;
+                return player;
             }
+        }
 
+        return null;
+    }
+
+    /// <summary>
+    /// A special event was 'recently' chosen not to be used. Toggles back on when the
+    /// next opportunity to use a special event arises.
+    /// </summary>
+    public bool SpecialEventWasRecentlySkipped { get; init; }
+
+    /// <summary>
+    /// Number of cards drawn during the current 'draw cards' phase
+    /// </summary>
+    public int CardsDrawn { get; init; }
+
+    private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = [];
+
+    private ImmutableList<PlayerCard> PlayerCardsRemovedFromGame { get; init; } = [];
+
+    /// <summary>
+    /// enabled by using the 'one quiet night' special event card
+    /// </summary>
+    private bool OneQuietNightWillBeUsedNextInfectPhase { get; init; }
+
+    private bool PlayerCommandRequired()
+    {
+        return !IsOver && _commandGenerator.Commands(this).Any();
+    }
+
+    public bool IsSameStateAs(PandemicGame other)
+    {
+        if (LossReason != other.LossReason)
+        {
             return false;
         }
 
-        public bool IsEradicated(Colour colour) =>
-            CuresDiscovered.SingleOrDefault(m => m.Colour == colour)?.ShowingSide == CureMarkerSide.Sunset;
-
-        public bool APlayerMustDiscard => PlayerThatNeedsToDiscard() != null;
-
-        public Player? PlayerThatNeedsToDiscard()
+        if (Difficulty != other.Difficulty)
         {
-            for (int i = 0; i < Players.Length; i++)
-            {
-                var player = Players[i];
-                if (player.Hand.Count > 7) return player;
-            }
-
-            return null;
+            return false;
         }
 
-        /// <summary>
-        /// A special event was 'recently' chosen not to be used. Toggles back on when the
-        /// next opportunity to use a special event arises.
-        /// </summary>
-        public bool SpecialEventWasRecentlySkipped { get; init; } = false;
-
-        /// <summary>
-        /// Number of cards drawn during the current 'draw cards' phase
-        /// </summary>
-        public int CardsDrawn { get; init; }
-
-        private ImmutableList<InfectionCard> InfectionCardsRemovedFromGame { get; init; } = ImmutableList<InfectionCard>.Empty;
-
-        private ImmutableList<PlayerCard> PlayerCardsRemovedFromGame { get; init; } = ImmutableList<PlayerCard>.Empty;
-
-        /// <summary>
-        /// enabled by using the 'one quiet night' special event card
-        /// </summary>
-        private bool OneQuietNightWillBeUsedNextInfectPhase { get; init; }
-
-        private bool PlayerCommandRequired()
+        if (InfectionRate != other.InfectionRate)
         {
-            return !IsOver && _commandGenerator.Commands(this).Any();
+            return false;
         }
 
-        public bool IsSameStateAs(PandemicGame other)
+        if (OutbreakCounter != other.OutbreakCounter)
         {
-            if (LossReason != other.LossReason) return false;
-            if (Difficulty != other.Difficulty) return false;
-            if (InfectionRate != other.InfectionRate) return false;
-            if (OutbreakCounter != other.OutbreakCounter) return false;
-            if (CurrentPlayerIdx != other.CurrentPlayerIdx) return false;
-            if (ResearchStationPile != other.ResearchStationPile) return false;
-
-            // order is expected to be the same and significant (different order means not equal)
-            if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer)) return false;
-            if (!Cities.SequenceEqual(other.Cities, City.DefaultEqualityComparer)) return false;
-            if (!InfectionDrawPile.IsSameAs(other.InfectionDrawPile)) return false;
-            if (!InfectionDiscardPile.IsSameAs(other.InfectionDiscardPile)) return false;
-            if (!PlayerDrawPile.IsSameAs(other.PlayerDrawPile)) return false;
-            if (!Cubes.HasSameCubesAs(other.Cubes)) return false;
-            if (!CuresDiscovered.SequenceEqual(other.CuresDiscovered)) return false;
-
-            return true;
+            return false;
         }
 
-        public static int NumberOfEpidemicCards(Difficulty difficulty)
+        if (CurrentPlayerIdx != other.CurrentPlayerIdx)
         {
-            return difficulty switch
-            {
-                Difficulty.Introductory => 4,
-                Difficulty.Normal => 5,
-                Difficulty.Heroic => 6,
-                _ => throw new ArgumentOutOfRangeException(nameof(difficulty), difficulty, null)
-            };
+            return false;
         }
 
-        public static int InitialPlayerHandSize(int numberOfPlayers)
+        if (ResearchStationPile != other.ResearchStationPile)
         {
-            return numberOfPlayers switch
-            {
-                2 => 4,
-                3 => 3,
-                4 => 2,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            return false;
         }
 
-        private PandemicGame(Random rng, ICommandGenerator commandGenerator)
+        // order is expected to be the same and significant (different order means not equal)
+        if (!Players.SequenceEqual(other.Players, Player.DefaultEqualityComparer))
         {
-            Cities = StandardGameBoard.Cities.Select(c => new City(c.Name)).ToImmutableArray();
-
-            var atlanta = CityByName("Atlanta");
-            Cities = Cities.Replace(atlanta, atlanta with {HasResearchStation = true});
-
-            PlayerDrawPile = new Deck<PlayerCard>(StandardGameBoard.Cities
-                .Select(c => new PlayerCityCard(c) as PlayerCard));
-
-            Rng = rng;
-            _commandGenerator = commandGenerator;
+            return false;
         }
 
-        public static PandemicGame CreateUninitialisedGame(Random? rng = null, ICommandGenerator? commandGenerator = null)
+        if (!Cities.SequenceEqual(other.Cities, City.DefaultEqualityComparer))
         {
-            return new(rng ?? new Random(), commandGenerator ?? new AllLegalCommandGenerator());
+            return false;
         }
 
-        public static PandemicGame FromEvents(IEnumerable<IEvent> events)
+        if (!InfectionDrawPile.IsSameAs(other.InfectionDrawPile))
         {
-            // this code is easier to debug than events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
-
-            var game = CreateUninitialisedGame();
-            var eventNumber = 0;
-
-            foreach (var evt in events)
-            {
-                eventNumber++;
-                game = ApplyEvent(game, evt);
-            }
-
-            return game;
+            return false;
         }
 
-        public PandemicGame Copy()
+        if (!InfectionDiscardPile.IsSameAs(other.InfectionDiscardPile))
         {
-            return this with { };
+            return false;
         }
 
-        public PandemicGame Cure(Colour colour)
+        if (!PlayerDrawPile.IsSameAs(other.PlayerDrawPile))
         {
-            if (IsCured(colour))
-                throw new InvalidOperationException($"{colour} is already cured");
-
-            return this with
-            {
-                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial))
-            };
+            return false;
         }
 
-        public PandemicGame Eradicate(Colour colour)
+        if (!Cubes.HasSameCubesAs(other.Cubes))
         {
-            if (IsEradicated(colour))
-                throw new InvalidOperationException($"{colour} is already eradicated");
-
-            return this with
-            {
-                CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Sunset))
-            };
+            return false;
         }
 
-        public PandemicGame AddCube(string city, Colour colour)
+        if (!CuresDiscovered.SequenceEqual(other.CuresDiscovered))
         {
-            return AddCubes(city, colour, 1);
+            return false;
         }
 
-        public PandemicGame AddCubes(string city, Colour colour, int numCubes)
-        {
-            var city_ = CityByName(city);
-            var cityIdx = StandardGameBoard.CityIdx(city);
+        return true;
+    }
 
-            return this with
-            {
-                Cities = Cities.SetItem(cityIdx, city_ with { Cubes = city_.Cubes.AddCubes(colour, numCubes) }),
-                Cubes = Cubes.RemoveCubes(colour, numCubes)
-            };
+    public static int NumberOfEpidemicCards(Difficulty difficulty)
+    {
+        return difficulty switch
+        {
+            Difficulty.Introductory => 4,
+            Difficulty.Normal => 5,
+            Difficulty.Heroic => 6,
+            _ => throw new ArgumentOutOfRangeException(nameof(difficulty), difficulty, null),
+        };
+    }
+
+    public static int InitialPlayerHandSize(int numberOfPlayers)
+    {
+        return numberOfPlayers switch
+        {
+            2 => 4,
+            3 => 3,
+            4 => 2,
+            _ => throw new ArgumentOutOfRangeException(nameof(numberOfPlayers)),
+        };
+    }
+
+    private PandemicGame(Random rng, ICommandGenerator commandGenerator)
+    {
+        Cities = [.. StandardGameBoard.Cities.Select(c => new City(c.Name))];
+
+        var atlanta = CityByName("Atlanta");
+        Cities = Cities.Replace(atlanta, atlanta with { HasResearchStation = true });
+
+        PlayerDrawPile = new Deck<PlayerCard>(
+            StandardGameBoard.Cities.Select(c => new PlayerCityCard(c) as PlayerCard)
+        );
+
+        Rng = rng;
+        _commandGenerator = commandGenerator;
+    }
+
+    public static PandemicGame CreateUninitialisedGame(
+        Random? rng = null,
+        ICommandGenerator? commandGenerator = null
+    )
+    {
+        return new(rng ?? new Random(), commandGenerator ?? new AllLegalCommandGenerator());
+    }
+
+    public static PandemicGame FromEvents(IEnumerable<IEvent> events)
+    {
+        // this code is easier to debug than events.Aggregate(CreateUninitialisedGame(), ApplyEvent);
+
+        var game = CreateUninitialisedGame();
+        var eventNumber = 0;
+
+        foreach (var evt in events)
+        {
+            eventNumber++;
+            game = ApplyEvent(game, evt);
         }
 
-        private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
+        return game;
+    }
+
+    public PandemicGame Copy()
+    {
+        return this with { };
+    }
+
+    public PandemicGame Cure(Colour colour)
+    {
+        if (IsCured(colour))
         {
-            for (int i = 0; i < Players.Length; i++)
-            {
-                var player = Players[i];
-                if (player.Role == Role.QuarantineSpecialist)
+            throw new InvalidOperationException($"{colour} is already cured");
+        }
+
+        return this with
+        {
+            CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Vial)),
+        };
+    }
+
+    public PandemicGame Eradicate(Colour colour)
+    {
+        if (IsEradicated(colour))
+        {
+            throw new InvalidOperationException($"{colour} is already eradicated");
+        }
+
+        return this with
+        {
+            CuresDiscovered = CuresDiscovered.Add(new CureMarker(colour, CureMarkerSide.Sunset)),
+        };
+    }
+
+    public PandemicGame AddCube(string city, Colour colour)
+    {
+        return AddCubes(city, colour, 1);
+    }
+
+    public PandemicGame AddCubes(string city, Colour colour, int numCubes)
+    {
+        var city_ = CityByName(city);
+        var cityIdx = StandardGameBoard.CityIdx(city);
+
+        return this with
+        {
+            Cities = Cities.SetItem(
+                cityIdx,
+                city_ with
                 {
-                    if (player.Location == city || QuarantineSpecialistIsInNeighbouringCity(city))
-                    {
-                        return true;
-                    }
+                    Cubes = city_.Cubes.AddCubes(colour, numCubes),
                 }
-            }
-            return false;
-        }
+            ),
+            Cubes = Cubes.RemoveCubes(colour, numCubes),
+        };
+    }
 
-        private bool IsMedicAt(string city)
+    private bool DoesQuarantineSpecialistPreventInfectionAt(string city)
+    {
+        for (int i = 0; i < Players.Length; i++)
         {
-            for (int i = 0; i < Players.Length; i++)
+            var player = Players[i];
+            if (player.Role == Role.QuarantineSpecialist)
             {
-                var player = Players[i];
-                if (player.Role == Role.Medic && player.Location == city)
+                if (player.Location == city || QuarantineSpecialistIsInNeighbouringCity(city))
                 {
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
+    }
 
-        private bool QuarantineSpecialistIsInNeighbouringCity(string city)
+    private bool IsMedicAt(string city)
+    {
+        for (int i = 0; i < Players.Length; i++)
         {
-            var neighbouringCities = StandardGameBoard.AdjacentCities[city];
-
-            return neighbouringCities.Any(c => PlayerByRole(Role.QuarantineSpecialist).Location == c);
-        }
-
-        public override string ToString()
-        {
-            return PandemicGameStringRenderer.FullState(this);
-        }
-
-        private void ValidateInternalConsistency()
-        {
-            Debug.Assert(TotalCubesInGame() == 96);
-
-            Debug.Assert(Cubes.Red is >= 0 and <= 24);
-            Debug.Assert(Cubes.Yellow is >= 0 and <= 24);
-            Debug.Assert(Cubes.Blue is >= 0 and <= 24);
-            Debug.Assert(Cubes.Black is >= 0 and <= 24);
-
-            foreach (var city in Cities)
+            var player = Players[i];
+            if (player.Role == Role.Medic && player.Location == city)
             {
-                Debug.Assert(city.Cubes.NumberOf(Colour.Black) is >= 0 and <= 3);
-                Debug.Assert(city.Cubes.NumberOf(Colour.Blue) is >= 0 and <= 3);
-                Debug.Assert(city.Cubes.NumberOf(Colour.Red) is >= 0 and <= 3);
-                Debug.Assert(city.Cubes.NumberOf(Colour.Yellow) is >= 0 and <= 3);
+                return true;
             }
+        }
 
-            var totalPlayerCards = Players.Select(p => p.Hand.Count).Sum()
-                                   + PlayerDrawPile.Count
-                                   + PlayerDiscardPile.Count
-                                   + PlayerCardsRemovedFromGame.Count;
-            if (ContingencyPlannerStoredCard != null) totalPlayerCards++;
-            Debug.Assert(totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count);
+        return false;
+    }
 
-            var specialEventCards = Players
-                .SelectMany(p => p.Hand.Cards)
-                .Concat(PlayerDrawPile.Cards)
-                .Concat(PlayerDiscardPile.Cards)
-                .Concat(PlayerCardsRemovedFromGame)
-                .Concat(new[] { ContingencyPlannerStoredCard as PlayerCard })
-                .Where(c => c is ISpecialEventCard)
-                .ToList();
+    private bool QuarantineSpecialistIsInNeighbouringCity(string city)
+    {
+        var neighbouringCities = StandardGameBoard.AdjacentCities[city];
 
-            Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
-            Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
+        return neighbouringCities.Any(c => PlayerByRole(Role.QuarantineSpecialist).Location == c);
+    }
 
-            Debug.Assert(
-                InfectionDrawPile.Count
+    public override string ToString()
+    {
+        return PandemicGameStringRenderer.FullState(this);
+    }
+
+    private void ValidateInternalConsistency()
+    {
+        Debug.Assert(TotalCubesInGame() == 96);
+
+        Debug.Assert(Cubes.Red is >= 0 and <= 24);
+        Debug.Assert(Cubes.Yellow is >= 0 and <= 24);
+        Debug.Assert(Cubes.Blue is >= 0 and <= 24);
+        Debug.Assert(Cubes.Black is >= 0 and <= 24);
+
+        foreach (var city in Cities)
+        {
+            Debug.Assert(city.Cubes.NumberOf(Colour.Black) is >= 0 and <= 3);
+            Debug.Assert(city.Cubes.NumberOf(Colour.Blue) is >= 0 and <= 3);
+            Debug.Assert(city.Cubes.NumberOf(Colour.Red) is >= 0 and <= 3);
+            Debug.Assert(city.Cubes.NumberOf(Colour.Yellow) is >= 0 and <= 3);
+        }
+
+        var totalPlayerCards =
+            Players.Select(p => p.Hand.Count).Sum()
+            + PlayerDrawPile.Count
+            + PlayerDiscardPile.Count
+            + PlayerCardsRemovedFromGame.Count;
+        if (ContingencyPlannerStoredCard != null)
+        {
+            totalPlayerCards++;
+        }
+
+        Debug.Assert(
+            totalPlayerCards == 48 + NumberOfEpidemicCards(Difficulty) + SpecialEventCards.All.Count
+        );
+
+        var specialEventCards = Players
+            .SelectMany(p => p.Hand.Cards)
+            .Concat(PlayerDrawPile.Cards)
+            .Concat(PlayerDiscardPile.Cards)
+            .Concat(PlayerCardsRemovedFromGame)
+            .Concat(new[] { ContingencyPlannerStoredCard as PlayerCard })
+            .Where(c => c is ISpecialEventCard)
+            .ToList();
+
+        Debug.Assert(specialEventCards.Count == SpecialEventCards.All.Count);
+        Debug.Assert(specialEventCards.ToHashSet().Count == SpecialEventCards.All.Count);
+
+        Debug.Assert(
+            InfectionDrawPile.Count
                 + InfectionDiscardPile.Count
-                + InfectionCardsRemovedFromGame.Count == 48);
+                + InfectionCardsRemovedFromGame.Count
+                == 48
+        );
 
-            Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
+        Debug.Assert(ResearchStationPile + Cities.Count(c => c.HasResearchStation) == 6);
 
-            if (Players.Any(p => p.Role == Role.Medic))
-            {
-                foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
-                {
-                    var medicLocation = PlayerByRole(Role.Medic).Location;
-                    Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
-                }
-            }
-
+        if (Players.Any(p => p.Role == Role.Medic))
+        {
             foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
             {
-                var numCubesOnCities = Cities.Sum(c => c.Cubes.NumberOf(curedColour));
-
-                if (numCubesOnCities == 0)
-                    Debug.Assert(IsEradicated(curedColour));
+                var medicLocation = PlayerByRole(Role.Medic).Location;
+                Debug.Assert(CityByName(medicLocation).Cubes.NumberOf(curedColour) == 0);
             }
         }
 
-        public ISpecialEventCard? ContingencyPlannerStoredCard => Players
+        foreach (var curedColour in ColourExtensions.AllColours.Where(IsCured))
+        {
+            var numCubesOnCities = Cities.Sum(c => c.Cubes.NumberOf(curedColour));
+
+            if (numCubesOnCities == 0)
+            {
+                Debug.Assert(IsEradicated(curedColour));
+            }
+        }
+    }
+
+    public ISpecialEventCard? ContingencyPlannerStoredCard =>
+        Players
             .Where(p => p.Role == Role.ContingencyPlanner)
             .Select(p => (ContingencyPlanner)p)
             .Select(p => p.StoredEventCard)
             .FirstOrDefault();
 
-        private bool APlayerHasASpecialEventCard => Players.Any(p => p.Hand.Cards.Any(c => c is ISpecialEventCard)) ||
-                                                    ContingencyPlannerStoredCard != null;
+    private bool APlayerHasASpecialEventCard =>
+        Players.Any(p => p.Hand.Cards.Any(c => c is ISpecialEventCard))
+        || ContingencyPlannerStoredCard != null;
 
-        public bool APlayerHasEnoughToCure => Players.Any(p => p.HasEnoughToCure());
+    public bool APlayerHasEnoughToCure => Players.Any(p => p.HasEnoughToCure());
 
-        private int TotalCubesInGame()
+    private int TotalCubesInGame()
+    {
+        var totalCubes = 0;
+
+        totalCubes += Cubes.NumberOf(Colour.Black);
+        totalCubes += Cubes.NumberOf(Colour.Blue);
+        totalCubes += Cubes.NumberOf(Colour.Red);
+        totalCubes += Cubes.NumberOf(Colour.Yellow);
+
+        foreach (var city in Cities)
         {
-            var totalCubes = 0;
-
-            totalCubes += Cubes.NumberOf(Colour.Black);
-            totalCubes += Cubes.NumberOf(Colour.Blue);
-            totalCubes += Cubes.NumberOf(Colour.Red);
-            totalCubes += Cubes.NumberOf(Colour.Yellow);
-
-            foreach (var city in Cities)
-            {
-                totalCubes += city.Cubes.NumberOf(Colour.Black);
-                totalCubes += city.Cubes.NumberOf(Colour.Blue);
-                totalCubes += city.Cubes.NumberOf(Colour.Red);
-                totalCubes += city.Cubes.NumberOf(Colour.Yellow);
-            }
-
-            return totalCubes;
+            totalCubes += city.Cubes.NumberOf(Colour.Black);
+            totalCubes += city.Cubes.NumberOf(Colour.Blue);
+            totalCubes += city.Cubes.NumberOf(Colour.Red);
+            totalCubes += city.Cubes.NumberOf(Colour.Yellow);
         }
+
+        return totalCubes;
     }
 }

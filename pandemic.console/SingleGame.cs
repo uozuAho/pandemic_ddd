@@ -1,13 +1,13 @@
+namespace pandemic.console;
+
 using System;
 using System.Collections.Generic;
-using pandemic.agents;
-using pandemic.agents.GameEvaluator;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.Events;
-using pandemic.Values;
-
-namespace pandemic.console;
+using agents;
+using agents.GameEvaluator;
+using Aggregates.Game;
+using Commands;
+using Events;
+using Values;
 
 internal class SingleGame
 {
@@ -17,7 +17,7 @@ internal class SingleGame
         {
             Difficulty = Difficulty.Introductory,
             Roles = new[] { Role.Medic, Role.Dispatcher },
-            CommandGenerator = new SensibleCommandGenerator()
+            CommandGenerator = new SensibleCommandGenerator(),
         };
         var (game, events) = PandemicGame.CreateNewGame(gameOptions);
 
@@ -39,7 +39,10 @@ internal class SingleGame
 
         for (; numActions < 1000 && !game.IsOver; numActions++)
         {
-            if (numActions == 999) throw new InvalidOperationException("didn't expect this many turns");
+            if (numActions == 999)
+            {
+                throw new InvalidOperationException("didn't expect this many turns");
+            }
             // var scores = CommandScores(game);
             var command = agent.NextCommand(game);
             game = game.Do(command, events);

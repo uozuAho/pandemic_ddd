@@ -1,6 +1,6 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Events;
+
+using Values;
 
 internal record GovernmentGrantUsed(Role Role, string City) : IEvent
 {

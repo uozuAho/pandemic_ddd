@@ -1,12 +1,11 @@
-using pandemic.GameData;
+namespace pandemic.Values;
 
-namespace pandemic.Values
+using GameData;
+
+public record InfectionCard(string City, Colour Colour)
 {
-    public record InfectionCard(string City, Colour Colour)
+    public static InfectionCard FromCity(CityData city)
     {
-        public static InfectionCard FromCity(CityData city)
-        {
-            return new InfectionCard(city.Name, city.Colour);
-        }
+        return new InfectionCard(city.Name, city.Colour);
     }
 }

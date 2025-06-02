@@ -1,13 +1,16 @@
-﻿using System;
-using pandemic.Aggregates.Game;
-using pandemic.GameData;
-
 namespace pandemic.agents.GameEvaluator;
+
+using System;
+using Aggregates.Game;
+using GameData;
 
 public static class ResearchStationDistance
 {
-    [ThreadStatic] private static int[] _distances;
-    [ThreadStatic] private static int[] _queue;
+    [ThreadStatic]
+    private static int[] _distances;
+
+    [ThreadStatic]
+    private static int[] _queue;
 
     static ResearchStationDistance()
     {
@@ -47,8 +50,16 @@ public static class ResearchStationDistance
             for (var i = 0; i < neighbours.Length; i++)
             {
                 var neighbourIdx = neighbours[i];
-                if (neighbourIdx == startCityIdx) continue;
-                if (_distances[neighbourIdx] != 0) continue;
+                if (neighbourIdx == startCityIdx)
+                {
+                    continue;
+                }
+
+                if (_distances[neighbourIdx] != 0)
+                {
+                    continue;
+                }
+
                 _distances[neighbourIdx] = distance + 1;
                 _queue[queueTail++] = neighbourIdx;
             }

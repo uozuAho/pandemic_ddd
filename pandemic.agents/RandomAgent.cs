@@ -1,9 +1,9 @@
-﻿using System;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using utils;
-
 namespace pandemic.agents;
+
+using System;
+using Aggregates.Game;
+using Commands;
+using utils;
 
 public class RandomAgent : ILiveAgent
 {

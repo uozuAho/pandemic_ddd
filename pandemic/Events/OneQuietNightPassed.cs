@@ -1,4 +1,4 @@
-﻿namespace pandemic.Events;
+namespace pandemic.Events;
 
 /// <summary>
 /// Signifies a skipped infect cities phase, caused by using

@@ -1,19 +1,19 @@
-﻿using BenchmarkDotNet.Attributes;
+namespace pandemic.perftest;
+
+using agents;
+using agents.GreedyBfs;
+using Aggregates.Game;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Running;
-using pandemic.agents;
-using pandemic.agents.GreedyBfs;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.Values;
-
-namespace pandemic.perftest;
+using Commands;
+using Values;
 
 public static class Benchmarks
 {
     public static void RunAll()
     {
-        BenchmarkRunner.Run<LiveAgentBenchmarks>();
+        _ = BenchmarkRunner.Run<LiveAgentBenchmarks>();
 
         // omitting for now. Takes more time to run, and will likely
         // improve as greedy live agent performance improves.
@@ -70,11 +70,8 @@ public class GreedyBfsBenchmarks
     [Benchmark]
     public void GreedyBfsTakeOneStep()
     {
-        var searchNode = _greedyBfsSearch!.Step();
-        if (searchNode == null)
-        {
-            throw new InvalidOperationException("game end not handled");
-        }
+        var searchNode =
+            _greedyBfsSearch!.Step() ?? throw new InvalidOperationException("game end not handled");
     }
 
     private void ResetGreedyBfsGame()
@@ -93,11 +90,14 @@ internal static class BenchmarkUtils
             Roles = new[] { Role.Medic, Role.Scientist },
             Difficulty = Difficulty.Introductory,
             CommandGenerator = new SensibleCommandGenerator(),
-            Rng = new Random(1234)
+            Rng = new Random(1234),
         };
 
         var (game, _) = PandemicGame.CreateNewGame(options);
 
-        return game with { SelfConsistencyCheckingEnabled = false };
+        return game with
+        {
+            SelfConsistencyCheckingEnabled = false,
+        };
     }
 }

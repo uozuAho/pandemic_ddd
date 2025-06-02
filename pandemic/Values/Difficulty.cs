@@ -1,9 +1,8 @@
-namespace pandemic.Values
+namespace pandemic.Values;
+
+public enum Difficulty
 {
-    public enum Difficulty
-    {
-        Introductory,
-        Normal,
-        Heroic
-    }
+    Introductory,
+    Normal,
+    Heroic,
 }

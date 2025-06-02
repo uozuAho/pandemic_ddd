@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    public record PlayerAdded (Role Role) : IEvent;
-}
+using Values;
+
+public record PlayerAdded(Role Role) : IEvent;

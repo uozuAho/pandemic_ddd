@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.GameData;
 
-namespace pandemic.GameData
-{
-    public record CityData(string Name, Colour Colour);
-}
+using Values;
+
+public record CityData(string Name, Colour Colour);

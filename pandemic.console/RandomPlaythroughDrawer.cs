@@ -1,25 +1,27 @@
-using System;
-using System.Linq;
-using pandemic.Aggregates.Game;
-using pandemic.Commands;
-using pandemic.drawing;
-using pandemic.Values;
-using utils;
-using Colour = pandemic.drawing.Colour;
-
 namespace pandemic.console;
 
-class RandomPlaythroughDrawer
+using System;
+using System.Linq;
+using Aggregates.Game;
+using Commands;
+using drawing;
+using utils;
+using Values;
+using Colour = drawing.Colour;
+
+internal class RandomPlaythroughDrawer
 {
     public static void DoIt()
     {
         var commandGenerator = new PlayerCommandGenerator();
         var random = new Random();
-        var (game, _) = PandemicGame.CreateNewGame(new NewGameOptions
-        {
-            Difficulty = Difficulty.Introductory,
-            Roles = new[] {Role.Medic, Role.Scientist}
-        });
+        var (game, _) = PandemicGame.CreateNewGame(
+            new NewGameOptions
+            {
+                Difficulty = Difficulty.Introductory,
+                Roles = new[] { Role.Medic, Role.Scientist },
+            }
+        );
 
         var graph = new DrawerGraph();
         var prevNode = graph.CreateNode(game.CurrentPlayer.Role.ToString());
@@ -44,16 +46,18 @@ class RandomPlaythroughDrawer
 
             var (updatedGame, _) = game.Do(selectedAction);
             game = updatedGame;
-            currentNode.Label = game.IsOver
-                ? game.LossReason
-                : game.CurrentPlayer.Role.ToString();
+            currentNode.Label = game.IsOver ? game.LossReason : game.CurrentPlayer.Role.ToString();
             prevNode = currentNode;
         }
 
         CsDotDrawer.FromGraph(graph).SaveToFile("asdf.dot");
     }
 
-    private static DrawerNode AddSelectedAction(DrawerGraph graph, DrawerNode prevState, IPlayerCommand selectedAction)
+    private static DrawerNode AddSelectedAction(
+        DrawerGraph graph,
+        DrawerNode prevState,
+        IPlayerCommand selectedAction
+    )
     {
         var currentState = graph.CreateNode();
         currentState.Colour = Colour.Red;
@@ -62,9 +66,13 @@ class RandomPlaythroughDrawer
         return currentState;
     }
 
-    private static void AddUnselectedAction(DrawerGraph graph, DrawerNode prevState, IPlayerCommand action)
+    private static void AddUnselectedAction(
+        DrawerGraph graph,
+        DrawerNode prevState,
+        IPlayerCommand action
+    )
     {
         var currentState = graph.CreateNode();
-        graph.CreateEdge(prevState, currentState, action.ToString());
+        _ = graph.CreateEdge(prevState, currentState, action.ToString());
     }
 }

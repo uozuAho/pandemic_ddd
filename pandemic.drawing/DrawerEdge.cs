@@ -1,16 +1,9 @@
 namespace pandemic.drawing;
 
-public class DrawerEdge
+public class DrawerEdge(DrawerNode from, DrawerNode to, string label)
 {
-    public DrawerNode From { get; }
-    public DrawerNode To { get; }
-    public string Label { get; set; }
+    public DrawerNode From { get; } = @from;
+    public DrawerNode To { get; } = to;
+    public string Label { get; set; } = label;
     public Colour? Colour { get; set; }
-
-    public DrawerEdge(DrawerNode from, DrawerNode to, string label)
-    {
-        From = @from;
-        To = to;
-        Label = label;
-    }
 }

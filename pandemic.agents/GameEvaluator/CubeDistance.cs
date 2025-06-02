@@ -1,21 +1,34 @@
-﻿using System;
+namespace pandemic.agents.GameEvaluator;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using pandemic.Aggregates.Game;
-using pandemic.GameData;
-using pandemic.Values;
-
-namespace pandemic.agents.GameEvaluator;
+using Aggregates.Game;
+using GameData;
+using Values;
 
 internal static class CubeDistance
 {
-    [ThreadStatic] private static readonly City[] CityQueue;
-    [ThreadStatic] private static int _queueHead;
-    [ThreadStatic] private static int _queueTail;
-    [ThreadStatic] private static readonly City[] Cities3;
-    [ThreadStatic] private static readonly City[] Cities2;
-    [ThreadStatic] private static readonly City[] Cities1;
-    [ThreadStatic] private static readonly List<Player> Players;
+    [ThreadStatic]
+    private static readonly City[] CityQueue;
+
+    [ThreadStatic]
+    private static int _queueHead;
+
+    [ThreadStatic]
+    private static int _queueTail;
+
+    [ThreadStatic]
+    private static readonly City[] Cities3;
+
+    [ThreadStatic]
+    private static readonly City[] Cities2;
+
+    [ThreadStatic]
+    private static readonly City[] Cities1;
+
+    [ThreadStatic]
+    private static readonly List<Player> Players;
 
     static CubeDistance()
     {
@@ -42,7 +55,9 @@ internal static class CubeDistance
         {
             var player = game.Players[i];
             if (!player.HasEnoughToCure())
+            {
                 Players.Add(player);
+            }
         }
         SetCitiesDescendingByMaxCubes(game);
         var score = 0;
@@ -50,15 +65,19 @@ internal static class CubeDistance
         while (_queueHead < _queueTail && Players.Count > 0)
         {
             var city = CityQueue[_queueHead++];
-            var closestPlayer = Players
-                .MinBy(p => StandardGameBoard.DriveFerryDistance(p.Location, city.Name));
+            var closestPlayer = Players.MinBy(p =>
+                StandardGameBoard.DriveFerryDistance(p.Location, city.Name)
+            );
 
-            if (closestPlayer == null) break;
+            if (closestPlayer == null)
+            {
+                break;
+            }
 
             var numCubes = city.MaxNumCubes();
             var distance = StandardGameBoard.DriveFerryDistance(closestPlayer.Location, city.Name);
 
-            Players.Remove(closestPlayer);
+            _ = Players.Remove(closestPlayer);
 
             score -= numCubes * numCubes * distance;
         }
@@ -78,7 +97,8 @@ internal static class CubeDistance
             var city = cities[i];
             switch (city.MaxNumCubes())
             {
-                case 0: continue;
+                case 0:
+                    continue;
                 case 1:
                     Cities1[city1Idx++] = city;
                     break;
@@ -87,6 +107,8 @@ internal static class CubeDistance
                     break;
                 case 3:
                     Cities3[city3Idx++] = city;
+                    break;
+                default:
                     break;
             }
         }

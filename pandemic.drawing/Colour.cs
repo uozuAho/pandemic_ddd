@@ -1,7 +1,6 @@
-namespace pandemic.drawing
+namespace pandemic.drawing;
+
+public enum Colour
 {
-    public enum Colour
-    {
-        Red
-    }
+    Red,
 }

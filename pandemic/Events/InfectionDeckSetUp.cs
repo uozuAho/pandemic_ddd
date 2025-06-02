@@ -1,7 +1,6 @@
-using System.Collections.Immutable;
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    public record InfectionDeckSetUp(ImmutableList<InfectionCard> Deck) : IEvent;
-}
+using System.Collections.Immutable;
+using Values;
+
+public record InfectionDeckSetUp(ImmutableList<InfectionCard> Deck) : IEvent;

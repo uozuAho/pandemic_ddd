@@ -1,4 +1,3 @@
-namespace pandemic.Events
-{
-    internal record GameLost(string Reason) : IEvent;
-}
+namespace pandemic.Events;
+
+internal record GameLost(string Reason) : IEvent;

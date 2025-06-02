@@ -1,67 +1,97 @@
+namespace pandemic.Values;
+
 using System;
 using System.Collections.Generic;
 
-namespace pandemic.Values
+public record City(string Name)
 {
-    public record City(string Name)
+    public CubePile Cubes { get; init; } = CubePile.Empty;
+
+    public bool HasResearchStation;
+
+    /// <summary>
+    /// Returns the highest number of cubes of any one colour in this city
+    /// </summary>
+    public int MaxNumCubes()
     {
-        public CubePile Cubes { get; init; } = CubePile.Empty;
-
-        public bool HasResearchStation;
-
-        /// <summary>
-        /// Returns the highest number of cubes of any one colour in this city
-        /// </summary>
-        public int MaxNumCubes()
+        var max = 0;
+        if (Cubes.Black > max)
         {
-            var max = 0;
-            if (Cubes.Black > max) max = Cubes.Black;
-            if (max == 3) return max;
-            if (Cubes.Blue > max) max = Cubes.Blue;
-            if (max == 3) return max;
-            if (Cubes.Red > max) max = Cubes.Red;
-            if (max == 3) return max;
-            if (Cubes.Yellow > max) max = Cubes.Yellow;
+            max = Cubes.Black;
+        }
+
+        if (max == 3)
+        {
             return max;
         }
 
-        public bool IsSameStateAs(City other)
+        if (Cubes.Blue > max)
         {
-            return Name == other.Name
-                   && Cubes.HasSameCubesAs(other.Cubes)
-                   && HasResearchStation == other.HasResearchStation;
+            max = Cubes.Blue;
         }
 
-        public City AddCube(Colour colour)
+        if (max == 3)
         {
-            return AddCubes(colour, 1);
+            return max;
         }
 
-        public City AddCubes(Colour colour, int numCubes)
+        if (Cubes.Red > max)
         {
-            return this with { Cubes = Cubes.AddCubes(colour, numCubes) };
+            max = Cubes.Red;
         }
 
-        public City RemoveCube(Colour colour)
+        if (max == 3)
         {
-            return this with { Cubes = Cubes.RemoveCube(colour) };
+            return max;
         }
 
-        public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
+        if (Cubes.Yellow > max)
+        {
+            max = Cubes.Yellow;
+        }
+
+        return max;
     }
 
-    internal class CityComparer : IEqualityComparer<City>
+    public bool IsSameStateAs(City other)
     {
-        public bool Equals(City? x, City? y)
-        {
-            if (x == null || y == null) return false;
+        return Name == other.Name
+            && Cubes.HasSameCubesAs(other.Cubes)
+            && HasResearchStation == other.HasResearchStation;
+    }
 
-            return x.IsSameStateAs(y);
+    public City AddCube(Colour colour)
+    {
+        return AddCubes(colour, 1);
+    }
+
+    public City AddCubes(Colour colour, int numCubes)
+    {
+        return this with { Cubes = Cubes.AddCubes(colour, numCubes) };
+    }
+
+    public City RemoveCube(Colour colour)
+    {
+        return this with { Cubes = Cubes.RemoveCube(colour) };
+    }
+
+    public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
+}
+
+internal class CityComparer : IEqualityComparer<City>
+{
+    public bool Equals(City? x, City? y)
+    {
+        if (x == null || y == null)
+        {
+            return false;
         }
 
-        public int GetHashCode(City obj)
-        {
-            throw new NotImplementedException();
-        }
+        return x.IsSameStateAs(y);
+    }
+
+    public int GetHashCode(City obj)
+    {
+        throw new NotImplementedException();
     }
 }

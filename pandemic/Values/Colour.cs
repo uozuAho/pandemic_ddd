@@ -1,17 +1,16 @@
+namespace pandemic.Values;
+
 using System;
 
-namespace pandemic.Values
+public enum Colour
 {
-    public enum Colour
-    {
-        Blue,
-        Black,
-        Red,
-        Yellow
-    }
+    Blue,
+    Black,
+    Red,
+    Yellow,
+}
 
-    public static class ColourExtensions
-    {
-        public static readonly Colour[] AllColours = Enum.GetValues<Colour>();
-    }
+public static class ColourExtensions
+{
+    public static readonly Colour[] AllColours = Enum.GetValues<Colour>();
 }

@@ -1,7 +1,6 @@
-using System;
-using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerCommand
 {
@@ -11,7 +10,7 @@ public record DiscardPlayerCardCommand(Role Role, PlayerCard Card) : IPlayerComm
         {
             EpidemicCard => $"{Role} discard epidemic card",
             PlayerCityCard cityCard => $"{Role} discard {cityCard.City.Name}",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => "ERROR: Card must be EpidemicCard or PlayerCityCard",
         };
     }
 

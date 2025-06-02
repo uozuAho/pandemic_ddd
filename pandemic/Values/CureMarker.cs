@@ -1,4 +1,4 @@
-﻿namespace pandemic.Values;
+namespace pandemic.Values;
 
 public enum CureMarkerSide
 {
@@ -10,7 +10,7 @@ public enum CureMarkerSide
     /// <summary>
     /// Sunset = eradicated
     /// </summary>
-    Sunset
+    Sunset,
 };
 
 public record CureMarker(Colour Colour, CureMarkerSide ShowingSide)

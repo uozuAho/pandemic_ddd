@@ -1,6 +1,5 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
-{
-    public record CureDiscovered(Colour Colour) : IEvent;
-}
+using Values;
+
+public record CureDiscovered(Colour Colour) : IEvent;

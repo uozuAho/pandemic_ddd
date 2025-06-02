@@ -1,8 +1,16 @@
-﻿using System;
+namespace pandemic.Values;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace pandemic.Values;
+public static class Deck
+{
+    public static Deck<T> Empty<T>()
+    {
+        return new Deck<T>([]);
+    }
+}
 
 /// <summary>
 /// A deck of cards. Immutable.
@@ -22,12 +30,12 @@ public class Deck<T>
     /// </summary>
     public IEnumerable<T> Cards => _cards;
     public T TopCard => _cards[^1];
-    public static Deck<T> Empty => new();
+
     public T BottomCard => _cards.First();
 
     private Deck()
     {
-        _cards = Array.Empty<T>();
+        _cards = [];
     }
 
     public Deck(IEnumerable<T> cards)
@@ -42,11 +50,17 @@ public class Deck<T>
 
     public bool IsSameAs(Deck<T> otherDeck)
     {
-        if (Count != otherDeck.Count) return false;
+        if (Count != otherDeck.Count)
+        {
+            return false;
+        }
 
         foreach (var (card, other) in _cards.Zip(otherDeck.Cards))
         {
-            if (!card!.Equals(other)) return false;
+            if (!card!.Equals(other))
+            {
+                return false;
+            }
         }
 
         return true;
@@ -115,7 +129,10 @@ public class Deck<T>
     {
         var newDeck = new Deck<T>(_cards.Where(c => c is not null && !c.Equals(card)));
 
-        if (newDeck.Count == Count) throw new InvalidOperationException($"Deck does not contain {card}");
+        if (newDeck.Count == Count)
+        {
+            throw new InvalidOperationException($"Deck does not contain {card}");
+        }
 
         return newDeck;
     }
@@ -123,13 +140,15 @@ public class Deck<T>
     public Deck<T> Remove(IEnumerable<T> cards)
     {
         var set = cards.ToHashSet();
-        var toRemove = _cards.Where(c => set.Contains(c)).ToHashSet();
+        var toRemove = _cards.Where(set.Contains).ToHashSet();
 
         if (toRemove.Count < set.Count)
         {
             var missingCards = _cards.Except(set);
 
-            throw new InvalidOperationException($"Deck does not contain {string.Join(',', missingCards)}");
+            throw new InvalidOperationException(
+                $"Deck does not contain {string.Join(',', missingCards)}"
+            );
         }
 
         return new Deck<T>(_cards.Where(c => !toRemove.Contains(c)));

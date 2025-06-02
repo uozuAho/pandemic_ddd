@@ -1,17 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <WarningsAsErrors>nullable</WarningsAsErrors>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\utils\utils.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Combinatorics" Version="2.0.0" />
-  </ItemGroup>
-
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\utils\utils.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Combinatorics" Version="2.0.0" />
+    </ItemGroup>
 </Project>

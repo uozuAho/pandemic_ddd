@@ -1,3 +1,3 @@
-﻿namespace pandemic.Events;
+namespace pandemic.Events;
 
 internal record QuarantineSpecialistPreventedInfection(string City) : IEvent;

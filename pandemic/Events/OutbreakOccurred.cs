@@ -1,3 +1,3 @@
-﻿namespace pandemic.Events;
+namespace pandemic.Events;
 
 public record OutbreakOccurred(string City) : IEvent;

@@ -1,16 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\pandemic.agents\pandemic.agents.csproj" />
-    <ProjectReference Include="..\pandemic.drawing\pandemic.drawing.csproj" />
-    <ProjectReference Include="..\pandemic.test\pandemic.test.csproj" />
-    <ProjectReference Include="..\pandemic\pandemic.csproj" />
-  </ItemGroup>
-
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\pandemic.agents\pandemic.agents.csproj" />
+        <ProjectReference Include="..\pandemic.drawing\pandemic.drawing.csproj" />
+        <ProjectReference Include="..\pandemic.test\pandemic.test.csproj" />
+        <ProjectReference Include="..\pandemic\pandemic.csproj" />
+    </ItemGroup>
 </Project>

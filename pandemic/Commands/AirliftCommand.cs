@@ -1,6 +1,6 @@
-﻿using pandemic.Values;
-
 namespace pandemic.Commands;
+
+using Values;
 
 public record AirliftCommand(Role Role, Role PlayerToMove, string City) : IPlayerCommand
 {

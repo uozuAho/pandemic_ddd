@@ -1,6 +1,3 @@
-namespace pandemic.Events
-{
-    public interface IEvent
-    {
-    }
-}
+namespace pandemic.Events;
+
+public interface IEvent { }

@@ -1,12 +1,11 @@
-using pandemic.Values;
+namespace pandemic.Events;
 
-namespace pandemic.Events
+using Values;
+
+public record InfectionCardDrawn(InfectionCard Card) : IEvent
 {
-    public record InfectionCardDrawn(InfectionCard Card) : IEvent
+    public override string ToString()
     {
-        public override string ToString()
-        {
-            return $"Infection card: {Card.City} ({Card.Colour})";
-        }
+        return $"Infection card: {Card.City} ({Card.Colour})";
     }
 }

@@ -1,4 +1,3 @@
-namespace pandemic.Events
-{
-    public record TurnEnded : IEvent;
-}
+namespace pandemic.Events;
+
+public record TurnEnded : IEvent;

@@ -1,16 +1,17 @@
-using System;
-using System.Linq;
-using pandemic.agents;
-using pandemic.Aggregates.Game;
-
 namespace pandemic.console;
 
-class WinFinder
+using System;
+using System.Linq;
+using agents;
+using Aggregates.Game;
+
+internal class WinFinder
 {
     public static void FindWinWithSolver(
         PandemicGame game,
         IPandemicGameSolver solver,
-        TimeSpan timeout)
+        TimeSpan timeout
+    )
     {
         var commands = solver.CommandsToWin(game, timeout).ToList();
 
