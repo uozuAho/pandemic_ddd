@@ -11,6 +11,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 
 [*.cs]
+# defaults
 csharp_style_namespace_declarations = file_scoped            # less indentation = easier reading
 csharp_using_directive_placement = inside_namespace          # see https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1200.md
 dotnet_style_prefer_conditional_expression_over_return = false   # ... nah
@@ -21,3 +22,6 @@ dotnet_diagnostic.CA2007.severity = none                     # avoid ConfigureAw
 dotnet_diagnostic.CA5394.severity = none                     # insecure RNG is fine
 dotnet_diagnostic.CS1591.severity = none                     # ignore missing XML docs
 dotnet_diagnostic.VSTHRD100.severity = error                 # never use async void
+
+# extras for pandemic
+dotnet_diagnostic.CA1062.severity = none                     # check public params for null. No. Client code should use nullable refs.
