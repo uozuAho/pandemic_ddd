@@ -25,3 +25,9 @@ dotnet_diagnostic.VSTHRD100.severity = error                 # never use async v
 
 # extras for pandemic
 dotnet_diagnostic.CA1062.severity = none                     # check public params for null. No. Client code should use nullable refs.
+dotnet_diagnostic.CA1305.severity = none                     # use IFormatProvider overloads. No. I don't care about localisation.
+
+[*Tests.cs]
+dotnet_diagnostic.CA1707.severity = none                     # allow test_method_names_with_underscores
+dotnet_diagnostic.CA1861.severity = none                     # allow passing `new[] { 2, 3, 4 }` params. These are easier to read in tests.
+                                                             # todo: maybe just allow in test projects?
