@@ -1080,7 +1080,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );

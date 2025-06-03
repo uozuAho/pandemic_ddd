@@ -148,6 +148,8 @@ internal static class AgentComparer
                 var node = searcher.Step();
                 statesVisited++;
 
+                Debug.Assert(node != null, nameof(node) + " != null");
+
                 if (worstNode == null || node.Score < worstNode.Score)
                 {
                     worstNode = node;
