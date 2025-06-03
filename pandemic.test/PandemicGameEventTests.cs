@@ -26,7 +26,7 @@ internal class PandemicGameEventTests
         for (var i = 0; i < 1000 && !game.IsOver; i++)
         {
             var legalActions = commandGenerator.AllLegalCommands(game).ToList();
-            if (!legalActions.Any())
+            if (legalActions.Count == 0)
             {
                 Assert.Fail(
                     $"No legal actions! State: \n\n{game}\n\n Events:\n{string.Join('\n', events)}"
@@ -46,7 +46,7 @@ internal class PandemicGameEventTests
     private static T RandomChoice<T>(IEnumerable<T> items, Random random)
     {
         var itemList = items.ToList();
-        if (!itemList.Any())
+        if (itemList.Count == 0)
         {
             throw new InvalidOperationException("no items to choose from!");
         }

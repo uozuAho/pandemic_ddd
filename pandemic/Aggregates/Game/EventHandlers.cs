@@ -1007,7 +1007,7 @@ public partial record PandemicGame
     {
         return game with
         {
-            InfectionDiscardPile = Deck<InfectionCard>.Empty,
+            InfectionDiscardPile = Deck.Empty<InfectionCard>(),
             InfectionDrawPile = game.InfectionDrawPile.PlaceOnTop(evt.ShuffledDiscardPile),
         };
     }

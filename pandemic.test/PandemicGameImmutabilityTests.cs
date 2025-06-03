@@ -14,7 +14,7 @@ internal class PandemicGameImmutabilityTests
             new NewGameOptions
             {
                 Difficulty = Difficulty.Normal,
-                Roles = new[] { Role.Medic, Role.Scientist },
+                Roles = [Role.Medic, Role.Scientist],
             }
         );
         var (game2, _) = game1.Do(new DriveFerryCommand(Role.Medic, "Chicago"));
@@ -30,7 +30,7 @@ internal class PandemicGameImmutabilityTests
             new NewGameOptions
             {
                 Difficulty = Difficulty.Normal,
-                Roles = new[] { Role.Medic, Role.Scientist },
+                Roles = [Role.Medic, Role.Scientist],
             }
         );
         var (game2, _) = game1.Do(new DriveFerryCommand(Role.Medic, "Chicago"));

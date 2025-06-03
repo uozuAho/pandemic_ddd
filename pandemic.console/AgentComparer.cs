@@ -90,12 +90,13 @@ internal static class AgentComparer
             else
             {
                 var lossReason = game.LossReason;
-                if (!losses.ContainsKey(lossReason))
+                if (!losses.TryGetValue(lossReason, out var value))
                 {
-                    losses[lossReason] = 0;
+                    value = 0;
+                    losses[lossReason] = value;
                 }
 
-                losses[lossReason]++;
+                losses[lossReason] = ++value;
             }
 
             totalGames++;

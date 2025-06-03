@@ -2,6 +2,7 @@ namespace pandemic.Commands;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Aggregates.Game;
 using Combinatorics.Collections;
@@ -29,7 +30,7 @@ public class SensibleCommandGenerator : ICommandGenerator
 
     public IEnumerable<IPlayerCommand> Commands(PandemicGame game)
     {
-        return _generator.AllSensibleCommands(game);
+        return PlayerCommandGenerator.AllSensibleCommands(game);
     }
 }
 
@@ -43,12 +44,12 @@ public class PlayerCommandGenerator
     /// <summary>
     /// Aims to be faster than AllLegalCommands by only generating 'sensible' commands
     /// </summary>
-    public IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
+    public static IEnumerable<IPlayerCommand> AllSensibleCommands(PandemicGame game)
     {
         return AllCommands(game, true);
     }
 
-    private IEnumerable<IPlayerCommand> AllCommands(PandemicGame game, bool beSensible)
+    private static IEnumerable<IPlayerCommand> AllCommands(PandemicGame game, bool beSensible)
     {
         if (game.IsOver)
         {
@@ -227,7 +228,7 @@ public class PlayerCommandGenerator
             if (!game.IsCured(cureCards.Key))
             {
                 // todo: yield all combinations if > 4 cards
-                yield return new ScientistDiscoverCureCommand(cureCards.Take(4).ToArray());
+                yield return new ScientistDiscoverCureCommand([..cureCards.Take(4)]);
             }
         }
     }

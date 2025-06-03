@@ -36,7 +36,10 @@ public class LiveAgentBenchmarks
     // }
 
     [Benchmark]
+    // I think benchmark methods can't be static (todo: check)
+#pragma warning disable CA1822
     public void PlayOneGreedyAgentGame()
+#pragma warning restore CA1822
     {
         var agent = new GreedyAgent();
         var game = BenchmarkUtils.NewGame();

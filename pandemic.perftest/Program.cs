@@ -1,4 +1,4 @@
-using pandemic.perftest;
+namespace pandemic.perftest;
 
 public static class Program
 {

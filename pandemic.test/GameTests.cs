@@ -910,7 +910,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -940,7 +940,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -969,7 +969,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -994,7 +994,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -1029,7 +1029,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -1055,7 +1055,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1112,7 +1112,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1140,7 +1140,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1729,7 +1729,7 @@ internal class GameTests
                 PlayerCards.CityCard("Atlanta"),
                 new EpidemicCard()
             ),
-            InfectionDiscardPile = Deck<InfectionCard>.Empty,
+            InfectionDiscardPile = Deck.Empty<InfectionCard>(),
             InfectionRateMarkerPosition = 5, // ensure that epidemic city is infected immediately
         };
         game = game.SetCurrentPlayerAs(game.CurrentPlayer with { ActionsRemaining = 1 });
@@ -1973,7 +1973,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -3698,7 +3698,7 @@ internal class GameTests
             }
         );
         (game, _) = game.Do(
-            new DiscoverCureCommand(Role.Dispatcher, game.CurrentPlayer.Hand.CityCards().ToArray())
+            new DiscoverCureCommand(Role.Dispatcher, [..game.CurrentPlayer.Hand.CityCards()])
         );
 
         game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
@@ -4143,7 +4143,7 @@ internal class GameTests
                 PlayerCards.CityCard("Atlanta"),
                 new EpidemicCard()
             ),
-            InfectionDiscardPile = Deck<InfectionCard>.Empty,
+            InfectionDiscardPile = Deck.Empty<InfectionCard>(),
             InfectionDrawPile = game.InfectionDrawPile.PlaceAtBottom(
                 new InfectionCard("Atlanta", Colour.Blue)
             ),
@@ -4211,7 +4211,7 @@ internal class GameTests
 
         (game, _) = game.Do(
             new ScientistDiscoverCureCommand(
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -4244,7 +4244,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4274,7 +4274,7 @@ internal class GameTests
 
         (game, _) = game.Do(
             new ScientistDiscoverCureCommand(
-                game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -4304,7 +4304,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4332,7 +4332,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4344,7 +4344,7 @@ internal class GameTests
         var game = DefaultTestGame(
             DefaultTestGameOptions() with
             {
-                Roles = new[] { Role.Scientist, Role.Dispatcher },
+                Roles = [Role.Scientist, Role.Dispatcher],
             }
         );
 
@@ -4358,7 +4358,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>().ToArray()
+                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );

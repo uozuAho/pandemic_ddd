@@ -10,7 +10,7 @@ public static class NewGameOptionsGenerator
     public static NewGameOptions RandomOptions()
     {
         var random = new Random();
-        var numberOfPlayers = random.Choice(new[] { 2, 3, 4 });
+        var numberOfPlayers = random.Choice([2, 3, 4]);
 
         return new NewGameOptions
         {

@@ -22,10 +22,10 @@ public partial record PandemicGame
     public int ResearchStationPile { get; init; } = 5;
     public ImmutableArray<Player> Players { get; init; } = [];
     public ImmutableArray<City> Cities { get; init; }
-    public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck<PlayerCard>.Empty;
-    public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck<PlayerCard>.Empty;
-    public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck<InfectionCard>.Empty;
-    public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck<InfectionCard>.Empty;
+    public Deck<PlayerCard> PlayerDrawPile { get; init; } = Deck.Empty<PlayerCard>();
+    public Deck<PlayerCard> PlayerDiscardPile { get; init; } = Deck.Empty<PlayerCard>();
+    public Deck<InfectionCard> InfectionDrawPile { get; init; } = Deck.Empty<InfectionCard>();
+    public Deck<InfectionCard> InfectionDiscardPile { get; init; } = Deck.Empty<InfectionCard>();
     public CubePile Cubes { get; init; } =
         new(ColourExtensions.AllColours.ToImmutableDictionary(c => c, _ => 24));
 

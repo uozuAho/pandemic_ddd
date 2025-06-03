@@ -122,10 +122,9 @@ internal class BfsRunner
         {
             var drawerNode = graph.CreateNode(NodeLabel(node.State));
             visitedNodes[node] = drawerNode;
-            if (node.Parent != null && visitedNodes.ContainsKey(node.Parent))
+            if (node.Parent != null && visitedNodes.TryGetValue(node.Parent, out var value))
             {
-                var parent = visitedNodes[node.Parent];
-                _ = graph.CreateEdge(parent, drawerNode, node.Action?.ToString() ?? string.Empty);
+                _ = graph.CreateEdge(value, drawerNode, node.Action?.ToString() ?? string.Empty);
             }
         }
 

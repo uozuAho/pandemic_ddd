@@ -24,7 +24,7 @@ public class GreedyBestFirstSearch
     public bool IsSolved { get; private set; }
     public PandemicGame CurrentState { get; private set; }
 
-    public MinPriorityFrontier Frontier;
+    public readonly MinPriorityFrontier Frontier;
 
     private readonly Dictionary<PandemicGame, SearchNode> _explored;
 
@@ -116,28 +116,21 @@ public class GreedyBestFirstSearch
         return actions;
     }
 
-    protected class SearchNodeComparer(Func<SearchNode, SearchNode, int> compare)
+    private class SearchNodeComparer(Func<SearchNode, SearchNode, int> compare)
         : IComparer<SearchNode>
     {
         private readonly Func<SearchNode, SearchNode, int> _compare = compare;
 
         public int Compare(SearchNode? x, SearchNode? y)
         {
-            if (x == null)
-            {
-                throw new NullReferenceException(nameof(x));
-            }
-
-            if (y == null)
-            {
-                throw new NullReferenceException(nameof(y));
-            }
+            ArgumentNullException.ThrowIfNull(x);
+            ArgumentNullException.ThrowIfNull(y);
 
             return _compare(x, y);
         }
     }
 
-    protected int CompareStates(SearchNode a, SearchNode b)
+    private static int CompareStates(SearchNode a, SearchNode b)
     {
         var priorityA = (double)-a.Score;
         var priorityB = (double)-b.Score;
@@ -196,7 +189,10 @@ public class MinPriorityFrontier(IComparer<SearchNode> nodeComparer)
     }
 }
 
+// todo: fix me later - don't use Queue suffix on publicly visible types
+#pragma warning disable CA1711
 public class MinPriorityQueue<T>(IComparer<T> comparer)
+#pragma warning restore CA1711
 {
     private readonly BinaryMinHeap<T> _minHeap = new(comparer);
 
@@ -236,10 +232,7 @@ public class BinaryMinHeap<T>(IComparer<T> comparer)
 
     private T RemoveAtIdx(int idx)
     {
-        if (idx >= Size)
-        {
-            throw new ArgumentOutOfRangeException();
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(idx, Size);
 
         // swap item at idx and last item
         var temp = _buf[idx];

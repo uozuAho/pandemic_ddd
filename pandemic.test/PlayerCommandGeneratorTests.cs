@@ -34,7 +34,7 @@ public class AllCommandGeneratorTests
     public void ShouldPass()
     {
         var game = Util.CreateNewGame(
-            new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } }
+            new NewGameOptions { Roles = [Role.Medic, Role.Scientist] }
         );
 
         _generator.Commands(game).ShouldContain(new PassCommand(Role.Medic));
@@ -570,7 +570,7 @@ public class CommandGeneratorTests<T>
         commands.ShouldAllBe(c => c is DontUseSpecialEventCommand || c.IsSpecialEvent);
     }
 
-    public static object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
+    private static readonly object[] AllSpecialEventCards = SpecialEventCards.All.ToArray();
 
     [TestCaseSource(nameof(AllSpecialEventCards))]
     public void Special_event_should_not_be_an_option_when_epidemic_is_triggered(PlayerCard card)
@@ -578,7 +578,7 @@ public class CommandGeneratorTests<T>
         var game = CreateNewGame(
             new NewGameOptions
             {
-                Roles = new[] { Role.Medic, Role.Scientist },
+                Roles = [Role.Medic, Role.Scientist],
                 IncludeSpecialEventCards = false,
             }
         );

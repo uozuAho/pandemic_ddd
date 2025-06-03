@@ -17,9 +17,7 @@ internal class SpielRandomAgentTests
         var options = NewGameOptionsGenerator.RandomOptions();
 
         var random = new Random();
-        PandemicGame game;
-        List<IEvent> events;
-        (game, events) = PandemicGame.CreateNewGame(options);
+        var (game, events) = PandemicGame.CreateNewGame(options);
         var state = new PandemicSpielGameState(game);
 
         for (var i = 0; i < 1000 && !state.IsTerminal; i++)
@@ -41,7 +39,7 @@ internal class SpielRandomAgentTests
     private static T RandomChoice<T>(IEnumerable<T> items, Random random)
     {
         var itemList = items.ToList();
-        if (!itemList.Any())
+        if (itemList.Count == 0)
         {
             throw new InvalidOperationException("no items to choose from!");
         }

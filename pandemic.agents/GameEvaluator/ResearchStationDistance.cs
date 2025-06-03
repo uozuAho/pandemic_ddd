@@ -12,7 +12,10 @@ public static class ResearchStationDistance
     [ThreadStatic]
     private static int[] _queue;
 
+    // CA1810: initialise static fields in place. Not applicable to ThreadStatic fields
+#pragma warning disable CA1810
     static ResearchStationDistance()
+#pragma warning restore CA1810
     {
         _distances = new int[48];
         _queue = new int[48];

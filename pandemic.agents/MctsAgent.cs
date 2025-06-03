@@ -119,7 +119,7 @@ public class MctsAgent
         {
             if (currentNode.IsLeaf)
             {
-                var legalActions = _evaluator.Prior(workingState).Shuffle();
+                var legalActions = RandomRolloutEvaluator.Prior(workingState).Shuffle();
                 currentNode.Children.AddRange(
                     legalActions.Select(a => new SearchNode
                     {
@@ -130,7 +130,7 @@ public class MctsAgent
                 );
             }
 
-            if (!currentNode.Children.Any())
+            if (currentNode.Children.Count == 0)
             {
                 throw new InvalidOperationException("non terminal state must have children");
             }
@@ -155,7 +155,7 @@ internal class RandomRolloutEvaluator(int numRollouts)
     /// <summary>
     /// Returns (command, probability)
     /// </summary>
-    public IEnumerable<(int, double)> Prior(PandemicSpielGameState state)
+    public static IEnumerable<(int, double)> Prior(PandemicSpielGameState state)
     {
         var legalActions = state.LegalActions().ToList();
         return Enumerable.Range(0, legalActions.Count).Select(i => (i, 1.0 / legalActions.Count));
@@ -197,15 +197,23 @@ public class SearchNode
     public int Action { get; set; }
     public int ExploreCount { get; set; }
     public double Prior { get; set; }
-    public double[]? Outcomes { get; set; }
-    public double TotalReward { get; set; }
-    public List<SearchNode> Children { get; set; } = [];
 
-    public bool IsLeaf => !Children.Any();
+// todo: fix me later. properties shouldn't return arrays
+#pragma warning disable CA1819
+    public double[]? Outcomes { get; set; }
+#pragma warning restore CA1819
+    public double TotalReward { get; set; }
+
+// todo: fix me later. don't use List<T>
+#pragma warning disable CA1002
+    public List<SearchNode> Children { get; init; } = [];
+#pragma warning restore CA1002
+
+    public bool IsLeaf => Children.Count == 0;
 
     public SearchNode BestChild()
     {
-        if (!Children.Any())
+        if (Children.Count == 0)
         {
             throw new InvalidOperationException("No children");
         }
