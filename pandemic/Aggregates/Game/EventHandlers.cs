@@ -848,6 +848,11 @@ public partial record PandemicGame
         {
             Role.OperationsExpert => new OperationsExpert { Location = "Atlanta" },
             Role.ContingencyPlanner => new ContingencyPlanner { Location = "Atlanta" },
+            Role.Medic => throw new NotImplementedException(),
+            Role.Scientist => throw new NotImplementedException(),
+            Role.QuarantineSpecialist => throw new NotImplementedException(),
+            Role.Researcher => throw new NotImplementedException(),
+            Role.Dispatcher => throw new NotImplementedException(),
             // Role.Medic => throw new NotImplementedException(),
             // Role.Scientist => throw new NotImplementedException(),
             // Role.QuarantineSpecialist => throw new NotImplementedException(),

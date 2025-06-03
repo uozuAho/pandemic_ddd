@@ -14,7 +14,7 @@ public record PlayerHand
 
     public PlayerHand(IEnumerable<PlayerCard> cards)
     {
-        Cards = [..cards];
+        Cards = [.. cards];
     }
 
     public static readonly PlayerHand Empty = new();

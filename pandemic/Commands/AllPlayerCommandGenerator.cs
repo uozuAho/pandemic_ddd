@@ -120,7 +120,7 @@ public static class AllPlayerCommandGenerator
                 .Where(g => g.Count() >= 4)
         )
         {
-            yield return new ScientistDiscoverCureCommand([..cardsToCure.Select(g => g)]);
+            yield return new ScientistDiscoverCureCommand([.. cardsToCure.Select(g => g)]);
         }
     }
 

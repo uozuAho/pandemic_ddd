@@ -155,7 +155,8 @@ public class DfsWithHeuristicsAgent : IPandemicGameSolver
         }
 
         var comparer = new CommandPriorityComparer(node.State);
-        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator
+            .AllLegalCommands(node.State)
             // .OrderBy(a => CommandPriority(a, node.State.Game))
             .OrderBy(a => a, comparer)
             // shuffle, otherwise we're at the mercy of the order of the move generator

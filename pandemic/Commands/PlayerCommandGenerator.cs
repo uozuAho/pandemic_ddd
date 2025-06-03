@@ -223,7 +223,7 @@ public static class PlayerCommandGenerator
             if (!game.IsCured(cureCards.Key))
             {
                 // todo: yield all combinations if > 4 cards
-                yield return new ScientistDiscoverCureCommand([..cureCards.Take(4)]);
+                yield return new ScientistDiscoverCureCommand([.. cureCards.Take(4)]);
             }
         }
     }

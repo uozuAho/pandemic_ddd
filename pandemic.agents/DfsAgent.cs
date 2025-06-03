@@ -69,7 +69,8 @@ public class DfsAgent : IPandemicGameSolver
             diagnostics.Loss(node.State.LossReason);
         }
 
-        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator
+            .AllLegalCommands(node.State)
             // shuffle, otherwise we're at the mercy of the order of the move generator
             .OrderBy(_ => Rng.Next())
             .ToList();

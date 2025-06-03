@@ -33,9 +33,7 @@ public class AllCommandGeneratorTests
     [Test]
     public void ShouldPass()
     {
-        var game = Util.CreateNewGame(
-            new NewGameOptions { Roles = [Role.Medic, Role.Scientist] }
-        );
+        var game = Util.CreateNewGame(new NewGameOptions { Roles = [Role.Medic, Role.Scientist] });
 
         _generator.Commands(game).ShouldContain(new PassCommand(Role.Medic));
     }

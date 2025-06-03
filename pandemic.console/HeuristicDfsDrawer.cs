@@ -39,7 +39,8 @@ public static class HeuristicDfsDrawer
             return;
         }
 
-        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator
+            .AllLegalCommands(node.State)
             .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
             // shuffle, otherwise we're at the mercy of the order of the move generator
             .ThenBy(_ => Rng.Next())

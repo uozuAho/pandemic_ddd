@@ -13,7 +13,6 @@ public class InvalidActionException : Exception
     public InvalidActionException(string message, Exception innerException)
         : base(message, innerException) { }
 
-    public InvalidActionException(string message) : base(message)
-    {
-    }
+    public InvalidActionException(string message)
+        : base(message) { }
 }

@@ -73,8 +73,7 @@ public class GreedyBfsBenchmarks
     [Benchmark]
     public void GreedyBfsTakeOneStep()
     {
-        var searchNode =
-            _greedyBfsSearch!.Step() ?? throw new InvalidOperationException("game end not handled");
+        _ = _greedyBfsSearch!.Step() ?? throw new InvalidOperationException("game end not handled");
     }
 
     private void ResetGreedyBfsGame()

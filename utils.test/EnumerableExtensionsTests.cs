@@ -17,8 +17,12 @@ public static class TestData
     {
         get
         {
-            yield return new TestCaseData(new[] { 1, 2, 3 }, 3).Returns(new int[][] { [1], [2], [3] });
-            yield return new TestCaseData(new[] { 1, 2, 3 }, 2).Returns(new int[][] { [1, 2], [3] });
+            yield return new TestCaseData(new[] { 1, 2, 3 }, 3).Returns(
+                new int[][] { [1], [2], [3] }
+            );
+            yield return new TestCaseData(new[] { 1, 2, 3 }, 2).Returns(
+                new int[][] { [1, 2], [3] }
+            );
             yield return new TestCaseData(new[] { 1, 2, 3 }, 1).Returns(
                 new[] { new[] { 1, 2, 3 } }
             );

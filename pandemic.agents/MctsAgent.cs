@@ -47,8 +47,7 @@ public class MctsAgent
         {
             var (visitPath, workingState) = ApplyTreePolicy(root, state);
             double[] returns;
-            var solved = false;
-
+            bool solved;
             if (workingState.IsTerminal)
             {
                 returns = workingState.Returns;
@@ -106,10 +105,10 @@ public class MctsAgent
         return root;
     }
 
-    private static (List<SearchNode> visitPath, PandemicSpielGameState workingState) ApplyTreePolicy(
-        SearchNode root,
-        PandemicSpielGameState state
-    )
+    private static (
+        List<SearchNode> visitPath,
+        PandemicSpielGameState workingState
+    ) ApplyTreePolicy(SearchNode root, PandemicSpielGameState state)
     {
         var visitPath = new List<SearchNode> { root };
         var workingState = state.Clone();
@@ -198,13 +197,13 @@ public class SearchNode
     public int ExploreCount { get; set; }
     public double Prior { get; set; }
 
-// todo: fix me later. properties shouldn't return arrays
+    // todo: fix me later. properties shouldn't return arrays
 #pragma warning disable CA1819
     public double[]? Outcomes { get; set; }
 #pragma warning restore CA1819
     public double TotalReward { get; set; }
 
-// todo: fix me later. don't use List<T>
+    // todo: fix me later. don't use List<T>
 #pragma warning disable CA1002
     public List<SearchNode> Children { get; init; } = [];
 #pragma warning restore CA1002

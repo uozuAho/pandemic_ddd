@@ -1,4 +1,4 @@
-﻿namespace pandemic.Values;
+namespace pandemic.Values;
 
 public record OperationsExpert : Player
 {

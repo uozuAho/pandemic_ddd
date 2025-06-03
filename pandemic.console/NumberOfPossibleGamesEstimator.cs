@@ -130,18 +130,30 @@ internal class NumberOfPossibleGamesEstimator
 
         public void AddNumActionsInGame(int numActions)
         {
-            ActionsPerGameCounts[numActions] = ActionsPerGameCounts.TryGetValue(numActions, out var value) ? ++value : 1;
+            ActionsPerGameCounts[numActions] = ActionsPerGameCounts.TryGetValue(
+                numActions,
+                out var value
+            )
+                ? ++value
+                : 1;
         }
 
         public void AddLegalActionCount(int numLegalActions)
         {
-            LegalActionCounts[numLegalActions] = LegalActionCounts.TryGetValue(numLegalActions, out var value) ? ++value : 1;
+            LegalActionCounts[numLegalActions] = LegalActionCounts.TryGetValue(
+                numLegalActions,
+                out var value
+            )
+                ? ++value
+                : 1;
         }
 
         public void RecordLoss(string lossReason)
         {
             Losses++;
-            LossReasons[lossReason] = LossReasons.TryGetValue(lossReason, out var value) ? ++value : 1;
+            LossReasons[lossReason] = LossReasons.TryGetValue(lossReason, out var value)
+                ? ++value
+                : 1;
         }
     }
 }

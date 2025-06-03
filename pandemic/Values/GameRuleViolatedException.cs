@@ -12,7 +12,6 @@ public class GameRuleViolatedException : Exception
     public GameRuleViolatedException(string message, Exception innerException)
         : base(message, innerException) { }
 
-    public GameRuleViolatedException(string message) : base(message)
-    {
-    }
+    public GameRuleViolatedException(string message)
+        : base(message) { }
 }

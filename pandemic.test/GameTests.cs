@@ -617,7 +617,8 @@ internal class GameTests
             events
         );
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
         game = game.Do(
@@ -666,7 +667,8 @@ internal class GameTests
             events
         );
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
 
         game = game.Do(
@@ -742,7 +744,8 @@ internal class GameTests
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.Hand.Count.ShouldBe(6);
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
         game = game.Do(
@@ -753,7 +756,8 @@ internal class GameTests
         // medic should now have picked up 2 cards, and needs to discard
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.Hand.Count.ShouldBe(8);
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
         game.InfectionDrawPile.Count.ShouldBe(
             gameStateBeforeShare.InfectionDrawPile.Count,
@@ -903,7 +907,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -933,7 +937,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -962,7 +966,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -987,7 +991,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -1022,7 +1026,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -1048,7 +1052,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1073,7 +1077,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1105,7 +1109,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1133,7 +1137,7 @@ internal class GameTests
             game.Do(
                 new DiscoverCureCommand(
                     game.CurrentPlayer.Role,
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -1583,7 +1587,8 @@ internal class GameTests
             new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist)
         );
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 
@@ -1964,7 +1969,7 @@ internal class GameTests
         (game, _) = game.Do(
             new DiscoverCureCommand(
                 game.CurrentPlayer.Role,
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -2301,7 +2306,9 @@ internal class GameTests
         var epidemicCity = game.CityByName(epidemicInfectionCard.City);
         epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
+            .ShouldContain(c => c is GovernmentGrantCommand);
 
         // act: use special event card
         game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
@@ -3686,7 +3693,7 @@ internal class GameTests
             }
         );
         (game, _) = game.Do(
-            new DiscoverCureCommand(Role.Dispatcher, [..game.CurrentPlayer.Hand.CityCards()])
+            new DiscoverCureCommand(Role.Dispatcher, [.. game.CurrentPlayer.Hand.CityCards()])
         );
 
         game.CityByName("Chicago").Cubes.NumberOf(Colour.Blue).ShouldBe(0);
@@ -3830,7 +3837,8 @@ internal class GameTests
         // act
         (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 
@@ -3971,7 +3979,8 @@ internal class GameTests
         // act
         (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
 
-        PlayerCommandGenerator.AllLegalCommands(game)
+        PlayerCommandGenerator
+            .AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 
@@ -4195,7 +4204,7 @@ internal class GameTests
 
         (game, _) = game.Do(
             new ScientistDiscoverCureCommand(
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -4228,7 +4237,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4258,7 +4267,7 @@ internal class GameTests
 
         (game, _) = game.Do(
             new ScientistDiscoverCureCommand(
-                [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
             )
         );
 
@@ -4288,7 +4297,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4316,7 +4325,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );
@@ -4342,7 +4351,7 @@ internal class GameTests
         _ = Should.Throw<GameRuleViolatedException>(() =>
             game.Do(
                 new ScientistDiscoverCureCommand(
-                    [..game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
+                    [.. game.CurrentPlayer.Hand.Cards.Cast<PlayerCityCard>()]
                 )
             )
         );

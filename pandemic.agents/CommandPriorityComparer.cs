@@ -63,11 +63,7 @@ public class CommandPriorityComparer(PandemicGame game) : IComparer<IPlayerComma
     /// This method is called when the commands cannot be resolved to more specific methods, ie.
     /// no comparison method has been defined for the two types.
     /// </summary>
-
-
     private int CompareMulti(IPlayerCommand a, IPlayerCommand b)
-
-
     {
         return Unmatched;
     }
