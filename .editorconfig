@@ -27,6 +27,7 @@ dotnet_diagnostic.VSTHRD100.severity = error                 # never use async v
 dotnet_diagnostic.CA1040.severity = none                     # allow empty interfaces. Maybe I don't need them, but they're widely used in this proj, eg. IEvent
 dotnet_diagnostic.CA1051.severity = none                     # allow public fields. This is done for perf.
 dotnet_diagnostic.CA1062.severity = none                     # check public params for null. No. Client code should use nullable refs.
+dotnet_diagnostic.CA1303.severity = none                     # use resource table for strings. nah I won't be localising strings
 dotnet_diagnostic.CA1305.severity = none                     # use IFormatProvider overloads. No. I don't care about localisation.
 
 [*Tests.cs]
