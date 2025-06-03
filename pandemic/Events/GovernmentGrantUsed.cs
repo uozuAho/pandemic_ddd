@@ -2,7 +2,7 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record GovernmentGrantUsed(Role Role, string City) : IEvent
+internal sealed record GovernmentGrantUsed(Role Role, string City) : IEvent
 {
     public override string ToString()
     {

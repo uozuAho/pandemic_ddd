@@ -2,4 +2,4 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record MedicAutoRemovedCubes(string City, Colour Colour) : IEvent;
+internal sealed record MedicAutoRemovedCubes(string City, Colour Colour) : IEvent;

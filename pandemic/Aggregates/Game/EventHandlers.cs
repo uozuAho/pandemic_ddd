@@ -249,7 +249,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation evt)
+    private static PandemicGame Apply(PandemicGame game, OperationsExpertBuiltResearchStation _)
     {
         var opex = game.PlayerByRole(Role.OperationsExpert);
         var city = game.CityByName(opex.Location);
@@ -388,7 +388,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed evt)
+    private static PandemicGame Apply(PandemicGame game, OneQuietNightPassed _)
     {
         return game with { OneQuietNightWillBeUsedNextInfectPhase = false };
     }
@@ -408,7 +408,7 @@ public partial record PandemicGame
 
     private static PandemicGame Apply(
         PandemicGame game,
-        ContingencyPlannerUsedStoredOneQuietNight evt
+        ContingencyPlannerUsedStoredOneQuietNight _
     )
     {
         var planner = (ContingencyPlanner)game.PlayerByRole(Role.ContingencyPlanner);
@@ -427,12 +427,12 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicInfectStepCompleted evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicInfectStepCompleted _)
     {
         return game with { SpecialEventWasRecentlySkipped = false };
     }
 
-    private static PandemicGame Apply(PandemicGame game, EpidemicTriggered evt)
+    private static PandemicGame Apply(PandemicGame game, EpidemicTriggered _)
     {
         return game with { PhaseOfTurn = TurnPhase.Epidemic };
     }
@@ -588,7 +588,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, ChoseNotToUseSpecialEventCard evt)
+    private static PandemicGame Apply(PandemicGame game, ChoseNotToUseSpecialEventCard _)
     {
         return game with { SpecialEventWasRecentlySkipped = true };
     }
@@ -631,7 +631,7 @@ public partial record PandemicGame
         };
     }
 
-    private static PandemicGame Apply(PandemicGame game, OutbreakOccurred evt)
+    private static PandemicGame Apply(PandemicGame game, OutbreakOccurred _)
     {
         return game with { OutbreakCounter = game.OutbreakCounter + 1 };
     }

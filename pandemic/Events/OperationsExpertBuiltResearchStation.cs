@@ -1,3 +1,3 @@
 namespace pandemic.Events;
 
-internal record OperationsExpertBuiltResearchStation(string City) : IEvent;
+internal sealed record OperationsExpertBuiltResearchStation(string City) : IEvent;

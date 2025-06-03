@@ -1,3 +1,3 @@
 namespace pandemic.Events;
 
-internal record ContingencyPlannerUsedStoredGovernmentGrant(string City) : IEvent;
+internal sealed record ContingencyPlannerUsedStoredGovernmentGrant(string City) : IEvent;

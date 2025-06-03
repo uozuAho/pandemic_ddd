@@ -2,7 +2,7 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record DispatcherDirectFlewPawn(Role PlayerToMove, string City) : IEvent
+internal sealed record DispatcherDirectFlewPawn(Role PlayerToMove, string City) : IEvent
 {
     public override string ToString()
     {

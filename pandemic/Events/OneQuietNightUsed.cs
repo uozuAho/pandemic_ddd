@@ -2,7 +2,7 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record OneQuietNightUsed(Role Role) : IEvent
+internal sealed record OneQuietNightUsed(Role Role) : IEvent
 {
     public override string ToString()
     {

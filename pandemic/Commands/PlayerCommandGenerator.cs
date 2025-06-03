@@ -892,7 +892,7 @@ public static class PlayerCommandGenerator
 /// <summary>
 /// Needed for generating permutations of event forecasts
 /// </summary>
-internal class InfectionCardComparer : IComparer<InfectionCard>
+internal sealed class InfectionCardComparer : IComparer<InfectionCard>
 {
     public int Compare(InfectionCard? x, InfectionCard? y)
     {

@@ -2,7 +2,7 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record DispatcherMovedPawnToOther(Role Role, Role DestinationRole) : IEvent
+internal sealed record DispatcherMovedPawnToOther(Role Role, Role DestinationRole) : IEvent
 {
     public override string ToString()
     {

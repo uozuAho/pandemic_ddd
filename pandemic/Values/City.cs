@@ -78,7 +78,7 @@ public record City(string Name)
     public static readonly IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
 }
 
-internal class CityComparer : IEqualityComparer<City>
+internal sealed class CityComparer : IEqualityComparer<City>
 {
     public bool Equals(City? x, City? y)
     {

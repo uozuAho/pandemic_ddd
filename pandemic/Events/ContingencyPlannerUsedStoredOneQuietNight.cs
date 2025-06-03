@@ -1,3 +1,3 @@
 namespace pandemic.Events;
 
-internal record ContingencyPlannerUsedStoredOneQuietNight : IEvent;
+internal sealed record ContingencyPlannerUsedStoredOneQuietNight : IEvent;

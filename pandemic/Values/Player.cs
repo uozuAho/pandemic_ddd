@@ -81,7 +81,7 @@ public record Player
     }
 }
 
-internal class PlayerComparer : IEqualityComparer<Player>
+internal sealed class PlayerComparer : IEqualityComparer<Player>
 {
     public bool Equals(Player? x, Player? y)
     {

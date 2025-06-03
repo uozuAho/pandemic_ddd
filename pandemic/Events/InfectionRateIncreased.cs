@@ -1,3 +1,3 @@
 namespace pandemic.Events;
 
-internal record InfectionRateIncreased : IEvent;
+internal sealed record InfectionRateIncreased : IEvent;

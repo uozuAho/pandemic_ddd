@@ -194,7 +194,10 @@ public static class StandardGameBoard
         ("Washington", "Montreal"),
     ];
 
+    // tood: fix me later: initialise static fields in place. did the linter remove this pragma???
+#pragma warning disable CA1810
     static StandardGameBoard()
+#pragma warning restore CA1810
     {
         CityLookup = _cities.ToDictionary(c => c.Name, c => c);
         CityIdxLookup = CreateCityIdxLookup();

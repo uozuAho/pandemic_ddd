@@ -1,3 +1,3 @@
 namespace pandemic.Events;
 
-internal record MedicPreventedInfection(string City) : IEvent;
+internal sealed record MedicPreventedInfection(string City) : IEvent;

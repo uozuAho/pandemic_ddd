@@ -2,7 +2,7 @@ namespace pandemic.Events;
 
 using Values;
 
-internal record TreatedDisease(Role Role, string City, Colour Colour) : IEvent
+internal sealed record TreatedDisease(Role Role, string City, Colour Colour) : IEvent
 {
     public override string ToString()
     {
