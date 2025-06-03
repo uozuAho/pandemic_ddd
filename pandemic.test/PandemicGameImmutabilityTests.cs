@@ -5,7 +5,7 @@ using Commands;
 using NUnit.Framework;
 using Values;
 
-internal class PandemicGameImmutabilityTests
+internal sealed class PandemicGameImmutabilityTests
 {
     [Test]
     public void Applying_command_returns_cloned_state()

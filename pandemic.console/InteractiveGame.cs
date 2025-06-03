@@ -3,7 +3,7 @@ namespace pandemic.console;
 using System;
 using System.Linq;
 using agents;
-using agents.GameEvaluator;
+using agents.GameEvaluators;
 using Aggregates.Game;
 
 public static class InteractiveGame
@@ -87,7 +87,7 @@ public static class InteractiveGame
         for (var i = 0; i < commands.Count; i++)
         {
             var (nextState, _) = game.Do(commands[i]);
-            var score = GameEvaluator.Score(nextState);
+            var score = HandCraftedGameEvaluator.Score(nextState);
             Console.WriteLine($"{i}: (score: {score}): {commands[i]}");
         }
 

@@ -3,6 +3,7 @@ namespace pandemic.agents.test;
 using System.Linq;
 using Aggregates.Game;
 using GameData;
+using GameEvaluators;
 using NUnit.Framework;
 using Shouldly;
 using utils;
@@ -17,8 +18,7 @@ internal class GameEvaluatorTests_HandScore
             Enumerable.Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 3)
         );
 
-        GameEvaluator
-            .GameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand)
+        HandCraftedGameEvaluator.PlayerHandScore(PandemicGame.CreateUninitialisedGame(), hand)
             .ShouldBePositive();
     }
 
@@ -30,11 +30,11 @@ internal class GameEvaluatorTests_HandScore
             Enumerable.Repeat(new PlayerCityCard(StandardGameBoard.City("Atlanta")), 5)
         );
 
-        GameEvaluator.GameEvaluator.PlayerHandScore(game, hand).ShouldBeNegative();
+        HandCraftedGameEvaluator.PlayerHandScore(game, hand).ShouldBeNegative();
     }
 }
 
-internal class GameEvaluatorTests
+internal class HandCraftedGameEvaluatorTests
 {
     [Test]
     public void Closer_to_high_cube_cities_is_better()
@@ -58,8 +58,8 @@ internal class GameEvaluatorTests
         };
         var gameFar = game with { Players = game.Players.Add(new Player { Location = "Paris" }) };
 
-        var closeScore = GameEvaluator.GameEvaluator.Score(gameClose);
-        var farScore = GameEvaluator.GameEvaluator.Score(gameFar);
+        var closeScore = HandCraftedGameEvaluator.Score(gameClose);
+        var farScore = HandCraftedGameEvaluator.Score(gameFar);
 
         closeScore.ShouldBeGreaterThan(farScore);
     }
@@ -129,7 +129,7 @@ internal class GameEvaluatorTests
         var shuffledGames = orderedGames.Shuffle();
 
         shuffledGames
-            .OrderByDescending(g => GameEvaluator.GameEvaluator.Score(g.Item2))
+            .OrderByDescending(g => HandCraftedGameEvaluator.Score(g.Item2))
             .Select(g => g.Item1)
             .ShouldBe(new[] { "A", "B", "C", "D", "E" });
     }
@@ -165,7 +165,7 @@ internal class GameEvaluatorTests
         var shuffledGames = orderedGames.Shuffle();
 
         shuffledGames
-            .OrderByDescending(g => GameEvaluator.GameEvaluator.Score(g.Item2))
+            .OrderByDescending(g => HandCraftedGameEvaluator.Score(g.Item2))
             .Select(g => g.Item1)
             .ShouldBe(new[] { "A", "B", "C" });
     }
@@ -199,8 +199,8 @@ internal class GameEvaluatorTests
         };
         var atParis = game with { Players = game.Players.Add(player with { Location = "Paris" }) };
 
-        var scoreAtChicago = GameEvaluator.GameEvaluator.Score(atChicago);
-        var scoreAtParis = GameEvaluator.GameEvaluator.Score(atParis);
+        var scoreAtChicago = HandCraftedGameEvaluator.Score(atChicago);
+        var scoreAtParis = HandCraftedGameEvaluator.Score(atParis);
 
         scoreAtParis.ShouldBeGreaterThan(scoreAtChicago);
     }
@@ -227,8 +227,7 @@ internal class GameEvaluatorTests
                 .Replace(istanbul, istanbul with { HasResearchStation = true }),
         };
 
-        GameEvaluator
-            .GameEvaluator.Score(spreadStations)
-            .ShouldBeGreaterThan(GameEvaluator.GameEvaluator.Score(closeStations));
+        HandCraftedGameEvaluator.Score(spreadStations)
+            .ShouldBeGreaterThan(HandCraftedGameEvaluator.Score(closeStations));
     }
 }

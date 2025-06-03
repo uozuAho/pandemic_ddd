@@ -14,7 +14,7 @@ using Utils;
 using utils;
 using Values;
 
-internal class GameTests
+internal sealed class GameTests
 {
     [TestCase("Chicago")]
     [TestCase("Washington")]

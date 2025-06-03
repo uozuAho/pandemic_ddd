@@ -15,7 +15,7 @@ public class GreedyAgent : ILiveAgent
         {
             var (nextState, _) = game.Do(command);
 
-            var stateScore = GameEvaluator.GameEvaluator.Score(nextState);
+            var stateScore = GameEvaluators.HandCraftedGameEvaluator.Score(nextState);
             if (stateScore < bestScore)
             {
                 continue;

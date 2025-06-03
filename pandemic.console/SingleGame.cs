@@ -3,7 +3,7 @@ namespace pandemic.console;
 using System;
 using System.Collections.Generic;
 using agents;
-using agents.GameEvaluator;
+using agents.GameEvaluators;
 using Aggregates.Game;
 using Commands;
 using Events;
@@ -56,7 +56,7 @@ internal class SingleGame
         foreach (var command in game.LegalCommands())
         {
             var (nextState, _) = game.Do(command);
-            yield return (GameEvaluator.Score(nextState), command);
+            yield return (HandCraftedGameEvaluator.Score(nextState), command);
         }
     }
 

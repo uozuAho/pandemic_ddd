@@ -1,9 +1,11 @@
-namespace pandemic.agents.GameEvaluator;
+namespace pandemic.agents.GameEvaluators;
 
+using System;
+using GameEvaluator;
 using Aggregates.Game;
 using Values;
 
-public static class GameEvaluator
+public static class HandCraftedGameEvaluator
 {
     /// <summary>
     /// Return a value that evaluates how 'good' a state is, ie.
@@ -70,6 +72,7 @@ public static class GameEvaluator
                     case Colour.Black:
                         black++;
                         break;
+                    // ReSharper disable once RedundantEmptySwitchSection: IDE0010
                     default:
                         break;
                 }
@@ -196,7 +199,7 @@ public static class GameEvaluator
                     yellowCount++;
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(hand));
             }
         }
 

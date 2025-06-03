@@ -9,7 +9,7 @@ using Events;
 using NUnit.Framework;
 using Utils;
 
-internal class PandemicGameEventTests
+internal sealed class PandemicGameEventTests
 {
     [Test]
     [Repeat(10)]

@@ -37,7 +37,7 @@ public class GreedyBestFirstSearch
 
         var nodeComparer = new SearchNodeComparer(CompareStates);
         Frontier = new MinPriorityFrontier(nodeComparer);
-        var root = new SearchNode(game, null, default, 0, GameEvaluator.GameEvaluator.Score(game));
+        var root = new SearchNode(game, null, default, 0, GameEvaluators.HandCraftedGameEvaluator.Score(game));
         Frontier.Push(root);
     }
 
@@ -72,7 +72,7 @@ public class GreedyBestFirstSearch
                 node,
                 command,
                 childCost,
-                GameEvaluator.GameEvaluator.Score(childState)
+                GameEvaluators.HandCraftedGameEvaluator.Score(childState)
             );
 
             if (_explored.ContainsKey(childState) || Frontier.ContainsState(childState))
@@ -116,7 +116,7 @@ public class GreedyBestFirstSearch
         return actions;
     }
 
-    private class SearchNodeComparer(Func<SearchNode, SearchNode, int> compare)
+    private sealed class SearchNodeComparer(Func<SearchNode, SearchNode, int> compare)
         : IComparer<SearchNode>
     {
         private readonly Func<SearchNode, SearchNode, int> _compare = compare;

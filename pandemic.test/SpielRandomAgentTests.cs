@@ -7,7 +7,7 @@ using Aggregates.Game;
 using NUnit.Framework;
 using Utils;
 
-internal class SpielRandomAgentTests
+internal sealed class SpielRandomAgentTests
 {
     [Test]
     [Repeat(10)]

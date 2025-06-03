@@ -146,7 +146,7 @@ public class MctsAgent
     }
 }
 
-internal class RandomRolloutEvaluator(int numRollouts)
+internal sealed class RandomRolloutEvaluator(int numRollouts)
 {
     private readonly int _numRollouts = numRollouts;
     private readonly Random _random = new();

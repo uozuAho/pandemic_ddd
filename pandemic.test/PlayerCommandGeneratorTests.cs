@@ -10,7 +10,7 @@ using Shouldly;
 using Utils;
 using Values;
 
-public static class Util
+public static class GameCreatorUtil
 {
     public static PandemicGame CreateNewGame(NewGameOptions options)
     {
@@ -33,7 +33,7 @@ public class AllCommandGeneratorTests
     [Test]
     public void ShouldPass()
     {
-        var game = Util.CreateNewGame(new NewGameOptions { Roles = [Role.Medic, Role.Scientist] });
+        var game = GameCreatorUtil.CreateNewGame(new NewGameOptions { Roles = [Role.Medic, Role.Scientist] });
 
         _generator.Commands(game).ShouldContain(new PassCommand(Role.Medic));
     }
@@ -41,7 +41,7 @@ public class AllCommandGeneratorTests
     [Test]
     public void Event_forecast_generates_all_permutations()
     {
-        var game = Util.CreateNewGame(
+        var game = GameCreatorUtil.CreateNewGame(
             new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },
@@ -73,7 +73,7 @@ public class SensibleCommandGeneratorTests
     [Test]
     public void ShouldNotPass()
     {
-        var game = Util.CreateNewGame(
+        var game = GameCreatorUtil.CreateNewGame(
             new NewGameOptions { Roles = new[] { Role.Medic, Role.Scientist } }
         );
 
@@ -83,7 +83,7 @@ public class SensibleCommandGeneratorTests
     [Test]
     public void Sensible_event_forecast_generates_one_sensible_command()
     {
-        var game = Util.CreateNewGame(
+        var game = GameCreatorUtil.CreateNewGame(
             new NewGameOptions
             {
                 Roles = new[] { Role.Medic, Role.Scientist },

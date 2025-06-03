@@ -92,9 +92,9 @@ public class DfsAgent : IPandemicGameSolver
     /// <summary>
     /// Action: command that resulted in State
     /// </summary>
-    private record SearchNode(PandemicGame State, IPlayerCommand? Command, SearchNode? Parent);
+    private sealed record SearchNode(PandemicGame State, IPlayerCommand? Command, SearchNode? Parent);
 
-    private class Diagnostics
+    private sealed class Diagnostics
     {
         private readonly Stopwatch _stopwatch;
         private int _nodesExplored;

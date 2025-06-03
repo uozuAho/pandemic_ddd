@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using agents.GameEvaluator;
+using agents.GameEvaluators;
 using agents.GreedyBfs;
 using Aggregates.Game;
 using drawing;
@@ -133,7 +133,7 @@ internal class BfsRunner
 
     private static string NodeLabel(PandemicGame state)
     {
-        var nodeValue = GameEvaluator.Score(state);
+        var nodeValue = HandCraftedGameEvaluator.Score(state);
         var cured = string.Join(",", state.CuresDiscovered.Select(c => c.Colour));
         var players = string.Join("\\n", state.Players.Select(PlayerText));
         var researchStations = string.Join(

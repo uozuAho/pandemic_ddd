@@ -3,7 +3,7 @@ namespace pandemic.test;
 using GameData;
 using NUnit.Framework;
 
-internal class StandardGameBoardTests
+internal sealed class StandardGameBoardTests
 {
     [TestCase("Atlanta", "Washington", 1)]
     [TestCase("Washington", "Atlanta", 1)]
