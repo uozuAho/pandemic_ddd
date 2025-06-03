@@ -32,5 +32,6 @@ dotnet_diagnostic.CA1305.severity = none                     # use IFormatProvid
 
 [*Tests.cs]
 dotnet_diagnostic.CA1707.severity = none                     # allow test_method_names_with_underscores
+dotnet_diagnostic.CA1812.severity = none                     # allow non static class that aren't instantiated by user code (eg test classes)
 dotnet_diagnostic.CA1861.severity = none                     # allow passing `new[] { 2, 3, 4 }` params. These are easier to read in tests.
                                                              # todo: maybe just allow in test projects?
