@@ -16,25 +16,11 @@ internal class GameStats
 
     public void AddNumActionsInGame(int numActions)
     {
-        if (ActionsPerGameCounts.ContainsKey(numActions))
-        {
-            ActionsPerGameCounts[numActions]++;
-        }
-        else
-        {
-            ActionsPerGameCounts[numActions] = 1;
-        }
+        ActionsPerGameCounts[numActions] = ActionsPerGameCounts.TryGetValue(numActions, out var value) ? ++value : 1;
     }
 
     public void AddLegalActionCount(int numLegalActions)
     {
-        if (LegalActionCounts.ContainsKey(numLegalActions))
-        {
-            LegalActionCounts[numLegalActions]++;
-        }
-        else
-        {
-            LegalActionCounts[numLegalActions] = 1;
-        }
+        LegalActionCounts[numLegalActions] = LegalActionCounts.TryGetValue(numLegalActions, out var value) ? ++value : 1;
     }
 }

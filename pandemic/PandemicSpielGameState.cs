@@ -20,12 +20,13 @@ public class PandemicSpielGameState(PandemicGame game)
     public bool IsLoss => Game.IsLost;
     public int CurrentPlayerIdx => Game.CurrentPlayerIdx;
 
+    // todo: fix me later. no public arrays
+#pragma warning disable CA1819
     public double[] Returns =>
+#pragma warning restore CA1819
         IsWin ? Enumerable.Repeat(1.0, Game.Players.Length).ToArray()
         : IsLoss ? Enumerable.Repeat(-1.0, Game.Players.Length).ToArray()
         : Enumerable.Repeat(0.0, Game.Players.Length).ToArray();
-
-    private readonly PlayerCommandGenerator _commandGenerator = new();
 
     public PandemicSpielGameState Clone()
     {
@@ -39,7 +40,7 @@ public class PandemicSpielGameState(PandemicGame game)
 
     public IEnumerable<IPlayerCommand> LegalActions()
     {
-        return _commandGenerator.AllLegalCommands(Game);
+        return PlayerCommandGenerator.AllLegalCommands(Game);
     }
 
     public void ApplyActionInt(int action)
@@ -49,7 +50,7 @@ public class PandemicSpielGameState(PandemicGame game)
 
     public IEnumerable<IEvent> ApplyAction(int action)
     {
-        var legalActions = _commandGenerator.AllLegalCommands(Game).ToList();
+        var legalActions = PlayerCommandGenerator.AllLegalCommands(Game).ToList();
         return ApplyAction(legalActions[action]);
     }
 

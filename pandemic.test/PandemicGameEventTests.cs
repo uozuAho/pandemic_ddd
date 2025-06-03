@@ -17,7 +17,6 @@ internal class PandemicGameEventTests
     {
         var options = NewGameOptionsGenerator.RandomOptions();
 
-        var commandGenerator = new PlayerCommandGenerator();
         var random = new Random();
         PandemicGame game;
         List<IEvent> events;
@@ -25,7 +24,7 @@ internal class PandemicGameEventTests
 
         for (var i = 0; i < 1000 && !game.IsOver; i++)
         {
-            var legalActions = commandGenerator.AllLegalCommands(game).ToList();
+            var legalActions = PlayerCommandGenerator.AllLegalCommands(game).ToList();
             if (legalActions.Count == 0)
             {
                 Assert.Fail(

@@ -14,8 +14,7 @@ using Values;
 /// </summary>
 public class DfsWithHeuristicsAgent : IPandemicGameSolver
 {
-    private static readonly Random _rng = new();
-    private static readonly PlayerCommandGenerator CommandGenerator = new();
+    private static readonly Random Rng = new();
 
     public IEnumerable<IPlayerCommand> CommandsToWin(PandemicGame state, TimeSpan timeout)
     {
@@ -156,12 +155,11 @@ public class DfsWithHeuristicsAgent : IPandemicGameSolver
         }
 
         var comparer = new CommandPriorityComparer(node.State);
-        var legalActions = CommandGenerator
-            .AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
             // .OrderBy(a => CommandPriority(a, node.State.Game))
             .OrderBy(a => a, comparer)
             // shuffle, otherwise we're at the mercy of the order of the move generator
-            .ThenBy(_ => _rng.Next())
+            .ThenBy(_ => Rng.Next())
             .ToList();
 
         foreach (var action in legalActions)
@@ -265,14 +263,7 @@ public class DfsWithHeuristicsAgent : IPandemicGameSolver
 
         public void StoppedExploringBecause(string reason)
         {
-            if (_stopReasons.ContainsKey(reason))
-            {
-                _stopReasons[reason]++;
-            }
-            else
-            {
-                _stopReasons[reason] = 1;
-            }
+            _stopReasons[reason] = _stopReasons.TryGetValue(reason, out var value) ? ++value : 1;
         }
     }
 }

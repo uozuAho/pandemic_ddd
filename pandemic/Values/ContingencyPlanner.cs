@@ -3,7 +3,7 @@ namespace pandemic.Values;
 public record ContingencyPlanner : Player
 {
     public override Role Role => Role.ContingencyPlanner;
-    public ISpecialEventCard? StoredEventCard { get; init; } = null;
+    public ISpecialEventCard? StoredEventCard { get; init; }
 
     public override bool Has(PlayerCard card)
     {

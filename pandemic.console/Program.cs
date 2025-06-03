@@ -11,9 +11,9 @@ using Events;
 using GameData;
 using Values;
 
-internal class Program
+internal static class Program
 {
-    private static void Main(string[] args)
+    private static void Main()
     {
         // SingleGame.PlayGameAndPrintPlaythrough(new GreedyAgent());
         // AgentComparer.Run();

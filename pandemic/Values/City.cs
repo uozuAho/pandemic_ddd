@@ -75,7 +75,7 @@ public record City(string Name)
         return this with { Cubes = Cubes.RemoveCube(colour) };
     }
 
-    public static IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
+    public static readonly IEqualityComparer<City> DefaultEqualityComparer = new CityComparer();
 }
 
 internal class CityComparer : IEqualityComparer<City>

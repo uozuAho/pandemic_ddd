@@ -11,8 +11,7 @@ using drawing;
 public static class HeuristicDfsDrawer
 {
     private const int NodeLimit = 300;
-    private static readonly Random _rng = new();
-    private static readonly PlayerCommandGenerator CommandGenerator = new();
+    private static readonly Random Rng = new();
 
     public static void DrawSearch(PandemicGame game)
     {
@@ -40,11 +39,10 @@ public static class HeuristicDfsDrawer
             return;
         }
 
-        var legalActions = CommandGenerator
-            .AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
             .OrderBy(a => DfsWithHeuristicsAgent.CommandPriority(a, node.State))
             // shuffle, otherwise we're at the mercy of the order of the move generator
-            .ThenBy(_ => _rng.Next())
+            .ThenBy(_ => Rng.Next())
             .ToList();
 
         foreach (var action in legalActions)
@@ -97,6 +95,6 @@ public static class HeuristicDfsDrawer
 
     private class NodeTracker
     {
-        public int TotalNumNodes { get; set; } = 0;
+        public int TotalNumNodes { get; set; }
     }
 }

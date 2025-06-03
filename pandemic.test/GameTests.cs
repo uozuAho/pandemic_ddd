@@ -432,7 +432,7 @@ internal class GameTests
         // assert
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldAllBe(move => move is DiscardPlayerCardCommand);
 
@@ -538,7 +538,7 @@ internal class GameTests
 
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldAllBe(move => move is DiscardPlayerCardCommand);
     }
@@ -565,7 +565,7 @@ internal class GameTests
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.ActionsRemaining.ShouldBe(0);
         events.ShouldNotContain(e => e is PlayerCardPickedUp);
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldAllBe(move => move is DiscardPlayerCardCommand);
     }
@@ -609,7 +609,6 @@ internal class GameTests
                 }
             );
 
-        var commandGenerator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         var gameStateBeforeShare = game;
@@ -618,8 +617,7 @@ internal class GameTests
             events
         );
 
-        commandGenerator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
         game = game.Do(
@@ -660,7 +658,6 @@ internal class GameTests
                 }
             );
 
-        var commandGenerator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         var gameStateBeforeShare = game;
@@ -669,8 +666,7 @@ internal class GameTests
             events
         );
 
-        commandGenerator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
 
         game = game.Do(
@@ -734,7 +730,6 @@ internal class GameTests
             );
 
         var cardToShare = PlayerCards.CityCard("Atlanta");
-        var commandGenerator = new PlayerCommandGenerator();
 
         var gameStateBeforeShare = game;
         var events = new List<IEvent>();
@@ -747,8 +742,7 @@ internal class GameTests
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.Hand.Count.ShouldBe(6);
 
-        commandGenerator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
 
         game = game.Do(
@@ -759,8 +753,7 @@ internal class GameTests
         // medic should now have picked up 2 cards, and needs to discard
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.Hand.Count.ShouldBe(8);
-        commandGenerator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Medic);
         game.InfectionDrawPile.Count.ShouldBe(
             gameStateBeforeShare.InfectionDrawPile.Count,
@@ -1590,9 +1583,7 @@ internal class GameTests
             new ShareKnowledgeGiveCommand(game.CurrentPlayer.Role, "Atlanta", Role.Scientist)
         );
 
-        var generator = new PlayerCommandGenerator();
-        generator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 
@@ -1675,7 +1666,7 @@ internal class GameTests
         events.ShouldContain(e => e is EpidemicInfectStepCompleted);
         events.ShouldNotContain(e => e is EpidemicIntensified);
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldContain(c => c is GovernmentGrantCommand);
     }
@@ -2151,7 +2142,7 @@ internal class GameTests
             }
         );
 
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldContain(
                 c => c is GovernmentGrantCommand,
@@ -2228,7 +2219,7 @@ internal class GameTests
             }
         );
 
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldContain(
                 c => c is GovernmentGrantCommand,
@@ -2265,7 +2256,7 @@ internal class GameTests
         // assert
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         game.CurrentPlayer.Hand.Count.ShouldBe(8);
-        new PlayerCommandGenerator()
+        PlayerCommandGenerator
             .AllLegalCommands(game)
             .ShouldContain(c => c is GovernmentGrantCommand);
 
@@ -2297,7 +2288,6 @@ internal class GameTests
         );
         var epidemicInfectionCard = game.InfectionDrawPile.BottomCard;
 
-        var generator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         // act: end turn, draw epidemic card
@@ -2311,7 +2301,7 @@ internal class GameTests
         var epidemicCity = game.CityByName(epidemicInfectionCard.City);
         epidemicCity.Cubes.NumberOf(epidemicInfectionCard.Colour).ShouldBe(3);
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
-        generator.AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
+        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c is GovernmentGrantCommand);
 
         // act: use special event card
         game = game.Do(new GovernmentGrantCommand(Role.Medic, "Chicago"), events);
@@ -2412,7 +2402,6 @@ internal class GameTests
             }
         );
 
-        var generator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         // act
@@ -2421,7 +2410,7 @@ internal class GameTests
         // assert: still a chance to use special event before picking up cards
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         events.ShouldNotContain(e => e is PlayerCardPickedUp);
-        generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
         // act: don't use special event
         game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -2430,7 +2419,7 @@ internal class GameTests
         game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         events.ShouldContain(e => e is PlayerCardPickedUp, 2);
         events.ShouldContain(e => e is InfectionCardDrawn, 2);
-        generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
     }
 
     [TestCaseSource(nameof(AllSpecialEventCards))]
@@ -2449,7 +2438,6 @@ internal class GameTests
             }
         );
 
-        var generator = new PlayerCommandGenerator();
         var events = new List<IEvent>();
 
         // act
@@ -2458,7 +2446,7 @@ internal class GameTests
         // assert: scientist still a chance to use special event before medic picks up cards
         game.CurrentPlayer.Role.ShouldBe(Role.Medic);
         events.ShouldNotContain(e => e is PlayerCardPickedUp);
-        generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
 
         // act: don't use special event
         game = game.Do(new DontUseSpecialEventCommand(), events);
@@ -2467,7 +2455,7 @@ internal class GameTests
         game.CurrentPlayer.Role.ShouldBe(Role.Scientist);
         events.ShouldContain(e => e is PlayerCardPickedUp, 2);
         events.ShouldContain(e => e is InfectionCardDrawn, 2);
-        generator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
+        PlayerCommandGenerator.AllLegalCommands(game).ShouldContain(c => c.IsSpecialEvent);
     }
 
     [Test]
@@ -3842,9 +3830,7 @@ internal class GameTests
         // act
         (game, _) = game.Do(new ResearcherShareKnowledgeGiveCommand(Role.Scientist, "Chicago"));
 
-        var generator = new PlayerCommandGenerator();
-        generator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 
@@ -3985,9 +3971,7 @@ internal class GameTests
         // act
         (game, _) = game.Do(new ShareKnowledgeTakeFromResearcherCommand(Role.Scientist, "Chicago"));
 
-        var generator = new PlayerCommandGenerator();
-        generator
-            .AllLegalCommands(game)
+        PlayerCommandGenerator.AllLegalCommands(game)
             .ShouldAllBe(c => c is DiscardPlayerCardCommand && c.Role == Role.Scientist);
     }
 

@@ -2,7 +2,6 @@ namespace pandemic.Commands;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Aggregates.Game;
 using Combinatorics.Collections;
@@ -16,27 +15,23 @@ public interface ICommandGenerator
 
 public class AllLegalCommandGenerator : ICommandGenerator
 {
-    private readonly PlayerCommandGenerator _generator = new();
-
     public IEnumerable<IPlayerCommand> Commands(PandemicGame game)
     {
-        return _generator.AllLegalCommands(game);
+        return PlayerCommandGenerator.AllLegalCommands(game);
     }
 }
 
 public class SensibleCommandGenerator : ICommandGenerator
 {
-    private readonly PlayerCommandGenerator _generator = new();
-
     public IEnumerable<IPlayerCommand> Commands(PandemicGame game)
     {
         return PlayerCommandGenerator.AllSensibleCommands(game);
     }
 }
 
-public class PlayerCommandGenerator
+public static class PlayerCommandGenerator
 {
-    public IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
+    public static IEnumerable<IPlayerCommand> AllLegalCommands(PandemicGame game)
     {
         return AllCommands(game, false);
     }

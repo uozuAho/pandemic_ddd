@@ -54,7 +54,6 @@ internal class NumberOfPossibleGamesEstimator
     {
         var numActions = 0;
         var random = new Random();
-        var commandGenerator = new PlayerCommandGenerator();
 
         for (; numActions < 1000 && !game.IsOver; numActions++)
         {
@@ -63,7 +62,7 @@ internal class NumberOfPossibleGamesEstimator
                 throw new InvalidOperationException("didn't expect this many turns");
             }
 
-            var legalActions = commandGenerator.AllLegalCommands(game).ToList();
+            var legalActions = PlayerCommandGenerator.AllLegalCommands(game).ToList();
             stats.AddLegalActionCount(legalActions.Count);
 
             var action = random.Choice(legalActions);
@@ -123,7 +122,7 @@ internal class NumberOfPossibleGamesEstimator
         /// </summary>
         public readonly Dictionary<int, int> LegalActionCounts = [];
 
-        public int GamesPlayed { get; set; } = 0;
+        public int GamesPlayed { get; set; }
         public TimeSpan RunTime { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
@@ -131,39 +130,18 @@ internal class NumberOfPossibleGamesEstimator
 
         public void AddNumActionsInGame(int numActions)
         {
-            if (ActionsPerGameCounts.ContainsKey(numActions))
-            {
-                ActionsPerGameCounts[numActions]++;
-            }
-            else
-            {
-                ActionsPerGameCounts[numActions] = 1;
-            }
+            ActionsPerGameCounts[numActions] = ActionsPerGameCounts.TryGetValue(numActions, out var value) ? ++value : 1;
         }
 
         public void AddLegalActionCount(int numLegalActions)
         {
-            if (LegalActionCounts.ContainsKey(numLegalActions))
-            {
-                LegalActionCounts[numLegalActions]++;
-            }
-            else
-            {
-                LegalActionCounts[numLegalActions] = 1;
-            }
+            LegalActionCounts[numLegalActions] = LegalActionCounts.TryGetValue(numLegalActions, out var value) ? ++value : 1;
         }
 
         public void RecordLoss(string lossReason)
         {
             Losses++;
-            if (LossReasons.ContainsKey(lossReason))
-            {
-                LossReasons[lossReason]++;
-            }
-            else
-            {
-                LossReasons[lossReason] = 1;
-            }
+            LossReasons[lossReason] = LossReasons.TryGetValue(lossReason, out var value) ? ++value : 1;
         }
     }
 }

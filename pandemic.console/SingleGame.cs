@@ -16,7 +16,7 @@ internal class SingleGame
         var gameOptions = new NewGameOptions
         {
             Difficulty = Difficulty.Introductory,
-            Roles = new[] { Role.Medic, Role.Dispatcher },
+            Roles = [Role.Medic, Role.Dispatcher],
             CommandGenerator = new SensibleCommandGenerator(),
         };
         var (game, events) = PandemicGame.CreateNewGame(gameOptions);

@@ -30,7 +30,10 @@ internal static class CubeDistance
     [ThreadStatic]
     private static readonly List<Player> Players;
 
+    // CA1810 not applicable to [ThreadStatic]
+#pragma warning disable CA1810
     static CubeDistance()
+#pragma warning restore CA1810
     {
         CityQueue = new City[48];
         Cities3 = new City[48];

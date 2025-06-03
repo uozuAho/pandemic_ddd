@@ -13,13 +13,12 @@ internal class RandomPlaythroughDrawer
 {
     public static void DoIt()
     {
-        var commandGenerator = new PlayerCommandGenerator();
         var random = new Random();
         var (game, _) = PandemicGame.CreateNewGame(
             new NewGameOptions
             {
                 Difficulty = Difficulty.Introductory,
-                Roles = new[] { Role.Medic, Role.Scientist },
+                Roles = [Role.Medic, Role.Scientist],
             }
         );
 
@@ -29,7 +28,7 @@ internal class RandomPlaythroughDrawer
 
         while (!game.IsOver)
         {
-            var actions = commandGenerator.AllLegalCommands(game).ToList();
+            var actions = PlayerCommandGenerator.AllLegalCommands(game).ToList();
             var selectedAction = random.Choice(actions);
 
             foreach (var action in actions)

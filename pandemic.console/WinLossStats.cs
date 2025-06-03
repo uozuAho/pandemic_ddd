@@ -80,48 +80,48 @@ public static class WinLossStats
         foreach (var options in winningOptions)
         {
             var roles = RolesToString(options.Roles);
-            if (!teamStats.ContainsKey(roles))
+            if (!teamStats.TryGetValue(roles, out var value))
             {
                 teamStats[roles] = [1, 0];
             }
             else
             {
-                teamStats[roles][0]++;
+                value[0]++;
             }
 
             foreach (var role in options.Roles)
             {
-                if (!roleStats.ContainsKey(role))
+                if (!roleStats.TryGetValue(role, out var value2))
                 {
                     roleStats[role] = [1, 0];
                 }
                 else
                 {
-                    roleStats[role][0]++;
+                    value2[0]++;
                 }
             }
         }
         foreach (var options in losingOptions)
         {
             var roles = RolesToString(options.Roles);
-            if (!teamStats.ContainsKey(roles))
+            if (!teamStats.TryGetValue(roles, out var value))
             {
                 teamStats[roles] = [0, 1];
             }
             else
             {
-                teamStats[roles][1]++;
+                value[1]++;
             }
 
             foreach (var role in options.Roles)
             {
-                if (!roleStats.ContainsKey(role))
+                if (!roleStats.TryGetValue(role, out var value2))
                 {
                     roleStats[role] = [0, 1];
                 }
                 else
                 {
-                    roleStats[role][1]++;
+                    value2[1]++;
                 }
             }
         }

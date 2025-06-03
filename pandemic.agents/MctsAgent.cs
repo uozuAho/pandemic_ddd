@@ -106,7 +106,7 @@ public class MctsAgent
         return root;
     }
 
-    private (List<SearchNode> visitPath, PandemicSpielGameState workingState) ApplyTreePolicy(
+    private static (List<SearchNode> visitPath, PandemicSpielGameState workingState) ApplyTreePolicy(
         SearchNode root,
         PandemicSpielGameState state
     )

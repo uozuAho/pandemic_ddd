@@ -42,7 +42,7 @@ public class CsDotDrawer
         new DotDocument().SaveToFile(_graph, path);
     }
 
-    private static IDot ToDotNode(DrawerNode node, int nodeId)
+    private static Node ToDotNode(DrawerNode node, int nodeId)
     {
         var node1 = new Node(nodeId.ToString());
         node1.Attribute.label.Value = node.Label;
@@ -52,7 +52,7 @@ public class CsDotDrawer
             node1.Attribute.color.Value = node.Colour.Value switch
             {
                 Colour.Red => Color.SVG.red,
-                _ => throw new ArgumentException(),
+                _ => throw new ArgumentException(nameof(node.Colour)),
             };
         }
 
@@ -70,7 +70,7 @@ public class CsDotDrawer
             dotEdge.Attribute.color.Value = edge.Colour switch
             {
                 Colour.Red => Color.SVG.red,
-                _ => throw new ArgumentException(),
+                _ => throw new ArgumentException(nameof(edge.Colour)),
             };
         }
 

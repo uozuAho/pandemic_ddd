@@ -15,7 +15,7 @@ internal class WinFinder
     {
         var commands = solver.CommandsToWin(game, timeout).ToList();
 
-        if (commands.Any())
+        if (commands.Count != 0)
         {
             Console.WriteLine("found win!");
             foreach (var command in commands)

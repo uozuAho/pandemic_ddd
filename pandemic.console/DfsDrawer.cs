@@ -10,8 +10,7 @@ using drawing;
 public static class DfsDrawer
 {
     private const int NodeLimit = 300;
-    private static readonly Random _rng = new();
-    private static readonly PlayerCommandGenerator CommandGenerator = new();
+    private static readonly Random Rng = new();
 
     public static void DrawSearch(PandemicGame game)
     {
@@ -34,10 +33,9 @@ public static class DfsDrawer
             return;
         }
 
-        var legalActions = CommandGenerator
-            .AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
             // shuffle, otherwise we're at the mercy of the order of the move generator
-            .OrderBy(_ => _rng.Next())
+            .OrderBy(_ => Rng.Next())
             .ToList();
 
         foreach (var action in legalActions)
@@ -80,6 +78,6 @@ public static class DfsDrawer
 
     private class NodeTracker
     {
-        public int TotalNumNodes { get; set; } = 0;
+        public int TotalNumNodes { get; set; }
     }
 }

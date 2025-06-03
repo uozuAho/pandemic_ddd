@@ -12,12 +12,11 @@ using Commands;
 /// </summary>
 public class DfsAgent : IPandemicGameSolver
 {
-    private static readonly Random _rng = new();
-    private static readonly PlayerCommandGenerator _commandGenerator = new();
+    private static readonly Random Rng = new();
 
-    public IEnumerable<IPlayerCommand> CommandsToWin(PandemicGame game, TimeSpan timeout)
+    public IEnumerable<IPlayerCommand> CommandsToWin(PandemicGame state, TimeSpan timeout)
     {
-        var root = new SearchNode(game, null, null);
+        var root = new SearchNode(state, null, null);
 
         var diagnostics = Diagnostics.StartNew();
         var stopwatch = Stopwatch.StartNew();
@@ -70,10 +69,9 @@ public class DfsAgent : IPandemicGameSolver
             diagnostics.Loss(node.State.LossReason);
         }
 
-        var legalActions = _commandGenerator
-            .AllLegalCommands(node.State)
+        var legalActions = PlayerCommandGenerator.AllLegalCommands(node.State)
             // shuffle, otherwise we're at the mercy of the order of the move generator
-            .OrderBy(_ => _rng.Next())
+            .OrderBy(_ => Rng.Next())
             .ToList();
 
         foreach (var action in legalActions)
@@ -139,14 +137,7 @@ public class DfsAgent : IPandemicGameSolver
 
         public void Loss(string reason)
         {
-            if (_losses.ContainsKey(reason))
-            {
-                _losses[reason]++;
-            }
-            else
-            {
-                _losses[reason] = 1;
-            }
+            _losses[reason] = _losses.TryGetValue(reason, out var value) ? ++value : 1;
         }
     }
 }
